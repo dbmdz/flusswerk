@@ -2,14 +2,11 @@ package org.mdz.dzp.workflow.neo.engine;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.Envelope;
+import com.rabbitmq.client.GetResponse;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
@@ -24,9 +21,12 @@ public class RabbitMQ {
   private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQ.class);
 
   private static final Integer PERSISTENT = 2;
-  public static final boolean DURABLE = true;
-  public static final boolean NOT_EXCLUSIVE = false;
-  public static final boolean NO_AUTO_DELETE = false;
+  private static final boolean DURABLE = true;
+  private static final boolean NOT_EXCLUSIVE = false;
+  private static final boolean NO_AUTO_DELETE = false;
+  private static final boolean NO_AUTO_ACK = false;
+  private static final boolean SINGLE_MESSAGE = false;
+  private static final boolean DONT_REQUEUE = false;
 
   private final String username = "guest";
 
@@ -45,8 +45,8 @@ public class RabbitMQ {
   private final Channel channel;
 
   private final String dlxName = "testDlx";
-  private final String exchange = "testExchange";;
 
+  private final String exchange = "testExchange";
 
   public RabbitMQ() throws IOException, TimeoutException {
     ConnectionFactory factory = new ConnectionFactory();
@@ -62,59 +62,27 @@ public class RabbitMQ {
     channel.exchangeDeclare("testExchange", "direct", true);
     channel.exchangeDeclare("testDlx", "direct", true);
 
-//    Map<String, Object> queueArgs = new HashMap<>();
-//    queueArgs.put("x-dead-letter-exchange", "testDlx");
-//    channel.queueDeclare("testQueue", true, false, false, queueArgs);
-//    channel.queueBind("testQueue", "testExchange", "testQueue");
-//
-//    Map<String, Object> dlxQueueArgs = new HashMap<>();
-//    dlxQueueArgs.put("x-message-ttl", 1000 * 30);
-//    dlxQueueArgs.put("x-dead-letter-exchange", "testExchange");
-//    channel.queueDeclare("dlx.testQueue", true, false, false, dlxQueueArgs);
-//    channel.queueBind("dlx.testQueue", "testDlx", "testQueue");
-
-    channel.queueDeclare("failed.testQueue", true, false, false, null);
-    channel.queueBind("failed.testQueue", "testDlx", "failedQueue");
-
     objectMapper = new ObjectMapper();
   }
 
-  public void send(Message message) throws IOException {
+  public void send(String routingKey, Message message) throws IOException {
     byte[] data = objectMapper.writeValueAsBytes(message);
     AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder()
         .contentType("application/json")
         .deliveryMode(PERSISTENT)
         .build();
-    channel.basicPublish("testExchange", "testQueue", properties, data);
+    channel.basicPublish(exchange, routingKey, properties, data);
   }
 
-  public void registerConsumer(String queue, boolean autoAck, String consumerTag, MessageListener callback) throws IOException {
-    while (true) {
-      LOGGER.info("Start new consumer");
-      channel.basicConsume(queue, autoAck, consumerTag, new DefaultConsumer(channel) {
-        @Override
-        public void handleDelivery(String consumerTag, Envelope envelope, BasicProperties properties, byte[] body) throws IOException {
-          LOGGER.info("Got message: " + new String(body, Charset.defaultCharset()));
-          if (!"application/json".equals(properties.getContentType())) {
-            LOGGER.error("Cannot process message " + new String(body, Charset.defaultCharset()) + " because its content type is not application/json");
-            channel.basicReject(envelope.getDeliveryTag(), false);
-            return;
-          }
-
-          LOGGER.info(String.format("routingKey = %s", envelope.getRoutingKey()));
-          LOGGER.info(String.format("contentType = %s", properties.getContentType()));
-          LOGGER.info(String.format("deliveryTag = %d", envelope.getDeliveryTag()));
-          LOGGER.info(String.format("body = %s", new String(body, Charset.defaultCharset())));
-
-          Message message = objectMapper.readValue(body, Message.class);
-          callback.receive(message, envelope.getDeliveryTag(), channel);
-        }
-      });
+  public Message receive(String queueName) throws IOException {
+    GetResponse response = channel.basicGet(queueName, NO_AUTO_ACK);
+    if (response != null) {
+      Message message = objectMapper.readValue(response.getBody(), Message.class);
+      message.setBody(new String(response.getBody(), "UTF-8"));
+      message.setDeliveryTag(response.getEnvelope().getDeliveryTag());
+      return message;
     }
-  }
-
-  public Channel getChannel() {
-    return channel;
+    return null;
   }
 
   public void provideInputQueue(String inputChannel) throws IOException {
@@ -142,4 +110,11 @@ public class RabbitMQ {
     channel.queueBind(queueName, exchange, queueName);
   }
 
+  public void ack(Message message) throws IOException {
+    channel.basicAck(message.getDeliveryTag(), SINGLE_MESSAGE);
+  }
+
+  public void reject(Message message) throws IOException {
+    channel.basicReject(message.getDeliveryTag(), DONT_REQUEUE);
+  }
 }

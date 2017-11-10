@@ -4,6 +4,10 @@ import static java.util.Objects.requireNonNull;
 
 public class Message {
 
+  private volatile long deliveryTag;
+
+  private volatile String body;
+
   private String value;
 
   private boolean broken;
@@ -27,4 +31,19 @@ public class Message {
     return broken;
   }
 
+  public long getDeliveryTag() {
+    return deliveryTag;
+  }
+
+  public String getBody() {
+    return body;
+  }
+
+  public void setDeliveryTag(long deliveryTag) {
+    this.deliveryTag = deliveryTag;
+  }
+
+  public void setBody(String body) {
+    this.body = body;
+  }
 }
