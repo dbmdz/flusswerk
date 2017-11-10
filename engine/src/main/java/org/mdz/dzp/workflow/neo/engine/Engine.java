@@ -13,7 +13,7 @@ public class Engine {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Engine.class);
 
-  private final RabbitMQ rabbitMQ;
+  private final MessageBroker messageBroker;
 
   private final Flow<?, ?> flow;
 
@@ -21,14 +21,14 @@ public class Engine {
 
   private final Semaphore semaphore;
 
-  public Engine(RabbitMQ rabbitMQ, Flow<?, ?> flow) throws IOException {
-    this.rabbitMQ = rabbitMQ;
+  public Engine(MessageBroker messageBroker, Flow<?, ?> flow) throws IOException {
+    this.messageBroker = messageBroker;
     this.flow = flow;
     this.executorService = Executors.newFixedThreadPool(5);
     this.semaphore = new Semaphore(5);
 
-    rabbitMQ.provideInputQueue(flow.getInputChannel());
-    rabbitMQ.provideOutputQueue(flow.getOutputChannel());
+    messageBroker.provideInputQueue(flow.getInputChannel());
+    messageBroker.provideOutputQueue(flow.getOutputChannel());
   }
 
   public void start() {
@@ -36,7 +36,7 @@ public class Engine {
       try {
         semaphore.acquire();
 
-        Message message = rabbitMQ.receive(flow.getInputChannel());
+        Message message = messageBroker.receive(flow.getInputChannel());
 
         if (message == null) {
           LOGGER.info("Checking for new message (available semaphores: {}) - Queue is empty", semaphore.availablePermits());
@@ -51,13 +51,13 @@ public class Engine {
           try {
             Message result = flow.process(message);
             if (flow.hasOutputChannel()) {
-              rabbitMQ.send(flow.getOutputChannel(), result);
+              messageBroker.send(flow.getOutputChannel(), result);
             }
-            rabbitMQ.ack(message);
+            messageBroker.ack(message);
           } catch (RuntimeException | IOException  e) {
             try {
               LOGGER.error("Could not process message: {}", message.getBody());
-              rabbitMQ.reject(message);
+              messageBroker.reject(message);
 
             } catch (IOException e1) {
               LOGGER.error("Could not reject message" + message.getBody(), e1);
@@ -76,7 +76,7 @@ public class Engine {
     final int n = 500;
     for (int i = 0; i < n; i++) {
       String message = String.format("Test message #%d of %d", i, n);
-      rabbitMQ.send(flow.getInputChannel(), new Message(message));
+      messageBroker.send(flow.getInputChannel(), new Message(message));
     }
   }
 

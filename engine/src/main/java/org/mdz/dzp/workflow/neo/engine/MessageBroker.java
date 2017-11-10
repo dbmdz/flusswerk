@@ -16,9 +16,9 @@ import org.slf4j.LoggerFactory;
 
 import static java.util.Objects.requireNonNull;
 
-public class RabbitMQ {
+public class MessageBroker {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQ.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MessageBroker.class);
 
   private static final Integer PERSISTENT = 2;
   private static final boolean DURABLE = true;
@@ -26,43 +26,31 @@ public class RabbitMQ {
   private static final boolean NO_AUTO_DELETE = false;
   private static final boolean NO_AUTO_ACK = false;
   private static final boolean SINGLE_MESSAGE = false;
-  private static final boolean DONT_REQUEUE = false;
-
-  private final String username = "guest";
-
-  private final String password = "guest";
-
-  private final String virtualHost = "/";
-
-  private final String hostName = "localhost";
-
-  private final int port = 5672;
+  private static final boolean DO_NOT_REQUEUE = false;
+  private static final String DIRECT = "direct";
 
   private final ObjectMapper objectMapper;
 
-  private final Connection conn;
-
   private final Channel channel;
 
-  private final String dlxName = "testDlx";
+  private final String deadLetterExchange = "testDlx";
 
   private final String exchange = "testExchange";
 
-  public RabbitMQ() throws IOException, TimeoutException {
+  MessageBroker(MessageBrokerConfig config) throws IOException, TimeoutException {
     ConnectionFactory factory = new ConnectionFactory();
-    factory.setUsername(username);
-    factory.setPassword(password);
-    factory.setVirtualHost(virtualHost);
-    factory.setHost(hostName);
-    factory.setPort(port);
+    factory.setUsername(config.getUsername());
+    factory.setPassword(config.getPassword());
+    factory.setVirtualHost(config.getVirtualHost());
+    factory.setHost(config.getHost());
+    factory.setPort(config.getPort());
+    objectMapper = config.getObjectMapper();
 
-    conn = factory.newConnection();
+    Connection conn = factory.newConnection();
     channel = conn.createChannel();
 
-    channel.exchangeDeclare("testExchange", "direct", true);
-    channel.exchangeDeclare("testDlx", "direct", true);
-
-    objectMapper = new ObjectMapper();
+    channel.exchangeDeclare(exchange, DIRECT, DURABLE);
+    channel.exchangeDeclare(deadLetterExchange, DIRECT, DURABLE);
   }
 
   public void send(String routingKey, Message message) throws IOException {
@@ -85,29 +73,31 @@ public class RabbitMQ {
     return null;
   }
 
-  public void provideInputQueue(String inputChannel) throws IOException {
-    requireNonNull(inputChannel);
+  public void provideInputQueue(String queue) throws IOException {
+    requireNonNull(queue);
     Map<String, Object> queueArgs = new HashMap<>();
-    queueArgs.put("x-dead-letter-exchange", dlxName);
-    channel.queueDeclare(inputChannel, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, queueArgs);
-    channel.queueBind(inputChannel, exchange, inputChannel);
+    queueArgs.put("x-dead-letter-exchange", deadLetterExchange);
+    channel.queueDeclare(queue, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, queueArgs);
+    channel.queueBind(queue, exchange, queue);
 
     Map<String, Object> dlxQueueArgs = new HashMap<>();
     dlxQueueArgs.put("x-message-ttl", 1000 * 30);
     dlxQueueArgs.put("x-dead-letter-exchange", exchange);
-    channel.queueDeclare("dlx."+inputChannel, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, dlxQueueArgs);
-    channel.queueBind("dlx." + inputChannel, dlxName, inputChannel);
+    String dlxQueue = "dlx." + queue;
+    channel.queueDeclare(dlxQueue, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, dlxQueueArgs);
+    channel.queueBind(dlxQueue, deadLetterExchange, queue);
 
-    channel.queueDeclare("failed." + inputChannel, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, null);
-    channel.queueBind("failed." + inputChannel, dlxName, inputChannel);
+    String failedQueue = "failed." + queue;
+    channel.queueDeclare(failedQueue, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, null);
+    channel.queueBind(failedQueue, deadLetterExchange, queue);
   }
 
-  public void provideOutputQueue(String queueName) throws IOException {
-    requireNonNull(queueName);
+  public void provideOutputQueue(String queue) throws IOException {
+    requireNonNull(queue);
     Map<String, Object> queueArgs = new HashMap<>();
-    queueArgs.put("x-dead-letter-exchange", dlxName);
-    channel.queueDeclare(queueName, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, queueArgs);
-    channel.queueBind(queueName, exchange, queueName);
+    queueArgs.put("x-dead-letter-exchange", deadLetterExchange);
+    channel.queueDeclare(queue, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, queueArgs);
+    channel.queueBind(queue, exchange, queue);
   }
 
   public void ack(Message message) throws IOException {
@@ -115,6 +105,6 @@ public class RabbitMQ {
   }
 
   public void reject(Message message) throws IOException {
-    channel.basicReject(message.getDeliveryTag(), DONT_REQUEUE);
+    channel.basicReject(message.getDeliveryTag(), DO_NOT_REQUEUE);
   }
 }
