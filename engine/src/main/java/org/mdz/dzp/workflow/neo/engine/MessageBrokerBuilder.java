@@ -18,6 +18,8 @@ public class MessageBrokerBuilder {
     config.setUsername("guest");
     config.setVirtualHost("/");
     config.setObjectMapper(new ObjectMapper());
+
+    config.setDeadLetterWait(30 * 1000);
   }
 
   public MessageBrokerBuilder hostName(String hostName) {
@@ -42,6 +44,7 @@ public class MessageBrokerBuilder {
     config.setUsername(requireNonNull(username));
     return this;
   }
+
   public MessageBrokerBuilder virtualHost(String virtualHost) {
     config.setVirtualHost(requireNonNull(virtualHost));
     return this;
@@ -49,6 +52,11 @@ public class MessageBrokerBuilder {
 
   public MessageBrokerBuilder objectMapper(ObjectMapper objectMapper) {
     config.setObjectMapper(requireNonNull(objectMapper));
+    return this;
+  }
+
+  public MessageBrokerBuilder deadLetterWait(int milliseconds) {
+    config.setDeadLetterWait(milliseconds);
     return this;
   }
 

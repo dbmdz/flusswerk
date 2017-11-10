@@ -7,6 +7,7 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.GetResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
@@ -33,6 +34,8 @@ public class MessageBroker {
 
   private final Channel channel;
 
+  private final int deadLetterWait;
+
   private final String deadLetterExchange = "testDlx";
 
   private final String exchange = "testExchange";
@@ -45,6 +48,7 @@ public class MessageBroker {
     factory.setHost(config.getHost());
     factory.setPort(config.getPort());
     objectMapper = config.getObjectMapper();
+    deadLetterWait = config.getDeadLetterWait();
 
     Connection conn = factory.newConnection();
     channel = conn.createChannel();
@@ -66,7 +70,7 @@ public class MessageBroker {
     GetResponse response = channel.basicGet(queueName, NO_AUTO_ACK);
     if (response != null) {
       Message message = objectMapper.readValue(response.getBody(), Message.class);
-      message.setBody(new String(response.getBody(), "UTF-8"));
+      message.setBody(new String(response.getBody(), StandardCharsets.UTF_8));
       message.setDeliveryTag(response.getEnvelope().getDeliveryTag());
       return message;
     }
@@ -81,7 +85,7 @@ public class MessageBroker {
     channel.queueBind(queue, exchange, queue);
 
     Map<String, Object> dlxQueueArgs = new HashMap<>();
-    dlxQueueArgs.put("x-message-ttl", 1000 * 30);
+    dlxQueueArgs.put("x-message-ttl", deadLetterWait);
     dlxQueueArgs.put("x-dead-letter-exchange", exchange);
     String dlxQueue = "dlx." + queue;
     channel.queueDeclare(dlxQueue, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, dlxQueueArgs);

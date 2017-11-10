@@ -16,6 +16,8 @@ class MessageBrokerConfig {
 
   private ObjectMapper objectMapper;
 
+  private int deadLetterWait;
+
   public String getUsername() {
     return username;
   }
@@ -63,4 +65,13 @@ class MessageBrokerConfig {
   public void setObjectMapper(ObjectMapper objectMapper) {
     this.objectMapper = objectMapper;
   }
+
+  public int getDeadLetterWait() {
+    return deadLetterWait;
+  }
+
+  public void setDeadLetterWait(int milliseconds) {
+    this.deadLetterWait = milliseconds;
+  }
+
 }
