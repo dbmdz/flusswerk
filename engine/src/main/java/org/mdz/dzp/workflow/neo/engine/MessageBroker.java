@@ -52,9 +52,6 @@ public class MessageBroker {
 
     Connection conn = factory.newConnection();
     channel = conn.createChannel();
-
-    channel.exchangeDeclare(exchange, DIRECT, DURABLE);
-    channel.exchangeDeclare(deadLetterExchange, DIRECT, DURABLE);
   }
 
   public void send(String routingKey, Message message) throws IOException {
@@ -110,5 +107,10 @@ public class MessageBroker {
 
   public void reject(Message message) throws IOException {
     channel.basicReject(message.getDeliveryTag(), DO_NOT_REQUEUE);
+  }
+
+  public void provideExchanges(String exchange, String deadLetterExchange) throws IOException {
+    channel.exchangeDeclare(exchange, DIRECT, DURABLE);
+    channel.exchangeDeclare(deadLetterExchange, DIRECT, DURABLE);
   }
 }

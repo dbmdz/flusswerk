@@ -29,6 +29,7 @@ public class Engine {
 
     messageBroker.provideInputQueue(flow.getInputChannel());
     messageBroker.provideOutputQueue(flow.getOutputChannel());
+    messageBroker.provideExchanges(flow.getExchange(), flow.getDeadLetterExchange());
   }
 
   public void start() {

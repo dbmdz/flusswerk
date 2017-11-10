@@ -17,13 +17,17 @@ public class FlowBuilder<R, W> {
 
   private Function<W, Message> writer;
 
+  private String exchange;
+
+  private String deadLetterExchange;
+
   @SuppressWarnings("unchecked")
   private W cast(R value) {
     return (W) value;
   }
 
-  public FlowBuilder<R, W> read(String channel, Function<Message, R> reader) {
-    this.inputChannel = requireNonNull(channel);
+  public FlowBuilder<R, W> read(String routingKey, Function<Message, R> reader) {
+    this.inputChannel = requireNonNull(routingKey);
     this.reader = requireNonNull(reader);
     return this;
   }
@@ -36,17 +40,27 @@ public class FlowBuilder<R, W> {
     return this;
   }
 
-  public FlowBuilder<R, W> write(String channel, Function<W, Message> writer) {
+  public FlowBuilder<R, W> write(String routingKey, Function<W, Message> writer) {
     if (reader != null && transformer == null) {
       this.transformer = this::cast;
     }
     this.writer = requireNonNull(writer);
-    this.outputChannel = channel;
+    this.outputChannel = routingKey;
+    return this;
+  }
+
+  public FlowBuilder<R, W> exchange(String name) {
+    this.exchange = name;
+    return this;
+  }
+
+  public FlowBuilder<R, W> deadLetterExchange(String name) {
+    this.deadLetterExchange = name;
     return this;
   }
 
   public Flow<R, W> build() {
-    return new Flow<>(inputChannel, outputChannel, reader, transformer, writer);
+    return new Flow<>(inputChannel, outputChannel, reader, transformer, writer, exchange, deadLetterExchange);
   }
 
 }

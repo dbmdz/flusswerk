@@ -27,6 +27,8 @@ public class Application {
         .read("testQueue", Message::getValue)
         .transform(this::doSomeTransformations)
         .write("output", Message::new)
+        .exchange("testExchange")
+        .deadLetterExchange("testDlx")
         .build();
 
     Engine engine = new Engine(messageBroker, flow);
