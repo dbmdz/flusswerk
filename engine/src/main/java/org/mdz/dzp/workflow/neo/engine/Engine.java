@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.mdz.dzp.workflow.neo.engine.model.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,10 @@ import org.slf4j.LoggerFactory;
 public class Engine {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Engine.class);
+
+  private static final int DEFAULT_CONCURRENT_WORKERS = 5;
+
+  private final int concurrentWorkers;
 
   private final MessageBroker messageBroker;
 
@@ -21,11 +26,21 @@ public class Engine {
 
   private final Semaphore semaphore;
 
+  private boolean running;
+
+  private AtomicInteger activeWorkers;
+
   public Engine(MessageBroker messageBroker, Flow<?, ?> flow) throws IOException {
+    this(messageBroker, flow, DEFAULT_CONCURRENT_WORKERS);
+  }
+
+  public Engine(MessageBroker messageBroker, Flow<?, ?> flow, int concurrentWorkers) throws IOException {
     this.messageBroker = messageBroker;
     this.flow = flow;
-    this.executorService = Executors.newFixedThreadPool(5);
-    this.semaphore = new Semaphore(5);
+    this.concurrentWorkers = concurrentWorkers;
+    this.executorService = Executors.newFixedThreadPool(concurrentWorkers);
+    this.semaphore = new Semaphore(concurrentWorkers);
+    this.activeWorkers = new AtomicInteger();
 
     messageBroker.provideInputQueue(flow.getInputChannel());
     messageBroker.provideOutputQueue(flow.getOutputChannel());
@@ -33,7 +48,9 @@ public class Engine {
   }
 
   public void start() {
-    while (true) {
+    LOGGER.debug("Starting engine...");
+    running = true;
+    while (running) {
       try {
         semaphore.acquire();
 
@@ -49,6 +66,7 @@ public class Engine {
         LOGGER.info("Checking for new message (available semaphores: {}), got {}", semaphore.availablePermits(), message.getBody());
 
         executorService.execute(() -> {
+          activeWorkers.incrementAndGet();
           try {
             Message result = flow.process(message);
             if (flow.hasOutputChannel()) {
@@ -59,11 +77,11 @@ public class Engine {
             try {
               LOGGER.error("Could not process message: {}", message.getBody());
               messageBroker.reject(message);
-
             } catch (IOException e1) {
               LOGGER.error("Could not reject message" + message.getBody(), e1);
             }
           }
+          activeWorkers.decrementAndGet();
           semaphore.release();
         });
 
@@ -73,12 +91,29 @@ public class Engine {
     }
   }
 
-  public void createTestMessages() throws IOException {
-    final int n = 500;
+  public void createTestMessages(int n) throws IOException {
     for (int i = 0; i < n; i++) {
       String message = String.format("Test message #%d of %d", i, n);
       messageBroker.send(flow.getInputChannel(), new Message(message));
     }
+  }
+
+  public void stop() {
+    running = false;
+    LOGGER.debug("Stopping engine...");
+  }
+
+
+  public int getConcurrentWorkers() {
+    return concurrentWorkers;
+  }
+
+  public int getActiveWorkers() {
+    return activeWorkers.get();
+  }
+
+  public int getAvailableWorkers() {
+    return semaphore.availablePermits();
   }
 
 }

@@ -46,4 +46,5 @@ public class Message {
   public void setBody(String body) {
     this.body = body;
   }
+
 }

@@ -32,7 +32,7 @@ public class Application {
         .build();
 
     Engine engine = new Engine(messageBroker, flow);
-    engine.createTestMessages();
+    engine.createTestMessages(500);
     engine.start();
   }
 

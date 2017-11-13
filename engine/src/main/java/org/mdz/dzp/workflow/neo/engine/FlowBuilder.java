@@ -27,8 +27,14 @@ public class FlowBuilder<R, W> {
   }
 
   public FlowBuilder<R, W> read(String routingKey, Function<Message, R> reader) {
-    this.inputChannel = requireNonNull(routingKey);
-    this.reader = requireNonNull(reader);
+    if (routingKey  == null || routingKey.isEmpty()) {
+      throw new IllegalArgumentException("The routingKey cannot be null or empty.");
+    }
+    if (reader == null) {
+      throw new IllegalArgumentException("The reader cannot be null.");
+    }
+    this.inputChannel = routingKey;
+    this.reader = reader;
     return this;
   }
 
@@ -36,7 +42,10 @@ public class FlowBuilder<R, W> {
     if (reader == null) {
       throw new IllegalStateException("You can't transform anything without reading it first. Please add a reader before adding and transformer.");
     }
-    this.transformer = requireNonNull(transformer);
+    if (transformer == null) {
+      throw new IllegalArgumentException("The transformer cannot be null.");
+    }
+    this.transformer = transformer;
     return this;
   }
 
