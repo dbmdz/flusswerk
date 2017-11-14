@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
+import org.mdz.dzp.workflow.neo.engine.jackson.MessageModule;
 import org.mdz.dzp.workflow.neo.engine.model.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,7 @@ public class MessageBroker {
     factory.setHost(config.getHost());
     factory.setPort(config.getPort());
     objectMapper = config.getObjectMapper();
+    objectMapper.registerModule(new MessageModule());
     deadLetterWait = config.getDeadLetterWait();
 
     Connection conn = factory.newConnection();

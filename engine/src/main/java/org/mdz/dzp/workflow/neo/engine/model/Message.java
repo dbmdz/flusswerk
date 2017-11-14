@@ -4,9 +4,11 @@ import static java.util.Objects.requireNonNull;
 
 public class Message {
 
-  private volatile long deliveryTag;
+  private long deliveryTag;
 
-  private volatile String body;
+  private int retries;
+
+  private String body;
 
   private String value;
 
