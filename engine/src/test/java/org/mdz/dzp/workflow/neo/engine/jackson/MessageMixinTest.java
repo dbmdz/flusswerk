@@ -14,16 +14,9 @@ class MessageMixinTest {
   private ObjectMapper objectMapper;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     objectMapper = new ObjectMapper();
     objectMapper.addMixIn(Message.class, MessageMixin.class);
-  }
-
-  @Test
-  @DisplayName("Serialization should exclude field retries")
-  void shouldExcludeRetries() throws JsonProcessingException {
-    String json = objectMapper.writeValueAsString(new Message("Tadaaaaa!"));
-    assertThat(json).doesNotContain("retries");
   }
 
   @Test

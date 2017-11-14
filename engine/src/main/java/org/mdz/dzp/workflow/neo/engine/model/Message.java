@@ -49,4 +49,11 @@ public class Message {
     this.body = body;
   }
 
+  public int getRetries() {
+    return retries;
+  }
+
+  public void setRetries(int retries) {
+    this.retries = retries;
+  }
 }

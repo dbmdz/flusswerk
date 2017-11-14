@@ -3,8 +3,6 @@ package org.mdz.dzp.workflow.neo.engine;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.GetResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -41,19 +39,16 @@ public class MessageBroker {
 
   private final String exchange = "testExchange";
 
-  MessageBroker(MessageBrokerConfig config) throws IOException, TimeoutException {
-    ConnectionFactory factory = new ConnectionFactory();
-    factory.setUsername(config.getUsername());
-    factory.setPassword(config.getPassword());
-    factory.setVirtualHost(config.getVirtualHost());
-    factory.setHost(config.getHost());
-    factory.setPort(config.getPort());
+  private String failedQueue;
+
+  private int maxRetries;
+
+  MessageBroker(MessageBrokerConfig config, MessageBrokerConnection connection) throws IOException, TimeoutException {
+    channel = connection.getChannel();
     objectMapper = config.getObjectMapper();
     objectMapper.registerModule(new MessageModule());
     deadLetterWait = config.getDeadLetterWait();
-
-    Connection conn = factory.newConnection();
-    channel = conn.createChannel();
+    maxRetries = config.getMaxRetries();
   }
 
   public void send(String routingKey, Message message) throws IOException {
@@ -90,7 +85,7 @@ public class MessageBroker {
     channel.queueDeclare(dlxQueue, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, dlxQueueArgs);
     channel.queueBind(dlxQueue, deadLetterExchange, queue);
 
-    String failedQueue = "failed." + queue;
+    failedQueue = "failed." + queue;
     channel.queueDeclare(failedQueue, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, null);
     channel.queueBind(failedQueue, deadLetterExchange, queue);
   }
@@ -108,7 +103,15 @@ public class MessageBroker {
   }
 
   public void reject(Message message) throws IOException {
-    channel.basicReject(message.getDeliveryTag(), DO_NOT_REQUEUE);
+    if (message.getRetries() < maxRetries) {
+      message.setRetries(message.getRetries() + 1);
+      channel.basicReject(message.getDeliveryTag(), DO_NOT_REQUEUE);
+    } else {
+      ack(message);
+      if (failedQueue != null) {
+        send(failedQueue, message);
+      }
+    }
   }
 
   public void provideExchanges(String exchange, String deadLetterExchange) throws IOException {

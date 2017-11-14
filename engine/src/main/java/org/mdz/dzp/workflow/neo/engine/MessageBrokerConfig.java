@@ -18,6 +18,13 @@ class MessageBrokerConfig {
 
   private int deadLetterWait;
 
+  private int maxRetries;
+
+  public MessageBrokerConfig() {
+    maxRetries = 5;
+    objectMapper = new ObjectMapper();
+  }
+
   public String getUsername() {
     return username;
   }
@@ -72,6 +79,14 @@ class MessageBrokerConfig {
 
   public void setDeadLetterWait(int milliseconds) {
     this.deadLetterWait = milliseconds;
+  }
+
+  public int getMaxRetries() {
+    return maxRetries;
+  }
+
+  public void setMaxRetries(int maxRetries) {
+    this.maxRetries = maxRetries;
   }
 
 }

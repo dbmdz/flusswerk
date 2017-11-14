@@ -18,7 +18,7 @@ public class MessageBrokerBuilder {
     config.setUsername("guest");
     config.setVirtualHost("/");
     config.setObjectMapper(new ObjectMapper());
-
+    config.setMaxRetries(5);
     config.setDeadLetterWait(30 * 1000);
   }
 
@@ -60,8 +60,17 @@ public class MessageBrokerBuilder {
     return this;
   }
 
+  public MessageBrokerBuilder maxRetries(int number) {
+    if (number < 0) {
+      throw new IllegalArgumentException("Max number of retries must be at least 0.");
+    }
+    config.setMaxRetries(number);
+    return this;
+  }
+
   public MessageBroker build() throws IOException, TimeoutException {
-    return new MessageBroker(config);
+    MessageBrokerConnection connection = new MessageBrokerConnection(config);
+    return new MessageBroker(config, connection);
   }
 
 }

@@ -5,10 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public interface MessageMixin {
 
   @JsonIgnore
-  int getRetries();
-
-
-  @JsonIgnore
   int getDeliveryTag();
 
 
