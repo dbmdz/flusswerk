@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mdz.dzp.workflow.neo.engine.model.DefaultMessage;
 import org.mdz.dzp.workflow.neo.engine.model.Message;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,6 +20,8 @@ class MessageBrokerTest {
 
   private MessageBrokerConfig config = new MessageBrokerConfig();
 
+  private MessageBrokerConnection connection;
+
   private Channel channel;
 
   private MessageBroker messageBroker;
@@ -27,17 +30,17 @@ class MessageBrokerTest {
 
   @BeforeEach
   void setUp() throws IOException, TimeoutException {
-    MessageBrokerConnection connection = mock(MessageBrokerConnection.class);
+    connection = mock(MessageBrokerConnection.class);
     channel = mock(Channel.class);
     when(connection.getChannel()).thenReturn(channel);
     messageBroker = new MessageBroker(config, connection);
-    message = new Message("Hey");
+    message = new DefaultMessage("Hey");
   }
 
   @Test
   void sendShouldUseCorrectRoutingKey() throws IOException {
     messageBroker.send("there", message);
-    verify(channel).basicPublish(anyString(), eq("there"), any(), any());
+    verify(channel).basicPublish(anyString(), eq("there"), any(), any(byte[].class));
   }
 
   @Test
@@ -50,7 +53,7 @@ class MessageBrokerTest {
   @Test
   void rejectShouldCountRejections() throws IOException {
     int numberOfRejections = 3;
-    for (int i=0; i < numberOfRejections; i++) {
+    for (int i = 0; i < numberOfRejections; i++) {
       messageBroker.reject(message);
     }
     assertThat(message.getRetries()).isEqualTo(numberOfRejections);
@@ -60,7 +63,7 @@ class MessageBrokerTest {
   void rejectShouldRouteToFailedQueueIfMessageIsRejectedTooOften() throws IOException {
     messageBroker.provideInputQueue("somequeue");
     int numberOfRejections = config.getMaxRetries() + 1;
-    for (int i=0; i < numberOfRejections; i++) {
+    for (int i = 0; i < numberOfRejections; i++) {
       messageBroker.reject(message);
     }
     verify(channel).basicPublish(anyString(), eq("failed.somequeue"), any(), any());
@@ -70,10 +73,21 @@ class MessageBrokerTest {
   void rejectShouldRemoveOriginalMessageIfMessageIsRejectedTooOften() throws IOException {
     messageBroker.provideInputQueue("somequeue");
     int numberOfRejections = config.getMaxRetries() + 1;
-    for (int i=0; i < numberOfRejections; i++) {
+    for (int i = 0; i < numberOfRejections; i++) {
       messageBroker.reject(message);
     }
     verify(channel).basicAck(eq(message.getDeliveryTag()), eq(false));
+  }
+
+  @Test
+  void shouldWorkWithCustomMessageType() throws IOException, TimeoutException {
+    config.setMessageMixin(CustomMessageMixin.class);
+    config.setMessageClass(CustomMessage.class);
+    messageBroker = new MessageBroker(config, connection);
+    CustomMessage message = new CustomMessage();
+    message.setCustomField("Blah!");
+    Message recreated = messageBroker.deserialize(messageBroker.serialize(message));
+    assertThat(message.getCustomField()).isEqualTo(((CustomMessage) recreated).getCustomField());
   }
 
 }

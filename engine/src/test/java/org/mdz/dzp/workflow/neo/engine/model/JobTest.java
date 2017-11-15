@@ -10,13 +10,13 @@ import static org.assertj.core.api.Assertions.from;
 
 class JobTest {
 
-  private static final Message SOME_MESSAGE = new Message("Hey!");
+  private static final Message SOME_MESSAGE = new DefaultMessage("Hey!");
 
-  private static final Function<Message, String> DUMMY_READER = Message::getValue;
+  private static final Function<Message, String> DUMMY_READER = Message::getType;
 
   private static final Function<String, String> DUMMY_TRANSFORMER = Function.identity();
 
-  private static final Function<String, Message> DUMMY_WRITER = Message::new;
+  private static final Function<String, Message> DUMMY_WRITER = DefaultMessage::new;
 
 
   class CheckIfCalled<R, W> implements Function<R, W> {
@@ -77,20 +77,20 @@ class JobTest {
   void readTransformWriteShouldPassValues() {
     String message = "Jolene, Jolene, Jolene, Jolene";
     Job<String, String> job = new Job<>(
-        new Message(message),
-        Message::getValue,
+        new DefaultMessage(message),
+        Message::getType,
         String::toUpperCase,
-        Message::new
+        DefaultMessage::new
     );
     job.read();
     job.transform();
     job.write();
-    assertThat(job.getResult()).returns(message.toUpperCase(), from(Message::getValue));
+    assertThat(job.getResult()).returns(message.toUpperCase(), from(Message::getType));
   }
 
   @Test
   void getMessage() {
-    Message message = new Message("Wuthering Heights");
+    Message message = new DefaultMessage("Wuthering Heights");
     Job<String, String> job = new Job<>(
         message,
         DUMMY_READER,

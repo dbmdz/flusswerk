@@ -1,6 +1,9 @@
 package org.mdz.dzp.workflow.neo.engine;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.mdz.dzp.workflow.neo.engine.jackson.DefaultMessageMixin;
+import org.mdz.dzp.workflow.neo.engine.model.DefaultMessage;
+import org.mdz.dzp.workflow.neo.engine.model.Message;
 
 class MessageBrokerConfig {
 
@@ -20,9 +23,21 @@ class MessageBrokerConfig {
 
   private int maxRetries;
 
+  private Class<? extends Message> messageClass;
+
+  private Class<?> messageMixin;
+
+  private String exchange;
+
+  private String deadLetterExchange;
+
   public MessageBrokerConfig() {
     maxRetries = 5;
     objectMapper = new ObjectMapper();
+    messageClass = DefaultMessage.class;
+    messageMixin = DefaultMessageMixin.class;
+    exchange = "workflow";
+    exchange = "dlx.workflow";
   }
 
   public String getUsername() {
@@ -87,6 +102,38 @@ class MessageBrokerConfig {
 
   public void setMaxRetries(int maxRetries) {
     this.maxRetries = maxRetries;
+  }
+
+  public Class<? extends Message> getMessageClass() {
+    return messageClass;
+  }
+
+  public void setMessageClass(Class<? extends Message> messageClass) {
+    this.messageClass = messageClass;
+  }
+
+  public Class<?> getMessageMixin() {
+    return messageMixin;
+  }
+
+  public void setMessageMixin(Class<?> messageMixin) {
+    this.messageMixin = messageMixin;
+  }
+
+  public void setExchange(String exchange) {
+    this.exchange = exchange;
+  }
+
+  public String getExchange() {
+    return exchange;
+  }
+
+  public void setDeadLetterExchange(String deadLetterExchange) {
+    this.deadLetterExchange = deadLetterExchange;
+  }
+
+  public String getDeadLetterExchange() {
+    return deadLetterExchange;
   }
 
 }

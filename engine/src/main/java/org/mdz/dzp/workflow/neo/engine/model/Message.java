@@ -1,59 +1,23 @@
 package org.mdz.dzp.workflow.neo.engine.model;
 
-import static java.util.Objects.requireNonNull;
+public interface Message<ID> {
 
-public class Message {
+  String getType();
 
-  private long deliveryTag;
+  long getDeliveryTag();
 
-  private int retries;
+  void setDeliveryTag(long deliveryTag);
 
-  private String body;
+  String getBody();
 
-  private String value;
+  void setBody(String body);
 
-  private boolean broken;
+  int getRetries();
 
-  protected Message() {}
+  void setRetries(int retries);
 
-  public Message(String value) {
-    this.value = requireNonNull(value);
-    this.broken = false;
-  }
+  ID getId();
 
-  public String getValue() {
-    return value;
-  }
+  void setId(ID id);
 
-  public void setBroken(boolean broken) {
-    this.broken = broken;
-  }
-
-  public boolean isBroken() {
-    return broken;
-  }
-
-  public long getDeliveryTag() {
-    return deliveryTag;
-  }
-
-  public String getBody() {
-    return body;
-  }
-
-  public void setDeliveryTag(long deliveryTag) {
-    this.deliveryTag = deliveryTag;
-  }
-
-  public void setBody(String body) {
-    this.body = body;
-  }
-
-  public int getRetries() {
-    return retries;
-  }
-
-  public void setRetries(int retries) {
-    this.retries = retries;
-  }
 }

@@ -2,7 +2,7 @@ package org.mdz.dzp.workflow.neo.engine.jackson;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public interface MessageMixin {
+public interface DefaultMessageMixin {
 
   @JsonIgnore
   int getDeliveryTag();

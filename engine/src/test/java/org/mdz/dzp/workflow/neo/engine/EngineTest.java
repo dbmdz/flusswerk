@@ -7,6 +7,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
+import org.mdz.dzp.workflow.neo.engine.model.DefaultMessage;
 import org.mdz.dzp.workflow.neo.engine.model.Message;
 import org.mockito.ArgumentCaptor;
 
@@ -30,7 +31,7 @@ class EngineTest {
   private Message[] moreMessages(int number) {
     Message[] messages = new Message[number];
     for (int i = 0; i < messages.length; i++) {
-      messages[i] = new Message("White Room");
+      messages[i] = new DefaultMessage("White Room");
     }
     return messages;
   }
@@ -38,14 +39,14 @@ class EngineTest {
   @Test
   public void engineShouldUseMaxNumberOfWorkers() throws IOException, InterruptedException {
     MessageBroker messageBroker = mock(MessageBroker.class);
-    when(messageBroker.receive(any())).thenReturn(new Message("White Room"));
+    when(messageBroker.receive(any())).thenReturn(new DefaultMessage("White Room"));
 
     Semaphore semaphore = new Semaphore(1);
     semaphore.drainPermits();
 
     Flow<String, String> flow = new Flow<>(
         IN, OUT,
-        Message::getValue,
+        Message::getType,
         s -> {
           try {
             semaphore.acquire(); // Block this worker to count it only once
@@ -54,8 +55,7 @@ class EngineTest {
           }
           return s;
         },
-        Message::new,
-        EXCHANGE, DLX
+        DefaultMessage::new
     );
 
     Engine engine = new Engine(messageBroker, flow);
@@ -75,19 +75,18 @@ class EngineTest {
   @Test
   public void engineShouldSendMessageToOut() throws IOException, InterruptedException {
     MessageBroker messageBroker = mock(MessageBroker.class);
-    when(messageBroker.receive(any())).thenReturn(new Message("White Room"));
+    when(messageBroker.receive(any())).thenReturn(new DefaultMessage("White Room"));
 
     AtomicInteger messagesSent = new AtomicInteger();
 
     Flow<String, String> flow = new Flow<>(
         IN, OUT,
-        Message::getValue,
+        Message::getType,
         s -> {
           messagesSent.incrementAndGet();
           return s;
         },
-        Message::new,
-        EXCHANGE, DLX
+        DefaultMessage::new
     );
 
     Engine engine = new Engine(messageBroker, flow);
@@ -105,7 +104,7 @@ class EngineTest {
     verify(messageBroker, atLeastOnce()).send(routingCaptor.capture(), messageCaptor.capture());
 
     assertThat(routingCaptor.getValue()).isEqualTo("out");
-    assertThat(messageCaptor.getValue().getValue()).isEqualTo("White Room");
+    assertThat(messageCaptor.getValue().getType()).isEqualTo("White Room");
     System.out.println(messagesSent.get());
   }
 

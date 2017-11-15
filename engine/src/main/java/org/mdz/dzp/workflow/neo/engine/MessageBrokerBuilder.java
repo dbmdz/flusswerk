@@ -3,6 +3,7 @@ package org.mdz.dzp.workflow.neo.engine;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
+import org.mdz.dzp.workflow.neo.engine.model.Message;
 
 import static java.util.Objects.requireNonNull;
 
@@ -68,9 +69,20 @@ public class MessageBrokerBuilder {
     return this;
   }
 
+  public MessageBrokerBuilder messageMapping(Class<? extends Message> messageClass, Class<?> messageMixin) {
+    config.setMessageClass(messageClass);
+    config.setMessageMixin(messageMixin);
+    return this;
+  }
+
+  public MessageBrokerBuilder exchanges(String exchange, String deadLetterExchange) {
+    config.setExchange(requireNonNull(exchange));
+    config.setDeadLetterExchange(requireNonNull(deadLetterExchange));
+    return this;
+  }
+
   public MessageBroker build() throws IOException, TimeoutException {
     MessageBrokerConnection connection = new MessageBrokerConnection(config);
     return new MessageBroker(config, connection);
   }
-
 }

@@ -15,24 +15,18 @@ public class Flow<R, W> {
 
   private String outputChannel;
 
-  private String exchange;
-
-  private String deadLetterExchange;
-
   private Function<Message, R> reader;
 
   private Function<R, W> transformer;
 
   private Function<W, Message> writer;
 
-  protected Flow(String inputChannel, String outputChannel, Function<Message, R> reader, Function<R, W> transformer, Function<W, Message> writer, String exchange, String deadLetterExchange) {
+  protected Flow(String inputChannel, String outputChannel, Function<Message, R> reader, Function<R, W> transformer, Function<W, Message> writer) {
     this.inputChannel = inputChannel;
     this.outputChannel = outputChannel;
     this.reader = reader;
     this.transformer = transformer;
     this.writer = writer;
-    this.exchange = exchange;
-    this.deadLetterExchange = deadLetterExchange;
   }
 
   public Message process(Message message) {
@@ -61,11 +55,4 @@ public class Flow<R, W> {
     return outputChannel != null;
   }
 
-  public String getExchange() {
-    return exchange;
-  }
-
-  public String getDeadLetterExchange() {
-    return deadLetterExchange;
-  }
 }

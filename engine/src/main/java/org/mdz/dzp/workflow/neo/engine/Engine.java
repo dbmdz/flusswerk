@@ -6,6 +6,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.mdz.dzp.workflow.neo.engine.model.DefaultMessage;
 import org.mdz.dzp.workflow.neo.engine.model.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,6 @@ public class Engine {
 
     messageBroker.provideInputQueue(flow.getInputChannel());
     messageBroker.provideOutputQueue(flow.getOutputChannel());
-    messageBroker.provideExchanges(flow.getExchange(), flow.getDeadLetterExchange());
   }
 
   public void start() {
@@ -94,7 +94,7 @@ public class Engine {
   public void createTestMessages(int n) throws IOException {
     for (int i = 0; i < n; i++) {
       String message = String.format("Test message #%d of %d", i, n);
-      messageBroker.send(flow.getInputChannel(), new Message(message));
+      messageBroker.send(flow.getInputChannel(), new DefaultMessage(message));
     }
   }
 

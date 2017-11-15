@@ -17,10 +17,6 @@ public class FlowBuilder<R, W> {
 
   private Function<W, Message> writer;
 
-  private String exchange;
-
-  private String deadLetterExchange;
-
   @SuppressWarnings("unchecked")
   private W cast(R value) {
     return (W) value;
@@ -58,18 +54,8 @@ public class FlowBuilder<R, W> {
     return this;
   }
 
-  public FlowBuilder<R, W> exchange(String name) {
-    this.exchange = name;
-    return this;
-  }
-
-  public FlowBuilder<R, W> deadLetterExchange(String name) {
-    this.deadLetterExchange = name;
-    return this;
-  }
-
   public Flow<R, W> build() {
-    return new Flow<>(inputChannel, outputChannel, reader, transformer, writer, exchange, deadLetterExchange);
+    return new Flow<>(inputChannel, outputChannel, reader, transformer, writer);
   }
 
 }

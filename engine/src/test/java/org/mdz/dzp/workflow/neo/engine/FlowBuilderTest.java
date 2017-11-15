@@ -3,6 +3,7 @@ package org.mdz.dzp.workflow.neo.engine;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mdz.dzp.workflow.neo.engine.model.DefaultMessage;
 import org.mdz.dzp.workflow.neo.engine.model.Message;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -67,12 +68,12 @@ class FlowBuilderTest {
   @DisplayName("build should create an working Flow if only reader and writer are set")
   public void buildWithOnlyReadAndWrite() {
     Flow<String, String> flow = new FlowBuilder<String, String>()
-        .read("some.route", Message::getValue)
-        .write("some.other.route", Message::new)
+        .read("some.route", Message::getType)
+        .write("some.other.route", DefaultMessage::new)
         .build();
     String message = "Whiskey in the Jar";
-    Message result = flow.process(new Message(message));
-    assertThat(result.getValue()).isEqualTo(message);
+    Message result = flow.process(new DefaultMessage(message));
+    assertThat(result.getType()).isEqualTo(message);
   }
 
 }

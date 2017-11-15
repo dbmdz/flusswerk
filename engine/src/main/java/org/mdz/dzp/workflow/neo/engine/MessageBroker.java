@@ -9,7 +9,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
-import org.mdz.dzp.workflow.neo.engine.jackson.MessageModule;
 import org.mdz.dzp.workflow.neo.engine.model.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,24 +34,32 @@ public class MessageBroker {
 
   private final int deadLetterWait;
 
-  private final String deadLetterExchange = "testDlx";
+  private String deadLetterExchange;
 
-  private final String exchange = "testExchange";
+  private String exchange;
 
   private String failedQueue;
 
   private int maxRetries;
 
+  private Class<? extends Message> messageClass;
+
   MessageBroker(MessageBrokerConfig config, MessageBrokerConnection connection) throws IOException, TimeoutException {
     channel = connection.getChannel();
     objectMapper = config.getObjectMapper();
-    objectMapper.registerModule(new MessageModule());
+    messageClass = config.getMessageClass();
+    if (objectMapper.findMixInClassFor(Message.class) == null) {
+      objectMapper.addMixIn(messageClass, config.getMessageMixin());
+    }
     deadLetterWait = config.getDeadLetterWait();
     maxRetries = config.getMaxRetries();
+    exchange = config.getExchange();
+    deadLetterExchange = config.getDeadLetterExchange();
+    provideExchanges(exchange, deadLetterExchange);
   }
 
   public void send(String routingKey, Message message) throws IOException {
-    byte[] data = objectMapper.writeValueAsBytes(message);
+    byte[] data = serialize(message);
     AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder()
         .contentType("application/json")
         .deliveryMode(PERSISTENT)
@@ -63,12 +70,20 @@ public class MessageBroker {
   public Message receive(String queueName) throws IOException {
     GetResponse response = channel.basicGet(queueName, NO_AUTO_ACK);
     if (response != null) {
-      Message message = objectMapper.readValue(response.getBody(), Message.class);
+      Message message = deserialize(response.getBody());
       message.setBody(new String(response.getBody(), StandardCharsets.UTF_8));
       message.setDeliveryTag(response.getEnvelope().getDeliveryTag());
       return message;
     }
     return null;
+  }
+
+  Message deserialize(byte[] body) throws IOException {
+    return objectMapper.readValue(body, messageClass);
+  }
+
+  byte[] serialize(Message message) throws IOException {
+    return objectMapper.writeValueAsBytes(message);
   }
 
   public void provideInputQueue(String queue) throws IOException {
