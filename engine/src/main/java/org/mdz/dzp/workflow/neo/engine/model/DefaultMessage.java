@@ -29,7 +29,8 @@ public class DefaultMessage implements Message<String> {
 
   public DefaultMessage(String type) {
     this.type = type;
-    parameters = new HashMap<>();
+    this.parameters = new HashMap<>();
+    this.timestamp = LocalDateTime.now();
   }
 
   @Override
