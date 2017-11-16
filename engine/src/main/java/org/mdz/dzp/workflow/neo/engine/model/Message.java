@@ -1,5 +1,7 @@
 package org.mdz.dzp.workflow.neo.engine.model;
 
+import java.time.LocalDateTime;
+
 public interface Message<ID> {
 
   String getType();
@@ -7,6 +9,10 @@ public interface Message<ID> {
   long getDeliveryTag();
 
   void setDeliveryTag(long deliveryTag);
+
+  LocalDateTime getTimestamp();
+
+  void setTimestamp(LocalDateTime timestamp);
 
   String getBody();
 

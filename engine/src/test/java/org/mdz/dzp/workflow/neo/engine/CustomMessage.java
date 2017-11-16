@@ -1,5 +1,6 @@
 package org.mdz.dzp.workflow.neo.engine;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import org.mdz.dzp.workflow.neo.engine.model.Message;
@@ -32,30 +33,47 @@ public class CustomMessage implements Message<Long> {
     parameters = new HashMap<>();
   }
 
+  @Override
   public String getType() {
     return type;
   }
 
+  @Override
   public long getDeliveryTag() {
     return deliveryTag;
   }
 
+  @Override
   public String getBody() {
     return body;
   }
 
+  @Override
   public void setDeliveryTag(long deliveryTag) {
     this.deliveryTag = deliveryTag;
   }
 
+  @Override
+  public LocalDateTime getTimestamp() {
+    return null;
+  }
+
+  @Override
+  public void setTimestamp(LocalDateTime timestamp) {
+
+  }
+
+  @Override
   public void setBody(String body) {
     this.body = body;
   }
 
+  @Override
   public int getRetries() {
     return retries;
   }
 
+  @Override
   public void setRetries(int retries) {
     this.retries = retries;
   }
@@ -80,10 +98,12 @@ public class CustomMessage implements Message<Long> {
     this.type = type;
   }
 
+  @Override
   public Long getId() {
     return id;
   }
 
+  @Override
   public void setId(Long id) {
     this.id = id;
   }

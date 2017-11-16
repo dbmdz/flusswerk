@@ -1,5 +1,6 @@
 package org.mdz.dzp.workflow.neo.engine.model;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,40 +20,63 @@ public class DefaultMessage implements Message<String> {
 
   private String id;
 
+  private LocalDateTime timestamp;
+
   public DefaultMessage() {
     parameters = new HashMap<>();
+    timestamp = LocalDateTime.now();
   }
-
 
   public DefaultMessage(String type) {
     this.type = type;
     parameters = new HashMap<>();
   }
 
+  @Override
   public String getType() {
     return type;
   }
 
+  public void setType(String type) {
+    this.type = type;
+  }
+
+  @Override
   public long getDeliveryTag() {
     return deliveryTag;
   }
 
-  public String getBody() {
-    return body;
-  }
-
+  @Override
   public void setDeliveryTag(long deliveryTag) {
     this.deliveryTag = deliveryTag;
   }
 
+  @Override
+  public String getBody() {
+    return body;
+  }
+
+  @Override
   public void setBody(String body) {
     this.body = body;
   }
 
+  @Override
+  public LocalDateTime getTimestamp() {
+    return timestamp;
+  }
+
+  @Override
+  public void setTimestamp(LocalDateTime timestamp) {
+    this.timestamp = timestamp;
+  }
+
+  @Override
   public int getRetries() {
     return retries;
   }
 
+  @Override
   public void setRetries(int retries) {
     this.retries = retries;
   }
@@ -73,17 +97,14 @@ public class DefaultMessage implements Message<String> {
     return parameters.get(type);
   }
 
-  public void setType(String type) {
-    this.type = type;
-  }
-
+  @Override
   public String getId() {
     return id;
   }
 
+  @Override
   public void setId(String id) {
     this.id = id;
   }
-
 
 }

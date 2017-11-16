@@ -11,4 +11,5 @@ public interface DefaultMessageMixin {
   @JsonIgnore
   int getBody();
 
+
 }
