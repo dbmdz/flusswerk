@@ -1,6 +1,7 @@
 package org.mdz.dzp.workflow.neo.engine;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.GetResponse;
@@ -51,6 +52,7 @@ public class MessageBroker {
     if (objectMapper.findMixInClassFor(Message.class) == null) {
       objectMapper.addMixIn(messageClass, config.getMessageMixin());
     }
+    objectMapper.registerModule(new JavaTimeModule());
     deadLetterWait = config.getDeadLetterWait();
     maxRetries = config.getMaxRetries();
     exchange = config.getExchange();

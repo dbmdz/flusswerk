@@ -23,12 +23,16 @@ public class DefaultMessage implements Message<String> {
   private LocalDateTime timestamp;
 
   public DefaultMessage() {
-    parameters = new HashMap<>();
-    timestamp = LocalDateTime.now();
+    this(null, null);
   }
 
   public DefaultMessage(String type) {
+    this(type, null);
+  }
+
+  public DefaultMessage(String type, String id) {
     this.type = type;
+    this.id = id;
     this.parameters = new HashMap<>();
     this.timestamp = LocalDateTime.now();
   }
