@@ -57,13 +57,13 @@ public class Engine {
         Message message = messageBroker.receive(flow.getInputChannel());
 
         if (message == null) {
-          LOGGER.info("Checking for new message (available semaphores: {}) - Queue is empty", semaphore.availablePermits());
+          LOGGER.debug("Checking for new message (available semaphores: {}) - Queue is empty", semaphore.availablePermits());
           TimeUnit.SECONDS.sleep(1);
           semaphore.release();
           continue;
         }
 
-        LOGGER.info("Checking for new message (available semaphores: {}), got {}", semaphore.availablePermits(), message.getBody());
+        LOGGER.debug("Checking for new message (available semaphores: {}), got {}", semaphore.availablePermits(), message.getBody());
 
         executorService.execute(() -> {
           activeWorkers.incrementAndGet();
