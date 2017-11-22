@@ -4,75 +4,203 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.mdz.dzp</groupId>
-    <artifactId>mdz-dzp-parent</artifactId>
-    <version>5.1.0</version>
-  </parent>
-
-  <groupId>org.mdz.dzp.workflow.neo</groupId>
-  <artifactId>dzp-workflow-neo</artifactId>
+  <groupId>de.digitalcollections.workflow</groupId>
+  <artifactId>dc-workflow-parent</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>MDZ DZP Workflow Neo</name>
+  <name>Digital Collections Workflow</name>
 
+  <description>
+    Tooling for AMQP/RabbitMQ based workflow management.
+  </description>
+  <url>https://github.com/dbmdz/workflow</url>
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://github.com/dbmdz/workflow/blob/master/LICENSE</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <name>Marcus Bitzl</name>
+      <email>marcus.bitzl@bsb-muenchen.de</email>
+      <id>bitzl</id>
+    </developer>
+  </developers>
+  <ciManagement>
+    <url>https://travis-ci.org/dbmdz/workflow</url>
+    <system>Travis CI</system>
+  </ciManagement>
+  <issueManagement>
+    <url>https://github.com/dbmdz/workflow/issues</url>
+    <system>GitHub Issues</system>
+  </issueManagement>
+  <scm>
+    <connection>https://github.com/dbmdz/workflow.git</connection>
+    <developerConnection>git@github.com:dbmdz/workflow.git</developerConnection>
+    <url>https://github.com/dbmdz/workflow</url>
+  </scm>
 
   <modules>
     <module>engine</module>
-    <module>test-app</module>
+    <module>examples</module>
   </modules>
 
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
+    <!-- Dependency versions -->
+    <version.amqp-client>5.0.0</version.amqp-client>
+    <version.assertj>3.8.0</version.assertj>
+    <version.jackson>2.9.2</version.jackson>
+    <version.junit>5.0.2</version.junit>
+    <version.junit-surefire>1.0.2</version.junit-surefire>
+    <version.logback>1.2.3</version.logback>
+    <version.mockito>2.12.0</version.mockito>
+    <version.slf4j>1.7.25</version.slf4j>
+    <!-- Plugin versions -->
+    <version.maven-compiler-plugin>3.7.0</version.maven-compiler-plugin>
+    <version.maven-gpg-plugin>1.6</version.maven-gpg-plugin>
+    <version.maven-jacoco-plugin>0.7.9</version.maven-jacoco-plugin>
+    <version.maven-surefire-plugin>2.19</version.maven-surefire-plugin>
   </properties>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <version>${version.logback}</version>
+      </dependency>
+      <dependency>
+        <groupId>de.digitalcollections.workflow</groupId>
+        <artifactId>dc-workflow-engine</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${version.jackson}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-jsr310</artifactId>
+        <version>${version.jackson}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.rabbitmq</groupId>
+        <artifactId>amqp-client</artifactId>
+        <version>${version.amqp-client}</version>
+      </dependency>
+      <dependency>
         <groupId>org.assertj</groupId>
         <artifactId>assertj-core</artifactId>
-        <version>3.8.0</version>
+        <version>${version.assertj}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter-api</artifactId>
-        <version>5.0.2</version>
+        <version>${version.junit}</version>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-engine</artifactId>
+        <version>${version.junit}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.platform</groupId>
+        <artifactId>junit-platform-surefire-provider</artifactId>
+        <version>${version.junit-surefire}</version>
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-core</artifactId>
-        <version>2.12.0</version>
+        <version>${version.mockito}</version>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${version.slf4j}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
 
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${version.maven-compiler-plugin}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${version.maven-surefire-plugin}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh-snapshots</id>
+      <name>Sonatype Nexus Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
+
   <repositories>
     <repository>
-      <id>mdzrepo-release</id>
-      <name>MDZ Release</name>
-      <url>http://bsbrepo.bsb.lrz.de/nexus/content/repositories/mdzrepo-release</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>mdzrepo-snapshot</id>
-      <name>MDZ Snapshot</name>
-      <url>http://bsbrepo.bsb.lrz.de/nexus/content/repositories/mdzrepo-snapshot</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
+      <id>ossrh-snapshots</id>
+      <name>Sonatype Nexus Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
     </repository>
   </repositories>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${version.maven-jacoco-plugin}</version>
+      </plugin>
+    </plugins>
+  </reporting>
+
+  <profiles>
+    <profile>
+      <id>deploy</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>${version.maven-gpg-plugin}</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
 </project>
