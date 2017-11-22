@@ -1,9 +1,9 @@
 package de.digitalcollections.workflow.engine;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.digitalcollections.workflow.engine.model.Message;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
-import de.digitalcollections.workflow.engine.model.Message;
 
 import static java.util.Objects.requireNonNull;
 

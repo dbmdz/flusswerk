@@ -1,13 +1,13 @@
 package de.digitalcollections.workflow.engine;
 
+import de.digitalcollections.workflow.engine.model.DefaultMessage;
+import de.digitalcollections.workflow.engine.model.Message;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import de.digitalcollections.workflow.engine.model.DefaultMessage;
-import de.digitalcollections.workflow.engine.model.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

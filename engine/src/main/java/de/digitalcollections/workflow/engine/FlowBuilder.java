@@ -1,7 +1,7 @@
 package de.digitalcollections.workflow.engine;
 
-import java.util.function.Function;
 import de.digitalcollections.workflow.engine.model.Message;
+import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
 

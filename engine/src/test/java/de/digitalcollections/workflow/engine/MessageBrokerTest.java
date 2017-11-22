@@ -1,12 +1,12 @@
 package de.digitalcollections.workflow.engine;
 
 import com.rabbitmq.client.Channel;
+import de.digitalcollections.workflow.engine.model.DefaultMessage;
+import de.digitalcollections.workflow.engine.model.Message;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import de.digitalcollections.workflow.engine.model.DefaultMessage;
-import de.digitalcollections.workflow.engine.model.Message;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
