@@ -36,4 +36,4 @@ Flow<String, String> flow = new FlowBuilder<String, String>()
     .build();
 ```  
 
-Here it is important that the classes do not keep a state (or do so in a threadsafe way) because the function's apply method is called in multile threads at the same time. 
+Here it is important that the classes do not keep a state (or do so in a threadsafe way) because the function's apply method is called in multiple threads at the same time. 
