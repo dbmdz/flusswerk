@@ -1,5 +1,11 @@
 # Digital Collections Workflow Engine
 
+[![Build Status](https://www.travis-ci.org/dbmdz/workflow.svg?branch=master)](https://www.travis-ci.org/dbmdz/workflow)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![codebeat badge](https://codebeat.co/badges/8a7dab47-377e-428f-a46e-e3f9fb6cf68d)](https://codebeat.co/projects/github-com-dbmdz-workflow-master)
+[![codecov](https://codecov.io/gh/dbmdz/workflow/branch/master/graph/badge.svg)](https://codecov.io/gh/dbmdz/workflow)
+
+
 The digital collections workflow engine makes it easy to create multithreaded workers for read-transform-write chains (aka ETL jobs).
  
  
