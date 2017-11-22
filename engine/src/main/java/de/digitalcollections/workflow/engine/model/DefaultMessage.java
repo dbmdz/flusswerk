@@ -94,12 +94,13 @@ public class DefaultMessage implements Message<String> {
     this.parameters = requireNonNull(parameters);
   }
 
-  public void put(String key, String value) {
+  public DefaultMessage put(String key, String value) {
     parameters.put(key, value);
+    return this;
   }
 
   public String get(String key) {
-    return parameters.get(type);
+    return parameters.get(key);
   }
 
   @Override
