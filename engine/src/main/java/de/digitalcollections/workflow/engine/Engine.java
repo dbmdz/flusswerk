@@ -67,26 +67,30 @@ public class Engine {
 
         executorService.execute(() -> {
           activeWorkers.incrementAndGet();
-          try {
-            Message result = flow.process(message);
-            if (flow.hasOutputChannel()) {
-              messageBroker.send(flow.getOutputChannel(), result);
-            }
-            messageBroker.ack(message);
-          } catch (RuntimeException | IOException  e) {
-            try {
-              LOGGER.error("Could not process message: {}", message.getBody());
-              messageBroker.reject(message);
-            } catch (IOException e1) {
-              LOGGER.error("Could not reject message" + message.getBody(), e1);
-            }
-          }
+          process(message);
           activeWorkers.decrementAndGet();
           semaphore.release();
         });
 
       } catch (IOException | InterruptedException e) {
         LOGGER.error("Got some error", e);
+      }
+    }
+  }
+
+  private void process(Message message) {
+    try {
+      Message result = flow.process(message);
+      if (flow.hasOutputChannel()) {
+        messageBroker.send(flow.getOutputChannel(), result);
+      }
+      messageBroker.ack(message);
+    } catch (RuntimeException | IOException e) {
+      try {
+        LOGGER.error("Could not process message: {}", message.getBody());
+        messageBroker.reject(message);
+      } catch (IOException e1) {
+        LOGGER.error("Could not reject message" + message.getBody(), e1);
       }
     }
   }
