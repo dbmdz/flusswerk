@@ -69,10 +69,10 @@ class FlowBuilderTest {
   public void buildWithOnlyReadAndWrite() {
     Flow<String, String> flow = new FlowBuilder<String, String>()
         .read("some.route", Message::getType)
-        .write("some.other.route", DefaultMessage::new)
+        .write("some.other.route", DefaultMessage::withType)
         .build();
     String message = "Whiskey in the Jar";
-    Message result = flow.process(new DefaultMessage(message));
+    Message result = flow.process(DefaultMessage.withType(message));
     assertThat(result.getType()).isEqualTo(message);
   }
 

@@ -4,6 +4,7 @@ import com.rabbitmq.client.Channel;
 import de.digitalcollections.workflow.engine.model.DefaultMessage;
 import de.digitalcollections.workflow.engine.model.Message;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,7 @@ class MessageBrokerTest {
     channel = mock(Channel.class);
     when(connection.getChannel()).thenReturn(channel);
     messageBroker = new MessageBroker(config, connection);
-    message = new DefaultMessage("Hey");
+    message = DefaultMessage.withType("Hey");
   }
 
   @Test
@@ -45,9 +46,9 @@ class MessageBrokerTest {
 
   @Test
   void ack() throws IOException {
-    message.setDeliveryTag(123123123);
+    message.getMeta().setDeliveryTag(123123123);
     messageBroker.ack(message);
-    verify(channel).basicAck(eq(message.getDeliveryTag()), eq(false));
+    verify(channel).basicAck(eq(message.getMeta().getDeliveryTag()), eq(false));
   }
 
   @Test
@@ -56,7 +57,7 @@ class MessageBrokerTest {
     for (int i = 0; i < numberOfRejections; i++) {
       messageBroker.reject(message);
     }
-    assertThat(message.getRetries()).isEqualTo(numberOfRejections);
+    assertThat(message.getMeta().getRetries()).isEqualTo(numberOfRejections);
   }
 
   @Test
@@ -76,7 +77,7 @@ class MessageBrokerTest {
     for (int i = 0; i < numberOfRejections; i++) {
       messageBroker.reject(message);
     }
-    verify(channel).basicAck(eq(message.getDeliveryTag()), eq(false));
+    verify(channel).basicAck(eq(message.getMeta().getDeliveryTag()), eq(false));
   }
 
   @Test
@@ -86,7 +87,7 @@ class MessageBrokerTest {
     messageBroker = new MessageBroker(config, connection);
     CustomMessage message = new CustomMessage();
     message.setCustomField("Blah!");
-    Message recreated = messageBroker.deserialize(messageBroker.serialize(message));
+    Message recreated = messageBroker.deserialize(new String(messageBroker.serialize(message), StandardCharsets.UTF_8));
     assertThat(message.getCustomField()).isEqualTo(((CustomMessage) recreated).getCustomField());
   }
 

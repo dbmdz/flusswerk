@@ -27,7 +27,7 @@ public class Application {
     Flow<String, String> flow = new FlowBuilder<String, String>()
         .read("testQueue", Message::getType)
         .transform(new UppercaseTransformer(true))
-        .write("output", DefaultMessage::new)
+        .write("output", DefaultMessage::withType)
 
         .build();
 

@@ -1,7 +1,7 @@
 package de.digitalcollections.workflow.engine;
 
 import de.digitalcollections.workflow.engine.model.Message;
-import java.time.LocalDateTime;
+import de.digitalcollections.workflow.engine.model.Meta;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,93 +9,51 @@ import static java.util.Objects.requireNonNull;
 
 public class CustomMessage implements Message<Long> {
 
-  private Map<String, String> parameters;
+  private Meta meta;
 
-  private long deliveryTag;
-
-  private int retries;
-
-  private String body;
-
-  private String type;
-
-  private Long id;
+  private Map<String, String> data;
 
   private String customField;
 
+  private Long id;
+
   public CustomMessage() {
-    parameters = new HashMap<>();
+    data = new HashMap<>();
   }
 
 
   public CustomMessage(String type) {
-    this.type = type;
-    parameters = new HashMap<>();
+    this.meta = new Meta();
+    this.data = new HashMap<>();
+    this.put("type", type);
+  }
+
+
+  @Override
+  public Meta getMeta() {
+    return meta;
   }
 
   @Override
   public String getType() {
-    return type;
+    return data.get("type");
   }
 
-  @Override
-  public long getDeliveryTag() {
-    return deliveryTag;
+  public Map<String, String> getData() {
+    return data;
   }
 
-  @Override
-  public String getBody() {
-    return body;
+  public void setData(Map<String, String> data) {
+    this.data = requireNonNull(data);
   }
 
-  @Override
-  public void setDeliveryTag(long deliveryTag) {
-    this.deliveryTag = deliveryTag;
-  }
-
-  @Override
-  public LocalDateTime getTimestamp() {
-    return null;
-  }
-
-  @Override
-  public void setTimestamp(LocalDateTime timestamp) {
-
-  }
-
-  @Override
-  public void setBody(String body) {
-    this.body = body;
-  }
-
-  @Override
-  public int getRetries() {
-    return retries;
-  }
-
-  @Override
-  public void setRetries(int retries) {
-    this.retries = retries;
-  }
-
-  public Map<String, String> getParameters() {
-    return parameters;
-  }
-
-  public void setParameters(Map<String, String> parameters) {
-    this.parameters = requireNonNull(parameters);
-  }
-
-  public void put(String key, String value) {
-    parameters.put(key, value);
+  public CustomMessage put(String key, String value) {
+    data.put(key, value);
+    return this;
   }
 
   public String get(String key) {
-    return parameters.get(type);
-  }
-
-  public void setType(String type) {
-    this.type = type;
+    return data.get(key);
   }
 
   @Override
@@ -103,7 +61,6 @@ public class CustomMessage implements Message<Long> {
     return id;
   }
 
-  @Override
   public void setId(Long id) {
     this.id = id;
   }

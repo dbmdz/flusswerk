@@ -63,7 +63,7 @@ public class Engine {
           continue;
         }
 
-        LOGGER.debug("Checking for new message (available semaphores: {}), got {}", semaphore.availablePermits(), message.getBody());
+        LOGGER.debug("Checking for new message (available semaphores: {}), got {}", semaphore.availablePermits(), message.getMeta().getBody());
 
         executorService.execute(() -> {
           activeWorkers.incrementAndGet();
@@ -87,10 +87,10 @@ public class Engine {
       messageBroker.ack(message);
     } catch (RuntimeException | IOException e) {
       try {
-        LOGGER.error("Could not process message: {}", message.getBody());
+        LOGGER.error("Could not process message: {}", message.getMeta().getBody());
         messageBroker.reject(message);
       } catch (IOException e1) {
-        LOGGER.error("Could not reject message" + message.getBody(), e1);
+        LOGGER.error("Could not reject message" + message.getMeta().getBody(), e1);
       }
     }
   }
@@ -98,7 +98,7 @@ public class Engine {
   public void createTestMessages(int n) throws IOException {
     for (int i = 0; i < n; i++) {
       String message = String.format("Test message #%d of %d", i, n);
-      messageBroker.send(flow.getInputChannel(), new DefaultMessage(message));
+      messageBroker.send(flow.getInputChannel(), DefaultMessage.withType(message));
     }
   }
 

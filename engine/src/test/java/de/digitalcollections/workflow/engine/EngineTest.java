@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import static de.digitalcollections.workflow.engine.model.DefaultMessage.withType;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
@@ -32,7 +33,7 @@ class EngineTest {
   private Message[] moreMessages(int number) {
     Message[] messages = new Message[number];
     for (int i = 0; i < messages.length; i++) {
-      messages[i] = new DefaultMessage("White Room");
+      messages[i] =  DefaultMessage.withType("White Room");
     }
     return messages;
   }
@@ -41,7 +42,7 @@ class EngineTest {
   @Test
   public void engineShouldUseMaxNumberOfWorkers() throws IOException, InterruptedException {
     MessageBroker messageBroker = mock(MessageBroker.class);
-    when(messageBroker.receive(any())).thenReturn(new DefaultMessage("White Room"));
+    when(messageBroker.receive(any())).thenReturn(DefaultMessage.withType("White Room"));
 
     Semaphore semaphore = new Semaphore(1);
     semaphore.drainPermits();
@@ -57,7 +58,7 @@ class EngineTest {
           }
           return s;
         },
-        DefaultMessage::new
+        DefaultMessage::withType
     );
 
     Engine engine = new Engine(messageBroker, flow);
@@ -78,7 +79,7 @@ class EngineTest {
   @Test
   public void engineShouldSendMessageToOut() throws IOException, InterruptedException {
     MessageBroker messageBroker = mock(MessageBroker.class);
-    when(messageBroker.receive(any())).thenReturn(new DefaultMessage("White Room"));
+    when(messageBroker.receive(any())).thenReturn(withType("White Room"));
 
     AtomicInteger messagesSent = new AtomicInteger();
 
@@ -89,7 +90,7 @@ class EngineTest {
           messagesSent.incrementAndGet();
           return s;
         },
-        DefaultMessage::new
+        DefaultMessage::withType
     );
 
     Engine engine = new Engine(messageBroker, flow);

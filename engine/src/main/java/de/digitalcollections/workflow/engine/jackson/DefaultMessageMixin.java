@@ -15,4 +15,10 @@ public interface DefaultMessageMixin {
   @JsonIgnore
   int getBody();
 
+  @JsonIgnore
+  String getType();
+
+  @JsonIgnore
+  String getId();
+
 }

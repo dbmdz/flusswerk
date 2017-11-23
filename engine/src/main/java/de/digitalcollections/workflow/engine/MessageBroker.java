@@ -6,6 +6,7 @@ import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.GetResponse;
 import de.digitalcollections.workflow.engine.model.Message;
+import de.digitalcollections.workflow.engine.model.Meta;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -72,15 +73,16 @@ public class MessageBroker {
   public Message receive(String queueName) throws IOException {
     GetResponse response = channel.basicGet(queueName, NO_AUTO_ACK);
     if (response != null) {
-      Message message = deserialize(response.getBody());
-      message.setBody(new String(response.getBody(), StandardCharsets.UTF_8));
-      message.setDeliveryTag(response.getEnvelope().getDeliveryTag());
+      String body = new String(response.getBody(), StandardCharsets.UTF_8);
+      Message message = deserialize(body);
+      message.getMeta().setBody(body);
+      message.getMeta().setDeliveryTag(response.getEnvelope().getDeliveryTag());
       return message;
     }
     return null;
   }
 
-  Message deserialize(byte[] body) throws IOException {
+  Message deserialize(String body) throws IOException {
     return objectMapper.readValue(body, messageClass);
   }
 
@@ -116,13 +118,14 @@ public class MessageBroker {
   }
 
   public void ack(Message message) throws IOException {
-    channel.basicAck(message.getDeliveryTag(), SINGLE_MESSAGE);
+    channel.basicAck(message.getMeta().getDeliveryTag(), SINGLE_MESSAGE);
   }
 
   public void reject(Message message) throws IOException {
-    if (message.getRetries() < maxRetries) {
-      message.setRetries(message.getRetries() + 1);
-      channel.basicReject(message.getDeliveryTag(), DO_NOT_REQUEUE);
+    final Meta meta = message.getMeta();
+    if (meta.getRetries() < maxRetries) {
+      meta.setRetries(meta.getRetries() + 1);
+      channel.basicReject(meta.getDeliveryTag(), DO_NOT_REQUEUE);
     } else {
       ack(message);
       if (failedQueue != null) {

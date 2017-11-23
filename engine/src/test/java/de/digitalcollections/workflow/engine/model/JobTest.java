@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.from;
 
 class JobTest {
 
-  private static final Message SOME_MESSAGE = new DefaultMessage("Hey!");
+  private static final Message SOME_MESSAGE = DefaultMessage.withType("Hey!");
 
   private static final Function<Message, String> DUMMY_READER = Message::getType;
 
@@ -77,7 +77,7 @@ class JobTest {
   void readTransformWriteShouldPassValues() {
     String message = "Jolene, Jolene, Jolene, Jolene";
     Job<String, String> job = new Job<>(
-        new DefaultMessage(message),
+        DefaultMessage.withType(message),
         Message::getType,
         String::toUpperCase,
         DefaultMessage::new
@@ -90,7 +90,7 @@ class JobTest {
 
   @Test
   void getMessage() {
-    Message message = new DefaultMessage("Wuthering Heights");
+    Message message = DefaultMessage.withType("Wuthering Heights");
     Job<String, String> job = new Job<>(
         message,
         DUMMY_READER,
