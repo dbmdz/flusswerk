@@ -6,7 +6,11 @@ import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+/**
+ * Recipe for the data processing. Every message will be processed by the reader, then the transformer and finally the writer. The transformer can be omitted if <code>R</code> and <code>W</code> are the same.
+ * @param <R>
+ * @param <W>
+ */
 public class Flow<R, W> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Flow.class);

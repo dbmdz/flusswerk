@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +46,7 @@ public class MessageBroker {
 
   private Class<? extends Message> messageClass;
 
-  MessageBroker(MessageBrokerConfig config, MessageBrokerConnection connection) throws IOException, TimeoutException {
+  MessageBroker(MessageBrokerConfig config, MessageBrokerConnection connection) throws IOException {
     channel = connection.getChannel();
     objectMapper = config.getObjectMapper();
     messageClass = config.getMessageClass();

@@ -6,7 +6,7 @@ import com.rabbitmq.client.ConnectionFactory;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-public class MessageBrokerConnection {
+class MessageBrokerConnection {
 
   private final Connection connection;
 

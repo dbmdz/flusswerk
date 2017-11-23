@@ -5,6 +5,12 @@ import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Builder to create the {@link Flow} to process the data using an {@link Engine}.
+ *
+ * @param <R> The data type produced by the reader. Input data type of the transformer.
+ * @param <W> The data type consumed by the writer. Output data type of the transformer.
+ */
 public class FlowBuilder<R, W> {
 
   private String inputChannel;
@@ -22,8 +28,15 @@ public class FlowBuilder<R, W> {
     return (W) value;
   }
 
+  /**
+   * Sets input queue and reader for this flow.
+   *
+   * @param routingKey The input queue.
+   * @param reader The reader to process incoming messages.
+   * @return This {@link FlowBuilder} instance for further configuration or creation of the {@link Flow}.
+   */
   public FlowBuilder<R, W> read(String routingKey, Function<Message, R> reader) {
-    if (routingKey  == null || routingKey.isEmpty()) {
+    if (routingKey == null || routingKey.isEmpty()) {
       throw new IllegalArgumentException("The routingKey cannot be null or empty.");
     }
     if (reader == null) {
@@ -34,6 +47,12 @@ public class FlowBuilder<R, W> {
     return this;
   }
 
+  /**
+   * Sets the transformer for this flow.
+   *
+   * @param transformer The transformer to process data produced by the reader, sending it further to the writer.
+   * @return This {@link FlowBuilder} instance for further configuration of the {@link Flow}.
+   */
   public FlowBuilder<R, W> transform(Function<R, W> transformer) {
     if (reader == null) {
       throw new IllegalStateException("You can't transform anything without reading it first. Please add a reader before adding and transformer.");
@@ -45,6 +64,13 @@ public class FlowBuilder<R, W> {
     return this;
   }
 
+  /**
+   * Sets output queue and writer for this flow.
+   *
+   * @param routingKey The output queue.
+   * @param writer The writer to process incoming messages.
+   * @return This {@link FlowBuilder} instance for further configuration or creation of the {@link Flow}.
+   */
   public FlowBuilder<R, W> write(String routingKey, Function<W, Message> writer) {
     if (reader != null && transformer == null) {
       this.transformer = this::cast;
@@ -54,6 +80,11 @@ public class FlowBuilder<R, W> {
     return this;
   }
 
+  /**
+   * Finally builds the flow.
+   *
+   * @return A new {@link Flow} as configured before.
+   */
   public Flow<R, W> build() {
     return new Flow<>(inputChannel, outputChannel, reader, transformer, writer);
   }

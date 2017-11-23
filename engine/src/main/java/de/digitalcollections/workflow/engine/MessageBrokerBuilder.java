@@ -7,6 +7,9 @@ import java.util.concurrent.TimeoutException;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Builder to create an instance of the {@link MessageBroker} which manages the connection to RabbitMQ and all related configuration and setups like creating queues and exchanges.
+ */
 public class MessageBrokerBuilder {
 
   private final MessageBrokerConfig config;
