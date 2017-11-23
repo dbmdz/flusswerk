@@ -25,10 +25,9 @@ public class Application {
         .build();
 
     Flow<String, String> flow = new FlowBuilder<String, String>()
-        .read("testQueue", Message::getType)
+        .read("someInputQueue", Message::getType)
         .transform(new UppercaseTransformer(true))
-        .write("output", DefaultMessage::withType)
-
+        .write("someOutputQueue", DefaultMessage::withType)
         .build();
 
     Engine engine = new Engine(messageBroker, flow);
