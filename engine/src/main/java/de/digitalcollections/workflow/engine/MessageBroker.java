@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.GetResponse;
+import de.digitalcollections.workflow.engine.jackson.MetaMixin;
 import de.digitalcollections.workflow.engine.model.Message;
 import de.digitalcollections.workflow.engine.model.Meta;
 import java.io.IOException;
@@ -53,6 +54,7 @@ public class MessageBroker {
     if (objectMapper.findMixInClassFor(Message.class) == null) {
       objectMapper.addMixIn(messageClass, config.getMessageMixin());
     }
+    objectMapper.addMixIn(Meta.class, MetaMixin.class);
     objectMapper.registerModule(new JavaTimeModule());
     deadLetterWait = config.getDeadLetterWait();
     maxRetries = config.getMaxRetries();
