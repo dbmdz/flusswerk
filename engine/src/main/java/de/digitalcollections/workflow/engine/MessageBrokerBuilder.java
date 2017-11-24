@@ -18,16 +18,6 @@ public class MessageBrokerBuilder {
 
   public MessageBrokerBuilder() {
     config = new MessageBrokerConfig();
-    config.setHostName("localhost");
-    config.setPassword("guest");
-    config.setPort(5672);
-    config.setUsername("guest");
-    config.setVirtualHost("/");
-    config.setObjectMapper(new ObjectMapper());
-    config.setMaxRetries(5);
-    config.setDeadLetterWait(30 * 1000);
-    config.setExchange("workflow");
-    config.setDeadLetterExchange("dlx.workflow");
   }
 
   /**

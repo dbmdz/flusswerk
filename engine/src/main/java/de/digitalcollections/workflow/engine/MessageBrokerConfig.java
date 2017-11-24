@@ -32,12 +32,19 @@ class MessageBrokerConfig {
   private String deadLetterExchange;
 
   public MessageBrokerConfig() {
-    maxRetries = 5;
-    objectMapper = new ObjectMapper();
-    messageClass = DefaultMessage.class;
-    messageMixin = DefaultMessageMixin.class;
-    exchange = "workflow";
-    deadLetterExchange = "dlx.workflow";
+    setHostName("localhost");
+    setPassword("guest");
+    setPort(5672);
+    setUsername("guest");
+    setVirtualHost("/");
+    setObjectMapper(new ObjectMapper());
+    setMaxRetries(5);
+    setDeadLetterWait(30 * 1000);
+    setExchange("workflow");
+    setDeadLetterExchange("dlx.workflow");
+    setObjectMapper(new ObjectMapper());
+    setMessageClass(DefaultMessage.class);
+    setMessageMixin(DefaultMessageMixin.class);
   }
 
   public String getUsername() {
