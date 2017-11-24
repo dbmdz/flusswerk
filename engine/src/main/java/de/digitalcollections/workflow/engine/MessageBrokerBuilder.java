@@ -1,9 +1,11 @@
 package de.digitalcollections.workflow.engine;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.digitalcollections.workflow.engine.exceptions.WorkflowSetupException;
 import de.digitalcollections.workflow.engine.model.Message;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
 
@@ -24,6 +26,8 @@ public class MessageBrokerBuilder {
     config.setObjectMapper(new ObjectMapper());
     config.setMaxRetries(5);
     config.setDeadLetterWait(30 * 1000);
+    config.setExchange("workflow");
+    config.setDeadLetterExchange("dlx.workflow");
   }
 
   /**
@@ -151,11 +155,25 @@ public class MessageBrokerBuilder {
    * Finally builds the {@link MessageBroker} as configured, up and running and connected it to RabbitMQ.
    *
    * @return A new MessageBroker
-   * @throws IOException If connection to RabbitMQ fails.
-   * @throws TimeoutException If connection to RabbitMQ fails.
+   * @throws WorkflowSetupException If connection to RabbitMQ fails.
    */
-  public MessageBroker build() throws IOException, TimeoutException {
-    MessageBrokerConnection connection = new MessageBrokerConnection(config);
+  public MessageBroker build() throws WorkflowSetupException {
+    try {
+      return build(c -> {
+        try {
+          return new MessageBrokerConnection(c);
+        } catch (IOException | TimeoutException e) {
+          throw new RuntimeException(e);
+        }
+      });
+    } catch (IOException | RuntimeException e) {
+      throw new WorkflowSetupException(e);
+    }
+  }
+
+  MessageBroker build(Function<MessageBrokerConfig, MessageBrokerConnection> connectionConstructor) throws IOException {
+    MessageBrokerConnection connection = connectionConstructor.apply(config);
     return new MessageBroker(config, connection);
   }
+
 }

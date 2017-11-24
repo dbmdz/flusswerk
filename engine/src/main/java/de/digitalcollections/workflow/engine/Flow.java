@@ -59,4 +59,7 @@ public class Flow<R, W> {
     return outputChannel != null;
   }
 
+  void setTransformer(Function<R, W> transformer) {
+    this.transformer = transformer;
+  }
 }

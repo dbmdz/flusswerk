@@ -1,14 +1,14 @@
 package de.digitalcollections.workflow.examples;
 
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
 import de.digitalcollections.workflow.engine.Engine;
 import de.digitalcollections.workflow.engine.Flow;
 import de.digitalcollections.workflow.engine.FlowBuilder;
 import de.digitalcollections.workflow.engine.MessageBroker;
 import de.digitalcollections.workflow.engine.MessageBrokerBuilder;
+import de.digitalcollections.workflow.engine.exceptions.WorkflowSetupException;
 import de.digitalcollections.workflow.engine.model.DefaultMessage;
 import de.digitalcollections.workflow.engine.model.Message;
+import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +16,7 @@ public class Application {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
-  public void run(String... args) throws IOException, TimeoutException {
+  public void run(String... args) throws WorkflowSetupException, IOException {
     MessageBroker messageBroker = new MessageBrokerBuilder()
         .hostName("localhost")
         .username("guest")
@@ -35,7 +35,7 @@ public class Application {
     engine.start();
   }
 
-  public static void main(String[] args) throws IOException, TimeoutException {
+  public static void main(String[] args) throws IOException, WorkflowSetupException {
     Application application = new Application();
     application.run(args);
   }

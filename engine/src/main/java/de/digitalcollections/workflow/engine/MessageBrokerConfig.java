@@ -37,7 +37,7 @@ class MessageBrokerConfig {
     messageClass = DefaultMessage.class;
     messageMixin = DefaultMessageMixin.class;
     exchange = "workflow";
-    exchange = "dlx.workflow";
+    deadLetterExchange = "dlx.workflow";
   }
 
   public String getUsername() {

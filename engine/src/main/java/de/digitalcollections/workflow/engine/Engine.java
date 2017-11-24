@@ -78,7 +78,7 @@ public class Engine {
     }
   }
 
-  private void process(Message message) {
+  void process(Message message) {
     try {
       Message result = flow.process(message);
       if (flow.hasOutputChannel()) {
@@ -87,7 +87,7 @@ public class Engine {
       messageBroker.ack(message);
     } catch (RuntimeException | IOException e) {
       try {
-        LOGGER.error("Could not process message: {}", message.getMeta().getBody());
+        LOGGER.info("Reject message because of processing error: {}", message.getMeta().getBody());
         messageBroker.reject(message);
       } catch (IOException e1) {
         LOGGER.error("Could not reject message" + message.getMeta().getBody(), e1);

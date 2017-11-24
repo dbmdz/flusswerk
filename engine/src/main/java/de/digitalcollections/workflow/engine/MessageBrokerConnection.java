@@ -13,7 +13,10 @@ class MessageBrokerConnection {
   private final Channel channel;
 
   MessageBrokerConnection(MessageBrokerConfig config) throws IOException, TimeoutException {
-    ConnectionFactory factory = new ConnectionFactory();
+    this(config, new ConnectionFactory());
+  }
+
+  MessageBrokerConnection(MessageBrokerConfig config, ConnectionFactory factory) throws IOException, TimeoutException {
     factory.setUsername(config.getUsername());
     factory.setPassword(config.getPassword());
     factory.setVirtualHost(config.getVirtualHost());

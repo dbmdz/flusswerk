@@ -139,4 +139,12 @@ public class MessageBroker {
     channel.exchangeDeclare(exchange, DIRECT, DURABLE);
     channel.exchangeDeclare(deadLetterExchange, DIRECT, DURABLE);
   }
+
+  public int getDeadLetterWait() {
+    return deadLetterWait;
+  }
+
+  public int getMaxRetries() {
+    return maxRetries;
+  }
 }

@@ -8,15 +8,20 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import static de.digitalcollections.workflow.engine.model.DefaultMessage.withType;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,6 +34,8 @@ class EngineTest {
   private static final String EXCHANGE = "exchange";
 
   private static final String DLX = "dlx.exchange";
+  private MessageBroker messageBroker;
+  private Flow<String, String> flowWithoutProblems;
 
   private Message[] moreMessages(int number) {
     Message[] messages = new Message[number];
@@ -38,10 +45,19 @@ class EngineTest {
     return messages;
   }
 
+  @BeforeEach
+  void setUp() {
+    messageBroker = mock(MessageBroker.class);
+    flowWithoutProblems = new FlowBuilder<String, String>()
+        .read(IN, READ_SOME_STRING)
+        .transform(Function.identity())
+        .write(OUT, WRITE_SOME_STRING)
+        .build();
+  }
+
   @Disabled("Test does not work in Travis CI")
   @Test
   public void engineShouldUseMaxNumberOfWorkers() throws IOException, InterruptedException {
-    MessageBroker messageBroker = mock(MessageBroker.class);
     when(messageBroker.receive(any())).thenReturn(DefaultMessage.withType("White Room"));
 
     Semaphore semaphore = new Semaphore(1);
@@ -78,7 +94,6 @@ class EngineTest {
   @Disabled("Test results are sometimes wrong")
   @Test
   public void engineShouldSendMessageToOut() throws IOException, InterruptedException {
-    MessageBroker messageBroker = mock(MessageBroker.class);
     when(messageBroker.receive(any())).thenReturn(withType("White Room"));
 
     AtomicInteger messagesSent = new AtomicInteger();
@@ -92,6 +107,8 @@ class EngineTest {
         },
         DefaultMessage::withType
     );
+
+
 
     Engine engine = new Engine(messageBroker, flow);
     ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -112,5 +129,46 @@ class EngineTest {
     System.out.println(messagesSent.get());
   }
 
+  private final Function<Message, String> READ_SOME_STRING = Message::getType;
+
+  private final Function<String, Message> WRITE_SOME_STRING = DefaultMessage::withType;
+
+  @Test
+  @DisplayName("Engine should reject a message failing processing")
+  void processShouldRejectMessageOnFailure() throws IOException {
+    Flow<String, String> flow = new FlowBuilder<String, String>()
+        .read(IN, READ_SOME_STRING)
+        .transform(s -> { throw new RuntimeException("Aaaaaaah!"); })
+        .write(OUT, WRITE_SOME_STRING)
+        .build();
+
+    Engine engine = new Engine(messageBroker, flow);
+    Message message = new DefaultMessage();
+    engine.process(message);
+
+    verify(messageBroker).reject(message);
+    verify(messageBroker, never()).ack(message);
+  }
+
+  @Test
+  @DisplayName("Engine should accept a message processed without failure")
+  void processShouldAcceptMessageWithoutFailure() throws IOException {
+    Engine engine = new Engine(messageBroker, flowWithoutProblems);
+    Message message = new DefaultMessage();
+    engine.process(message);
+
+    verify(messageBroker).ack(message);
+    verify(messageBroker, never()).reject(message);
+  }
+
+
+  @Test
+  @DisplayName("Engine should send a message")
+  void processShouldSendMessage() throws IOException {
+    Engine engine = new Engine(messageBroker, flowWithoutProblems);
+    engine.process(new DefaultMessage());
+
+    verify(messageBroker).send(eq(OUT), any(Message.class));
+  }
 
 }
