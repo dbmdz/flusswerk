@@ -1,6 +1,9 @@
 language: java
 jdk:
+- openjdk8
+- openjdk9
 - oraclejdk8
+- oraclejdk9
 
 before_script:
 - if [ ! -z "$TRAVIS_TAG" ]; then mvn versions:set -DnewVersion=$TRAVIS_TAG; fi
