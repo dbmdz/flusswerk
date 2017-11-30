@@ -32,6 +32,7 @@ class MessageBrokerTest {
 
   @BeforeEach
   void setUp() throws IOException, TimeoutException {
+    config.setReadFrom("some.input.queue");
     connection = mock(MessageBrokerConnection.class);
     channel = mock(Channel.class);
     when(connection.getChannel()).thenReturn(channel);
@@ -63,18 +64,18 @@ class MessageBrokerTest {
 
   @Test
   void rejectShouldRouteToFailedQueueIfMessageIsRejectedTooOften() throws IOException {
-    messageBroker.provideInputQueue("somequeue");
+    messageBroker.provideInputQueue();
     int numberOfRejections = config.getMaxRetries() + 1;
     for (int i = 0; i < numberOfRejections; i++) {
       messageBroker.reject(message);
     }
-    verify(channel).basicPublish(anyString(), eq("somequeue.failed"), any(), any());
+    verify(channel).basicPublish(anyString(), eq("some.input.queue.failed"), any(), any());
   }
 
   @Test
   @Disabled("Need different test logic")
   void rejectShouldRemoveOriginalMessageIfMessageIsRejectedTooOften() throws IOException {
-    messageBroker.provideInputQueue("somequeue");
+    messageBroker.provideInputQueue();
     int numberOfRejections = config.getMaxRetries() + 1;
     for (int i = 0; i < numberOfRejections; i++) {
       messageBroker.reject(message);

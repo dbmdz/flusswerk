@@ -21,12 +21,6 @@ public class Stepdefs implements En {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Stepdefs.class);
 
-  private static final String IN = "bdd.in";
-
-  private static final String OUT = "bdd.out";
-
-  private static final String FAILED = "bdd.in.failed";
-
   private Orchestration orchestration = Orchestration.getInstance();
 
   private MessageBroker messageBroker;
@@ -41,6 +35,8 @@ public class Stepdefs implements En {
       messageBroker = orchestration.createMessageBroker(
           new MessageBrokerBuilder()
               .deadLetterWait(20)
+              .readFrom("bdd.in")
+              .writeTo("bdd.out")
       );
       messagesToSend = Collections.singletonList(DefaultMessage.withType("happy message"));
       queueToSendTo = queue;
@@ -48,11 +44,11 @@ public class Stepdefs implements En {
 
     When("the processing always fails", () -> {
       Flow<String, String> flow = new FlowBuilder<String, String>()
-          .read(IN, Message::getType)
+          .read(Message::getType)
           .transform(s -> {
             throw new RuntimeException("Fail!");
           })
-          .write(OUT, DefaultMessage::withType)
+          .write(DefaultMessage::withType)
           .build();
 
       // Preparation finished, start everything
@@ -61,15 +57,14 @@ public class Stepdefs implements En {
 
     When("^the processing always works$", () -> {
       Flow<String, String> flow = new FlowBuilder<String, String>()
-          .read(IN, Message::getType)
+          .read(Message::getType)
           .transform(s -> s)
-          .write(OUT, s -> DefaultMessage.withType(s).put("blah", "blubb"))
+          .write(s -> DefaultMessage.withType(s).put("blah", "blubb"))
           .build();
 
       // Preparation finished, start everything
       start(flow);
     });
-
 
     Then("the message in queue ([\\w\\.]+) has (\\d+) retries", (String queue, Integer retries) -> {
       Message<?> message = waitForMessageFrom(queue);

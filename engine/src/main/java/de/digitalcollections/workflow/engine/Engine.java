@@ -42,9 +42,6 @@ public class Engine {
     this.executorService = Executors.newFixedThreadPool(concurrentWorkers);
     this.semaphore = new Semaphore(concurrentWorkers);
     this.activeWorkers = new AtomicInteger();
-
-    messageBroker.provideInputQueue(flow.getInputChannel());
-    messageBroker.provideOutputQueue(flow.getOutputChannel());
   }
 
   public void start() {
@@ -54,7 +51,7 @@ public class Engine {
       try {
         semaphore.acquire();
 
-        Message message = messageBroker.receive(flow.getInputChannel());
+        Message message = messageBroker.receive();
 
         if (message == null) {
           LOGGER.debug("Checking for new message (available semaphores: {}) - Queue is empty", semaphore.availablePermits());
@@ -81,8 +78,8 @@ public class Engine {
   void process(Message message) {
     try {
       Message result = flow.process(message);
-      if (flow.hasOutputChannel()) {
-        messageBroker.send(flow.getOutputChannel(), result);
+      if (flow.writesData()) {
+        messageBroker.send(result);
       }
       messageBroker.ack(message);
     } catch (RuntimeException | IOException e) {
@@ -98,7 +95,7 @@ public class Engine {
   public void createTestMessages(int n) throws IOException {
     for (int i = 0; i < n; i++) {
       String message = String.format("Test message #%d of %d", i, n);
-      messageBroker.send(flow.getInputChannel(), DefaultMessage.withType(message));
+      messageBroker.send(messageBroker.getRoutingConfig().getReadFrom(), DefaultMessage.withType(message));
     }
   }
 

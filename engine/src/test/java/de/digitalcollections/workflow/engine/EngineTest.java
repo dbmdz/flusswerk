@@ -18,7 +18,6 @@ import org.mockito.ArgumentCaptor;
 import static de.digitalcollections.workflow.engine.model.DefaultMessage.withType;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -49,9 +48,9 @@ class EngineTest {
   void setUp() {
     messageBroker = mock(MessageBroker.class);
     flowWithoutProblems = new FlowBuilder<String, String>()
-        .read(IN, READ_SOME_STRING)
+        .read(READ_SOME_STRING)
         .transform(Function.identity())
-        .write(OUT, WRITE_SOME_STRING)
+        .write(WRITE_SOME_STRING)
         .build();
   }
 
@@ -64,7 +63,6 @@ class EngineTest {
     semaphore.drainPermits();
 
     Flow<String, String> flow = new Flow<>(
-        IN, OUT,
         Message::getType,
         s -> {
           try {
@@ -99,7 +97,6 @@ class EngineTest {
     AtomicInteger messagesSent = new AtomicInteger();
 
     Flow<String, String> flow = new Flow<>(
-        IN, OUT,
         Message::getType,
         s -> {
           messagesSent.incrementAndGet();
@@ -137,9 +134,9 @@ class EngineTest {
   @DisplayName("Engine should reject a message failing processing")
   void processShouldRejectMessageOnFailure() throws IOException {
     Flow<String, String> flow = new FlowBuilder<String, String>()
-        .read(IN, READ_SOME_STRING)
+        .read(READ_SOME_STRING)
         .transform(s -> { throw new RuntimeException("Aaaaaaah!"); })
-        .write(OUT, WRITE_SOME_STRING)
+        .write(WRITE_SOME_STRING)
         .build();
 
     Engine engine = new Engine(messageBroker, flow);
@@ -168,7 +165,7 @@ class EngineTest {
     Engine engine = new Engine(messageBroker, flowWithoutProblems);
     engine.process(new DefaultMessage());
 
-    verify(messageBroker).send(eq(OUT), any(Message.class));
+    verify(messageBroker).send(any(Message.class));
   }
 
 }

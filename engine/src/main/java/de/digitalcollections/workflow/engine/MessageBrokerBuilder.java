@@ -166,4 +166,17 @@ public class MessageBrokerBuilder {
     return new MessageBroker(config, connection);
   }
 
+  public MessageBrokerBuilder readFrom(String inputQueue) {
+    if (inputQueue == null || inputQueue.isEmpty()) {
+      throw new IllegalArgumentException("The input queue cannot be null or empty.");
+    }
+    config.setReadFrom(inputQueue);
+    return this;
+  }
+
+  public MessageBrokerBuilder writeTo(String outputRoutingKey) {
+    config.setWriteTo(outputRoutingKey);
+    return this;
+  }
+
 }

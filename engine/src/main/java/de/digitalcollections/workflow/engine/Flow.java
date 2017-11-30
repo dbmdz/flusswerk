@@ -15,19 +15,13 @@ public class Flow<R, W> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Flow.class);
 
-  private String inputChannel;
-
-  private String outputChannel;
-
   private Function<Message, R> reader;
 
   private Function<R, W> transformer;
 
   private Function<W, Message> writer;
 
-  protected Flow(String inputChannel, String outputChannel, Function<Message, R> reader, Function<R, W> transformer, Function<W, Message> writer) {
-    this.inputChannel = inputChannel;
-    this.outputChannel = outputChannel;
+  protected Flow(Function<Message, R> reader, Function<R, W> transformer, Function<W, Message> writer) {
     this.reader = reader;
     this.transformer = transformer;
     this.writer = writer;
@@ -47,19 +41,12 @@ public class Flow<R, W> {
     return job.getResult();
   }
 
-  public String getInputChannel() {
-    return inputChannel;
-  }
-
-  public String getOutputChannel() {
-    return outputChannel;
-  }
-
-  public boolean hasOutputChannel() {
-    return outputChannel != null;
-  }
-
   void setTransformer(Function<R, W> transformer) {
     this.transformer = transformer;
   }
+
+  boolean writesData() {
+    return writer != null;
+  }
+
 }

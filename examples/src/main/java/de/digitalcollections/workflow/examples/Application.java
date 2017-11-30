@@ -22,12 +22,14 @@ public class Application {
         .username("guest")
         .password("guest")
         .exchanges("testExchange", "testDlx")
+        .readFrom("someInputQueue")
+        .writeTo("someOutputQueue")
         .build();
 
     Flow<String, String> flow = new FlowBuilder<String, String>()
-        .read("someInputQueue", Message::getType)
+        .read(Message::getType)
         .transform(new UppercaseTransformer(true))
-        .write("someOutputQueue", DefaultMessage::withType)
+        .write(DefaultMessage::withType)
         .build();
 
     Engine engine = new Engine(messageBroker, flow);

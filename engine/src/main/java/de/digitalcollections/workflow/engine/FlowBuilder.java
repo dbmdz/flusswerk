@@ -13,13 +13,9 @@ import static java.util.Objects.requireNonNull;
  */
 public class FlowBuilder<R, W> {
 
-  private String inputChannel;
-
   private Function<Message, R> reader;
 
   private Function<R, W> transformer;
-
-  private String outputChannel;
 
   private Function<W, Message> writer;
 
@@ -31,18 +27,13 @@ public class FlowBuilder<R, W> {
   /**
    * Sets input queue and reader for this flow.
    *
-   * @param routingKey The input queue.
    * @param reader The reader to process incoming messages.
    * @return This {@link FlowBuilder} instance for further configuration or creation of the {@link Flow}.
    */
-  public FlowBuilder<R, W> read(String routingKey, Function<Message, R> reader) {
-    if (routingKey == null || routingKey.isEmpty()) {
-      throw new IllegalArgumentException("The routingKey cannot be null or empty.");
-    }
+  public FlowBuilder<R, W> read(Function<Message, R> reader) {
     if (reader == null) {
       throw new IllegalArgumentException("The reader cannot be null.");
     }
-    this.inputChannel = routingKey;
     this.reader = reader;
     return this;
   }
@@ -67,16 +58,14 @@ public class FlowBuilder<R, W> {
   /**
    * Sets output queue and writer for this flow.
    *
-   * @param routingKey The output queue.
    * @param writer The writer to process incoming messages.
    * @return This {@link FlowBuilder} instance for further configuration or creation of the {@link Flow}.
    */
-  public FlowBuilder<R, W> write(String routingKey, Function<W, Message> writer) {
+  public FlowBuilder<R, W> write(Function<W, Message> writer) {
     if (reader != null && transformer == null) {
       this.transformer = this::cast;
     }
     this.writer = requireNonNull(writer);
-    this.outputChannel = routingKey;
     return this;
   }
 
@@ -86,7 +75,7 @@ public class FlowBuilder<R, W> {
    * @return A new {@link Flow} as configured before.
    */
   public Flow<R, W> build() {
-    return new Flow<>(inputChannel, outputChannel, reader, transformer, writer);
+    return new Flow<>(reader, transformer, writer);
   }
 
 }

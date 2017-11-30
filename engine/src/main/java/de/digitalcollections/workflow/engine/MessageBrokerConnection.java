@@ -20,7 +20,7 @@ class MessageBrokerConnection {
     factory.setUsername(config.getUsername());
     factory.setPassword(config.getPassword());
     factory.setVirtualHost(config.getVirtualHost());
-    factory.setHost(config.getHost());
+    factory.setHost(config.getHostName());
     factory.setPort(config.getPort());
     this.connection = factory.newConnection();
     this.channel = connection.createChannel();

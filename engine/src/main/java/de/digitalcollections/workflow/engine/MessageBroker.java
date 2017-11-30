@@ -17,8 +17,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static java.util.Objects.requireNonNull;
-
 public class MessageBroker {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MessageBroker.class);
@@ -37,17 +35,11 @@ public class MessageBroker {
 
   private final int deadLetterWait;
 
-  private String deadLetterExchange;
-
-  private String exchange;
-
-  private String failedQueue;
-
   private int maxRetries;
 
   private Class<? extends Message> messageClass;
 
-  private String queue;
+  private RoutingConfig routingConfig;
 
   MessageBroker(MessageBrokerConfig config, MessageBrokerConnection connection) throws IOException {
     channel = connection.getChannel();
@@ -60,9 +52,13 @@ public class MessageBroker {
     objectMapper.registerModule(new JavaTimeModule());
     deadLetterWait = config.getDeadLetterWait();
     maxRetries = config.getMaxRetries();
-    exchange = config.getExchange();
-    deadLetterExchange = config.getDeadLetterExchange();
-    provideExchanges(exchange, deadLetterExchange);
+
+    this.routingConfig = config.getRoutingConfig();
+    provideExchanges(routingConfig.getExchange(), routingConfig.getDeadLetterExchange());
+    provideInputQueue();
+    if (routingConfig.hasWriteTo()) {
+      provideOutputQueue();
+    }
   }
 
   private void send(String exchange, String routingKey, Message message) throws IOException {
@@ -74,8 +70,12 @@ public class MessageBroker {
     channel.basicPublish(exchange, routingKey, properties, data);
   }
 
+  public void send(Message message) throws IOException {
+    send(routingConfig.getExchange(), routingConfig.getWriteTo(), message);
+  }
+
   public void send(String routingKey, Message message) throws IOException {
-    send(exchange, routingKey, message);
+    send(routingConfig.getExchange(), routingKey, message);
   }
 
   public void send(String routingKey, Collection<Message> messages) throws IOException {
@@ -85,7 +85,7 @@ public class MessageBroker {
   }
 
   public void sendToDlx(String routingKey, Message message) throws IOException {
-    send(deadLetterExchange, routingKey, message);
+    send(routingConfig.getDeadLetterExchange(), routingKey, message);
   }
 
   public Message receive(String queueName) throws IOException {
@@ -100,6 +100,10 @@ public class MessageBroker {
     return null;
   }
 
+  public Message receive() throws IOException {
+    return receive(routingConfig.getReadFrom());
+  }
+
   Message deserialize(String body) throws IOException {
     return objectMapper.readValue(body, messageClass);
   }
@@ -108,32 +112,33 @@ public class MessageBroker {
     return objectMapper.writeValueAsBytes(message);
   }
 
-  public void provideInputQueue(String queue) throws IOException {
-    this.queue = requireNonNull(queue);
+  void provideInputQueue() throws IOException {
+    String exchange = routingConfig.getExchange();
+    String deadLetterExchange = routingConfig.getDeadLetterExchange();
+
     Map<String, Object> queueArgs = new HashMap<>();
-//    queueArgs.put("x-dead-letter-exchange", deadLetterExchange);
-    channel.queueDeclare(queue, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, queueArgs);
-    channel.queueBind(queue, exchange, queue);
+    String inputQueue = routingConfig.getReadFrom();
+    channel.queueDeclare(inputQueue, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, queueArgs);
+    channel.queueBind(inputQueue, exchange, inputQueue);
 
     Map<String, Object> dlxQueueArgs = new HashMap<>();
     dlxQueueArgs.put("x-message-ttl", deadLetterWait);
     dlxQueueArgs.put("x-dead-letter-exchange", exchange);
-    String dlxQueue = queue + ".retry";
+    String dlxQueue = routingConfig.getRetryQueue();
     channel.queueDeclare(dlxQueue, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, dlxQueueArgs);
-    channel.queueBind(dlxQueue, deadLetterExchange, queue);
+    channel.queueBind(dlxQueue, deadLetterExchange, inputQueue);
 
-    failedQueue = queue + ".failed";
+    String failedQueue = routingConfig.getFailedQueue();
     channel.queueDeclare(failedQueue, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, null);
-//    channel.queueBind(failedQueue, deadLetterExchange, queue);
     channel.queueBind(failedQueue, exchange, failedQueue);
   }
 
-  public void provideOutputQueue(String queue) throws IOException {
-    requireNonNull(queue);
+  private void provideOutputQueue() throws IOException {
+    String outputQueue = routingConfig.getWriteTo();
     Map<String, Object> queueArgs = new HashMap<>();
-    queueArgs.put("x-dead-letter-exchange", deadLetterExchange);
-    channel.queueDeclare(queue, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, queueArgs);
-    channel.queueBind(queue, exchange, queue);
+    queueArgs.put("x-dead-letter-exchange", routingConfig.getDeadLetterExchange());
+    channel.queueDeclare(outputQueue, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, queueArgs);
+    channel.queueBind(outputQueue, routingConfig.getExchange(), outputQueue);
   }
 
   public void ack(Message message) throws IOException {
@@ -146,11 +151,11 @@ public class MessageBroker {
     if (meta.getRetries() < maxRetries) {
       meta.setRetries(meta.getRetries() + 1);
       LOGGER.debug("Send message to DLX: " + message);
-      sendToDlx(queue, message);
+      sendToDlx(routingConfig.getReadFrom(), message);
     } else {
-      if (failedQueue != null) {
-        LOGGER.debug("Send message to failed queue: " + message);
-        send(failedQueue, message);
+      if (routingConfig.hasFailedQueue()) {
+        LOGGER.debug("Send message to failed inputQueue: " + message);
+        send(routingConfig.getFailedQueue(), message);
       }
     }
   }
@@ -166,5 +171,9 @@ public class MessageBroker {
 
   public int getMaxRetries() {
     return maxRetries;
+  }
+
+  public RoutingConfig getRoutingConfig() {
+    return routingConfig;
   }
 }

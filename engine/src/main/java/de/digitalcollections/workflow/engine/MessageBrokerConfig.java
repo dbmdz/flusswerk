@@ -27,11 +27,10 @@ class MessageBrokerConfig {
 
   private Class<?> messageMixin;
 
-  private String exchange;
-
-  private String deadLetterExchange;
+  private RoutingConfig routingConfig;
 
   public MessageBrokerConfig() {
+    this.routingConfig = new RoutingConfig();
     setHostName("localhost");
     setPassword("guest");
     setPort(5672);
@@ -71,7 +70,7 @@ class MessageBrokerConfig {
     this.virtualHost = virtualHost;
   }
 
-  public String getHost() {
+  public String getHostName() {
     return hostName;
   }
 
@@ -128,19 +127,22 @@ class MessageBrokerConfig {
   }
 
   public void setExchange(String exchange) {
-    this.exchange = exchange;
-  }
-
-  public String getExchange() {
-    return exchange;
+    routingConfig.setExchange(exchange);
   }
 
   public void setDeadLetterExchange(String deadLetterExchange) {
-    this.deadLetterExchange = deadLetterExchange;
+    routingConfig.setDeadLetterExchange(deadLetterExchange);
   }
 
-  public String getDeadLetterExchange() {
-    return deadLetterExchange;
+  public void setReadFrom(String readFrom) {
+    routingConfig.setReadFrom(readFrom);
   }
 
+  public void setWriteTo(String writeTo) {
+    routingConfig.setWriteTo(writeTo);
+  }
+
+  public RoutingConfig getRoutingConfig() {
+    return routingConfig;
+  }
 }
