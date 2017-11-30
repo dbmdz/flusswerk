@@ -9,6 +9,7 @@ before_script:
 
 script:
 - mvn clean install
+- mvn -B --projects bdd -Pbdd test
 
 after_success:
 - bash <(curl -s https://codecov.io/bash)

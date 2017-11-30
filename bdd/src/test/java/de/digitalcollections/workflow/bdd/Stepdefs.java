@@ -38,9 +38,10 @@ public class Stepdefs implements En {
 
   public Stepdefs() {
     Given("I have an message broker with default config and a message in ([\\w\\.]+)", (String queue) -> {
-      messageBroker = new MessageBrokerBuilder()
-          .deadLetterWait(20)
-          .build();
+      messageBroker = orchestration.createMessageBroker(
+          new MessageBrokerBuilder()
+              .deadLetterWait(20)
+      );
       messagesToSend = Collections.singletonList(DefaultMessage.withType("happy message"));
       queueToSendTo = queue;
     });
