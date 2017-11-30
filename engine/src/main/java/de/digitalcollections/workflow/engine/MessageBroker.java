@@ -55,7 +55,7 @@ public class MessageBroker {
 
     this.routingConfig = config.getRoutingConfig();
     provideExchanges(routingConfig.getExchange(), routingConfig.getDeadLetterExchange());
-    provideInputQueue();
+    provideInputQueues();
     if (routingConfig.hasWriteTo()) {
       provideOutputQueue();
     }
@@ -112,33 +112,45 @@ public class MessageBroker {
     return objectMapper.writeValueAsBytes(message);
   }
 
-  void provideInputQueue() throws IOException {
-    String exchange = routingConfig.getExchange();
-    String deadLetterExchange = routingConfig.getDeadLetterExchange();
-
-    Map<String, Object> queueArgs = new HashMap<>();
-    String inputQueue = routingConfig.getReadFrom();
-    channel.queueDeclare(inputQueue, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, queueArgs);
-    channel.queueBind(inputQueue, exchange, inputQueue);
+  void provideInputQueues() throws IOException {
+    declareQueue(
+        routingConfig.getReadFrom(),
+        routingConfig.getExchange(),
+        routingConfig.getReadFrom(),
+        null
+    );
 
     Map<String, Object> dlxQueueArgs = new HashMap<>();
     dlxQueueArgs.put("x-message-ttl", deadLetterWait);
-    dlxQueueArgs.put("x-dead-letter-exchange", exchange);
-    String dlxQueue = routingConfig.getRetryQueue();
-    channel.queueDeclare(dlxQueue, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, dlxQueueArgs);
-    channel.queueBind(dlxQueue, deadLetterExchange, inputQueue);
+    dlxQueueArgs.put("x-dead-letter-exchange", routingConfig.getExchange());
+    declareQueue(
+        routingConfig.getRetryQueue(),
+        routingConfig.getDeadLetterExchange(),
+        routingConfig.getReadFrom(),
+        dlxQueueArgs
+    );
 
-    String failedQueue = routingConfig.getFailedQueue();
-    channel.queueDeclare(failedQueue, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, null);
-    channel.queueBind(failedQueue, exchange, failedQueue);
+    declareQueue(routingConfig.getFailedQueue(),
+        routingConfig.getExchange(),
+        routingConfig.getFailedQueue(),
+        null
+    );
+  }
+
+  private void declareQueue(String name, String exchange, String routingKey, Map<String, Object> args) throws IOException {
+    channel.queueDeclare(name, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, args);
+    channel.queueBind(name, exchange, routingKey);
   }
 
   private void provideOutputQueue() throws IOException {
-    String outputQueue = routingConfig.getWriteTo();
-    Map<String, Object> queueArgs = new HashMap<>();
-    queueArgs.put("x-dead-letter-exchange", routingConfig.getDeadLetterExchange());
-    channel.queueDeclare(outputQueue, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, queueArgs);
-    channel.queueBind(outputQueue, routingConfig.getExchange(), outputQueue);
+    Map<String, Object> args = new HashMap<>();
+    args.put("x-dead-letter-exchange", routingConfig.getDeadLetterExchange());
+    declareQueue(
+        routingConfig.getWriteTo(),
+        routingConfig.getExchange(),
+        routingConfig.getWriteTo(),
+        args
+    );
   }
 
   public void ack(Message message) throws IOException {

@@ -64,7 +64,7 @@ class MessageBrokerTest {
 
   @Test
   void rejectShouldRouteToFailedQueueIfMessageIsRejectedTooOften() throws IOException {
-    messageBroker.provideInputQueue();
+    messageBroker.provideInputQueues();
     int numberOfRejections = config.getMaxRetries() + 1;
     for (int i = 0; i < numberOfRejections; i++) {
       messageBroker.reject(message);
@@ -75,7 +75,7 @@ class MessageBrokerTest {
   @Test
   @Disabled("Need different test logic")
   void rejectShouldRemoveOriginalMessageIfMessageIsRejectedTooOften() throws IOException {
-    messageBroker.provideInputQueue();
+    messageBroker.provideInputQueues();
     int numberOfRejections = config.getMaxRetries() + 1;
     for (int i = 0; i < numberOfRejections; i++) {
       messageBroker.reject(message);
