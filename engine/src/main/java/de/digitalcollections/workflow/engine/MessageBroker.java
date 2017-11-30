@@ -84,8 +84,9 @@ public class MessageBroker {
     }
   }
 
-  public void sendToDlx(String routingKey, Message message) throws IOException {
-    send(routingConfig.getDeadLetterExchange(), routingKey, message);
+  public void retry(Message message) throws IOException {
+    LOGGER.debug("Send message to failed queue: " + message);
+    send(routingConfig.getDeadLetterExchange(), routingConfig.getReadFrom(), message);
   }
 
   public Message receive(String queueName) throws IOException {
@@ -162,14 +163,18 @@ public class MessageBroker {
     ack(message);
     if (meta.getRetries() < maxRetries) {
       meta.setRetries(meta.getRetries() + 1);
-      LOGGER.debug("Send message to DLX: " + message);
-      sendToDlx(routingConfig.getReadFrom(), message);
-    } else {
-      if (routingConfig.hasFailedQueue()) {
-        LOGGER.debug("Send message to failed inputQueue: " + message);
-        send(routingConfig.getFailedQueue(), message);
-      }
+      retry(message);
+    } else if (routingConfig.hasFailedQueue()) {
+      fail(message);
     }
+  }
+
+  private void fail(Message message) throws IOException {
+    if (!routingConfig.hasFailedQueue()) {
+      return;
+    }
+    LOGGER.debug("Send message to failed queue: " + message);
+    send(routingConfig.getFailedQueue(), message);
   }
 
   public void provideExchanges(String exchange, String deadLetterExchange) throws IOException {
