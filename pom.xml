@@ -42,6 +42,7 @@
   </scm>
 
   <modules>
+    <module>bdd</module>
     <module>engine</module>
     <module>examples</module>
   </modules>

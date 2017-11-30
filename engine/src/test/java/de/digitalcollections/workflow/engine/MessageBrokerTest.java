@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -71,6 +72,7 @@ class MessageBrokerTest {
   }
 
   @Test
+  @Disabled("Need different test logic")
   void rejectShouldRemoveOriginalMessageIfMessageIsRejectedTooOften() throws IOException {
     messageBroker.provideInputQueue("somequeue");
     int numberOfRejections = config.getMaxRetries() + 1;

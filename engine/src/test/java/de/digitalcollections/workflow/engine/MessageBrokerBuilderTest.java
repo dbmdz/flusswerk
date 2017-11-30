@@ -1,5 +1,6 @@
 package de.digitalcollections.workflow.engine;
 
+import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -167,21 +168,21 @@ class MessageBrokerBuilderTest {
   }
 
   @Test
-  @DisplayName("Default exchanges should be workflow and workflow.dlx")
+  @DisplayName("Default exchanges should be workflow and workflow.retry")
   void defaultExchanges() throws IOException {
     messageBroker = new MessageBrokerBuilder().build(create_connection);
-    verify(channel).exchangeDeclare(eq("workflow"), any(String.class), anyBoolean());
-    verify(channel).exchangeDeclare(eq("workflow.dlx"), any(String.class), anyBoolean());
+    verify(channel).exchangeDeclare(eq("workflow"), any(BuiltinExchangeType.class), anyBoolean());
+    verify(channel).exchangeDeclare(eq("workflow.retry"), any(BuiltinExchangeType.class), anyBoolean());
   }
 
   @Test
-  @DisplayName("Default exchanges should be workflow and workflow.dlx")
+  @DisplayName("Default exchanges should be workflow and workflow.retry")
   void exchanges() throws IOException {
     messageBroker = new MessageBrokerBuilder()
-        .exchanges("another", "another.dlx")
+        .exchanges("another", "another.retry")
         .build(create_connection);
-    verify(channel).exchangeDeclare(eq("another"), any(String.class), anyBoolean());
-    verify(channel).exchangeDeclare(eq("another.dlx"), any(String.class), anyBoolean());
+    verify(channel).exchangeDeclare(eq("another"), any(BuiltinExchangeType.class), anyBoolean());
+    verify(channel).exchangeDeclare(eq("another.retry"), any(BuiltinExchangeType.class), anyBoolean());
   }
 
 }
