@@ -4,6 +4,11 @@ jdk:
 - oraclejdk8
 - oraclejdk9
 
+sudo: required
+
+services:
+  - docker
+
 before_script:
 - if [ ! -z "$TRAVIS_TAG" ]; then mvn versions:set -DnewVersion=$TRAVIS_TAG; fi
 
