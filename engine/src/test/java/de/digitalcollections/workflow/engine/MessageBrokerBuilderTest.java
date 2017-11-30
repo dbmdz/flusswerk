@@ -167,21 +167,21 @@ class MessageBrokerBuilderTest {
   }
 
   @Test
-  @DisplayName("Default exchanges should be workflow and dlx.workflow")
+  @DisplayName("Default exchanges should be workflow and workflow.dlx")
   void defaultExchanges() throws IOException {
     messageBroker = new MessageBrokerBuilder().build(create_connection);
     verify(channel).exchangeDeclare(eq("workflow"), any(String.class), anyBoolean());
-    verify(channel).exchangeDeclare(eq("dlx.workflow"), any(String.class), anyBoolean());
+    verify(channel).exchangeDeclare(eq("workflow.dlx"), any(String.class), anyBoolean());
   }
 
   @Test
-  @DisplayName("Default exchanges should be workflow and dlx.workflow")
+  @DisplayName("Default exchanges should be workflow and workflow.dlx")
   void exchanges() throws IOException {
     messageBroker = new MessageBrokerBuilder()
-        .exchanges("another", "dlx.another")
+        .exchanges("another", "another.dlx")
         .build(create_connection);
     verify(channel).exchangeDeclare(eq("another"), any(String.class), anyBoolean());
-    verify(channel).exchangeDeclare(eq("dlx.another"), any(String.class), anyBoolean());
+    verify(channel).exchangeDeclare(eq("another.dlx"), any(String.class), anyBoolean());
   }
 
 }

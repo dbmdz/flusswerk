@@ -70,6 +70,24 @@ class DefaultMessageMixinTest {
     assertThat(message.getType()).isEqualTo(restored.getType());
   }
 
+  @Test
+  @DisplayName("Should serialize Meta.retries")
+  void shouldSerializeRetries() throws JsonProcessingException {
+    DefaultMessage message = DefaultMessage.withType("something happened");
+    message.getMeta().setRetries(42);
+    assertThat(objectMapper.writeValueAsString(message)).contains("42");
+  }
+
+  @Test
+  @DisplayName("Should deserialize Meta.retries")
+  void shouldDeserializeRetries() throws IOException {
+    DefaultMessage message = DefaultMessage.withType("something happened");
+    message.getMeta().setRetries(42);
+    Message deserialized = objectMapper.readValue(objectMapper.writeValueAsString(message), DefaultMessage.class);
+    assertThat(deserialized.getMeta().getRetries()).isEqualTo(42);
+
+  }
+
 
 //  @Test
 //  @DisplayName("Serialization should preserve parameters")

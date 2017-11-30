@@ -87,7 +87,7 @@ public class Engine {
       messageBroker.ack(message);
     } catch (RuntimeException | IOException e) {
       try {
-        LOGGER.info("Reject message because of processing error: {}", message.getMeta().getBody());
+        LOGGER.debug("Reject message because of processing error: {}", message.getMeta().getBody(), e);
         messageBroker.reject(message);
       } catch (IOException e1) {
         LOGGER.error("Could not reject message" + message.getMeta().getBody(), e1);

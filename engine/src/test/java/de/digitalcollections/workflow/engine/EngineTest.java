@@ -33,7 +33,7 @@ class EngineTest {
 
   private static final String EXCHANGE = "exchange";
 
-  private static final String DLX = "dlx.exchange";
+  private static final String DLX = "exchange.retry";
   private MessageBroker messageBroker;
   private Flow<String, String> flowWithoutProblems;
 

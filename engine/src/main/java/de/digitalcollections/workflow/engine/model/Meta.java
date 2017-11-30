@@ -94,4 +94,8 @@ public class Meta {
     this.timestamp = timestamp;
   }
 
+  @Override
+  public String toString() {
+    return "Meta{deliveryTag=" + deliveryTag + ", retries=" + retries + "}";
+  }
 }

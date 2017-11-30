@@ -67,7 +67,7 @@ class MessageBrokerTest {
     for (int i = 0; i < numberOfRejections; i++) {
       messageBroker.reject(message);
     }
-    verify(channel).basicPublish(anyString(), eq("failed.somequeue"), any(), any());
+    verify(channel).basicPublish(anyString(), eq("somequeue.failed"), any(), any());
   }
 
   @Test

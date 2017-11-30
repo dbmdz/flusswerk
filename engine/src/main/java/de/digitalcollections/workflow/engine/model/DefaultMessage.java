@@ -80,4 +80,8 @@ public class DefaultMessage implements Message<String> {
     return this;
   }
 
+  @Override
+  public String toString() {
+    return "Message{meta=" + meta + ", data=" + data + "}";
+  }
 }

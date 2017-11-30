@@ -41,7 +41,7 @@ class MessageBrokerConfig {
     setMaxRetries(5);
     setDeadLetterWait(30 * 1000);
     setExchange("workflow");
-    setDeadLetterExchange("dlx.workflow");
+    setDeadLetterExchange("workflow.retry");
     setObjectMapper(new ObjectMapper());
     setMessageClass(DefaultMessage.class);
     setMessageMixin(DefaultMessageMixin.class);
