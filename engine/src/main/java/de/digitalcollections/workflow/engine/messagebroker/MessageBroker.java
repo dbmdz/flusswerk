@@ -22,12 +22,12 @@ public class MessageBroker {
 
   private final RabbitClient rabbitClient;
 
-  MessageBroker(MessageBrokerConfig config, MessageBrokerConnection connection, RoutingConfig routingConfig) throws IOException {
+  MessageBroker(MessageBrokerConfig config, RoutingConfig routingConfig, RabbitClient rabbitClient) throws IOException {
     deadLetterWait = config.getDeadLetterWait();
     maxRetries = config.getMaxRetries();
     this.routingConfig = routingConfig;
 
-    rabbitClient = new RabbitClient(config, connection);
+    this.rabbitClient = rabbitClient;
 
     provideExchanges();
     provideInputQueues();
@@ -124,7 +124,4 @@ public class MessageBroker {
     return maxRetries;
   }
 
-  public RoutingConfig getRoutingConfig() {
-    return routingConfig;
-  }
 }

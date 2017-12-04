@@ -179,7 +179,7 @@ public class MessageBrokerBuilder {
 
   MessageBroker build(Function<ConnectionConfig, MessageBrokerConnection> connectionConstructor) throws IOException {
     MessageBrokerConnection connection = connectionConstructor.apply(connectionConfig);
-    return new MessageBroker(config, connection, routingConfig);
+    return new MessageBroker(config, routingConfig, new RabbitClient(config, connection));
   }
 
   public MessageBrokerBuilder readFrom(String inputQueue) {

@@ -70,11 +70,6 @@ public class DefaultMessage implements Message<String> {
     return message;
   }
 
-  public DefaultMessage andType(String type) {
-    this.put("type", type);
-    return this;
-  }
-
   public DefaultMessage andId(String id) {
     this.put("id", id);
     return this;
