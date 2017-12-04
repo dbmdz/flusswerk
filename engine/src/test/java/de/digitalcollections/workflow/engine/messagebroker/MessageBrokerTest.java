@@ -1,10 +1,6 @@
 package de.digitalcollections.workflow.engine.messagebroker;
 
 import com.rabbitmq.client.Channel;
-import de.digitalcollections.workflow.engine.messagebroker.MessageBroker;
-import de.digitalcollections.workflow.engine.messagebroker.MessageBrokerConfig;
-import de.digitalcollections.workflow.engine.messagebroker.MessageBrokerConnection;
-import de.digitalcollections.workflow.engine.messagebroker.RoutingConfig;
 import de.digitalcollections.workflow.engine.model.DefaultMessage;
 import de.digitalcollections.workflow.engine.model.Message;
 import java.io.IOException;
@@ -37,6 +33,7 @@ class MessageBrokerTest {
   void setUp() throws IOException, TimeoutException {
     RoutingConfig routingConfig = new RoutingConfig();
     routingConfig.setReadFrom("some.input.queue");
+    routingConfig.setWriteTo("some.output.queue");
     connection = mock(MessageBrokerConnection.class);
     channel = mock(Channel.class);
     when(connection.getChannel()).thenReturn(channel);
@@ -68,7 +65,6 @@ class MessageBrokerTest {
 
   @Test
   void rejectShouldRouteToFailedQueueIfMessageIsRejectedTooOften() throws IOException {
-    messageBroker.provideInputQueues();
     int numberOfRejections = config.getMaxRetries() + 1;
     for (int i = 0; i < numberOfRejections; i++) {
       messageBroker.reject(message);
@@ -77,9 +73,14 @@ class MessageBrokerTest {
   }
 
   @Test
+  void sendShouldRouteMessageToOutputQueue() throws IOException {
+    messageBroker.send(DefaultMessage.withType("test"));
+    verify(channel).basicPublish(anyString(), eq("some.output.queue"), any(), any());
+  }
+
+  @Test
   @Disabled("Need different test logic")
   void rejectShouldRemoveOriginalMessageIfMessageIsRejectedTooOften() throws IOException {
-    messageBroker.provideInputQueues();
     int numberOfRejections = config.getMaxRetries() + 1;
     for (int i = 0; i < numberOfRejections; i++) {
       messageBroker.reject(message);

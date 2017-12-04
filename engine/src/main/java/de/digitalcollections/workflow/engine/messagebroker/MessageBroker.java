@@ -63,7 +63,7 @@ public class MessageBroker {
     return receive(routingConfig.getReadFrom());
   }
 
-  void provideInputQueues() throws IOException {
+  private void provideInputQueues() throws IOException {
     final String deadLetterExchange = routingConfig.getDeadLetterExchange();
     final String exchange = routingConfig.getExchange();
     final String failedQueue = routingConfig.getFailedQueue();

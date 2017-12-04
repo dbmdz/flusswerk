@@ -41,10 +41,6 @@ public class Flow<R, W> {
     return job.getResult();
   }
 
-  void setTransformer(Function<R, W> transformer) {
-    this.transformer = transformer;
-  }
-
   public boolean writesData() {
     return writer != null;
   }
