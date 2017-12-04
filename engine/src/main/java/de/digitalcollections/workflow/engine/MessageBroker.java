@@ -2,9 +2,9 @@ package de.digitalcollections.workflow.engine;
 
 import de.digitalcollections.workflow.engine.model.Message;
 import de.digitalcollections.workflow.engine.model.Meta;
+import de.digitalcollections.workflow.engine.util.Maps;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +75,7 @@ public class MessageBroker {
         routingConfig.getRetryQueue(),
         routingConfig.getDeadLetterExchange(),
         routingConfig.getReadFrom(),
-        Map.of(
+        Maps.of(
             MESSAGE_TTL, deadLetterWait,
             DEAD_LETTER_EXCHANGE, routingConfig.getExchange())
     );
@@ -92,7 +92,7 @@ public class MessageBroker {
         routingConfig.getWriteTo(),
         routingConfig.getExchange(),
         routingConfig.getWriteTo(),
-        Map.of(DEAD_LETTER_EXCHANGE, routingConfig.getDeadLetterExchange())
+        Maps.of(DEAD_LETTER_EXCHANGE, routingConfig.getDeadLetterExchange())
     );
   }
 

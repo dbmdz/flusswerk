@@ -1,6 +1,8 @@
 language: java
 jdk:
-- oraclejdk9
+ - openjdk8
+ - oraclejdk8
+ - oraclejdk9
 
 sudo: required
 
@@ -12,7 +14,6 @@ before_script:
 
 script:
 - mvn clean install
-- jdk_switcher use oraclejdk8
 - mvn -B --projects bdd -Pbdd surefire:test
 
 after_success:
