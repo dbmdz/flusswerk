@@ -11,24 +11,24 @@ import org.slf4j.LoggerFactory;
  * @param <R>
  * @param <W>
  */
-public class Flow<R, W> {
+public class Flow<M, R, W> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Flow.class);
 
-  private Function<Message, R> reader;
+  private Function<M, R> reader;
 
   private Function<R, W> transformer;
 
   private Function<W, Message> writer;
 
-  protected Flow(Function<Message, R> reader, Function<R, W> transformer, Function<W, Message> writer) {
+  protected Flow(Function<M, R> reader, Function<R, W> transformer, Function<W, Message> writer) {
     this.reader = reader;
     this.transformer = transformer;
     this.writer = writer;
   }
 
-  public Message process(Message message) {
-    Job job = new Job<>(message, reader, transformer, writer);
+  public Message process(M message) {
+    Job<M, R, W> job = new Job<>(message, reader, transformer, writer);
     if (reader != null) {
       job.read();
     }

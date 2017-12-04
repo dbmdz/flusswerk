@@ -2,9 +2,9 @@ package de.digitalcollections.workflow.engine.model;
 
 import java.util.function.Function;
 
-public class Job<R, W> {
+public class Job<M, R, W> {
 
-  private final Function<Message, R> reader;
+  private final Function<M, R> reader;
 
   private final Function<R, W> transformer;
 
@@ -14,11 +14,11 @@ public class Job<R, W> {
 
   private W dataTransformed;
 
-  private Message message;
+  private M message;
 
   private Message result;
 
-  public Job(Message message, Function<Message, R> reader, Function<R, W> transformer, Function<W, Message>  writer) {
+  public Job(M message, Function<M, R> reader, Function<R, W> transformer, Function<W, Message>  writer) {
     this.message = message;
     this.reader = reader;
     this.transformer = transformer;
@@ -39,7 +39,7 @@ public class Job<R, W> {
     result = writer.apply(dataTransformed);
   }
 
-  public Message getMessage() {
+  public M getMessage() {
     return message;
   }
 

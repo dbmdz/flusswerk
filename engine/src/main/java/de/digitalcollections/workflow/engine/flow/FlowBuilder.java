@@ -12,9 +12,9 @@ import static java.util.Objects.requireNonNull;
  * @param <R> The data type produced by the reader. Input data type of the transformer.
  * @param <W> The data type consumed by the writer. Output data type of the transformer.
  */
-public class FlowBuilder<R, W> {
+public class FlowBuilder<M, R, W> {
 
-  private Function<Message, R> reader;
+  private Function<M, R> reader;
 
   private Function<R, W> transformer;
 
@@ -31,7 +31,7 @@ public class FlowBuilder<R, W> {
    * @param reader The reader to process incoming messages.
    * @return This {@link FlowBuilder} instance for further configuration or creation of the {@link Flow}.
    */
-  public FlowBuilder<R, W> read(Function<Message, R> reader) {
+  public FlowBuilder<M, R, W> read(Function<M, R> reader) {
     if (reader == null) {
       throw new IllegalArgumentException("The reader cannot be null.");
     }
@@ -45,7 +45,7 @@ public class FlowBuilder<R, W> {
    * @param transformer The transformer to process data produced by the reader, sending it further to the writer.
    * @return This {@link FlowBuilder} instance for further configuration of the {@link Flow}.
    */
-  public FlowBuilder<R, W> transform(Function<R, W> transformer) {
+  public FlowBuilder<M, R, W> transform(Function<R, W> transformer) {
     if (reader == null) {
       throw new IllegalStateException("You can't transform anything without reading it first. Please add a reader before adding and transformer.");
     }
@@ -62,7 +62,7 @@ public class FlowBuilder<R, W> {
    * @param writer The writer to process incoming messages.
    * @return This {@link FlowBuilder} instance for further configuration or creation of the {@link Flow}.
    */
-  public FlowBuilder<R, W> write(Function<W, Message> writer) {
+  public FlowBuilder<M, R, W> write(Function<W, Message> writer) {
     if (reader != null && transformer == null) {
       this.transformer = this::cast;
     }
@@ -75,7 +75,7 @@ public class FlowBuilder<R, W> {
    *
    * @return A new {@link Flow} as configured before.
    */
-  public Flow<R, W> build() {
+  public Flow<M, R, W> build() {
     return new Flow<>(reader, transformer, writer);
   }
 

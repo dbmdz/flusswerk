@@ -26,7 +26,7 @@ public class Application {
         .writeTo("someOutputQueue")
         .build();
 
-    Flow<String, String> flow = new FlowBuilder<String, String>()
+    Flow<DefaultMessage, String, String> flow = new FlowBuilder<DefaultMessage, String, String>()
         .read(Message::getType)
         .transform(new UppercaseTransformer(true))
         .write(DefaultMessage::withType)
