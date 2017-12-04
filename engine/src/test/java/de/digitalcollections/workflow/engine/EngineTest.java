@@ -105,8 +105,6 @@ class EngineTest {
         DefaultMessage::withType
     );
 
-
-
     Engine engine = new Engine(messageBroker, flow);
     ExecutorService executorService = Executors.newSingleThreadExecutor();
     executorService.submit(engine::start);

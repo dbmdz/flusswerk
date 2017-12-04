@@ -4,7 +4,6 @@ import com.rabbitmq.client.Channel;
 import de.digitalcollections.workflow.engine.model.DefaultMessage;
 import de.digitalcollections.workflow.engine.model.Message;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -83,15 +82,5 @@ class MessageBrokerTest {
     verify(channel).basicAck(eq(message.getMeta().getDeliveryTag()), eq(false));
   }
 
-  @Test
-  void shouldWorkWithCustomMessageType() throws IOException, TimeoutException {
-    config.setMessageMixin(CustomMessageMixin.class);
-    config.setMessageClass(CustomMessage.class);
-    messageBroker = new MessageBroker(config, connection);
-    CustomMessage message = new CustomMessage();
-    message.setCustomField("Blah!");
-    Message recreated = messageBroker.deserialize(new String(messageBroker.serialize(message), StandardCharsets.UTF_8));
-    assertThat(message.getCustomField()).isEqualTo(((CustomMessage) recreated).getCustomField());
-  }
 
 }
