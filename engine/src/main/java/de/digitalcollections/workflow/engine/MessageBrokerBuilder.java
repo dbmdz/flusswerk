@@ -16,8 +16,11 @@ public class MessageBrokerBuilder {
 
   private final MessageBrokerConfig config;
 
+  private final ConnectionConfig connectionConfig;
+
   public MessageBrokerBuilder() {
     config = new MessageBrokerConfig();
+    connectionConfig = new ConnectionConfig();
   }
 
   /**
@@ -27,7 +30,7 @@ public class MessageBrokerBuilder {
    * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
    */
   public MessageBrokerBuilder hostName(String hostName) {
-    config.setHostName(requireNonNull(hostName));
+    connectionConfig.setHostName(requireNonNull(hostName));
     return this;
   }
 
@@ -38,7 +41,7 @@ public class MessageBrokerBuilder {
    * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
    */
   public MessageBrokerBuilder password(String password) {
-    config.setPassword(requireNonNull(password));
+    connectionConfig.setPassword(requireNonNull(password));
     return this;
   }
 
@@ -52,7 +55,7 @@ public class MessageBrokerBuilder {
     if (port <= 0) {
       throw new IllegalArgumentException("Port value must be > 0");
     }
-    config.setPort(port);
+    connectionConfig.setPort(port);
     return this;
   }
 
@@ -63,7 +66,7 @@ public class MessageBrokerBuilder {
    * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
    */
   public MessageBrokerBuilder username(String username) {
-    config.setUsername(requireNonNull(username));
+    connectionConfig.setUsername(requireNonNull(username));
     return this;
   }
 
@@ -74,7 +77,7 @@ public class MessageBrokerBuilder {
    * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
    */
   public MessageBrokerBuilder virtualHost(String virtualHost) {
-    config.setVirtualHost(requireNonNull(virtualHost));
+    connectionConfig.setVirtualHost(requireNonNull(virtualHost));
     return this;
   }
 
@@ -161,8 +164,8 @@ public class MessageBrokerBuilder {
     }
   }
 
-  MessageBroker build(Function<MessageBrokerConfig, MessageBrokerConnection> connectionConstructor) throws IOException {
-    MessageBrokerConnection connection = connectionConstructor.apply(config);
+  MessageBroker build(Function<ConnectionConfig, MessageBrokerConnection> connectionConstructor) throws IOException {
+    MessageBrokerConnection connection = connectionConstructor.apply(connectionConfig);
     return new MessageBroker(config, connection);
   }
 

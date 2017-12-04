@@ -18,8 +18,8 @@ public class RoutingConfig {
   private String retryQueue;
 
   public RoutingConfig() {
-    exchange = "workflow";
-    deadLetterExchange = "workflow.dlx";
+    setExchange("workflow");
+    setDeadLetterExchange("workflow.retry");
     readFrom = null;
     writeTo = null;
   }

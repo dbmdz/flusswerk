@@ -25,11 +25,9 @@ class MessageBrokerBuilderTest {
 
   private Channel channel;
 
-  private Connection connection;
-
   private MessageBroker messageBroker;
 
-  private Function<MessageBrokerConfig, MessageBrokerConnection> create_connection = config -> {
+  private final Function<ConnectionConfig, MessageBrokerConnection> create_connection = config -> {
     try {
       return new MessageBrokerConnection(config, connectionFactory);
     } catch (IOException | TimeoutException e) {
@@ -40,17 +38,10 @@ class MessageBrokerBuilderTest {
   @BeforeEach
   void setUp() throws IOException, TimeoutException {
     connectionFactory = mock(ConnectionFactory.class);
-    connection = mock(Connection.class);
+    Connection connection = mock(Connection.class);
     when(connectionFactory.newConnection()).thenReturn(connection);
     channel = mock(Channel.class);
     when(connection.createChannel()).thenReturn(channel);
-    create_connection = config -> {
-      try {
-        return new MessageBrokerConnection(config, connectionFactory);
-      } catch (IOException | TimeoutException e) {
-        throw new RuntimeException(e);
-      }
-    };
   }
 
 
