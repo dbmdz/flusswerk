@@ -64,27 +64,19 @@ public class MessageBroker {
   }
 
   void provideInputQueues() throws IOException {
-    rabbitClient.declareQueue(
-        routingConfig.getReadFrom(),
-        routingConfig.getExchange(),
-        routingConfig.getReadFrom(),
-        null
-    );
+    final String deadLetterExchange = routingConfig.getDeadLetterExchange();
+    final String exchange = routingConfig.getExchange();
+    final String failedQueue = routingConfig.getFailedQueue();
+    final String readFrom = routingConfig.getReadFrom();
+    final String retryQueue = routingConfig.getRetryQueue();
 
-    rabbitClient.declareQueue(
-        routingConfig.getRetryQueue(),
-        routingConfig.getDeadLetterExchange(),
-        routingConfig.getReadFrom(),
+    rabbitClient.declareQueue(readFrom, exchange, readFrom, null);
+    rabbitClient.declareQueue(retryQueue, deadLetterExchange, readFrom,
         Maps.of(
             MESSAGE_TTL, deadLetterWait,
-            DEAD_LETTER_EXCHANGE, routingConfig.getExchange())
+            DEAD_LETTER_EXCHANGE, exchange)
     );
-
-    rabbitClient.declareQueue(routingConfig.getFailedQueue(),
-        routingConfig.getExchange(),
-        routingConfig.getFailedQueue(),
-        null
-    );
+    rabbitClient.declareQueue(failedQueue, exchange, failedQueue, null);
   }
 
   private void provideOutputQueue() throws IOException {

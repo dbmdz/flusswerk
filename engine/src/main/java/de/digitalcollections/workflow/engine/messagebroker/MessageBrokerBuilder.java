@@ -155,15 +155,22 @@ public class MessageBrokerBuilder {
    */
   public MessageBroker build() throws WorkflowSetupException {
     try {
-      return build(c -> {
-        try {
-          return new MessageBrokerConnection(c);
-        } catch (IOException | TimeoutException e) {
-          throw new RuntimeException(e);
-        }
-      });
+      return build(MessageBrokerBuilder::defaultConnectionConstructor);
     } catch (IOException | RuntimeException e) {
       throw new WorkflowSetupException(e);
+    }
+  }
+
+  /**
+   * Can be exchanged for testing.
+   * @param config The config to set.
+   * @return The connection to the message broker.
+   */
+  private static MessageBrokerConnection defaultConnectionConstructor(ConnectionConfig config) {
+    try {
+      return new MessageBrokerConnection(config);
+    } catch (IOException | TimeoutException e) {
+      throw new RuntimeException(e);
     }
   }
 
