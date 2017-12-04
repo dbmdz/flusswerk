@@ -23,7 +23,7 @@ public class Engine {
 
   private final MessageBroker messageBroker;
 
-  private final Flow<?, ?> flow;
+  private final Flow<Message, ?, ?> flow;
 
   private final ExecutorService executorService;
 
@@ -33,11 +33,11 @@ public class Engine {
 
   private AtomicInteger activeWorkers;
 
-  public Engine(MessageBroker messageBroker, Flow<?, ?> flow) throws IOException {
+  public Engine(MessageBroker messageBroker, Flow<Message, ?, ?> flow) throws IOException {
     this(messageBroker, flow, DEFAULT_CONCURRENT_WORKERS);
   }
 
-  public Engine(MessageBroker messageBroker, Flow<?, ?> flow, int concurrentWorkers) throws IOException {
+  public Engine(MessageBroker messageBroker, Flow<Message, ?, ?> flow, int concurrentWorkers) throws IOException {
     this.messageBroker = messageBroker;
     this.flow = flow;
     this.concurrentWorkers = concurrentWorkers;

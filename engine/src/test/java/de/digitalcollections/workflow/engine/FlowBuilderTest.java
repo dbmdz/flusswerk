@@ -16,7 +16,7 @@ class FlowBuilderTest {
   @Test
   @DisplayName("read should throw an exception if the reader is null")
   public void readShouldThrowExceptionIfArgumentNull() {
-    FlowBuilder<String, String> builder = new FlowBuilder<>();
+    FlowBuilder<Message, String, String> builder = new FlowBuilder<>();
     Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
       builder.read(null);
     });
@@ -26,7 +26,7 @@ class FlowBuilderTest {
   @Test
   @DisplayName("transform should throw an exception if there is no reader")
   public void transformerShouldThrowExceptionIfReaderIsNull() {
-    FlowBuilder<String, String> builder = new FlowBuilder<>();
+    FlowBuilder<Message, String, String> builder = new FlowBuilder<>();
     Throwable exception = assertThrows(IllegalStateException.class, () -> {
       builder.transform(s -> null);
     });
@@ -36,7 +36,7 @@ class FlowBuilderTest {
   @Test
   @DisplayName("transform should throw an exception if transformer is null")
   public void transformerShouldThrowExceptionIfTransformerIsNull() {
-    FlowBuilder<String, String> builder = new FlowBuilder<>();
+    FlowBuilder<Message, String, String> builder = new FlowBuilder<>();
     Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
       builder.read(message -> null);
       builder.transform(null);
@@ -47,7 +47,7 @@ class FlowBuilderTest {
   @Test
   @DisplayName("build should create an working Flow if only reader and writer are set")
   public void buildWithOnlyReadAndWrite() {
-    Flow<String, String> flow = new FlowBuilder<String, String>()
+    Flow<Message, String, String> flow = new FlowBuilder<Message, String, String>()
         .read(Message::getType)
         .write(DefaultMessage::withType)
         .build();

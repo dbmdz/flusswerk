@@ -37,7 +37,7 @@ class EngineTest {
 
   private static final String DLX = "exchange.retry";
   private MessageBroker messageBroker;
-  private Flow<String, String> flowWithoutProblems;
+  private Flow<Message, String, String> flowWithoutProblems;
 
   private Message[] moreMessages(int number) {
     Message[] messages = new Message[number];
@@ -50,7 +50,7 @@ class EngineTest {
   @BeforeEach
   void setUp() {
     messageBroker = mock(MessageBroker.class);
-    flowWithoutProblems = new FlowBuilder<String, String>()
+    flowWithoutProblems = new FlowBuilder<Message, String, String>()
         .read(READ_SOME_STRING)
         .transform(Function.identity())
         .write(WRITE_SOME_STRING)
@@ -65,7 +65,7 @@ class EngineTest {
     Semaphore semaphore = new Semaphore(1);
     semaphore.drainPermits();
 
-    Flow<String, String> flow = new FlowBuilder<String, String>()
+    Flow<Message, String, String> flow = new FlowBuilder<Message, String, String>()
         .read(Message::getType)
         .transform(s -> {
           try {
@@ -98,7 +98,7 @@ class EngineTest {
 
     AtomicInteger messagesSent = new AtomicInteger();
 
-    Flow<String, String> flow = new FlowBuilder<String, String>()
+    Flow<Message, String, String> flow = new FlowBuilder<Message, String, String>()
         .read(Message::getType)
         .transform(s -> {
           messagesSent.incrementAndGet();
@@ -133,7 +133,7 @@ class EngineTest {
   @Test
   @DisplayName("Engine should reject a message failing processing")
   void processShouldRejectMessageOnFailure() throws IOException {
-    Flow<String, String> flow = new FlowBuilder<String, String>()
+    Flow<Message, String, String> flow = new FlowBuilder<Message, String, String>()
         .read(READ_SOME_STRING)
         .transform(s -> {
           throw new RuntimeException("Aaaaaaah!");

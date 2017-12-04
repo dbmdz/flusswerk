@@ -36,7 +36,7 @@ class JobTest {
   @DisplayName("Read should call the read function")
   void read() {
     CheckIfCalled<Message, String> reader = new CheckIfCalled<>();
-    Job<String, String> job = new Job<>(
+    Job<Message, String, String> job = new Job<>(
         SOME_MESSAGE,
         reader,
         DUMMY_TRANSFORMER,
@@ -49,7 +49,7 @@ class JobTest {
   @Test
   void transform() {
     CheckIfCalled<String, String> transformer = new CheckIfCalled<>();
-    Job<String, String> job = new Job<>(
+    Job<Message, String, String> job = new Job<>(
         SOME_MESSAGE,
         DUMMY_READER,
         transformer,
@@ -62,7 +62,7 @@ class JobTest {
   @Test
   void write() {
     CheckIfCalled<String, Message> writer = new CheckIfCalled<>();
-    Job<String, String> job = new Job<>(
+    Job<Message, String, String> job = new Job<>(
         SOME_MESSAGE,
         DUMMY_READER,
         DUMMY_TRANSFORMER,
@@ -76,7 +76,7 @@ class JobTest {
   @DisplayName("Read, Transform, Write should pass values along")
   void readTransformWriteShouldPassValues() {
     String message = "Jolene, Jolene, Jolene, Jolene";
-    Job<String, String> job = new Job<>(
+    Job<Message, String, String> job = new Job<>(
         DefaultMessage.withType(message),
         Message::getType,
         String::toUpperCase,
@@ -91,7 +91,7 @@ class JobTest {
   @Test
   void getMessage() {
     Message message = DefaultMessage.withType("Wuthering Heights");
-    Job<String, String> job = new Job<>(
+    Job<Message, String, String> job = new Job<>(
         message,
         DUMMY_READER,
         DUMMY_TRANSFORMER,
