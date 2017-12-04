@@ -1,10 +1,10 @@
 package de.digitalcollections.workflow.examples;
 
 import de.digitalcollections.workflow.engine.Engine;
-import de.digitalcollections.workflow.engine.Flow;
-import de.digitalcollections.workflow.engine.FlowBuilder;
-import de.digitalcollections.workflow.engine.MessageBroker;
-import de.digitalcollections.workflow.engine.MessageBrokerBuilder;
+import de.digitalcollections.workflow.engine.flow.Flow;
+import de.digitalcollections.workflow.engine.flow.FlowBuilder;
+import de.digitalcollections.workflow.engine.messagebroker.MessageBroker;
+import de.digitalcollections.workflow.engine.messagebroker.MessageBrokerBuilder;
 import de.digitalcollections.workflow.engine.exceptions.WorkflowSetupException;
 import de.digitalcollections.workflow.engine.model.DefaultMessage;
 import de.digitalcollections.workflow.engine.model.Message;

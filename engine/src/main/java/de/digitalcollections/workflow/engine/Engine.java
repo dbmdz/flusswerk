@@ -1,5 +1,7 @@
 package de.digitalcollections.workflow.engine;
 
+import de.digitalcollections.workflow.engine.flow.Flow;
+import de.digitalcollections.workflow.engine.messagebroker.MessageBroker;
 import de.digitalcollections.workflow.engine.model.DefaultMessage;
 import de.digitalcollections.workflow.engine.model.Message;
 import java.io.IOException;
@@ -95,7 +97,7 @@ public class Engine {
   public void createTestMessages(int n) throws IOException {
     for (int i = 0; i < n; i++) {
       String message = String.format("Test message #%d of %d", i, n);
-      messageBroker.send(messageBroker.getRoutingConfig().getReadFrom(), DefaultMessage.withType(message));
+      messageBroker.send(DefaultMessage.withType(message));
     }
   }
 

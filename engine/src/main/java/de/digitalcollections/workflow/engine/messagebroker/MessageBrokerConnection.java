@@ -1,4 +1,4 @@
-package de.digitalcollections.workflow.engine;
+package de.digitalcollections.workflow.engine.messagebroker;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;

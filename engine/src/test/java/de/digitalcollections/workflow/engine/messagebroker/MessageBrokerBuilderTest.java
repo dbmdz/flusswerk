@@ -1,9 +1,13 @@
-package de.digitalcollections.workflow.engine;
+package de.digitalcollections.workflow.engine.messagebroker;
 
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import de.digitalcollections.workflow.engine.messagebroker.ConnectionConfig;
+import de.digitalcollections.workflow.engine.messagebroker.MessageBroker;
+import de.digitalcollections.workflow.engine.messagebroker.MessageBrokerBuilder;
+import de.digitalcollections.workflow.engine.messagebroker.MessageBrokerConnection;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;

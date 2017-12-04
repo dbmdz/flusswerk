@@ -1,6 +1,11 @@
-package de.digitalcollections.workflow.engine;
+package de.digitalcollections.workflow.engine.messagebroker;
 
 import com.rabbitmq.client.Channel;
+import de.digitalcollections.workflow.engine.CustomMessage;
+import de.digitalcollections.workflow.engine.CustomMessageMixin;
+import de.digitalcollections.workflow.engine.messagebroker.MessageBrokerConfig;
+import de.digitalcollections.workflow.engine.messagebroker.MessageBrokerConnection;
+import de.digitalcollections.workflow.engine.messagebroker.RabbitClient;
 import de.digitalcollections.workflow.engine.model.Message;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -22,7 +27,6 @@ class RabbitClientTest {
 
   @BeforeEach
   void setUp() throws IOException, TimeoutException {
-    config.setReadFrom("some.input.queue");
     connection = mock(MessageBrokerConnection.class);
     channel = mock(Channel.class);
     when(connection.getChannel()).thenReturn(channel);

@@ -1,4 +1,4 @@
-package de.digitalcollections.workflow.engine;
+package de.digitalcollections.workflow.engine.messagebroker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.digitalcollections.workflow.engine.jackson.DefaultMessageMixin;
@@ -17,10 +17,7 @@ class MessageBrokerConfig {
 
   private Class<?> messageMixin;
 
-  private RoutingConfig routingConfig;
-
   public MessageBrokerConfig() {
-    this.routingConfig = new RoutingConfig();
     setObjectMapper(new ObjectMapper());
     setMaxRetries(5);
     setDeadLetterWait(30 * 1000);
@@ -67,26 +64,6 @@ class MessageBrokerConfig {
 
   public void setMessageMixin(Class<?> messageMixin) {
     this.messageMixin = messageMixin;
-  }
-
-  public void setExchange(String exchange) {
-    routingConfig.setExchange(exchange);
-  }
-
-  public void setDeadLetterExchange(String deadLetterExchange) {
-    routingConfig.setDeadLetterExchange(deadLetterExchange);
-  }
-
-  public void setReadFrom(String readFrom) {
-    routingConfig.setReadFrom(readFrom);
-  }
-
-  public void setWriteTo(String writeTo) {
-    routingConfig.setWriteTo(writeTo);
-  }
-
-  public RoutingConfig getRoutingConfig() {
-    return routingConfig;
   }
 
 }

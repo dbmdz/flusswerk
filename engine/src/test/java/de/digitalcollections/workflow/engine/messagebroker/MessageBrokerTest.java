@@ -1,6 +1,10 @@
-package de.digitalcollections.workflow.engine;
+package de.digitalcollections.workflow.engine.messagebroker;
 
 import com.rabbitmq.client.Channel;
+import de.digitalcollections.workflow.engine.messagebroker.MessageBroker;
+import de.digitalcollections.workflow.engine.messagebroker.MessageBrokerConfig;
+import de.digitalcollections.workflow.engine.messagebroker.MessageBrokerConnection;
+import de.digitalcollections.workflow.engine.messagebroker.RoutingConfig;
 import de.digitalcollections.workflow.engine.model.DefaultMessage;
 import de.digitalcollections.workflow.engine.model.Message;
 import java.io.IOException;
@@ -31,11 +35,12 @@ class MessageBrokerTest {
 
   @BeforeEach
   void setUp() throws IOException, TimeoutException {
-    config.setReadFrom("some.input.queue");
+    RoutingConfig routingConfig = new RoutingConfig();
+    routingConfig.setReadFrom("some.input.queue");
     connection = mock(MessageBrokerConnection.class);
     channel = mock(Channel.class);
     when(connection.getChannel()).thenReturn(channel);
-    messageBroker = new MessageBroker(config, connection);
+    messageBroker = new MessageBroker(config, connection, routingConfig);
     message = DefaultMessage.withType("Hey");
   }
 

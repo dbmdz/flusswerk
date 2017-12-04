@@ -1,5 +1,8 @@
 package de.digitalcollections.workflow.engine;
 
+import de.digitalcollections.workflow.engine.flow.Flow;
+import de.digitalcollections.workflow.engine.flow.FlowBuilder;
+import de.digitalcollections.workflow.engine.messagebroker.MessageBroker;
 import de.digitalcollections.workflow.engine.model.DefaultMessage;
 import de.digitalcollections.workflow.engine.model.Message;
 import java.io.IOException;
@@ -39,7 +42,7 @@ class EngineTest {
   private Message[] moreMessages(int number) {
     Message[] messages = new Message[number];
     for (int i = 0; i < messages.length; i++) {
-      messages[i] =  DefaultMessage.withType("White Room");
+      messages[i] = DefaultMessage.withType("White Room");
     }
     return messages;
   }
@@ -62,18 +65,18 @@ class EngineTest {
     Semaphore semaphore = new Semaphore(1);
     semaphore.drainPermits();
 
-    Flow<String, String> flow = new Flow<>(
-        Message::getType,
-        s -> {
+    Flow<String, String> flow = new FlowBuilder<String, String>()
+        .read(Message::getType)
+        .transform(s -> {
           try {
             semaphore.acquire(); // Block this worker to count it only once
           } catch (InterruptedException e) {
             e.printStackTrace();
           }
           return s;
-        },
-        DefaultMessage::withType
-    );
+        })
+        .write(DefaultMessage::withType)
+        .build();
 
     Engine engine = new Engine(messageBroker, flow);
     ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -85,7 +88,6 @@ class EngineTest {
       TimeUnit.MILLISECONDS.sleep(10);
     }
 
-
     assertThat(engine.getActiveWorkers()).isEqualTo(engine.getConcurrentWorkers());
   }
 
@@ -96,14 +98,14 @@ class EngineTest {
 
     AtomicInteger messagesSent = new AtomicInteger();
 
-    Flow<String, String> flow = new Flow<>(
-        Message::getType,
-        s -> {
+    Flow<String, String> flow = new FlowBuilder<String, String>()
+        .read(Message::getType)
+        .transform(s -> {
           messagesSent.incrementAndGet();
           return s;
-        },
-        DefaultMessage::withType
-    );
+        })
+        .write(DefaultMessage::withType)
+        .build();
 
     Engine engine = new Engine(messageBroker, flow);
     ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -133,7 +135,9 @@ class EngineTest {
   void processShouldRejectMessageOnFailure() throws IOException {
     Flow<String, String> flow = new FlowBuilder<String, String>()
         .read(READ_SOME_STRING)
-        .transform(s -> { throw new RuntimeException("Aaaaaaah!"); })
+        .transform(s -> {
+          throw new RuntimeException("Aaaaaaah!");
+        })
         .write(WRITE_SOME_STRING)
         .build();
 

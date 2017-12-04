@@ -1,9 +1,9 @@
 package de.digitalcollections.workflow.bdd;
 
 import de.digitalcollections.workflow.engine.Engine;
-import de.digitalcollections.workflow.engine.Flow;
-import de.digitalcollections.workflow.engine.MessageBroker;
-import de.digitalcollections.workflow.engine.MessageBrokerBuilder;
+import de.digitalcollections.workflow.engine.flow.Flow;
+import de.digitalcollections.workflow.engine.messagebroker.MessageBroker;
+import de.digitalcollections.workflow.engine.messagebroker.MessageBrokerBuilder;
 import de.digitalcollections.workflow.engine.exceptions.WorkflowSetupException;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;

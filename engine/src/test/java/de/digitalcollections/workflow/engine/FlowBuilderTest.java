@@ -1,6 +1,8 @@
 package de.digitalcollections.workflow.engine;
 
 
+import de.digitalcollections.workflow.engine.flow.Flow;
+import de.digitalcollections.workflow.engine.flow.FlowBuilder;
 import de.digitalcollections.workflow.engine.model.DefaultMessage;
 import de.digitalcollections.workflow.engine.model.Message;
 import org.junit.jupiter.api.DisplayName;

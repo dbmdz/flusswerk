@@ -1,6 +1,6 @@
-package de.digitalcollections.workflow.engine;
+package de.digitalcollections.workflow.engine.messagebroker;
 
-public class ConnectionConfig {
+class ConnectionConfig {
 
   private String username;
 
@@ -12,7 +12,7 @@ public class ConnectionConfig {
 
   private int port;
 
-  public ConnectionConfig() {
+  ConnectionConfig() {
     setHostName("localhost");
     setPassword("guest");
     setPort(5672);

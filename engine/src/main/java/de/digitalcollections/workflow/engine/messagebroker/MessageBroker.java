@@ -1,4 +1,4 @@
-package de.digitalcollections.workflow.engine;
+package de.digitalcollections.workflow.engine.messagebroker;
 
 import de.digitalcollections.workflow.engine.model.Message;
 import de.digitalcollections.workflow.engine.model.Meta;
@@ -22,10 +22,10 @@ public class MessageBroker {
 
   private final RabbitClient rabbitClient;
 
-  MessageBroker(MessageBrokerConfig config, MessageBrokerConnection connection) throws IOException {
+  MessageBroker(MessageBrokerConfig config, MessageBrokerConnection connection, RoutingConfig routingConfig) throws IOException {
     deadLetterWait = config.getDeadLetterWait();
     maxRetries = config.getMaxRetries();
-    routingConfig = config.getRoutingConfig();
+    this.routingConfig = routingConfig;
 
     rabbitClient = new RabbitClient(config, connection);
 

@@ -1,4 +1,4 @@
-package de.digitalcollections.workflow.engine;
+package de.digitalcollections.workflow.engine.flow;
 
 import de.digitalcollections.workflow.engine.model.Job;
 import de.digitalcollections.workflow.engine.model.Message;
@@ -45,7 +45,7 @@ public class Flow<R, W> {
     this.transformer = transformer;
   }
 
-  boolean writesData() {
+  public boolean writesData() {
     return writer != null;
   }
 

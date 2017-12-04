@@ -1,8 +1,8 @@
-package de.digitalcollections.workflow.engine;
+package de.digitalcollections.workflow.engine.messagebroker;
 
 import static java.util.Objects.requireNonNull;
 
-public class RoutingConfig {
+class RoutingConfig {
 
 
   private String exchange;

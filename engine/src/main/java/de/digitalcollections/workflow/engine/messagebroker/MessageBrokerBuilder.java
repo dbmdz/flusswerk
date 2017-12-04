@@ -1,4 +1,4 @@
-package de.digitalcollections.workflow.engine;
+package de.digitalcollections.workflow.engine.messagebroker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.digitalcollections.workflow.engine.exceptions.WorkflowSetupException;
@@ -14,13 +14,16 @@ import static java.util.Objects.requireNonNull;
  */
 public class MessageBrokerBuilder {
 
+  private final ConnectionConfig connectionConfig;
+
   private final MessageBrokerConfig config;
 
-  private final ConnectionConfig connectionConfig;
+  private final RoutingConfig routingConfig;
 
   public MessageBrokerBuilder() {
     config = new MessageBrokerConfig();
     connectionConfig = new ConnectionConfig();
+    routingConfig = new RoutingConfig();
   }
 
   /**
@@ -139,8 +142,8 @@ public class MessageBrokerBuilder {
    * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
    */
   public MessageBrokerBuilder exchanges(String exchange, String deadLetterExchange) {
-    config.setExchange(requireNonNull(exchange));
-    config.setDeadLetterExchange(requireNonNull(deadLetterExchange));
+    routingConfig.setExchange(requireNonNull(exchange));
+    routingConfig.setDeadLetterExchange(requireNonNull(deadLetterExchange));
     return this;
   }
 
@@ -166,19 +169,19 @@ public class MessageBrokerBuilder {
 
   MessageBroker build(Function<ConnectionConfig, MessageBrokerConnection> connectionConstructor) throws IOException {
     MessageBrokerConnection connection = connectionConstructor.apply(connectionConfig);
-    return new MessageBroker(config, connection);
+    return new MessageBroker(config, connection, routingConfig);
   }
 
   public MessageBrokerBuilder readFrom(String inputQueue) {
     if (inputQueue == null || inputQueue.isEmpty()) {
       throw new IllegalArgumentException("The input queue cannot be null or empty.");
     }
-    config.setReadFrom(inputQueue);
+    routingConfig.setReadFrom(inputQueue);
     return this;
   }
 
   public MessageBrokerBuilder writeTo(String outputRoutingKey) {
-    config.setWriteTo(outputRoutingKey);
+    routingConfig.setWriteTo(outputRoutingKey);
     return this;
   }
 
