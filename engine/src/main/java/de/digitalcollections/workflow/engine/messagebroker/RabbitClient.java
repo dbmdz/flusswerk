@@ -6,7 +6,9 @@ import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.GetResponse;
+import de.digitalcollections.workflow.engine.jackson.DefaultMessageMixin;
 import de.digitalcollections.workflow.engine.jackson.MetaMixin;
+import de.digitalcollections.workflow.engine.model.DefaultMessage;
 import de.digitalcollections.workflow.engine.model.Message;
 import de.digitalcollections.workflow.engine.model.Meta;
 import java.io.IOException;
@@ -36,14 +38,14 @@ class RabbitClient {
 
   public RabbitClient(MessageBrokerConfig config, MessageBrokerConnection connection) {
     channel = connection.getChannel();
-
-    objectMapper = config.getObjectMapper();
+    objectMapper = new ObjectMapper();
     messageClass = config.getMessageClass();
-    if (objectMapper.findMixInClassFor(Message.class) == null) {
-      objectMapper.addMixIn(messageClass, config.getMessageMixin());
-    }
+    objectMapper.registerModules(config.getJacksonModules());
     objectMapper.addMixIn(Meta.class, MetaMixin.class);
     objectMapper.registerModule(new JavaTimeModule());
+    if (objectMapper.findMixInClassFor(Message.class) == null) {
+      objectMapper.addMixIn(DefaultMessage.class, DefaultMessageMixin.class);
+    }
   }
 
   void send(String exchange, String routingKey, Message message) throws IOException {

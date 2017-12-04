@@ -1,37 +1,26 @@
 package de.digitalcollections.workflow.engine.messagebroker;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import de.digitalcollections.workflow.engine.jackson.DefaultMessageMixin;
+import com.fasterxml.jackson.databind.Module;
 import de.digitalcollections.workflow.engine.model.DefaultMessage;
 import de.digitalcollections.workflow.engine.model.Message;
+import java.util.ArrayList;
+import java.util.List;
 
 class MessageBrokerConfig {
-
-  private ObjectMapper objectMapper;
 
   private int deadLetterWait;
 
   private int maxRetries;
 
+  private List<Module> jacksonModules;
+
   private Class<? extends Message> messageClass;
 
-  private Class<?> messageMixin;
-
   public MessageBrokerConfig() {
-    setObjectMapper(new ObjectMapper());
+    jacksonModules = new ArrayList<>();
     setMaxRetries(5);
     setDeadLetterWait(30 * 1000);
-    setObjectMapper(new ObjectMapper());
     setMessageClass(DefaultMessage.class);
-    setMessageMixin(DefaultMessageMixin.class);
-  }
-
-  public ObjectMapper getObjectMapper() {
-    return objectMapper;
-  }
-
-  public void setObjectMapper(ObjectMapper objectMapper) {
-    this.objectMapper = objectMapper;
   }
 
   public int getDeadLetterWait() {
@@ -58,12 +47,12 @@ class MessageBrokerConfig {
     this.messageClass = messageClass;
   }
 
-  public Class<?> getMessageMixin() {
-    return messageMixin;
+  public void addJacksonModule(Module jacksonModule) {
+    this.jacksonModules.add(jacksonModule);
   }
 
-  public void setMessageMixin(Class<?> messageMixin) {
-    this.messageMixin = messageMixin;
+  public List<Module> getJacksonModules() {
+    return jacksonModules;
   }
 
 }

@@ -3,9 +3,7 @@ package de.digitalcollections.workflow.engine.messagebroker;
 import com.rabbitmq.client.Channel;
 import de.digitalcollections.workflow.engine.CustomMessage;
 import de.digitalcollections.workflow.engine.CustomMessageMixin;
-import de.digitalcollections.workflow.engine.messagebroker.MessageBrokerConfig;
-import de.digitalcollections.workflow.engine.messagebroker.MessageBrokerConnection;
-import de.digitalcollections.workflow.engine.messagebroker.RabbitClient;
+import de.digitalcollections.workflow.engine.jackson.SingleClassModule;
 import de.digitalcollections.workflow.engine.model.Message;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -34,7 +32,7 @@ class RabbitClientTest {
 
   @Test
   void shouldWorkWithCustomMessageType() throws IOException, TimeoutException {
-    config.setMessageMixin(CustomMessageMixin.class);
+    config.addJacksonModule(new SingleClassModule(CustomMessage.class, CustomMessageMixin.class));
     config.setMessageClass(CustomMessage.class);
     RabbitClient rabbitClient = new RabbitClient(config, connection);
     CustomMessage message = new CustomMessage();

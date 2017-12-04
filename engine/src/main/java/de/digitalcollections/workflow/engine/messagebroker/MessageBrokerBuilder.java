@@ -1,7 +1,8 @@
 package de.digitalcollections.workflow.engine.messagebroker;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.Module;
 import de.digitalcollections.workflow.engine.exceptions.WorkflowSetupException;
+import de.digitalcollections.workflow.engine.jackson.SingleClassModule;
 import de.digitalcollections.workflow.engine.model.Message;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -86,13 +87,15 @@ public class MessageBrokerBuilder {
 
 
   /**
-   * Sets the Jackson {@link ObjectMapper} to use if you do not want to use the default one.
+   * Registers Jackson Modules to use with the object mapper.
    *
-   * @param objectMapper The {@link ObjectMapper}
+   * @param modules The Jackson @{@link Module}s to register
    * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
    */
-  public MessageBrokerBuilder objectMapper(ObjectMapper objectMapper) {
-    config.setObjectMapper(requireNonNull(objectMapper));
+  public MessageBrokerBuilder jacksonModules(Module... modules) {
+    for (Module module : modules) {
+      config.addJacksonModule(module);
+    }
     return this;
   }
 
@@ -129,8 +132,8 @@ public class MessageBrokerBuilder {
    * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
    */
   public MessageBrokerBuilder messageMapping(Class<? extends Message> messageClass, Class<?> messageMixin) {
+    config.addJacksonModule(new SingleClassModule(messageClass, messageMixin));
     config.setMessageClass(messageClass);
-    config.setMessageMixin(messageMixin);
     return this;
   }
 
