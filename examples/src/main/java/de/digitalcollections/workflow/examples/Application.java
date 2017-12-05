@@ -16,17 +16,18 @@ public class Application {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
-  public void run(String... args) throws WorkflowSetupException, IOException {
+  private void run() throws IOException {
     MessageBroker messageBroker = new MessageBrokerBuilder()
         .hostName("localhost")
         .username("guest")
         .password("guest")
-        .exchanges("testExchange", "testDlx")
+        .exchange("workflow")
+        .deadLetterExchange("workflow.dlx")
         .readFrom("someInputQueue")
         .writeTo("someOutputQueue")
         .build();
 
-    Flow<DefaultMessage, String, String> flow = new FlowBuilder<DefaultMessage, String, String>()
+    Flow flow = new FlowBuilder<DefaultMessage, String, String>()
         .read(Message::getType)
         .transform(new UppercaseTransformer(true))
         .write(DefaultMessage::withType)
@@ -39,7 +40,7 @@ public class Application {
 
   public static void main(String[] args) throws IOException, WorkflowSetupException {
     Application application = new Application();
-    application.run(args);
+    application.run();
   }
 
 }

@@ -176,6 +176,7 @@ public class MessageBrokerBuilder {
 
   /**
    * Can be exchanged for testing.
+   *
    * @param config The config to set.
    * @return The connection to the message broker.
    */
@@ -193,11 +194,45 @@ public class MessageBrokerBuilder {
     return new MessageBroker(config, routingConfig, new RabbitClient(config, connection));
   }
 
+  /**
+   * The queue to read from.
+   *
+   * @param inputQueue The queue name to read from.
+   * @return This builder for a fluent interface.
+   */
   public MessageBrokerBuilder readFrom(String inputQueue) {
     if (inputQueue == null || inputQueue.isEmpty()) {
       throw new IllegalArgumentException("The input queue cannot be null or empty.");
     }
     routingConfig.setReadFrom(inputQueue);
+    return this;
+  }
+
+  /**
+   * This queue is used to store messages which failed permanently. Defaults to <code>inputQueue.failed</code>.
+   *
+   * @param name The name of the queue
+   * @return This builder for a fluent interface.
+   */
+  public MessageBrokerBuilder failedQueue(String name) {
+    if (name == null || name.isEmpty()) {
+      throw new IllegalArgumentException("The failed queue cannot be null or empty.");
+    }
+    routingConfig.setFailedQueue(name);
+    return this;
+  }
+
+  /**
+   * This queue is used to store messages to retry them later. Defaults to <code>inputQueue.retry</code>.
+   *
+   * @param name The name of the queue
+   * @return This builder for a fluent interface.
+   */
+  public MessageBrokerBuilder retryQueue(String name) {
+    if (name == null || name.isEmpty()) {
+      throw new IllegalArgumentException("The retry queue cannot be null or empty.");
+    }
+    routingConfig.setRetryQueue(name);
     return this;
   }
 
