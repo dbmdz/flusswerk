@@ -64,7 +64,7 @@ public class Orchestration {
     while ((messageBroker == null) && (totalWait <= maxWait)) {
       try {
         messageBroker = messageBrokerBuilder.build();
-      } catch (WorkflowSetupException | RuntimeException e) {
+      } catch (RuntimeException e) {
         try {
           TimeUnit.MILLISECONDS.sleep(interval);
           totalWait += interval;

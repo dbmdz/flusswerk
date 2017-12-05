@@ -35,6 +35,7 @@ class MessageBrokerTest {
     routingConfig = new RoutingConfig();
     routingConfig.setReadFrom("some.input.queue");
     routingConfig.setWriteTo("some.output.queue");
+    routingConfig.complete();
     rabbitClient = mock(RabbitClient.class);
     messageBroker = new MessageBroker(config, routingConfig, rabbitClient);
     message = DefaultMessage.withType("Hey");

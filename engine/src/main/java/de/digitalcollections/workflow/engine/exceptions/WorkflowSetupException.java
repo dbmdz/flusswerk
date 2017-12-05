@@ -1,9 +1,16 @@
 package de.digitalcollections.workflow.engine.exceptions;
 
-public class WorkflowSetupException extends Exception {
+/**
+ * This exception is thrown when the workflow cannot be started because of configuration issues.
+ */
+public class WorkflowSetupException extends RuntimeException {
 
   public WorkflowSetupException(Throwable cause) {
     super(cause);
+  }
+
+  public WorkflowSetupException(String message) {
+    super(message);
   }
 
 }

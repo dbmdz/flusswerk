@@ -138,14 +138,23 @@ public class MessageBrokerBuilder {
   }
 
   /**
-   * Sets the AMQP exchange and dead letter exchange (optional, defaults to the RabbitMQ defaults). If an exchange does not exist it will be created.
+   * Sets the AMQP exchange (optional, defaults to 'workflow'). If an exchange does not exist it will be created.
    *
    * @param exchange The regular exchange.
+   * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
+   */
+  public MessageBrokerBuilder exchange(String exchange) {
+    routingConfig.setExchange(requireNonNull(exchange));
+    return this;
+  }
+
+  /**
+   * Sets the AMQP dead letter exchange (optional, defaults to 'workflow.dlx'). If an exchange does not exist it will be created.
+   *
    * @param deadLetterExchange The dead letter exchange.
    * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
    */
-  public MessageBrokerBuilder exchanges(String exchange, String deadLetterExchange) {
-    routingConfig.setExchange(requireNonNull(exchange));
+  public MessageBrokerBuilder deadLetterExchange(String deadLetterExchange) {
     routingConfig.setDeadLetterExchange(requireNonNull(deadLetterExchange));
     return this;
   }
@@ -157,6 +166,7 @@ public class MessageBrokerBuilder {
    * @throws WorkflowSetupException If connection to RabbitMQ fails.
    */
   public MessageBroker build() throws WorkflowSetupException {
+    routingConfig.complete();
     try {
       return build(MessageBrokerBuilder::defaultConnectionConstructor);
     } catch (IOException | RuntimeException e) {
@@ -178,6 +188,7 @@ public class MessageBrokerBuilder {
   }
 
   MessageBroker build(Function<ConnectionConfig, MessageBrokerConnection> connectionConstructor) throws IOException {
+    routingConfig.complete();
     MessageBrokerConnection connection = connectionConstructor.apply(connectionConfig);
     return new MessageBroker(config, routingConfig, new RabbitClient(config, connection));
   }

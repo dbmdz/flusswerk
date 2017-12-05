@@ -1,5 +1,7 @@
 package de.digitalcollections.workflow.engine.messagebroker;
 
+import de.digitalcollections.workflow.engine.exceptions.WorkflowSetupException;
+
 import static java.util.Objects.requireNonNull;
 
 class RoutingConfig {
@@ -18,10 +20,26 @@ class RoutingConfig {
   private String retryQueue;
 
   public RoutingConfig() {
-    setExchange("workflow");
-    setDeadLetterExchange("workflow.retry");
     readFrom = null;
     writeTo = null;
+  }
+
+  public void complete() {
+    if (exchange == null) {
+      exchange = "workflow";
+    }
+    if (deadLetterExchange == null) {
+      deadLetterExchange = exchange + ".retry";
+    }
+    if (readFrom == null) {
+      throw new WorkflowSetupException("A workflow always needs an input queue. Please configure 'readFrom'.");
+    }
+    if (failedQueue == null) {
+      failedQueue = readFrom + ".failed";
+    }
+    if (retryQueue == null) {
+      retryQueue = readFrom + ".retry";
+    }
   }
 
   public String getExchange() {
@@ -46,12 +64,7 @@ class RoutingConfig {
 
   public void setReadFrom(String readFrom) {
     this.readFrom = requireNonNull(readFrom);
-    if (failedQueue == null) {
-      failedQueue = readFrom + ".failed";
-    }
-    if (retryQueue == null) {
-      retryQueue = readFrom + ".retry";
-    }
+
   }
 
   public String getWriteTo() {

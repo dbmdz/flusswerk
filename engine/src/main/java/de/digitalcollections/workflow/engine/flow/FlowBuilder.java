@@ -79,4 +79,8 @@ public class FlowBuilder<M extends Message, R, W> {
     return new Flow<>(reader, transformer, writer);
   }
 
+  public static <M extends Message, R, W> FlowBuilder<M, R, W> receiving(Class<M> clazz) {
+    return new FlowBuilder<>();
+  }
+
 }
