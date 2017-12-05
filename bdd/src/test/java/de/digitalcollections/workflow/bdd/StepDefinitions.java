@@ -17,9 +17,9 @@ import org.slf4j.LoggerFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class Stepdefs implements En {
+public class StepDefinitions implements En {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(Stepdefs.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(StepDefinitions.class);
 
   private Orchestration orchestration = Orchestration.getInstance();
 
@@ -30,7 +30,7 @@ public class Stepdefs implements En {
   private String queueToSendTo;
 
 
-  public Stepdefs() {
+  public StepDefinitions() {
     Given("I have an message broker with default config and a message in ([\\w\\.]+)", (String queue) -> {
       messageBroker = orchestration.createMessageBroker(
           new MessageBrokerBuilder()
@@ -43,7 +43,7 @@ public class Stepdefs implements En {
     });
 
     When("the processing always fails", () -> {
-      Flow<String, String> flow = new FlowBuilder<String, String>()
+      Flow<Message, String, String> flow = new FlowBuilder<Message, String, String>()
           .read(Message::getType)
           .transform(s -> {
             throw new RuntimeException("Fail!");
@@ -56,7 +56,7 @@ public class Stepdefs implements En {
     });
 
     When("^the processing always works$", () -> {
-      Flow<String, String> flow = new FlowBuilder<String, String>()
+      Flow<Message, String, String> flow = new FlowBuilder<Message, String, String>()
           .read(Message::getType)
           .transform(s -> s)
           .write(s -> DefaultMessage.withType(s).put("blah", "blubb"))
@@ -101,7 +101,7 @@ public class Stepdefs implements En {
     return message;
   }
 
-  private void start(Flow<String, String> flow) throws IOException, InterruptedException {
+  private void start(Flow<?, ?, ?> flow) throws IOException, InterruptedException {
     orchestration.startEngine(messageBroker, flow);
     messageBroker.send(queueToSendTo, messagesToSend);
   }

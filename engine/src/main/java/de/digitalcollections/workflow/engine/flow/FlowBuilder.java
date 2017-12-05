@@ -12,7 +12,7 @@ import static java.util.Objects.requireNonNull;
  * @param <R> The data type produced by the reader. Input data type of the transformer.
  * @param <W> The data type consumed by the writer. Output data type of the transformer.
  */
-public class FlowBuilder<M, R, W> {
+public class FlowBuilder<M extends Message, R, W> {
 
   private Function<M, R> reader;
 

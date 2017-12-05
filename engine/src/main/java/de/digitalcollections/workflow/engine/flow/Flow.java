@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  * @param <R>
  * @param <W>
  */
-public class Flow<M, R, W> {
+public class Flow<M extends Message, R, W> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Flow.class);
 
