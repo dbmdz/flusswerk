@@ -1,4 +1,4 @@
-package de.digitalcollections.workflow.engine;
+package de.digitalcollections.workflow.engine.flow;
 
 
 import de.digitalcollections.workflow.engine.flow.Flow;

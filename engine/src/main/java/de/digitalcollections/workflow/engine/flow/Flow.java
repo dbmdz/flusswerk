@@ -27,13 +27,7 @@ public class Flow<M extends Message, R, W> {
     this.transformerFactory = transformerFactory;
     this.writerFactory = writerFactory;
   }
-
-  Flow(Function<M, R> reader, Function<R, W> transformer, Function<W, Message> writer) {
-    this.readerFactory = () -> reader;
-    this.transformerFactory = () -> transformer;
-    this.writerFactory = () -> writer;
-  }
-
+  
   public Message process(M message) {
     Job<M, R, W> job = new Job<>(message);
     if (readerFactory != null) {
