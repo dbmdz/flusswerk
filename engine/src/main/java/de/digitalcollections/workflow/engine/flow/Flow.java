@@ -3,11 +3,12 @@ package de.digitalcollections.workflow.engine.flow;
 import de.digitalcollections.workflow.engine.model.Job;
 import de.digitalcollections.workflow.engine.model.Message;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Recipe for the data processing. Every message will be processed by the reader, then the transformer and finally the writer. The transformer can be omitted if <code>R</code> and <code>W</code> are the same.
+ * Recipe for the data processing. Every message will be processed by the readerFactory, then the transformerFactory and finally the writerFactory. The transformerFactory can be omitted if <code>R</code> and <code>W</code> are the same.
  * @param <R>
  * @param <W>
  */
@@ -15,34 +16,40 @@ public class Flow<M extends Message, R, W> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Flow.class);
 
-  private Function<M, R> reader;
+  private Supplier<Function<M, R>> readerFactory;
 
-  private Function<R, W> transformer;
+  private Supplier<Function<R, W>> transformerFactory;
 
-  private Function<W, Message> writer;
+  private Supplier<Function<W, Message>> writerFactory;
 
-  protected Flow(Function<M, R> reader, Function<R, W> transformer, Function<W, Message> writer) {
-    this.reader = reader;
-    this.transformer = transformer;
-    this.writer = writer;
+  public Flow(Supplier<Function<M, R>> readerFactory, Supplier<Function<R, W>> transformerFactory, Supplier<Function<W, Message>> writerFactory) {
+    this.readerFactory = readerFactory;
+    this.transformerFactory = transformerFactory;
+    this.writerFactory = writerFactory;
+  }
+
+  Flow(Function<M, R> reader, Function<R, W> transformer, Function<W, Message> writer) {
+    this.readerFactory = () -> reader;
+    this.transformerFactory = () -> transformer;
+    this.writerFactory = () -> writer;
   }
 
   public Message process(M message) {
-    Job<M, R, W> job = new Job<>(message, reader, transformer, writer);
-    if (reader != null) {
-      job.read();
+    Job<M, R, W> job = new Job<>(message);
+    if (readerFactory != null) {
+      job.read(readerFactory.get());
     }
-    if (transformer != null) {
-      job.transform();
+    if (transformerFactory != null) {
+      job.transform(transformerFactory.get());
     }
-    if (writer != null) {
-      job.write();
+    if (writerFactory != null) {
+      job.write(writerFactory.get());
     }
     return job.getResult();
   }
 
   public boolean writesData() {
-    return writer != null;
+    return writerFactory != null;
   }
 
 }

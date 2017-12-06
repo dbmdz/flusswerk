@@ -143,6 +143,7 @@ class EngineTest {
 
     Engine engine = new Engine(messageBroker, flow);
     Message message = new DefaultMessage();
+
     engine.process(message);
 
     verify(messageBroker).reject(message);

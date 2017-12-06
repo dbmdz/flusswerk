@@ -4,12 +4,6 @@ import java.util.function.Function;
 
 public class Job<M, R, W> {
 
-  private final Function<M, R> reader;
-
-  private final Function<R, W> transformer;
-
-  private final Function<W, Message>  writer;
-
   private R dataRead;
 
   private W dataTransformed;
@@ -18,24 +12,21 @@ public class Job<M, R, W> {
 
   private Message result;
 
-  public Job(M message, Function<M, R> reader, Function<R, W> transformer, Function<W, Message>  writer) {
+  public Job(M message) {
     this.message = message;
-    this.reader = reader;
-    this.transformer = transformer;
-    this.writer = writer;
     this.dataRead = null;
     this.dataTransformed = null;
   }
 
-  public void read() {
+  public void read(Function<M, R> reader) {
     dataRead = reader.apply(message);
   }
 
-  public void transform() {
+  public void transform(Function<R, W> transformer) {
     dataTransformed = transformer.apply(dataRead);
   }
 
-  public void write() {
+  public void write(Function<W, Message>  writer) {
     result = writer.apply(dataTransformed);
   }
 

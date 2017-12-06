@@ -20,7 +20,9 @@ class JobTest {
 
 
   class CheckIfCalled<R, W> implements Function<R, W> {
+
     boolean called = false;
+
     @Override
     public W apply(R r) {
       called = true;
@@ -36,39 +38,24 @@ class JobTest {
   @DisplayName("Read should call the read function")
   void read() {
     CheckIfCalled<Message, String> reader = new CheckIfCalled<>();
-    Job<Message, String, String> job = new Job<>(
-        SOME_MESSAGE,
-        reader,
-        DUMMY_TRANSFORMER,
-        DUMMY_WRITER
-    );
-    job.read();
+    Job<Message, String, String> job = new Job<>(SOME_MESSAGE);
+    job.read(reader);
     assertThat(reader.called).isTrue();
   }
 
   @Test
   void transform() {
     CheckIfCalled<String, String> transformer = new CheckIfCalled<>();
-    Job<Message, String, String> job = new Job<>(
-        SOME_MESSAGE,
-        DUMMY_READER,
-        transformer,
-        DUMMY_WRITER
-    );
-    job.transform();
+    Job<Message, String, String> job = new Job<>(SOME_MESSAGE);
+    job.transform(transformer);
     assertThat(transformer.called).isTrue();
   }
 
   @Test
   void write() {
     CheckIfCalled<String, Message> writer = new CheckIfCalled<>();
-    Job<Message, String, String> job = new Job<>(
-        SOME_MESSAGE,
-        DUMMY_READER,
-        DUMMY_TRANSFORMER,
-        writer
-    );
-    job.write();
+    Job<Message, String, String> job = new Job<>(SOME_MESSAGE);
+    job.write(writer);
     assertThat(writer.called).isTrue();
   }
 
@@ -76,27 +63,17 @@ class JobTest {
   @DisplayName("Read, Transform, Write should pass values along")
   void readTransformWriteShouldPassValues() {
     String message = "Jolene, Jolene, Jolene, Jolene";
-    Job<Message, String, String> job = new Job<>(
-        DefaultMessage.withType(message),
-        Message::getType,
-        String::toUpperCase,
-        DefaultMessage::new
-    );
-    job.read();
-    job.transform();
-    job.write();
+    Job<Message, String, String> job = new Job<>(DefaultMessage.withType(message));
+    job.read(Message::getType);
+    job.transform(String::toUpperCase);
+    job.write(DefaultMessage::new);
     assertThat(job.getResult()).returns(message.toUpperCase(), from(Message::getType));
   }
 
   @Test
   void getMessage() {
     Message message = DefaultMessage.withType("Wuthering Heights");
-    Job<Message, String, String> job = new Job<>(
-        message,
-        DUMMY_READER,
-        DUMMY_TRANSFORMER,
-        DUMMY_WRITER
-    );
+    Job<Message, String, String> job = new Job<>(message);
     assertThat(job.getMessage()).isEqualTo(message);
   }
 
