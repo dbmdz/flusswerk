@@ -83,7 +83,7 @@ class EngineTest {
     executorService.submit(engine::start);
 
     int millisecondsWaited = 0;
-    while (engine.getAvailableWorkers() > 0 && millisecondsWaited < 1000) {
+    while (engine.getAvailableWorkers() > 0 && millisecondsWaited < 10000) {
       millisecondsWaited += 10;
       TimeUnit.MILLISECONDS.sleep(10);
     }
