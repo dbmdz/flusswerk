@@ -97,6 +97,33 @@ class Application {
 }
 ```
 
+## Isolating messages with suppliers
+
+By using the same instance of an reader, transformer or writer for every message it is easy to introduce side-effects and thread-safety issues. Therefore, `FlowBuilder` supports Suppliers to create a new instance for every message.  
+
+This example uses a custom Supplier implementation for `Reader` and a supplier lambda for `Transformer`. The same instance of `Writer` is used for every message:
+
+```java
+class ReaderSupplier implements java.util.function.Supplier<Reader> {
+    public Reader get() {
+        return new Reader();
+    }
+}
+
+class Application {
+  public static void main(String[] args) {
+    // ...
+    Flow flow = new FlowBuilder<DefaultMessage, String, String>()
+        .read(new ReaderSuppiler())
+        .transform(() -> new Transformer())
+        .write(new Writer())
+        .build();
+    // ...
+  }
+}
+```  
+
+
 ## How to use a custom message implementation
 
 The default message implementation `DefaultMessage` allows to set arbitrary key-value-pairs of type `String`. To use custom message it has to be registered:
