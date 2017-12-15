@@ -1,58 +1,16 @@
 package de.digitalcollections.workflow.engine.messagebroker;
 
 import com.fasterxml.jackson.databind.Module;
-import de.digitalcollections.workflow.engine.model.DefaultMessage;
 import de.digitalcollections.workflow.engine.model.Message;
-import java.util.ArrayList;
 import java.util.List;
 
-class MessageBrokerConfig {
+public interface MessageBrokerConfig {
 
-  private int deadLetterWait;
+  int getDeadLetterWait();
 
-  private int maxRetries;
+  int getMaxRetries();
 
-  private List<Module> jacksonModules;
+  Class<? extends Message> getMessageClass();
 
-  private Class<? extends Message> messageClass;
-
-  public MessageBrokerConfig() {
-    jacksonModules = new ArrayList<>();
-    setMaxRetries(5);
-    setDeadLetterWait(30 * 1000);
-    setMessageClass(DefaultMessage.class);
-  }
-
-  public int getDeadLetterWait() {
-    return deadLetterWait;
-  }
-
-  public void setDeadLetterWait(int milliseconds) {
-    this.deadLetterWait = milliseconds;
-  }
-
-  public int getMaxRetries() {
-    return maxRetries;
-  }
-
-  public void setMaxRetries(int maxRetries) {
-    this.maxRetries = maxRetries;
-  }
-
-  public Class<? extends Message> getMessageClass() {
-    return messageClass;
-  }
-
-  public void setMessageClass(Class<? extends Message> messageClass) {
-    this.messageClass = messageClass;
-  }
-
-  public void addJacksonModule(Module jacksonModule) {
-    this.jacksonModules.add(jacksonModule);
-  }
-
-  public List<Module> getJacksonModules() {
-    return jacksonModules;
-  }
-
+  List<Module> getJacksonModules();
 }

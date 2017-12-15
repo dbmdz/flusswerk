@@ -20,7 +20,7 @@ import static org.mockito.Mockito.verify;
 
 class MessageBrokerTest {
 
-  private MessageBrokerConfig config = new MessageBrokerConfig();
+  private MessageBrokerConfig config = new MessageBrokerConfigImpl();
 
   private MessageBroker messageBroker;
 
@@ -28,11 +28,11 @@ class MessageBrokerTest {
 
   private RabbitClient rabbitClient;
 
-  private RoutingConfig routingConfig;
+  private RoutingConfigImpl routingConfig;
 
   @BeforeEach
   void setUp() throws IOException, TimeoutException {
-    routingConfig = new RoutingConfig();
+    routingConfig = new RoutingConfigImpl();
     routingConfig.setReadFrom("some.input.queue");
     routingConfig.setWriteTo("some.output.queue");
     routingConfig.complete();

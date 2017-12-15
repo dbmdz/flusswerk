@@ -28,7 +28,7 @@ import static org.mockito.Mockito.when;
 
 class RabbitClientTest {
 
-  private MessageBrokerConfig config = new MessageBrokerConfig();
+  private MessageBrokerConfigImpl config = new MessageBrokerConfigImpl();
 
   private MessageBrokerConnection connection;
 

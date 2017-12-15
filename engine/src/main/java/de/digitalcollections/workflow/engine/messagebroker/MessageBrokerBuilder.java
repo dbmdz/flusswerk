@@ -15,16 +15,16 @@ import static java.util.Objects.requireNonNull;
  */
 public class MessageBrokerBuilder {
 
-  private final ConnectionConfig connectionConfig;
+  private final ConnectionConfigImpl connectionConfig;
 
-  private final MessageBrokerConfig config;
+  private final MessageBrokerConfigImpl config;
 
-  private final RoutingConfig routingConfig;
+  private final RoutingConfigImpl routingConfig;
 
   public MessageBrokerBuilder() {
-    config = new MessageBrokerConfig();
-    connectionConfig = new ConnectionConfig();
-    routingConfig = new RoutingConfig();
+    config = new MessageBrokerConfigImpl();
+    connectionConfig = new ConnectionConfigImpl();
+    routingConfig = new RoutingConfigImpl();
   }
 
   /**

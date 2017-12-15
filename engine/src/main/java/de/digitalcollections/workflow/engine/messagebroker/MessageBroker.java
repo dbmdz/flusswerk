@@ -17,19 +17,15 @@ public class MessageBroker {
   private static final String MESSAGE_TTL = "x-message-ttl";
   private static final String DEAD_LETTER_EXCHANGE = "x-dead-letter-exchange";
 
-  private final int deadLetterWait;
-
-  private int maxRetries;
+  private MessageBrokerConfig config;
 
   private RoutingConfig routingConfig;
 
   private final RabbitClient rabbitClient;
 
   MessageBroker(MessageBrokerConfig config, RoutingConfig routingConfig, RabbitClient rabbitClient) throws IOException {
-    deadLetterWait = config.getDeadLetterWait();
-    maxRetries = config.getMaxRetries();
+    this.config = config;
     this.routingConfig = routingConfig;
-
     this.rabbitClient = rabbitClient;
 
     provideExchanges();
@@ -110,7 +106,7 @@ public class MessageBroker {
     rabbitClient.declareQueue(readFrom, exchange, readFrom, null);
     rabbitClient.declareQueue(retryQueue, deadLetterExchange, readFrom,
         Maps.of(
-            MESSAGE_TTL, deadLetterWait,
+            MESSAGE_TTL, config.getDeadLetterWait(),
             DEAD_LETTER_EXCHANGE, exchange)
     );
     rabbitClient.declareQueue(failedQueue, exchange, failedQueue, null);
@@ -145,7 +141,7 @@ public class MessageBroker {
   public void reject(Message message) throws IOException {
     final Meta meta = message.getMeta();
     ack(message);
-    if (meta.getRetries() < maxRetries) {
+    if (meta.getRetries() < config.getMaxRetries()) {
       meta.setRetries(meta.getRetries() + 1);
       retry(message);
     } else if (routingConfig.hasFailedQueue()) {
@@ -166,13 +162,8 @@ public class MessageBroker {
     rabbitClient.provideExchange(routingConfig.getDeadLetterExchange());
   }
 
-
-  public int getDeadLetterWait() {
-    return deadLetterWait;
-  }
-
-  public int getMaxRetries() {
-    return maxRetries;
+  public MessageBrokerConfig getConfig() {
+    return config;
   }
 
 }

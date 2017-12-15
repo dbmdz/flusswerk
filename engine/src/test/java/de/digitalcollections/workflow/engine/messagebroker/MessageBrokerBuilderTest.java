@@ -133,7 +133,7 @@ class MessageBrokerBuilderTest {
   @DisplayName("Default dead letter backoff time is 30s")
   void defaultDeadLetterWait() throws IOException {
     messageBroker = messageBrokerBuilder.build(create_connection);
-    assertThat(messageBroker.getDeadLetterWait()).isEqualTo(30 * 1000);
+    assertThat(messageBroker.getConfig().getDeadLetterWait()).isEqualTo(30 * 1000);
   }
 
   @Test
@@ -142,14 +142,14 @@ class MessageBrokerBuilderTest {
     messageBroker = messageBrokerBuilder
         .deadLetterWait(321)
         .build(create_connection);
-    assertThat(messageBroker.getDeadLetterWait()).isEqualTo(321);
+    assertThat(messageBroker.getConfig().getDeadLetterWait()).isEqualTo(321);
   }
 
   @Test
   @DisplayName("Default max retries is 5")
   void defaultMaxRetries() throws IOException {
     messageBroker = messageBrokerBuilder.build(create_connection);
-    assertThat(messageBroker.getMaxRetries()).isEqualTo(5);
+    assertThat(messageBroker.getConfig().getMaxRetries()).isEqualTo(5);
   }
 
   @Test
@@ -158,7 +158,7 @@ class MessageBrokerBuilderTest {
     messageBroker = messageBrokerBuilder
         .maxRetries(42)
         .build(create_connection);
-    assertThat(messageBroker.getMaxRetries()).isEqualTo(42);
+    assertThat(messageBroker.getConfig().getMaxRetries()).isEqualTo(42);
   }
 
   @Test
