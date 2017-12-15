@@ -123,6 +123,27 @@ class Application {
 }
 ```  
 
+## Sending messages to arbitrary queues
+
+The Writer always sends a message to the defined output queue, which satisfies most use cases. For more complex workflows the MessageBroke can be used to send messages to any queue you like:
+
+```java
+class Writer implements Function<String, Message> {
+  private final MessageBroker messageBroker;
+  public Writer(MessageBroker messageBroker) {
+    this.messageBroker = requireNonNull(messageBroker);
+  }
+  public Message apply(String value) {
+    // ...
+    // Notify other workflow jobs
+    messageBroker.send("ocr", DefaultMessage.withId("1000001"));
+    messageBroker.send("iiif", DefaultMessage.withId("1000001"));
+    messageBroker.send("import", DefaultMessage.withId("1000001"));
+    // ...
+  }
+}
+```
+
 
 ## How to use a custom message implementation
 
