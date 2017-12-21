@@ -71,11 +71,10 @@ class Transformer implements Function<String, String> {
   }  
 }
 
-class Writer implements Function<Receipt, Message> { 
+class Writer implements Function<String, Message> { 
     Message apply(String output) {
-      return message.get("value");
+      return DefaultMessage.withType("your.type").put("value", output);
     }
-
  }
 
 class Application {
