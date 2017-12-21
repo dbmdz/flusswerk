@@ -176,18 +176,18 @@ class Application {
 Everything will be created if it does not exist:
 
 | Property                                        | default               | Meaning     |
-| ----------------------------------------------- | --------------------- | ------------------------------------------ | 
-| `readFrom(String inputQueue)`                   | -                     | Queue to read incoming messages from       |
-| `writeTo(String outputRoutingKey)`              | -                     | Queue to write outgoing messages to        |
-| `retryQueue(String name)`                       | `<inputQueue>.retry`  | Queue to store messages to retry           |
-| `failedQueue(String name)`                      | `<inputQueue>.failed` | Queue to store permanently failed messages |
-| `exchange(String exchange)`                     | `workflow`            | RabbitMQ dead letter exchange to use       |
-| `deadLetterExchange(String deadLetterExchange)` | `workflow.retry`      | RabbitMQ de                                |
-| `maxRetries(int number)`                        | `5`                   |                                            |
+| ----------------------------------------------- | --------------------- | ------------------------------------------------------------------- | 
+| `readFrom(String inputQueue)`                   | -                     | Queue to read incoming messages from                                |
+| `writeTo(String outputRoutingKey)`              | -                     | Queue to write outgoing messages to                                 |
+| `retryQueue(String name)`                       | `<inputQueue>.retry`  | Queue to store messages to retry                                    |
+| `failedQueue(String name)`                      | `<inputQueue>.failed` | Queue to store permanently failed messages                          |
+| `exchange(String exchange)`                     | `workflow`            | RabbitMQ exchange for routing messages                              |
+| `deadLetterExchange(String deadLetterExchange)` | `workflow.retry`      | RabbitMQ dead letter exchange to reroute failed messages            |
+| `maxRetries(int number)`                        | `5`                   | The number of retries until a message is routed to the failed queue |
 
 ### Jackson Mapping
 
 | Property                                                                       | Meaning                                                   |
 | ------------------------------------------------------------------------------ | --------------------------------------------------------- |
-| `jacksonModules(Module... modules)`                                            | A list of Jackson Modules to configura arbitrary Mappings |
+| `jacksonModules(Module... modules)`                                            | A list of Jackson Modules to configure arbitrary Mappings |
 | `messageMapping(Class<? extends Message> messageClass, Class<?> messageMixin)` | Set a custom message type and its Jackson Mapping         |
