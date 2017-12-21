@@ -89,10 +89,10 @@ class EngineTest {
     }
 
     EngineStats engineStats = engine.getStats();
-    assertThat(engineStats.getActiveWorkers())
-        .isEqualTo(engineStats.getConcurrentWorkers())
-        .as("There were {} workers expected, but only {} running after waiting for {} ms",
-            engineStats.getActiveWorkers(), engineStats.getConcurrentWorkers(), millisecondsWaited);
+    assertThat(engineStats.getActiveWorkers()).as("There were {} workers expected, but only {} running after waiting for {} ms",
+        engineStats.getActiveWorkers(), engineStats.getConcurrentWorkers(), millisecondsWaited)
+        .isEqualTo(engineStats.getConcurrentWorkers());
+
     engine.stop();
   }
 
