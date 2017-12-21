@@ -2,7 +2,6 @@ package de.digitalcollections.workflow.engine;
 
 import de.digitalcollections.workflow.engine.flow.Flow;
 import de.digitalcollections.workflow.engine.messagebroker.MessageBroker;
-import de.digitalcollections.workflow.engine.model.DefaultMessage;
 import de.digitalcollections.workflow.engine.model.Message;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -13,6 +12,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+/**
+ * Run flows {@link Flow} for every message from the {@link MessageBroker} - usually several in parallel.
+ */
 public class Engine {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Engine.class);
@@ -33,10 +36,25 @@ public class Engine {
 
   private AtomicInteger activeWorkers;
 
+  /**
+   * Creates a new Engine instance with {@value DEFAULT_CONCURRENT_WORKERS} concurrent workers.
+   *
+   * @param messageBroker the message broker to get messages from or send messages to
+   * @param flow the flow to execute agains every message
+   * @throws IOException if reading/writing to the message broker fails
+   */
   public Engine(MessageBroker messageBroker, Flow flow) throws IOException {
     this(messageBroker, flow, DEFAULT_CONCURRENT_WORKERS);
   }
 
+  /**
+   * Creates a new Engine instance with a fixed number of concurrent workers.
+   *
+   * @param messageBroker the message broker to get messages from or send messages to
+   * @param flow the flow to execute agains every message
+   * @param concurrentWorkers the number of concurrent workers
+   * @throws IOException if reading/writing to the message broker fails
+   */
   public Engine(MessageBroker messageBroker, Flow flow, int concurrentWorkers) throws IOException {
     this.messageBroker = messageBroker;
     this.flow = flow;
@@ -46,6 +64,10 @@ public class Engine {
     this.activeWorkers = new AtomicInteger();
   }
 
+  /**
+   * Starts processing messages until {@link Engine#stop()} is called. If there are no
+   * messages in the input queue, the engine waits for new messages to arrive.
+   */
   public void start() {
     LOGGER.debug("Starting engine...");
     running = true;
@@ -95,29 +117,25 @@ public class Engine {
     }
   }
 
-  public void createTestMessages(int n) throws IOException {
-    for (int i = 0; i < n; i++) {
-      String message = String.format("Test message #%d of %d", i, n);
-      messageBroker.send(DefaultMessage.withType(message));
-    }
-  }
-
+  /**
+   * Stops processing new messages or waiting for new messages to arrive. This usually means that
+   * the application will shut down when the last worker finished.
+   */
   public void stop() {
     running = false;
     LOGGER.debug("Stopping engine...");
   }
 
-
-  public int getConcurrentWorkers() {
-    return concurrentWorkers;
-  }
-
-  public int getActiveWorkers() {
-    return activeWorkers.get();
-  }
-
-  public int getAvailableWorkers() {
-    return semaphore.availablePermits();
+  /**
+   *
+   * @return statistics about the engine's state like active workers
+   */
+  public EngineStats getStats() {
+    return new EngineStats(
+        concurrentWorkers,
+        activeWorkers.get(),
+        semaphore.availablePermits()
+    );
   }
 
 }

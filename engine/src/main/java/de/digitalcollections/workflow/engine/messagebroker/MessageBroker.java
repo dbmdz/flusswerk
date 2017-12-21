@@ -1,5 +1,6 @@
 package de.digitalcollections.workflow.engine.messagebroker;
 
+import de.digitalcollections.workflow.engine.model.DefaultMessage;
 import de.digitalcollections.workflow.engine.model.Message;
 import de.digitalcollections.workflow.engine.model.Meta;
 import de.digitalcollections.workflow.engine.util.Maps;
@@ -164,6 +165,18 @@ public class MessageBroker {
 
   public MessageBrokerConfig getConfig() {
     return config;
+  }
+
+  /**
+   * Sends numbered test messages to the input queue.
+   * @param n the number of messages to send
+   * @throws IOException if sending a messages fails
+   */
+  public void createTestMessages(int n) throws IOException {
+    for (int i = 0; i < n; i++) {
+      String message = String.format("Test message #%d of %d", i, n);
+      send(routingConfig.getReadFrom(), DefaultMessage.withType(message));
+    }
   }
 
 }
