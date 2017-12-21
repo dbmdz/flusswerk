@@ -83,14 +83,18 @@ class EngineTest {
     executorService.submit(engine::start);
 
     int millisecondsWaited = 0;
-    while (engine.getStats().getAvailableWorkers() > 0 && millisecondsWaited < 300000) {
-      millisecondsWaited += 10;
-      TimeUnit.MILLISECONDS.sleep(10);
+    EngineStats engineStats = engine.getStats();
+    boolean shouldWait = engineStats.getAvailableWorkers() > 0;
+    while (shouldWait) {
+      LOGGER.info("Waiting for workers to get busy: {} active, {} free after {} ms", engineStats.getActiveWorkers(), engineStats.getAvailableWorkers(), millisecondsWaited);
+      millisecondsWaited += 100;
+      TimeUnit.MILLISECONDS.sleep(100);
+      engineStats = engine.getStats();
+      shouldWait = (engineStats.getAvailableWorkers() > 0) && (millisecondsWaited < 300000);
     }
 
-    EngineStats engineStats = engine.getStats();
     assertThat(engineStats.getActiveWorkers()).as("There were %d workers expected, but only %d running after waiting for %d ms",
-        engineStats.getActiveWorkers(), engineStats.getConcurrentWorkers(), millisecondsWaited)
+        engineStats.getConcurrentWorkers(), engineStats.getActiveWorkers(), millisecondsWaited)
         .isEqualTo(engineStats.getConcurrentWorkers());
 
     engine.stop();
