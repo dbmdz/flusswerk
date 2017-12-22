@@ -23,4 +23,3 @@ deploy:
   skip_cleanup: true
   on:
     tags: true
-  body: $TRAVIS_COMMIT_MESSAGE
