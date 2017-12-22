@@ -12,7 +12,7 @@ public interface Message<ID> {
    *
    * @return An object containing the messages technical metadata.
    */
-  Meta getMeta();
+  Envelope getEnvelope();
 
   /**
    * The optional message type is represented by an arbitrary string value to distinguish different events on the same queue.

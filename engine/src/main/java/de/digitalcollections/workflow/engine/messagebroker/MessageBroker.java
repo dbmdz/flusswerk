@@ -1,7 +1,7 @@
 package de.digitalcollections.workflow.engine.messagebroker;
 
+import de.digitalcollections.workflow.engine.model.Envelope;
 import de.digitalcollections.workflow.engine.model.Message;
-import de.digitalcollections.workflow.engine.model.Meta;
 import de.digitalcollections.workflow.engine.util.Maps;
 import java.io.IOException;
 import java.util.Collection;
@@ -139,10 +139,10 @@ public class MessageBroker {
    * @throws IOException if communication with RabbitMQ failed
    */
   public void reject(Message message) throws IOException {
-    final Meta meta = message.getMeta();
+    final Envelope envelope = message.getEnvelope();
     ack(message);
-    if (meta.getRetries() < config.getMaxRetries()) {
-      meta.setRetries(meta.getRetries() + 1);
+    if (envelope.getRetries() < config.getMaxRetries()) {
+      envelope.setRetries(envelope.getRetries() + 1);
       retry(message);
     } else if (routingConfig.hasFailedQueue()) {
       fail(message);

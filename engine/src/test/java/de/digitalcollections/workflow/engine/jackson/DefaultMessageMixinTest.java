@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import de.digitalcollections.workflow.engine.model.DefaultMessage;
+import de.digitalcollections.workflow.engine.model.Envelope;
 import de.digitalcollections.workflow.engine.model.Message;
-import de.digitalcollections.workflow.engine.model.Meta;
 import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -39,7 +39,7 @@ class DefaultMessageMixinTest {
   void setUp() {
     objectMapper = new ObjectMapper();
     objectMapper.addMixIn(Message.class, DefaultMessageMixin.class);
-    objectMapper.addMixIn(Meta.class, MetaMixin.class);
+    objectMapper.addMixIn(Envelope.class, MetaMixin.class);
     objectMapper.registerModule(new JavaTimeModule());
     objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     objectMapper.enable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
@@ -71,20 +71,20 @@ class DefaultMessageMixinTest {
   }
 
   @Test
-  @DisplayName("Should serialize Meta.retries")
+  @DisplayName("Should serialize Envelope.retries")
   void shouldSerializeRetries() throws JsonProcessingException {
     DefaultMessage message = DefaultMessage.withType("something happened");
-    message.getMeta().setRetries(42);
+    message.getEnvelope().setRetries(42);
     assertThat(objectMapper.writeValueAsString(message)).contains("42");
   }
 
   @Test
-  @DisplayName("Should deserialize Meta.retries")
+  @DisplayName("Should deserialize Envelope.retries")
   void shouldDeserializeRetries() throws IOException {
     DefaultMessage message = DefaultMessage.withType("something happened");
-    message.getMeta().setRetries(42);
+    message.getEnvelope().setRetries(42);
     Message deserialized = objectMapper.readValue(objectMapper.writeValueAsString(message), DefaultMessage.class);
-    assertThat(deserialized.getMeta().getRetries()).isEqualTo(42);
+    assertThat(deserialized.getEnvelope().getRetries()).isEqualTo(42);
 
   }
 

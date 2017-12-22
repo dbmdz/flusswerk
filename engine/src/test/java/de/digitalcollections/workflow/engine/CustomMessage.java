@@ -1,7 +1,7 @@
 package de.digitalcollections.workflow.engine;
 
+import de.digitalcollections.workflow.engine.model.Envelope;
 import de.digitalcollections.workflow.engine.model.Message;
-import de.digitalcollections.workflow.engine.model.Meta;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,7 +9,7 @@ import static java.util.Objects.requireNonNull;
 
 public class CustomMessage implements Message<Long> {
 
-  private Meta meta;
+  private Envelope envelope;
 
   private Map<String, String> data;
 
@@ -23,15 +23,15 @@ public class CustomMessage implements Message<Long> {
 
 
   public CustomMessage(String type) {
-    this.meta = new Meta();
+    this.envelope = new Envelope();
     this.data = new HashMap<>();
     this.put("type", type);
   }
 
 
   @Override
-  public Meta getMeta() {
-    return meta;
+  public Envelope getEnvelope() {
+    return envelope;
   }
 
   @Override

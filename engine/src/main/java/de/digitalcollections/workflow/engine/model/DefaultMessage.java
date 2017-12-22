@@ -7,7 +7,7 @@ import static java.util.Objects.requireNonNull;
 
 public class DefaultMessage implements Message<String> {
 
-  private Meta meta;
+  private Envelope envelope;
 
   private Map<String, String> data;
 
@@ -20,15 +20,15 @@ public class DefaultMessage implements Message<String> {
   }
 
   protected DefaultMessage(String type, String id) {
-    this.meta = new Meta();
+    this.envelope = new Envelope();
     this.data = new HashMap<>();
     this.put("type", type);
     this.put("id", id);
   }
 
   @Override
-  public Meta getMeta() {
-    return meta;
+  public Envelope getEnvelope() {
+    return envelope;
   }
 
   @Override
@@ -77,6 +77,6 @@ public class DefaultMessage implements Message<String> {
 
   @Override
   public String toString() {
-    return "Message{meta=" + meta + ", data=" + data + "}";
+    return "Message{envelope=" + envelope + ", data=" + data + "}";
   }
 }

@@ -84,7 +84,7 @@ public class Engine {
           continue;
         }
 
-        LOGGER.debug("Checking for new message (available semaphores: {}), got {}", semaphore.availablePermits(), message.getMeta().getBody());
+        LOGGER.debug("Checking for new message (available semaphores: {}), got {}", semaphore.availablePermits(), message.getEnvelope().getBody());
 
         executorService.execute(() -> {
           activeWorkers.incrementAndGet();
@@ -109,10 +109,10 @@ public class Engine {
       messageBroker.ack(message);
     } catch (RuntimeException | IOException e) {
       try {
-        LOGGER.debug("Reject message because of processing error: {}", message.getMeta().getBody(), e);
+        LOGGER.debug("Reject message because of processing error: {}", message.getEnvelope().getBody(), e);
         messageBroker.reject(message);
       } catch (IOException e1) {
-        LOGGER.error("Could not reject message" + message.getMeta().getBody(), e1);
+        LOGGER.error("Could not reject message" + message.getEnvelope().getBody(), e1);
       }
     }
   }

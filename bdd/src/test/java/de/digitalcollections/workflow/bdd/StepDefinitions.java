@@ -69,7 +69,7 @@ public class StepDefinitions implements En {
     Then("the message in queue ([\\w\\.]+) has (\\d+) retries", (String queue, Integer retries) -> {
       Message<?> message = waitForMessageFrom(queue);
       messageBroker.ack(message);
-      assertThat(message.getMeta().getRetries()).isEqualTo(5);
+      assertThat(message.getEnvelope().getRetries()).isEqualTo(5);
     });
 
     Then("^the message in queue ([\\w\\.]+) has a field ([\\w\\.]+) with value ([\\w\\.]+)$", (String queue, String field, String value) -> {

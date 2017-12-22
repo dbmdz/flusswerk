@@ -2,14 +2,13 @@ package de.digitalcollections.workflow.engine.messagebroker;
 
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.GetResponse;
 import de.digitalcollections.workflow.engine.CustomMessage;
 import de.digitalcollections.workflow.engine.CustomMessageMixin;
 import de.digitalcollections.workflow.engine.jackson.SingleClassModule;
 import de.digitalcollections.workflow.engine.model.DefaultMessage;
+import de.digitalcollections.workflow.engine.model.Envelope;
 import de.digitalcollections.workflow.engine.model.Message;
-import de.digitalcollections.workflow.engine.model.Meta;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -49,9 +48,9 @@ class RabbitClientTest {
   @Test
   void ack() throws IOException {
     RabbitClient rabbitClient = new RabbitClient(config, connection);
-    message.getMeta().setDeliveryTag(123123123);
+    message.getEnvelope().setDeliveryTag(123123123);
     rabbitClient.ack(message);
-    verify(channel).basicAck(eq(message.getMeta().getDeliveryTag()), eq(false));
+    verify(channel).basicAck(eq(message.getEnvelope().getDeliveryTag()), eq(false));
   }
 
   @Test
@@ -92,11 +91,11 @@ class RabbitClientTest {
 
     when(channel.basicGet(inputQueue, false)).thenReturn(response);
     Message message = rabbitClient.receive(inputQueue);
-    assertThat(message.getMeta())
-        .returns(body, from(Meta::getBody))
-        .returns(deliveryTag, from(Meta::getDeliveryTag))
-        .returns(retries, from(Meta::getRetries))
-        .returns(timestamp, from(Meta::getTimestamp));
+    assertThat(message.getEnvelope())
+        .returns(body, from(Envelope::getBody))
+        .returns(deliveryTag, from(Envelope::getDeliveryTag))
+        .returns(retries, from(Envelope::getRetries))
+        .returns(timestamp, from(Envelope::getTimestamp));
     assertThat(message)
         .returns(messageType, from(Message::getType))
         .returns(messageId, from(Message<String>::getId));
@@ -104,13 +103,13 @@ class RabbitClientTest {
 
   private Message<String> createMessage(String messageType, String messageId, int retries, LocalDateTime timestamp) throws IOException {
     Message<String> messageToReceive = DefaultMessage.withType(messageType).andId(messageId);
-    messageToReceive.getMeta().setRetries(retries);
-    messageToReceive.getMeta().setTimestamp(timestamp);
+    messageToReceive.getEnvelope().setRetries(retries);
+    messageToReceive.getEnvelope().setTimestamp(timestamp);
     return messageToReceive;
   }
 
   private GetResponse createResponse(long deliveryTag, Message<?> message, RabbitClient rabbitClient) throws IOException {
-    Envelope envelope = new Envelope(deliveryTag, true, "workflow", "some.input.queue");
+    com.rabbitmq.client.Envelope envelope = new com.rabbitmq.client.Envelope(deliveryTag, true, "workflow", "some.input.queue");
     BasicProperties basicProperties = new BasicProperties.Builder().build();
     return new GetResponse(
         envelope,

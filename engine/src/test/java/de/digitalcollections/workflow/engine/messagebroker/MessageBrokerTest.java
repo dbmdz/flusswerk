@@ -62,7 +62,7 @@ class MessageBrokerTest {
     for (int i = 0; i < numberOfRejections; i++) {
       messageBroker.reject(message);
     }
-    assertThat(message.getMeta().getRetries()).isEqualTo(numberOfRejections);
+    assertThat(message.getEnvelope().getRetries()).isEqualTo(numberOfRejections);
   }
 
   @Test

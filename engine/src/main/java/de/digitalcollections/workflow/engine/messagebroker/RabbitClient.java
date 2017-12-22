@@ -9,8 +9,8 @@ import com.rabbitmq.client.GetResponse;
 import de.digitalcollections.workflow.engine.jackson.DefaultMessageMixin;
 import de.digitalcollections.workflow.engine.jackson.MetaMixin;
 import de.digitalcollections.workflow.engine.model.DefaultMessage;
+import de.digitalcollections.workflow.engine.model.Envelope;
 import de.digitalcollections.workflow.engine.model.Message;
-import de.digitalcollections.workflow.engine.model.Meta;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -41,7 +41,7 @@ class RabbitClient {
     objectMapper = new ObjectMapper();
     messageClass = config.getMessageClass();
     objectMapper.registerModules(config.getJacksonModules());
-    objectMapper.addMixIn(Meta.class, MetaMixin.class);
+    objectMapper.addMixIn(Envelope.class, MetaMixin.class);
     objectMapper.registerModule(new JavaTimeModule());
     if (objectMapper.findMixInClassFor(Message.class) == null) {
       objectMapper.addMixIn(DefaultMessage.class, DefaultMessageMixin.class);
@@ -66,7 +66,7 @@ class RabbitClient {
   }
 
   public void ack(Message message) throws IOException {
-    channel.basicAck(message.getMeta().getDeliveryTag(), SINGLE_MESSAGE);
+    channel.basicAck(message.getEnvelope().getDeliveryTag(), SINGLE_MESSAGE);
   }
 
   public Message receive(String queueName) throws IOException {
@@ -74,8 +74,8 @@ class RabbitClient {
     if (response != null) {
       String body = new String(response.getBody(), StandardCharsets.UTF_8);
       Message message = deserialize(body);
-      message.getMeta().setBody(body);
-      message.getMeta().setDeliveryTag(response.getEnvelope().getDeliveryTag());
+      message.getEnvelope().setBody(body);
+      message.getEnvelope().setDeliveryTag(response.getEnvelope().getDeliveryTag());
       return message;
     }
     return null;

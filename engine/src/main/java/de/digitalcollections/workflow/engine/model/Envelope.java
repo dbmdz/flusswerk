@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 /**
  * Technical metadata all implementations of {@link Message} must have.
  */
-public class Meta {
+public class Envelope {
 
   private String body;
 
@@ -16,9 +16,9 @@ public class Meta {
   private LocalDateTime timestamp;
 
   /**
-   * Default constructor setting the Meta.timestamp to now.
+   * Default constructor setting the Envelope.timestamp to now.
    */
-  public Meta() {
+  public Envelope() {
     timestamp = LocalDateTime.now();
   }
 
@@ -96,6 +96,6 @@ public class Meta {
 
   @Override
   public String toString() {
-    return "Meta{deliveryTag=" + deliveryTag + ", retries=" + retries + "}";
+    return "Envelope{deliveryTag=" + deliveryTag + ", retries=" + retries + "}";
   }
 }
