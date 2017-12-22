@@ -13,6 +13,11 @@
 
   <name>Digital Collections Workflow Examples</name>
 
+  <properties>
+    <version.spring-boot-starter>1.5.8.RELEASE</version.spring-boot-starter>
+    <version.jackson-annotations>2.9.0</version.jackson-annotations>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>ch.qos.logback</groupId>
@@ -21,6 +26,26 @@
     <dependency>
       <groupId>de.digitalcollections.workflow</groupId>
       <artifactId>dc-workflow-engine</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter</artifactId>
+      <version>${version.spring-boot-starter}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>${version.jackson-annotations}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
