@@ -34,7 +34,7 @@ public class Application {
         .build();
 
     Engine engine = new Engine(messageBroker, flow);
-    messageBroker.createTestMessages(500);
+    messageBroker.send("someInputQueue", DefaultMessage.withType("lowercase-text").put("text", "Shibuyara"));
     engine.start();
   }
 
