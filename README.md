@@ -4,8 +4,8 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![codebeat badge](https://codebeat.co/badges/8a7dab47-377e-428f-a46e-e3f9fb6cf68d)](https://codebeat.co/projects/github-com-dbmdz-workflow-master)
 [![codecov](https://codecov.io/gh/dbmdz/workflow/branch/master/graph/badge.svg)](https://codecov.io/gh/dbmdz/workflow)
-
-
+[![Javadocs](https://javadoc.io/badge/de.digitalcollections.workflow/dc-workflow-engine.svg)](https://javadoc.io/doc/de.digitalcollections.workflow/dc-workflow-engine)
+[![Maven Central](https://img.shields.io/maven-central/v/de.digitalcollections.workflow/dc-workflow-engine.svg)]()
 The digital collections workflow engine makes it easy to create multithreaded workers for read-transform-write chains (aka ETL jobs). Workflows are coordinated via RabbitMQ, so it's easy to create chains of independent workflow jobs (each a new Java Application).
 
 Maven:
