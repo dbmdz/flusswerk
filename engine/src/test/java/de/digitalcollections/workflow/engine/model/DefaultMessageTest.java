@@ -8,7 +8,7 @@ class DefaultMessageTest {
 
   @Test
   void putCanBeChained() {
-    DefaultMessage message = DefaultMessage.withType("sundry").put("first", "is the first").put("second", "is the second");
+    DefaultMessage message = DefaultMessage.withId("sundry").put("first", "is the first").put("second", "is the second");
     assertThat(message.get("first")).isEqualTo("is the first");
     assertThat(message.get("second")).isEqualTo("is the second");
   }

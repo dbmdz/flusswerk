@@ -6,13 +6,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.from;
 
 class JobTest {
 
-  private static final Message SOME_MESSAGE = DefaultMessage.withType("Hey!");
+  private static final Message<String> SOME_MESSAGE = DefaultMessage.withId("Hey!");
 
-  private static final Function<Message, String> DUMMY_READER = Message::getType;
+  private static final Function<Message, String> DUMMY_READER = Message<String>::getId;
 
   private static final Function<String, String> DUMMY_TRANSFORMER = Function.identity();
 
@@ -63,16 +62,16 @@ class JobTest {
   @DisplayName("Read, Transform, Write should pass values along")
   void readTransformWriteShouldPassValues() {
     String message = "Jolene, Jolene, Jolene, Jolene";
-    Job<Message, String, String> job = new Job<>(DefaultMessage.withType(message));
-    job.read(Message::getType);
+    Job<DefaultMessage, String, String> job = new Job<>(new DefaultMessage().put("message", message));
+    job.read(m -> m.get("message"));
     job.transform(String::toUpperCase);
-    job.write(DefaultMessage::new);
-    assertThat(job.getResult()).returns(message.toUpperCase(), from(Message::getType));
+    job.write(s -> new DefaultMessage().put("message", s));
+    assertThat(((DefaultMessage) job.getResult()).get("message")).isEqualTo(message.toUpperCase());
   }
 
   @Test
   void getMessage() {
-    Message message = DefaultMessage.withType("Wuthering Heights");
+    Message message = DefaultMessage.withId("Wuthering Heights");
     Job<Message, String, String> job = new Job<>(message);
     assertThat(job.getMessage()).isEqualTo(message);
   }

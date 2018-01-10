@@ -24,7 +24,7 @@ public class Application implements CommandLineRunner {
 
   @Override
   public void run(String... strings) throws WorkflowSetupException, java.io.IOException {
-    messageBroker.send("someInputQueue", DefaultMessage.withType("lowercase-text").put("text", "Shibuyara"));
+    messageBroker.send("someInputQueue", DefaultMessage.withId("lowercase-text").put("text", "Shibuyara"));
     engine.start();
   }
 

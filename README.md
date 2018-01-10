@@ -47,7 +47,7 @@ class Application {
     Flow flow = new FlowBuilder<DefaultMessage, String, String>()
         .read(message -> message.get("value"))
         .transform(String::toUpperCase)
-        .write(value -> DefaultMessage.withType("your.type").put("value", value))
+        .write(value -> DefaultMessage.withId("your.id").put("value", value))
         .build();
     
     Engine engine = new Engine(messageBroker, flow);
@@ -73,7 +73,7 @@ class Transformer implements Function<String, String> {
 
 class Writer implements Function<String, Message> { 
     Message apply(String output) {
-      return DefaultMessage.withType("your.type").put("value", output);
+      return DefaultMessage.withId("your.id").put("value", output);
     }
  }
 

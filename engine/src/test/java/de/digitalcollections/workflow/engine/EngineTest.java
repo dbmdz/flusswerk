@@ -36,12 +36,12 @@ class EngineTest {
 
   private static final String DLX = "exchange.retry";
   private MessageBroker messageBroker;
-  private Flow<Message, String, String> flowWithoutProblems;
+  private Flow<DefaultMessage, String, String> flowWithoutProblems;
 
   private Message[] moreMessages(int number) {
     Message[] messages = new Message[number];
     for (int i = 0; i < messages.length; i++) {
-      messages[i] = DefaultMessage.withType("White Room");
+      messages[i] = DefaultMessage.withId("White Room");
     }
     return messages;
   }
@@ -49,7 +49,7 @@ class EngineTest {
   @BeforeEach
   void setUp() {
     messageBroker = mock(MessageBroker.class);
-    flowWithoutProblems = new FlowBuilder<Message, String, String>()
+    flowWithoutProblems = new FlowBuilder<DefaultMessage, String, String>()
         .read(READ_SOME_STRING)
         .transform(Function.identity())
         .write(WRITE_SOME_STRING)
@@ -58,13 +58,13 @@ class EngineTest {
 
   @Test
   public void engineShouldUseMaxNumberOfWorkers() throws IOException, InterruptedException {
-    when(messageBroker.receive()).thenReturn(DefaultMessage.withType("White Room"));
+    when(messageBroker.receive()).thenReturn(DefaultMessage.withId("White Room"));
 
     Semaphore semaphore = new Semaphore(1);
     semaphore.drainPermits();
 
-    Flow<Message, String, String> flow = new FlowBuilder<Message, String, String>()
-        .read(Message::getType)
+    Flow flow = new FlowBuilder<DefaultMessage, String, String>()
+        .read(DefaultMessage::getId)
         .transform(s -> {
           try {
             LOGGER.debug("Trying to acquire semaphore, should block (Thread id {})", Thread.currentThread().getId());
@@ -75,7 +75,7 @@ class EngineTest {
           }
           return s;
         })
-        .write(DefaultMessage::withType)
+        .write(DefaultMessage::withId)
         .build();
 
     Engine engine = new Engine(messageBroker, flow);
@@ -134,14 +134,14 @@ class EngineTest {
 //    System.out.println(messagesSent.get());
 //  }
 
-  private final Function<Message, String> READ_SOME_STRING = Message::getType;
+  private final Function<DefaultMessage, String> READ_SOME_STRING = DefaultMessage::getId;
 
-  private final Function<String, Message> WRITE_SOME_STRING = DefaultMessage::withType;
+  private final Function<String, Message> WRITE_SOME_STRING = DefaultMessage::withId;
 
   @Test
   @DisplayName("Engine should reject a message failing processing")
   void processShouldRejectMessageOnFailure() throws IOException {
-    Flow<Message, String, String> flow = new FlowBuilder<Message, String, String>()
+    Flow flow = new FlowBuilder<DefaultMessage, String, String>()
         .read(READ_SOME_STRING)
         .transform(s -> {
           throw new RuntimeException("Aaaaaaah!");

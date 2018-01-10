@@ -31,11 +31,6 @@ public class DefaultMessage implements Message<String> {
     return envelope;
   }
 
-  @Override
-  public String getType() {
-    return data.get("type");
-  }
-
   public Map<String, String> getData() {
     return data;
   }
@@ -58,21 +53,10 @@ public class DefaultMessage implements Message<String> {
     return data.get("id");
   }
 
-  public static DefaultMessage withType(String type) {
-    DefaultMessage message = new DefaultMessage();
-    message.put("type", type);
-    return message;
-  }
-
   public static DefaultMessage withId(String id) {
     DefaultMessage message = new DefaultMessage();
     message.put("id", id);
     return message;
-  }
-
-  public DefaultMessage andId(String id) {
-    this.put("id", id);
-    return this;
   }
 
   @Override

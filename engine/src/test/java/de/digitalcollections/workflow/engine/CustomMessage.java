@@ -22,21 +22,16 @@ public class CustomMessage implements Message<Long> {
   }
 
 
-  public CustomMessage(String type) {
+  public CustomMessage(Long id) {
     this.envelope = new Envelope();
     this.data = new HashMap<>();
-    this.put("type", type);
+    this.id = id;
   }
 
 
   @Override
   public Envelope getEnvelope() {
     return envelope;
-  }
-
-  @Override
-  public String getType() {
-    return data.get("type");
   }
 
   public Map<String, String> getData() {

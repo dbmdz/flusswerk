@@ -10,7 +10,7 @@ public class StringWriter implements Function<String, Message> {
 
   @Override
   public DefaultMessage apply(String s) {
-    return DefaultMessage.withType("uppercase-strings").put("text", s);
+    return DefaultMessage.withId("uppercase-strings").put("text", s);
   }
 
 }

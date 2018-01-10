@@ -15,13 +15,6 @@ public interface Message<ID> {
   Envelope getEnvelope();
 
   /**
-   * The optional message type is represented by an arbitrary string value to distinguish different events on the same queue.
-   *
-   * @return The message type.
-   */
-  String getType();
-
-  /**
    * The optional ID can hold the identifier of an corresponding object (e.g. a book to be indexed).
    *
    * @return The corresponding object's id.

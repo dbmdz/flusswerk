@@ -38,17 +38,17 @@ public class StepDefinitions implements En {
               .readFrom("bdd.in")
               .writeTo("bdd.out")
       );
-      messagesToSend = Collections.singletonList(DefaultMessage.withType("happy message"));
+      messagesToSend = Collections.singletonList(DefaultMessage.withId("happy message"));
       queueToSendTo = queue;
     });
 
     When("the processing always fails", () -> {
-      Flow<Message, String, String> flow = new FlowBuilder<Message, String, String>()
-          .read(Message::getType)
+      Flow flow = new FlowBuilder<>()
+          .read(Message::toString)
           .transform(s -> {
             throw new RuntimeException("Fail!");
           })
-          .write(DefaultMessage::withType)
+          .write(s -> DefaultMessage.withId(s.toString()))
           .build();
 
       // Preparation finished, start everything
@@ -56,10 +56,10 @@ public class StepDefinitions implements En {
     });
 
     When("^the processing always works$", () -> {
-      Flow<Message, String, String> flow = new FlowBuilder<Message, String, String>()
-          .read(Message::getType)
+      Flow flow = new FlowBuilder<DefaultMessage, String, String>()
+          .read(DefaultMessage::getId)
           .transform(s -> s)
-          .write(s -> DefaultMessage.withType(s).put("blah", "blubb"))
+          .write(s -> DefaultMessage.withId(s).put("blah", "blubb"))
           .build();
 
       // Preparation finished, start everything

@@ -38,7 +38,7 @@ class MessageBrokerTest {
     routingConfig.complete();
     rabbitClient = mock(RabbitClient.class);
     messageBroker = new MessageBroker(config, routingConfig, rabbitClient);
-    message = DefaultMessage.withType("Hey");
+    message = DefaultMessage.withId("Hey");
   }
 
   @Test
@@ -78,7 +78,7 @@ class MessageBrokerTest {
   @Test
   @DisplayName("Should send a message to the output queue")
   void sendShouldRouteMessageToOutputQueue() throws IOException {
-    messageBroker.send(DefaultMessage.withType("test"));
+    messageBroker.send(DefaultMessage.withId("test"));
     verify(rabbitClient).send(any(), eq(routingConfig.getWriteTo()), any());
   }
 
@@ -88,9 +88,9 @@ class MessageBrokerTest {
   void sendMultipleMessagesShouldRouteMessagesToSpecifiedQueue() throws IOException {
     String queue = "specified.queue";
     List<Message> messages = Arrays.asList(
-        DefaultMessage.withType("test"),
-        DefaultMessage.withType("test"),
-        DefaultMessage.withType("test"));
+        DefaultMessage.withId("test"),
+        DefaultMessage.withId("test"),
+        DefaultMessage.withId("test"));
     messageBroker.send(queue, messages);
     verify(rabbitClient, times(messages.size())).send(any(), eq(queue), any());
   }

@@ -1,8 +1,6 @@
 package de.digitalcollections.workflow.engine.flow;
 
 
-import de.digitalcollections.workflow.engine.flow.Flow;
-import de.digitalcollections.workflow.engine.flow.FlowBuilder;
 import de.digitalcollections.workflow.engine.model.DefaultMessage;
 import de.digitalcollections.workflow.engine.model.Message;
 import java.util.function.Function;
@@ -19,9 +17,7 @@ class FlowBuilderTest {
   @DisplayName("read should throw an exception if the reader is null")
   public void readShouldThrowExceptionIfReaderIsNull() {
     FlowBuilder<Message, String, String> builder = new FlowBuilder<>();
-    Throwable exception = assertThrows(NullPointerException.class, () -> {
-      builder.read((Function<Message, String>) null);
-    });
+    Throwable exception = assertThrows(NullPointerException.class, () -> builder.read((Function<Message, String>) null));
     assertThat(exception.getMessage()).contains("reader");
   }
 
@@ -29,9 +25,7 @@ class FlowBuilderTest {
   @DisplayName("read should throw an exception if the reader factory is null")
   public void readShouldThrowExceptionIfFactoryIsNull() {
     FlowBuilder<Message, String, String> builder = new FlowBuilder<>();
-    Throwable exception = assertThrows(NullPointerException.class, () -> {
-      builder.read((Supplier<Function<Message, String>>) null);
-    });
+    Throwable exception = assertThrows(NullPointerException.class, () -> builder.read((Supplier<Function<Message, String>>) null));
     assertThat(exception.getMessage()).contains("reader factory");
   }
 
@@ -39,9 +33,7 @@ class FlowBuilderTest {
   @DisplayName("transform should throw an exception if there is no reader")
   public void transformerShouldThrowExceptionIfReaderIsNull() {
     FlowBuilder<Message, String, String> builder = new FlowBuilder<>();
-    Throwable exception = assertThrows(IllegalStateException.class, () -> {
-      builder.transform(s -> null);
-    });
+    Throwable exception = assertThrows(IllegalStateException.class, () -> builder.transform(s -> null));
     assertThat(exception.getMessage()).contains("reader");
   }
 
@@ -92,13 +84,13 @@ class FlowBuilderTest {
   @Test
   @DisplayName("build should create an working Flow if only reader and writer are set")
   public void buildWithOnlyReadAndWrite() {
-    Flow<Message, String, String> flow = new FlowBuilder<Message, String, String>()
-        .read(Message::getType)
-        .write(DefaultMessage::withType)
+    Flow flow = new FlowBuilder<DefaultMessage, String, String>()
+        .read(DefaultMessage::getId)
+        .write(DefaultMessage::withId)
         .build();
     String message = "Whiskey in the Jar";
-    Message result = flow.process(DefaultMessage.withType(message));
-    assertThat(result.getType()).isEqualTo(message);
+    Message result = flow.process(DefaultMessage.withId(message));
+    assertThat(result.getId()).isEqualTo(message);
   }
 
 }
