@@ -15,7 +15,7 @@ Maven:
 <dependency>
   <groupId>de.digitalcollections.workflow</groupId>
   <artifactId>dc-workflow-engine</artifactId>
-  <version>0.3.0</version>
+  <version>0.4.0</version>
 </dependency>
 ```
 
