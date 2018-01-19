@@ -1,20 +1,23 @@
 package de.digitalcollections.workflow.engine.messagebroker;
 
+import de.digitalcollections.workflow.engine.model.Message;
+
 public interface RoutingConfig {
 
   String getExchange();
 
   String getDeadLetterExchange();
 
-  String getReadFrom();
+  String[] getReadFrom();
 
   String getWriteTo();
 
   boolean hasWriteTo();
 
-  String getFailedQueue();
+  FailurePolicy getFailurePolicy(String inputQueue);
 
-  String getRetryQueue();
+  default  FailurePolicy getFailurePolicy(Message message) {
+    return getFailurePolicy(message.getEnvelope().getSource());
+  }
 
-  boolean hasFailedQueue();
 }

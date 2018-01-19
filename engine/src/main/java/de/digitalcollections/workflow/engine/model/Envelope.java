@@ -15,6 +15,8 @@ public class Envelope {
 
   private LocalDateTime timestamp;
 
+  private String source;
+
   /**
    * Default constructor setting the Envelope.timestamp to now.
    */
@@ -92,6 +94,22 @@ public class Envelope {
    */
   public void setTimestamp(LocalDateTime timestamp) {
     this.timestamp = timestamp;
+  }
+
+  /**
+   * Gets the queue name where this message was received from.
+   * @return the queue name where this message was received from.
+   */
+  public String getSource() {
+    return source;
+  }
+
+  /**
+   * Gets the queue name where this message was received from.
+   * @param source the queue name where this message was received from.
+   */
+  public void setSource(String source) {
+    this.source = source;
   }
 
   @Override

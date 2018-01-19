@@ -76,6 +76,7 @@ class RabbitClient {
       Message message = deserialize(body);
       message.getEnvelope().setBody(body);
       message.getEnvelope().setDeliveryTag(response.getEnvelope().getDeliveryTag());
+      message.getEnvelope().setSource(queueName);
       return message;
     }
     return null;

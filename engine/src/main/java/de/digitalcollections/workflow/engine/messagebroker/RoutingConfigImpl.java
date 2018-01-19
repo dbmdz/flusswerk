@@ -1,6 +1,8 @@
 package de.digitalcollections.workflow.engine.messagebroker;
 
 import de.digitalcollections.workflow.engine.exceptions.WorkflowSetupException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 
@@ -10,17 +12,16 @@ class RoutingConfigImpl implements RoutingConfig {
 
   private String deadLetterExchange;
 
-  private String readFrom;
+  private String[] readFrom;
 
   private String writeTo;
 
-  private String failedQueue;
+  private Map<String, FailurePolicy> failurePolicies;
 
-  private String retryQueue;
-
-  public RoutingConfigImpl() {
+  RoutingConfigImpl() {
     readFrom = null;
     writeTo = null;
+    failurePolicies = new HashMap<>();
   }
 
   public void complete() {
@@ -33,11 +34,10 @@ class RoutingConfigImpl implements RoutingConfig {
     if (readFrom == null) {
       throw new WorkflowSetupException("A workflow always needs an input queue. Please configure 'readFrom'.");
     }
-    if (failedQueue == null) {
-      failedQueue = readFrom + ".failed";
-    }
-    if (retryQueue == null) {
-      retryQueue = readFrom + ".retry";
+    for (String inputQueue : readFrom){
+      if (!failurePolicies.containsKey(inputQueue)) {
+        failurePolicies.put(inputQueue, new FailurePolicy(inputQueue));
+      }
     }
   }
 
@@ -60,13 +60,12 @@ class RoutingConfigImpl implements RoutingConfig {
   }
 
   @Override
-  public String getReadFrom() {
+  public String[] getReadFrom() {
     return readFrom;
   }
 
-  public void setReadFrom(String readFrom) {
+  public void setReadFrom(String... readFrom) {
     this.readFrom = requireNonNull(readFrom);
-
   }
 
   @Override
@@ -84,25 +83,12 @@ class RoutingConfigImpl implements RoutingConfig {
   }
 
   @Override
-  public String getFailedQueue() {
-    return failedQueue;
+  public FailurePolicy getFailurePolicy(String inputQueue) {
+    return failurePolicies.get(inputQueue);
   }
 
-  public void setFailedQueue(String failedQueue) {
-    this.failedQueue = failedQueue;
+  public void addFailurePolicy(FailurePolicy failurePolicy) {
+    failurePolicies.put(failurePolicy.getInputQueue(), failurePolicy);
   }
 
-  @Override
-  public String getRetryQueue() {
-    return retryQueue;
-  }
-
-  public void setRetryQueue(String retryQueue) {
-    this.retryQueue = retryQueue;
-  }
-
-  @Override
-  public boolean hasFailedQueue() {
-    return failedQueue != null;
-  }
 }

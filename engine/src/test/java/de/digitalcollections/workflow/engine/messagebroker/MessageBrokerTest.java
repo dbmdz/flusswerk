@@ -39,6 +39,7 @@ class MessageBrokerTest {
     rabbitClient = mock(RabbitClient.class);
     messageBroker = new MessageBroker(config, routingConfig, rabbitClient);
     message = DefaultMessage.withId("Hey");
+    message.getEnvelope().setSource("some.input.queue");
   }
 
   @Test
@@ -72,7 +73,8 @@ class MessageBrokerTest {
     for (int i = 0; i < numberOfRejections; i++) {
       messageBroker.reject(message);
     }
-    verify(rabbitClient).send(anyString(), eq(routingConfig.getFailedQueue()), eq(message));
+    FailurePolicy failurePolicy = routingConfig.getFailurePolicy(message);
+    verify(rabbitClient).send(anyString(), eq(failurePolicy.getFailedRoutingKey()), eq(message));
   }
 
   @Test
@@ -107,7 +109,7 @@ class MessageBrokerTest {
   @DisplayName("Default receive should pull from the input queue")
   void defaultReceiveShouldPullTheInputQueue() throws IOException {
     messageBroker.receive();
-    verify(rabbitClient).receive(routingConfig.getReadFrom());
+    verify(rabbitClient).receive(routingConfig.getReadFrom()[0]);
   }
 
 }

@@ -72,7 +72,7 @@ public class MessageBroker {
 
   private void retry(Message message) throws IOException {
     LOGGER.debug("Send message to failed queue: " + message);
-    rabbitClient.send(routingConfig.getDeadLetterExchange(), routingConfig.getReadFrom(), message);
+    rabbitClient.send(routingConfig.getDeadLetterExchange(), message.getEnvelope().getSource(), message);
   }
 
   /**
@@ -93,23 +93,30 @@ public class MessageBroker {
    * @throws IOException if communication with RabbitMQ failed.
    */
   public Message receive() throws IOException {
-    return receive(routingConfig.getReadFrom());
+    Message message = null;
+    for (String inputQueue : routingConfig.getReadFrom()) {
+      message = receive(inputQueue);
+      if (message != null) {
+        break;
+      }
+    }
+    return message;
   }
 
   private void provideInputQueues() throws IOException {
     final String deadLetterExchange = routingConfig.getDeadLetterExchange();
     final String exchange = routingConfig.getExchange();
-    final String failedQueue = routingConfig.getFailedQueue();
-    final String readFrom = routingConfig.getReadFrom();
-    final String retryQueue = routingConfig.getRetryQueue();
 
-    rabbitClient.declareQueue(readFrom, exchange, readFrom, null);
-    rabbitClient.declareQueue(retryQueue, deadLetterExchange, readFrom,
-        Maps.of(
-            MESSAGE_TTL, config.getDeadLetterWait(),
-            DEAD_LETTER_EXCHANGE, exchange)
-    );
-    rabbitClient.declareQueue(failedQueue, exchange, failedQueue, null);
+    for (String inputQueue : routingConfig.getReadFrom()) {
+      FailurePolicy failurePolicy = routingConfig.getFailurePolicy(inputQueue);
+      rabbitClient.declareQueue(inputQueue, exchange, inputQueue, null);
+      rabbitClient.declareQueue(failurePolicy.getRetryRoutingKey(), deadLetterExchange, inputQueue,
+          Maps.of(
+              MESSAGE_TTL, config.getDeadLetterWait(),
+              DEAD_LETTER_EXCHANGE, exchange)
+      );
+      rabbitClient.declareQueue(failurePolicy.getFailedRoutingKey(), exchange, failurePolicy.getFailedRoutingKey(), null);
+    }
   }
 
   private void provideOutputQueue() throws IOException {
@@ -144,17 +151,15 @@ public class MessageBroker {
     if (envelope.getRetries() < config.getMaxRetries()) {
       envelope.setRetries(envelope.getRetries() + 1);
       retry(message);
-    } else if (routingConfig.hasFailedQueue()) {
+    } else {
       fail(message);
     }
   }
 
   private void fail(Message message) throws IOException {
-    if (!routingConfig.hasFailedQueue()) {
-      return;
-    }
     LOGGER.debug("Send message to failed queue: " + message);
-    send(routingConfig.getFailedQueue(), message);
+    FailurePolicy failurePolicy = routingConfig.getFailurePolicy(message);
+    send(failurePolicy.getFailedRoutingKey(), message);
   }
 
   private void provideExchanges() throws IOException {

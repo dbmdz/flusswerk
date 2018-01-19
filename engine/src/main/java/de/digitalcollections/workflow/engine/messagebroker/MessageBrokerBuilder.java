@@ -195,44 +195,24 @@ public class MessageBrokerBuilder {
   }
 
   /**
-   * The queue to read from.
+   * The queues to read from. All queues are considered in order. Only if a queue is empty, the next queue will be queried.
    *
-   * @param inputQueue The queue name to read from.
+   * @param inputQueues The queue names to read from.
    * @return This builder for a fluent interface.
    */
-  public MessageBrokerBuilder readFrom(String inputQueue) {
-    if (inputQueue == null || inputQueue.isEmpty()) {
+  public MessageBrokerBuilder readFrom(String... inputQueues) {
+    if (inputQueues == null || inputQueues.length == 0) {
       throw new IllegalArgumentException("The input queue cannot be null or empty.");
     }
-    routingConfig.setReadFrom(inputQueue);
+    routingConfig.setReadFrom(inputQueues);
     return this;
   }
 
-  /**
-   * This queue is used to store messages which failed permanently. Defaults to <code>inputQueue.failed</code>.
-   *
-   * @param name The name of the queue
-   * @return This builder for a fluent interface.
-   */
-  public MessageBrokerBuilder failedQueue(String name) {
-    if (name == null || name.isEmpty()) {
-      throw new IllegalArgumentException("The failed queue cannot be null or empty.");
+  public MessageBrokerBuilder addFailurePolicy(FailurePolicy failurePolicy) {
+    if (failurePolicy == null) {
+      throw new IllegalArgumentException("A failure policy cannot be null");
     }
-    routingConfig.setFailedQueue(name);
-    return this;
-  }
-
-  /**
-   * This queue is used to store messages to retry them later. Defaults to <code>inputQueue.retry</code>.
-   *
-   * @param name The name of the queue
-   * @return This builder for a fluent interface.
-   */
-  public MessageBrokerBuilder retryQueue(String name) {
-    if (name == null || name.isEmpty()) {
-      throw new IllegalArgumentException("The retry queue cannot be null or empty.");
-    }
-    routingConfig.setRetryQueue(name);
+    routingConfig.addFailurePolicy(failurePolicy);
     return this;
   }
 
