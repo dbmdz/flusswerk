@@ -7,7 +7,7 @@ import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.GetResponse;
 import de.digitalcollections.workflow.engine.jackson.DefaultMessageMixin;
-import de.digitalcollections.workflow.engine.jackson.MetaMixin;
+import de.digitalcollections.workflow.engine.jackson.EnvelopeMixin;
 import de.digitalcollections.workflow.engine.model.DefaultMessage;
 import de.digitalcollections.workflow.engine.model.Envelope;
 import de.digitalcollections.workflow.engine.model.Message;
@@ -41,7 +41,7 @@ class RabbitClient {
     objectMapper = new ObjectMapper();
     messageClass = config.getMessageClass();
     objectMapper.registerModules(config.getJacksonModules());
-    objectMapper.addMixIn(Envelope.class, MetaMixin.class);
+    objectMapper.addMixIn(Envelope.class, EnvelopeMixin.class);
     objectMapper.registerModule(new JavaTimeModule());
     if (objectMapper.findMixInClassFor(Message.class) == null) {
       objectMapper.addMixIn(DefaultMessage.class, DefaultMessageMixin.class);

@@ -22,7 +22,7 @@ class DefaultMessageMixinTest {
   void setUp() {
     objectMapper = new ObjectMapper();
     objectMapper.addMixIn(Message.class, DefaultMessageMixin.class);
-    objectMapper.addMixIn(Envelope.class, MetaMixin.class);
+    objectMapper.addMixIn(Envelope.class, EnvelopeMixin.class);
     objectMapper.registerModule(new JavaTimeModule());
     objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     objectMapper.enable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
