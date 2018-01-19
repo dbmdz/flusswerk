@@ -160,6 +160,25 @@ class Application {
 }
 ```  
 
+## Failure Policies
+
+As default every input queue gets a retry and a failed queue with the same name as the input queue with suffixes `.failure` and `.retry`. Every message is retried 5 times and then moved to the failed queue.
+
+To customize this behaviour one can set `FailurePolicies`:
+
+```java
+class Application {
+  public static void main(String[] args) {
+    MessageBroker messageBroker = new MessageBrokerBuilder()
+        .failurePolicy(new FailurePolicies("inputQueue", "retryRoutingKey", "failureRoutingKey", 42))
+        .build();
+    /* ... */
+  }
+}
+``` 
+
+If messages should not be retried, set `retryRoutingKey` to `null`. If permanently failing messages should be discarded, set `failureRoutingKey` to `null`.
+
 ## MessageBrokerBuilder properties
 
 ### RabbitMQ connection
@@ -180,8 +199,7 @@ Everything will be created if it does not exist:
 | ----------------------------------------------- | --------------------- | ------------------------------------------------------------------- | 
 | `readFrom(String inputQueue)`                   | -                     | Queue to read incoming messages from                                |
 | `writeTo(String outputRoutingKey)`              | -                     | Queue to write outgoing messages to                                 |
-| `retryQueue(String name)`                       | `<inputQueue>.retry`  | Queue to store messages to retry                                    |
-| `failedQueue(String name)`                      | `<inputQueue>.failed` | Queue to store permanently failed messages                          |
+| `addFailurePolicy(FailurePolicy policy)`        | behaviour as in section *Failure Policies*  | Policy for retrying messages                  |
 | `exchange(String exchange)`                     | `workflow`            | RabbitMQ exchange for routing messages                              |
 | `deadLetterExchange(String deadLetterExchange)` | `workflow.retry`      | RabbitMQ dead letter exchange to reroute failed messages            |
 | `maxRetries(int number)`                        | `5`                   | The number of retries until a message is routed to the failed queue |
