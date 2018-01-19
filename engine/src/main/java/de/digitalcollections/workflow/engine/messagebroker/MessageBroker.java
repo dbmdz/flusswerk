@@ -70,11 +70,6 @@ public class MessageBroker {
     }
   }
 
-  private void retry(Message message) throws IOException {
-    LOGGER.debug("Send message to failed queue: " + message);
-    rabbitClient.send(routingConfig.getDeadLetterExchange(), message.getEnvelope().getSource(), message);
-  }
-
   /**
    * Gets one message from the queue but does not acknowledge it. To do so, use {@link MessageBroker#ack(Message)}.
    *
@@ -110,12 +105,16 @@ public class MessageBroker {
     for (String inputQueue : routingConfig.getReadFrom()) {
       FailurePolicy failurePolicy = routingConfig.getFailurePolicy(inputQueue);
       rabbitClient.declareQueue(inputQueue, exchange, inputQueue, null);
-      rabbitClient.declareQueue(failurePolicy.getRetryRoutingKey(), deadLetterExchange, inputQueue,
-          Maps.of(
-              MESSAGE_TTL, config.getDeadLetterWait(),
-              DEAD_LETTER_EXCHANGE, exchange)
-      );
-      rabbitClient.declareQueue(failurePolicy.getFailedRoutingKey(), exchange, failurePolicy.getFailedRoutingKey(), null);
+      if (failurePolicy.getRetryRoutingKey() != null) {
+        rabbitClient.declareQueue(failurePolicy.getRetryRoutingKey(), deadLetterExchange, inputQueue,
+            Maps.of(
+                MESSAGE_TTL, config.getDeadLetterWait(),
+                DEAD_LETTER_EXCHANGE, exchange)
+        );
+      }
+      if (failurePolicy.getFailedRoutingKey() != null) {
+        rabbitClient.declareQueue(failurePolicy.getFailedRoutingKey(), exchange, failurePolicy.getFailedRoutingKey(), null);
+      }
     }
   }
 
@@ -159,7 +158,19 @@ public class MessageBroker {
   private void fail(Message message) throws IOException {
     LOGGER.debug("Send message to failed queue: " + message);
     FailurePolicy failurePolicy = routingConfig.getFailurePolicy(message);
-    send(failurePolicy.getFailedRoutingKey(), message);
+    String failedRoutingKey = failurePolicy.getFailedRoutingKey();
+    if (failedRoutingKey != null) {
+      send(failedRoutingKey, message);
+    }
+  }
+
+  private void retry(Message message) throws IOException {
+    LOGGER.debug("Send message to retry queue: " + message);
+    FailurePolicy failurePolicy = routingConfig.getFailurePolicy(message);
+    String retryRoutingKey = failurePolicy.getRetryRoutingKey();
+    if (retryRoutingKey != null) {
+      rabbitClient.send(routingConfig.getDeadLetterExchange(), message.getEnvelope().getSource(), message);
+    }
   }
 
   private void provideExchanges() throws IOException {
