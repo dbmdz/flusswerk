@@ -23,7 +23,7 @@ Gradle:
 
 ```groovy
 dependencies {
-    compile group: 'de.digitalcollections.workflow', name: 'dc-workflow-engine', version: '0.0.1-SNAPSHOT'
+    compile group: 'de.digitalcollections.workflow', name: 'dc-workflow-engine', version: '0.4.0'
 }
 ``` 
  
