@@ -28,13 +28,14 @@ public class MessageBrokerBuilder {
   }
 
   /**
-   * Sets the RabbitMQ host name. Default is <em>localhost</em>.
+   * Adds an RabbitMQ host to connect to. Default would be <em>localhost</em> with port 5672. To configure cluster access call this method once for each server.
    *
-   * @param hostName The hostname to connect to.
+   * @param host The host to connect to.
+   * @param port The port to use for this connection
    * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
    */
-  public MessageBrokerBuilder hostName(String hostName) {
-    connectionConfig.setHostName(requireNonNull(hostName));
+  public MessageBrokerBuilder connectTo(String host, int port) {
+    connectionConfig.addAddress(host, port);
     return this;
   }
 
@@ -46,20 +47,6 @@ public class MessageBrokerBuilder {
    */
   public MessageBrokerBuilder password(String password) {
     connectionConfig.setPassword(requireNonNull(password));
-    return this;
-  }
-
-  /**
-   * Sets the RabbitMQ port.
-   *
-   * @param port The RabbitMQ port.
-   * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
-   */
-  public MessageBrokerBuilder port(int port) {
-    if (port <= 0) {
-      throw new IllegalArgumentException("Port value must be > 0");
-    }
-    connectionConfig.setPort(port);
     return this;
   }
 
@@ -180,17 +167,17 @@ public class MessageBrokerBuilder {
    * @param config The config to set.
    * @return The connection to the message broker.
    */
-  private static MessageBrokerConnection defaultConnectionConstructor(ConnectionConfig config) {
+  private static RabbitConnection defaultConnectionConstructor(ConnectionConfig config) {
     try {
-      return new MessageBrokerConnection(config);
+      return new RabbitConnection(config);
     } catch (IOException | TimeoutException e) {
       throw new RuntimeException(e);
     }
   }
 
-  MessageBroker build(Function<ConnectionConfig, MessageBrokerConnection> connectionConstructor) throws IOException {
+  MessageBroker build(Function<ConnectionConfig, RabbitConnection> connectionConstructor) throws IOException {
     routingConfig.complete();
-    MessageBrokerConnection connection = connectionConstructor.apply(connectionConfig);
+    RabbitConnection connection = connectionConstructor.apply(connectionConfig);
     return new MessageBroker(config, routingConfig, new RabbitClient(config, connection));
   }
 

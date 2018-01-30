@@ -1,5 +1,10 @@
 package de.digitalcollections.workflow.engine.messagebroker;
 
+import com.rabbitmq.client.Address;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 class ConnectionConfigImpl implements ConnectionConfig {
 
   private String username;
@@ -8,14 +13,11 @@ class ConnectionConfigImpl implements ConnectionConfig {
 
   private String virtualHost;
 
-  private String hostName;
-
-  private int port;
+  private List<Address> addresses;
 
   ConnectionConfigImpl() {
-    setHostName("localhost");
+    addresses = new ArrayList<>();
     setPassword("guest");
-    setPort(5672);
     setUsername("guest");
     setVirtualHost("/");
   }
@@ -47,22 +49,15 @@ class ConnectionConfigImpl implements ConnectionConfig {
     this.virtualHost = virtualHost;
   }
 
-  @Override
-  public String getHostName() {
-    return hostName;
-  }
-
-  public void setHostName(String hostName) {
-    this.hostName = hostName;
+  public void addAddress(String host, int port) {
+    addresses.add(new Address(host, port));
   }
 
   @Override
-  public int getPort() {
-    return port;
+  public List<Address> getAddresses() {
+    if (addresses.isEmpty()) {
+      return Collections.singletonList(new Address("localhost", 5672));
+    }
+    return addresses;
   }
-
-  public void setPort(int port) {
-    this.port = port;
-  }
-
 }

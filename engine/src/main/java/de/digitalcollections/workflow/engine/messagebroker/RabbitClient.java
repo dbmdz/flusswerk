@@ -19,7 +19,6 @@ class RabbitClient {
 
   private static final boolean DURABLE = true;
 
-
   private static final boolean NO_AUTO_DELETE = false;
 
   private static final boolean NO_AUTO_ACK = false;
@@ -36,7 +35,7 @@ class RabbitClient {
 
   private Class<? extends Message> messageClass;
 
-  public RabbitClient(MessageBrokerConfig config, MessageBrokerConnection connection) {
+  public RabbitClient(MessageBrokerConfig config, RabbitConnection connection) {
     channel = connection.getChannel();
     objectMapper = new ObjectMapper();
     messageClass = config.getMessageClass();

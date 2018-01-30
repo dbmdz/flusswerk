@@ -27,9 +27,9 @@ class MessageBrokerBuilderTest {
 
   private MessageBroker messageBroker;
 
-  private final Function<ConnectionConfig, MessageBrokerConnection> create_connection = config -> {
+  private final Function<ConnectionConfig, RabbitConnection> create_connection = config -> {
     try {
-      return new MessageBrokerConnection(config, connectionFactory);
+      return new RabbitConnection(config, connectionFactory);
     } catch (IOException | TimeoutException e) {
       throw new RuntimeException(e);
     }

@@ -29,7 +29,7 @@ class RabbitClientTest {
 
   private MessageBrokerConfigImpl config = new MessageBrokerConfigImpl();
 
-  private MessageBrokerConnection connection;
+  private RabbitConnection connection;
 
   private Channel channel;
 
@@ -38,7 +38,7 @@ class RabbitClientTest {
 
   @BeforeEach
   void setUp() throws IOException, TimeoutException {
-    connection = mock(MessageBrokerConnection.class);
+    connection = mock(RabbitConnection.class);
     channel = mock(Channel.class);
     when(connection.getChannel()).thenReturn(channel);
     message = DefaultMessage.withId("Hey");

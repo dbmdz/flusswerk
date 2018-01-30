@@ -1,5 +1,8 @@
 package de.digitalcollections.workflow.engine.messagebroker;
 
+import com.rabbitmq.client.Address;
+import java.util.List;
+
 public interface ConnectionConfig {
 
   String getUsername();
@@ -8,7 +11,6 @@ public interface ConnectionConfig {
 
   String getVirtualHost();
 
-  String getHostName();
+  List<Address> getAddresses();
 
-  int getPort();
 }
