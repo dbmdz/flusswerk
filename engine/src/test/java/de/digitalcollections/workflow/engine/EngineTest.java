@@ -1,5 +1,7 @@
 package de.digitalcollections.workflow.engine;
 
+import de.digitalcollections.workflow.engine.exceptions.FinallyFailedProcessException;
+import de.digitalcollections.workflow.engine.exceptions.RetriableProcessException;
 import de.digitalcollections.workflow.engine.flow.Flow;
 import de.digitalcollections.workflow.engine.flow.FlowBuilder;
 import de.digitalcollections.workflow.engine.messagebroker.MessageBroker;
@@ -41,7 +43,7 @@ class EngineTest {
   private Message[] moreMessages(int number) {
     Message[] messages = new Message[number];
     for (int i = 0; i < messages.length; i++) {
-      messages[i] = DefaultMessage.withId("White Room");
+      messages[i] = new DefaultMessage("White Room");
     }
     return messages;
   }
@@ -58,7 +60,7 @@ class EngineTest {
 
   @Test
   public void engineShouldUseMaxNumberOfWorkers() throws IOException, InterruptedException {
-    when(messageBroker.receive()).thenReturn(DefaultMessage.withId("White Room"));
+    when(messageBroker.receive()).thenReturn(new DefaultMessage("White Room"));
 
     Semaphore semaphore = new Semaphore(1);
     semaphore.drainPermits();
@@ -75,7 +77,7 @@ class EngineTest {
           }
           return s;
         })
-        .write(DefaultMessage::withId)
+        .write((Function<String, Message>) DefaultMessage::new)
         .build();
 
     Engine engine = new Engine(messageBroker, flow);
@@ -136,7 +138,7 @@ class EngineTest {
 
   private final Function<DefaultMessage, String> READ_SOME_STRING = DefaultMessage::getId;
 
-  private final Function<String, Message> WRITE_SOME_STRING = DefaultMessage::withId;
+  private final Function<String, Message> WRITE_SOME_STRING = DefaultMessage::new;
 
   @Test
   @DisplayName("Engine should reject a message failing processing")
@@ -177,6 +179,44 @@ class EngineTest {
     engine.process(new DefaultMessage());
 
     verify(messageBroker).send(any(Message.class));
+  }
+
+  @Test
+  @DisplayName("RetriableProcessException shall reject message temporarily")
+  void retriableProcessExceptionShallRejectTemporarily() throws IOException {
+    Flow flow = new FlowBuilder<DefaultMessage, String, String>()
+        .read(READ_SOME_STRING)
+        .transform(s -> {
+          throw new RetriableProcessException("Try again after a cup of coffee");
+        })
+        .write(WRITE_SOME_STRING)
+        .build();
+
+    Engine engine = new Engine(messageBroker, flow);
+    Message message = new DefaultMessage();
+
+    engine.process(message);
+
+    verify(messageBroker).reject(message);
+  }
+
+  @Test
+  @DisplayName("FinallyFailedProcessException shall fail message")
+  void finallyFailedProcessExceptionShallFailMessage() throws IOException {
+    Flow flow = new FlowBuilder<DefaultMessage, String, String>()
+        .read(READ_SOME_STRING)
+        .transform(s -> {
+          throw new FinallyFailedProcessException("Never again!");
+        })
+        .write(WRITE_SOME_STRING)
+        .build();
+
+    Engine engine = new Engine(messageBroker, flow);
+    Message message = new DefaultMessage();
+
+    engine.process(message);
+
+    verify(messageBroker).fail(message);
   }
 
 }

@@ -5,7 +5,7 @@
   <parent>
     <groupId>de.digitalcollections.workflow</groupId>
     <artifactId>dc-workflow-parent</artifactId>
-    <version>0.4.0</version>
+    <version>0.5.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -14,7 +14,8 @@
   <name>Digital Collections Workflow Examples</name>
 
   <properties>
-    <version.spring-boot-starter>1.5.8.RELEASE</version.spring-boot-starter>
+    <version.spring-boot>1.5.9.RELEASE</version.spring-boot>
+    <version.spring-boot-starter>1.5.9.RELEASE</version.spring-boot-starter>
     <version.jackson-annotations>2.9.0</version.jackson-annotations>
   </properties>
 
@@ -62,6 +63,15 @@
   </dependencyManagement>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-maven-plugin</artifactId>
+          <version>${version.spring-boot}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.springframework.boot</groupId>

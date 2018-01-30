@@ -139,23 +139,26 @@ public class MessageBroker {
 
 
   /**
-   * Rejects a messaging and takes care of proper dead lettering, retries and, if the message failed too ofen, routing to the failed queue.
+   * Rejects a messaging and takes care of proper dead lettering, retries and, if the message failed too often, routing to the failed queue.
    *
    * @param message the message to reject
    * @throws IOException if communication with RabbitMQ failed
    */
-  public void reject(Message message) throws IOException {
+  public boolean reject(Message message) throws IOException {
     final Envelope envelope = message.getEnvelope();
     ack(message);
+    System.out.println("Envelope="+ envelope.getRetries() + ", config=" + config.getMaxRetries());
     if (envelope.getRetries() < config.getMaxRetries()) {
       envelope.setRetries(envelope.getRetries() + 1);
       retry(message);
+      return true;
     } else {
       fail(message);
+      return false;
     }
   }
 
-  private void fail(Message message) throws IOException {
+  public void fail(Message message) throws IOException {
     LOGGER.debug("Send message to failed queue: " + message);
     FailurePolicy failurePolicy = routingConfig.getFailurePolicy(message);
     String failedRoutingKey = failurePolicy.getFailedRoutingKey();
@@ -181,5 +184,4 @@ public class MessageBroker {
   public MessageBrokerConfig getConfig() {
     return config;
   }
-
 }

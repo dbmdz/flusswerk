@@ -4,7 +4,7 @@
 
   <groupId>de.digitalcollections.workflow</groupId>
   <artifactId>dc-workflow-parent</artifactId>
-  <version>0.4.0</version>
+  <version>0.5.0</version>
   <packaging>pom</packaging>
 
   <name>Digital Collections Workflow</name>
@@ -25,6 +25,11 @@
       <name>Marcus Bitzl</name>
       <email>marcus.bitzl@bsb-muenchen.de</email>
       <id>bitzl</id>
+    </developer>
+    <developer>
+      <name>Christoph Lorenz</name>
+      <email>christoph.lorenz@bsb-muenchen.de</email>
+      <id>clorenz</id>
     </developer>
   </developers>
   <ciManagement>
@@ -60,7 +65,6 @@
     <version.logback>1.2.3</version.logback>
     <version.mockito>2.12.0</version.mockito>
     <version.slf4j>1.7.25</version.slf4j>
-    <version.spring-boot>1.5.6.RELEASE</version.spring-boot>
     <!-- Plugin versions -->
     <version.maven-compiler-plugin>3.7.0</version.maven-compiler-plugin>
     <version.maven-gpg-plugin>1.6</version.maven-gpg-plugin>
@@ -179,11 +183,6 @@
               </goals>
             </execution>
           </executions>
-        </plugin>
-        <plugin>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot-maven-plugin</artifactId>
-          <version>${version.spring-boot}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>

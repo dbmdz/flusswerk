@@ -41,7 +41,7 @@ class RabbitClientTest {
     connection = mock(RabbitConnection.class);
     channel = mock(Channel.class);
     when(connection.getChannel()).thenReturn(channel);
-    message = DefaultMessage.withId("Hey");
+    message = new DefaultMessage("Hey");
   }
 
 
@@ -101,7 +101,7 @@ class RabbitClientTest {
   }
 
   private Message<String> createMessage(String messageType, String messageId, int retries, LocalDateTime timestamp) throws IOException {
-    Message<String> messageToReceive = DefaultMessage.withId(messageId);
+    Message<String> messageToReceive = new DefaultMessage(messageId);
     messageToReceive.getEnvelope().setRetries(retries);
     messageToReceive.getEnvelope().setTimestamp(timestamp);
     return messageToReceive;

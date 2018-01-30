@@ -9,21 +9,18 @@ public class DefaultMessage implements Message<String> {
 
   private Envelope envelope;
 
+  private String id;
+
   private Map<String, String> data;
 
   public DefaultMessage() {
-    this(null, null);
+    this(null);
   }
 
-  protected DefaultMessage(String type) {
-    this(type, null);
-  }
-
-  protected DefaultMessage(String type, String id) {
+  public DefaultMessage(String id) {
     this.envelope = new Envelope();
     this.data = new HashMap<>();
-    this.put("type", type);
-    this.put("id", id);
+    this.id = id;
   }
 
   @Override
@@ -39,6 +36,15 @@ public class DefaultMessage implements Message<String> {
     this.data = requireNonNull(data);
   }
 
+  public DefaultMessage put(Map<String, String> data) {
+    if ( data != null ) {
+      for ( Map.Entry<String, String> entry : data.entrySet() ) {
+        this.data.put(entry.getKey(), entry.getValue());
+      }
+    }
+    return this;
+  }
+
   public DefaultMessage put(String key, String value) {
     data.put(key, value);
     return this;
@@ -50,17 +56,11 @@ public class DefaultMessage implements Message<String> {
 
   @Override
   public String getId() {
-    return data.get("id");
-  }
-
-  public static DefaultMessage withId(String id) {
-    DefaultMessage message = new DefaultMessage();
-    message.put("id", id);
-    return message;
+    return id;
   }
 
   @Override
   public String toString() {
-    return "Message{envelope=" + envelope + ", data=" + data + "}";
+    return "Message{id=" + id + ", envelope=" + envelope + ", data=" + data + "}";
   }
 }

@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class JobTest {
 
-  private static final Message<String> SOME_MESSAGE = DefaultMessage.withId("Hey!");
+  private static final Message<String> SOME_MESSAGE = new DefaultMessage("Hey!");
 
   private static final Function<Message, String> DUMMY_READER = Message<String>::getId;
 
@@ -71,7 +71,7 @@ class JobTest {
 
   @Test
   void getMessage() {
-    Message message = DefaultMessage.withId("Wuthering Heights");
+    Message message = new DefaultMessage("Wuthering Heights");
     Job<Message, String, String> job = new Job<>(message);
     assertThat(job.getMessage()).isEqualTo(message);
   }

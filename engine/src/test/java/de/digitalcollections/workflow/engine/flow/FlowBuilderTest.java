@@ -86,10 +86,10 @@ class FlowBuilderTest {
   public void buildWithOnlyReadAndWrite() {
     Flow flow = new FlowBuilder<DefaultMessage, String, String>()
         .read(DefaultMessage::getId)
-        .write(DefaultMessage::withId)
+        .write((Function<String, Message>) DefaultMessage::new)
         .build();
     String message = "Whiskey in the Jar";
-    Message result = flow.process(DefaultMessage.withId(message));
+    Message result = flow.process(new DefaultMessage(message));
     assertThat(result.getId()).isEqualTo(message);
   }
 

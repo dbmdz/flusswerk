@@ -7,7 +7,9 @@ import de.digitalcollections.workflow.engine.flow.FlowBuilder;
 import de.digitalcollections.workflow.engine.messagebroker.MessageBroker;
 import de.digitalcollections.workflow.engine.messagebroker.MessageBrokerBuilder;
 import de.digitalcollections.workflow.engine.model.DefaultMessage;
+import de.digitalcollections.workflow.engine.model.Message;
 import java.io.IOException;
+import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,11 +31,11 @@ public class Application {
     Flow flow = new FlowBuilder<DefaultMessage, String, String>()
         .read(DefaultMessage::getId)
         .transform(new UppercaseTransformer(true))
-        .write(DefaultMessage::withId)
+        .write((Function<String, Message>) DefaultMessage::new)
         .build();
 
     Engine engine = new Engine(messageBroker, flow);
-    messageBroker.send("someInputQueue", DefaultMessage.withId("lowercase-text").put("text", "Shibuyara"));
+    messageBroker.send("someInputQueue", new DefaultMessage("lowercase-text").put("text", "Shibuyara"));
     engine.start();
   }
 

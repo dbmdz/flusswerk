@@ -31,24 +31,23 @@ class DefaultMessageMixinTest {
   @Test
   @DisplayName("Serialization should exclude field deliveryTag")
   void shouldExcludeDeliveryTag() throws JsonProcessingException {
-    String json = objectMapper.writeValueAsString(DefaultMessage.withId("Tadaaaaa!"));
+    String json = objectMapper.writeValueAsString(new DefaultMessage("Tadaaaaa!"));
     assertThat(json).doesNotContain("deliveryTag");
   }
 
   @Test
   @DisplayName("Serialization should exclude field body")
   void shouldExcludeBody() throws JsonProcessingException {
-    String json = objectMapper.writeValueAsString(DefaultMessage.withId("Tadaaaaa!"));
+    String json = objectMapper.writeValueAsString(new DefaultMessage("Tadaaaaa!"));
     assertThat(json).doesNotContain("body");
   }
 
   @Test
   @DisplayName("Deserialization should ignore unknown fields")
   void shouldIgnoreUnknownFields() throws IOException {
-    DefaultMessage message = DefaultMessage.withId("Tadaaaaa!");
+    DefaultMessage message = new DefaultMessage("Tadaaaaa!");
     String json = objectMapper.writeValueAsString(message);
     json = json.substring(0, json.length() - 1) + ", \"stupidField\": 0}";
-    System.out.println(json);
     DefaultMessage restored = objectMapper.readValue(json, DefaultMessage.class);
     assertThat(message.getId()).isEqualTo(restored.getId());
   }
@@ -56,7 +55,7 @@ class DefaultMessageMixinTest {
   @Test
   @DisplayName("Should serialize Envelope.retries")
   void shouldSerializeRetries() throws JsonProcessingException {
-    DefaultMessage message = DefaultMessage.withId("something happened");
+    DefaultMessage message = new DefaultMessage("something happened");
     message.getEnvelope().setRetries(42);
     assertThat(objectMapper.writeValueAsString(message)).contains("42");
   }
@@ -64,7 +63,7 @@ class DefaultMessageMixinTest {
   @Test
   @DisplayName("Should deserialize Envelope.retries")
   void shouldDeserializeRetries() throws IOException {
-    DefaultMessage message = DefaultMessage.withId("something happened");
+    DefaultMessage message = new DefaultMessage("something happened");
     message.getEnvelope().setRetries(42);
     Message deserialized = objectMapper.readValue(objectMapper.writeValueAsString(message), DefaultMessage.class);
     assertThat(deserialized.getEnvelope().getRetries()).isEqualTo(42);
