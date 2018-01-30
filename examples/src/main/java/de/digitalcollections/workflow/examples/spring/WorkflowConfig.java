@@ -42,7 +42,7 @@ public class WorkflowConfig {
   @Bean
   public MessageBroker messageBroker() {
     return new MessageBrokerBuilder()
-        .hostName("localhost")
+        .connectTo("localhost", 5672)
         .username("guest")
         .password("guest")
         .exchange("workflow")

@@ -19,7 +19,7 @@ public class Application {
 
   private void run() throws IOException {
     MessageBroker messageBroker = new MessageBrokerBuilder()
-        .hostName("localhost")
+        .connectTo("localhost", 5672)
         .username("guest")
         .password("guest")
         .exchange("workflow")
