@@ -15,7 +15,7 @@ Maven:
 <dependency>
   <groupId>de.digitalcollections.workflow</groupId>
   <artifactId>dc-workflow-engine</artifactId>
-  <version>0.4.0</version>
+  <version>0.5.0</version>
 </dependency>
 ```
 
@@ -23,7 +23,7 @@ Gradle:
 
 ```groovy
 dependencies {
-    compile group: 'de.digitalcollections.workflow', name: 'dc-workflow-engine', version: '0.4.0'
+    compile group: 'de.digitalcollections.workflow', name: 'dc-workflow-engine', version: '0.5.0'
 }
 ``` 
  
@@ -48,7 +48,7 @@ class Application {
     Flow flow = new FlowBuilder<DefaultMessage, String, String>()
         .read(message -> message.get("value"))
         .transform(String::toUpperCase)
-        .write(value -> DefaultMessage.withId("your.id").put("value", value))
+        .write(value -> new DefaultMessage("your.id").put("value", value))
         .build();
     
     Engine engine = new Engine(messageBroker, flow);
@@ -74,7 +74,7 @@ class Transformer implements Function<String, String> {
 
 class Writer implements Function<String, Message> { 
     Message apply(String output) {
-      return DefaultMessage.withId("your.id").put("value", output);
+      return new DefaultMessage("your.id").put("value", output);
     }
  }
 
@@ -136,9 +136,9 @@ class Writer implements Function<String, Message> {
   public Message apply(String value) {
     // ...
     // Notify other workflow jobs
-    messageBroker.send("ocr", DefaultMessage.withId("1000001"));
-    messageBroker.send("iiif", DefaultMessage.withId("1000001"));
-    messageBroker.send("import", DefaultMessage.withId("1000001"));
+    messageBroker.send("ocr", new DefaultMessage("1000001"));
+    messageBroker.send("iiif", new DefaultMessage("1000001"));
+    messageBroker.send("import", new DefaultMessage("1000001"));
     // ...
   }
 }
@@ -158,7 +158,23 @@ class Application {
     /* ... */
   }
 }
-```  
+```
+
+## Use custom reporting
+
+By default, the message stati (success, temporarily failed, finally failed) are just logged by the Logger of `DefaultProcessReport`.
+If you want to customize this (e.g. for writing structured logging messages with only specific information), you
+can provide a custom implementation of the `ProcessReport` interface and pass this to the Engine:
+
+```java
+class Application {
+  public static void main(String[] args) {
+    //...
+    Engine engine = new Engine(messageBroker, flow, new MyProcessReport());
+    engine.start();
+  }
+}
+```
 
 ## Failure Policies
 
@@ -178,6 +194,31 @@ class Application {
 ``` 
 
 If messages should not be retried, set `retryRoutingKey` to `null`. If permanently failing messages should be discarded, set `failureRoutingKey` to `null`.
+
+### Failure control by exceptions
+
+If your read/transform/write implementations, you can control the failure handling by failing a message temporarily or finally.
+
+If a message shall fail finally, just throw an `FinallyFailedProcessException`; if you want to fail temporarily and
+schedule a retry, throw a `RetriableProcessException`.
+
+
+## Multithreading
+
+If you want to process more than one message at the same time, you can customize, how many threads the engine uses:
+
+```java
+class Application {
+  public static void main(String[] args) {
+    int concurrentWorkers = 42;
+    
+    //...
+    Engine engine = new Engine(messageBroker, flow, concurrentWorkers);
+    engine.start();
+    //...
+  }
+}
+```
 
 ## MessageBrokerBuilder properties
 

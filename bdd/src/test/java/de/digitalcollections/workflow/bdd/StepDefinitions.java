@@ -38,7 +38,7 @@ public class StepDefinitions implements En {
               .readFrom("bdd.in")
               .writeTo("bdd.out")
       );
-      messagesToSend = Collections.singletonList(DefaultMessage.withId("happy message"));
+      messagesToSend = Collections.singletonList(new DefaultMessage("happy message"));
       queueToSendTo = queue;
     });
 
@@ -48,7 +48,7 @@ public class StepDefinitions implements En {
           .transform(s -> {
             throw new RuntimeException("Fail!");
           })
-          .write(s -> DefaultMessage.withId(s.toString()))
+          .write(s -> new DefaultMessage(s.toString()))
           .build();
 
       // Preparation finished, start everything
@@ -59,7 +59,7 @@ public class StepDefinitions implements En {
       Flow flow = new FlowBuilder<DefaultMessage, String, String>()
           .read(DefaultMessage::getId)
           .transform(s -> s)
-          .write(s -> DefaultMessage.withId(s).put("blah", "blubb"))
+          .write(s -> new DefaultMessage(s).put("blah", "blubb"))
           .build();
 
       // Preparation finished, start everything

@@ -1,8 +1,11 @@
 package de.digitalcollections.workflow.engine;
 
+import de.digitalcollections.workflow.engine.exceptions.FinallyFailedProcessException;
 import de.digitalcollections.workflow.engine.flow.Flow;
 import de.digitalcollections.workflow.engine.messagebroker.MessageBroker;
 import de.digitalcollections.workflow.engine.model.Message;
+import de.digitalcollections.workflow.engine.reporting.DefaultProcessReport;
+import de.digitalcollections.workflow.engine.reporting.ProcessReport;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,6 +39,8 @@ public class Engine {
 
   private AtomicInteger activeWorkers;
 
+  private ProcessReport processReport = new DefaultProcessReport();
+
   /**
    * Creates a new Engine instance with {@value DEFAULT_CONCURRENT_WORKERS} concurrent workers.
    *
@@ -44,7 +49,7 @@ public class Engine {
    * @throws IOException if reading/writing to the message broker fails
    */
   public Engine(MessageBroker messageBroker, Flow flow) throws IOException {
-    this(messageBroker, flow, DEFAULT_CONCURRENT_WORKERS);
+    this(messageBroker, flow, DEFAULT_CONCURRENT_WORKERS, null);
   }
 
   /**
@@ -56,12 +61,40 @@ public class Engine {
    * @throws IOException if reading/writing to the message broker fails
    */
   public Engine(MessageBroker messageBroker, Flow flow, int concurrentWorkers) throws IOException {
+    this(messageBroker, flow, concurrentWorkers, null);
+  }
+
+  /**
+   * Creates a new Engine instance with a customized process report.
+   *
+   * @param messageBroker the message broker to get messages from or send messages to
+   * @param flow the flow to execute agains every message
+   * @param processReport Reporting implementation
+   * @throws IOException if reading/writing to the message broker fails
+   */
+  public Engine(MessageBroker messageBroker, Flow flow, ProcessReport processReport) throws IOException {
+    this(messageBroker, flow, DEFAULT_CONCURRENT_WORKERS, null);
+  }
+
+  /**
+   * Creates a new Engine instance with a fixed number of concurrent workers.
+   *
+   * @param messageBroker the message broker to get messages from or send messages to
+   * @param flow the flow to execute agains every message
+   * @param concurrentWorkers the number of concurrent workers
+   * @param processReport Reporting implementation (or null, if DefaultProcessReport shall be used)
+   * @throws IOException if reading/writing to the message broker fails
+   */
+  public Engine(MessageBroker messageBroker, Flow flow, int concurrentWorkers, ProcessReport processReport) throws IOException {
     this.messageBroker = messageBroker;
     this.flow = flow;
     this.concurrentWorkers = concurrentWorkers;
     this.executorService = Executors.newFixedThreadPool(concurrentWorkers);
     this.semaphore = new Semaphore(concurrentWorkers);
     this.activeWorkers = new AtomicInteger();
+    if ( processReport != null ) {
+      this.processReport = processReport;
+    }
   }
 
   /**
@@ -84,7 +117,9 @@ public class Engine {
           continue;
         }
 
-        LOGGER.debug("Checking for new message (available semaphores: {}), got {}", semaphore.availablePermits(), message.getEnvelope().getBody());
+        if ( LOGGER.isDebugEnabled() ) {
+          LOGGER.debug("Checking for new message (available semaphores: {}), got {}", semaphore.availablePermits(), message.getEnvelope().getBody());
+        }
 
         executorService.execute(() -> {
           activeWorkers.incrementAndGet();
@@ -94,7 +129,7 @@ public class Engine {
         });
 
       } catch (IOException | InterruptedException e) {
-        LOGGER.error("Got some error", e);
+        LOGGER.error("Got some error: " + e, e);
       }
     }
   }
@@ -107,10 +142,23 @@ public class Engine {
         messageBroker.send(result);
       }
       messageBroker.ack(message);
+      processReport.reportSuccess(message);
+    } catch (FinallyFailedProcessException e) {
+      try {
+        processReport.reportFail(message, e);
+        messageBroker.fail(message);
+      } catch (IOException e1) {
+        LOGGER.error("Could not fail message" + message.getEnvelope().getBody(), e1);
+      }
     } catch (RuntimeException | IOException e) {
       try {
-        LOGGER.debug("Reject message because of processing error: {}", message.getEnvelope().getBody(), e);
-        messageBroker.reject(message);
+        boolean isRejected = messageBroker.reject(message);
+        System.out.println("Rejected=" + isRejected + " for " + message);
+        if ( isRejected ) {
+          processReport.reportReject(message, e);
+        } else {
+          processReport.reportFailAfterMaxRetries(message, e);
+        }
       } catch (IOException e1) {
         LOGGER.error("Could not reject message" + message.getEnvelope().getBody(), e1);
       }
