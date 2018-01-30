@@ -7,6 +7,7 @@ import de.digitalcollections.workflow.engine.model.Message;
 import de.digitalcollections.workflow.engine.reporting.DefaultProcessReport;
 import de.digitalcollections.workflow.engine.reporting.ProcessReport;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
@@ -135,32 +136,34 @@ public class Engine {
   }
 
   @SuppressWarnings("unchecked")
-  void process(Message message) {
+  void process(Message receivedMessage) {
     try {
-      Message result = flow.process(message);
+      Collection<? extends Message> messagesToSend = flow.process(receivedMessage);
       if (flow.writesData()) {
-        messageBroker.send(result);
+        for (Message messageToSend : messagesToSend) {
+          messageBroker.send(messageToSend);
+        }
       }
-      messageBroker.ack(message);
-      processReport.reportSuccess(message);
+      messageBroker.ack(receivedMessage);
+      processReport.reportSuccess(receivedMessage);
     } catch (FinallyFailedProcessException e) {
       try {
-        processReport.reportFail(message, e);
-        messageBroker.fail(message);
+        processReport.reportFail(receivedMessage, e);
+        messageBroker.fail(receivedMessage);
       } catch (IOException e1) {
-        LOGGER.error("Could not fail message" + message.getEnvelope().getBody(), e1);
+        LOGGER.error("Could not fail message" + receivedMessage.getEnvelope().getBody(), e1);
       }
     } catch (RuntimeException | IOException e) {
       try {
-        boolean isRejected = messageBroker.reject(message);
-        System.out.println("Rejected=" + isRejected + " for " + message);
+        boolean isRejected = messageBroker.reject(receivedMessage);
+        System.out.println("Rejected=" + isRejected + " for " + receivedMessage);
         if ( isRejected ) {
-          processReport.reportReject(message, e);
+          processReport.reportReject(receivedMessage, e);
         } else {
-          processReport.reportFailAfterMaxRetries(message, e);
+          processReport.reportFailAfterMaxRetries(receivedMessage, e);
         }
       } catch (IOException e1) {
-        LOGGER.error("Could not reject message" + message.getEnvelope().getBody(), e1);
+        LOGGER.error("Could not reject message" + receivedMessage.getEnvelope().getBody(), e1);
       }
     }
   }

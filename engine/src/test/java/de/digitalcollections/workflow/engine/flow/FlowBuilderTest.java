@@ -3,6 +3,7 @@ package de.digitalcollections.workflow.engine.flow;
 
 import de.digitalcollections.workflow.engine.model.DefaultMessage;
 import de.digitalcollections.workflow.engine.model.Message;
+import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.DisplayName;
@@ -88,9 +89,10 @@ class FlowBuilderTest {
         .read(DefaultMessage::getId)
         .write((Function<String, Message>) DefaultMessage::new)
         .build();
-    String message = "Whiskey in the Jar";
-    Message result = flow.process(new DefaultMessage(message));
-    assertThat(result.getId()).isEqualTo(message);
+    String id = "Whiskey in the Jar";
+    Collection<? extends Message> result = flow.process(new DefaultMessage(id));
+    assertThat(result).hasSize(1);
+    assertThat(result).allSatisfy(m -> assertThat(m.getId()).isEqualTo(id));
   }
 
 }

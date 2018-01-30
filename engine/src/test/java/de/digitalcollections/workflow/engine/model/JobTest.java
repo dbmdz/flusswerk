@@ -1,5 +1,7 @@
 package de.digitalcollections.workflow.engine.model;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,6 +31,17 @@ class JobTest {
     }
   }
 
+  class CheckIfWritten<R> implements Function<R, Collection<? extends Message>> {
+
+    boolean called = false;
+
+    @Override
+    public Collection<? extends Message> apply(R r) {
+      called = true;
+      return null;
+    }
+  }
+
   @BeforeEach
   void setUp() {
   }
@@ -52,7 +65,7 @@ class JobTest {
 
   @Test
   void write() {
-    CheckIfCalled<String, Message> writer = new CheckIfCalled<>();
+    CheckIfWritten<String> writer = new CheckIfWritten<>();
     Job<Message, String, String> job = new Job<>(SOME_MESSAGE);
     job.write(writer);
     assertThat(writer.called).isTrue();
@@ -65,8 +78,10 @@ class JobTest {
     Job<DefaultMessage, String, String> job = new Job<>(new DefaultMessage().put("message", message));
     job.read(m -> m.get("message"));
     job.transform(String::toUpperCase);
-    job.write(s -> new DefaultMessage().put("message", s));
-    assertThat(((DefaultMessage) job.getResult()).get("message")).isEqualTo(message.toUpperCase());
+    job.write(s -> Collections.singleton(new DefaultMessage().put("message", s)));
+    assertThat(job.getResult()).allSatisfy(
+        result -> assertThat(assertThat(((DefaultMessage) result).get("message")).isEqualTo(message.toUpperCase()))
+    );
   }
 
   @Test

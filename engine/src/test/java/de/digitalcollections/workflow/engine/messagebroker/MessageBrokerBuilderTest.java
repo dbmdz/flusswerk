@@ -1,10 +1,13 @@
 package de.digitalcollections.workflow.engine.messagebroker;
 
+import com.rabbitmq.client.Address;
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,27 +44,19 @@ class MessageBrokerBuilderTest {
   void setUp() throws IOException, TimeoutException {
     connectionFactory = mock(ConnectionFactory.class);
     Connection connection = mock(Connection.class);
-    when(connectionFactory.newConnection()).thenReturn(connection);
+    when(connectionFactory.newConnection(any(List.class))).thenReturn(connection);
     channel = mock(Channel.class);
     when(connection.createChannel()).thenReturn(channel);
     messageBrokerBuilder = new MessageBrokerBuilder().readFrom("default");
   }
 
-
   @Test
-  @DisplayName("Default hostname is RabbitMQ default")
-  void defaultHostName() throws IOException {
-    messageBroker = messageBrokerBuilder.build(create_connection);
-    verify(connectionFactory).setHost("localhost");
-  }
-
-  @Test
-  @DisplayName("Should set hostname to desired value")
-  void hostName() throws IOException {
+  @DisplayName("Should add new address to desired value")
+  void hostNameAndPort() throws IOException, TimeoutException {
     messageBroker = messageBrokerBuilder
-        .hostName("example.com")
+        .connectTo("example.com", 1234)
         .build(create_connection);
-    verify(connectionFactory).setHost("example.com");
+    verify(connectionFactory).newConnection(Collections.singletonList(new Address("example.com", 1234)));
   }
 
   @Test
@@ -82,19 +77,10 @@ class MessageBrokerBuilderTest {
   }
 
   @Test
-  @DisplayName("Default port is RabbitMQ default")
-  void defaultPort() throws IOException {
+  @DisplayName("Default port and hostname are RabbitMQ default")
+  void defaulAddress() throws IOException, TimeoutException {
     messageBroker = messageBrokerBuilder.build(create_connection);
-    verify(connectionFactory).setPort(5672);
-  }
-
-  @Test
-  @DisplayName("Should set port")
-  void port() throws IOException {
-    messageBroker = messageBrokerBuilder
-        .port(12345)
-        .build(create_connection);
-    verify(connectionFactory).setPort(12345);
+    verify(connectionFactory).newConnection(Collections.singletonList(new Address("localhost", 5672)));
   }
 
   @Test
