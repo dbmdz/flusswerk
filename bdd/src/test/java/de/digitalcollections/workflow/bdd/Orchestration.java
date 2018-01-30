@@ -59,7 +59,7 @@ public class Orchestration {
     long interval = 100;
 
     MessageBroker messageBroker = null;
-    messageBrokerBuilder.port(rabbitMQ.getMappedPort(5672));
+    messageBrokerBuilder.connectTo("localhost", rabbitMQ.getMappedPort(5672));
 
     while ((messageBroker == null) && (totalWait <= maxWait)) {
       try {
