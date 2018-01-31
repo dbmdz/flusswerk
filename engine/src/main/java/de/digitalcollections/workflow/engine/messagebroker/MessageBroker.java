@@ -104,7 +104,10 @@ public class MessageBroker {
 
     for (String inputQueue : routingConfig.getReadFrom()) {
       FailurePolicy failurePolicy = routingConfig.getFailurePolicy(inputQueue);
-      rabbitClient.declareQueue(inputQueue, exchange, inputQueue, null);
+      rabbitClient.declareQueue(inputQueue, exchange, inputQueue,
+          Maps.of(
+              DEAD_LETTER_EXCHANGE, deadLetterExchange)
+        );
       if (failurePolicy.getRetryRoutingKey() != null) {
         rabbitClient.declareQueue(failurePolicy.getRetryRoutingKey(), deadLetterExchange, inputQueue,
             Maps.of(
