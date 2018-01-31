@@ -169,6 +169,7 @@ public class MessageBrokerBuilder {
    * @throws WorkflowSetupException If connection to RabbitMQ fails.
    */
   public MessageBroker build() throws WorkflowSetupException {
+    routingConfig.complete();
     try {
       return build(new RabbitConnection(connectionConfig));
     } catch (IOException | RuntimeException e) {
