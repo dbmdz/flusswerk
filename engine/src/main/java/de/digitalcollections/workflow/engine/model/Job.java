@@ -1,6 +1,7 @@
 package de.digitalcollections.workflow.engine.model;
 
 import java.util.Collection;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Job<M, R, W> {
@@ -29,6 +30,10 @@ public class Job<M, R, W> {
 
   public void write(Function<W, Collection<? extends Message>> writer) {
     result = writer.apply(dataTransformed);
+  }
+
+  public void write(Consumer<W> writer) {
+    writer.accept(dataTransformed);
   }
 
   public M getMessage() {
