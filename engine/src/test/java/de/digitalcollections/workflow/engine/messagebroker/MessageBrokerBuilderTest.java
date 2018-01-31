@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,14 +30,6 @@ class MessageBrokerBuilderTest {
 
   private MessageBroker messageBroker;
 
-  private final Function<ConnectionConfig, RabbitConnection> create_connection = config -> {
-    try {
-      return new RabbitConnection(config, connectionFactory);
-    } catch (IOException | TimeoutException e) {
-      throw new RuntimeException(e);
-    }
-  };
-
   private MessageBrokerBuilder messageBrokerBuilder;
 
   @BeforeEach
@@ -51,12 +42,20 @@ class MessageBrokerBuilderTest {
     messageBrokerBuilder = new MessageBrokerBuilder().readFrom("default");
   }
 
+  private RabbitConnection rabbitConnection() {
+    try {
+      return new RabbitConnection(messageBrokerBuilder.getConnectionConfig(), connectionFactory);
+    } catch (IOException | TimeoutException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   @Test
   @DisplayName("Should add new address to desired value")
   void hostNameAndPort() throws IOException, TimeoutException {
     messageBroker = messageBrokerBuilder
         .connectTo("example.com", 1234)
-        .build(create_connection);
+        .build(rabbitConnection());
     verify(connectionFactory).newConnection(Collections.singletonList(new Address("example.com", 1234)));
   }
 
@@ -65,7 +64,7 @@ class MessageBrokerBuilderTest {
   void hostConnectionStrings() throws IOException, TimeoutException {
     messageBroker = messageBrokerBuilder
         .connectTo("rabbit1.example.com:1234,rabbit2.example.com:2345;rabbit3.example.org:3456")
-        .build(create_connection);
+        .build(rabbitConnection());
     List<Address> expectedAddresses = new ArrayList<>();
     expectedAddresses.add(new Address("rabbit1.example.com", 1234));
     expectedAddresses.add(new Address("rabbit2.example.com", 2345));
@@ -76,63 +75,63 @@ class MessageBrokerBuilderTest {
   @Test
   @DisplayName("Default password is RabbitMQ default")
   void defaultPassword() throws IOException {
-    messageBroker = messageBrokerBuilder.build(create_connection);
+    messageBroker = messageBrokerBuilder.build(rabbitConnection());
     verify(connectionFactory).setPassword("guest");
   }
 
 
   @Test
   @DisplayName("Password should be set")
-  void password() throws IOException {
+  void password() throws IOException, TimeoutException {
     messageBroker = messageBrokerBuilder
         .password("secretsecretsecret")
-        .build(create_connection);
+        .build(rabbitConnection());
     verify(connectionFactory).setPassword("secretsecretsecret");
   }
 
   @Test
   @DisplayName("Default port and hostname are RabbitMQ default")
   void defaulAddress() throws IOException, TimeoutException {
-    messageBroker = messageBrokerBuilder.build(create_connection);
+    messageBroker = messageBrokerBuilder.build(rabbitConnection());
     verify(connectionFactory).newConnection(Collections.singletonList(new Address("localhost", 5672)));
   }
 
   @Test
   @DisplayName("Default username is RabbitMQ default")
   void defaultUsername() throws IOException {
-    messageBroker = messageBrokerBuilder.build(create_connection);
+    messageBroker = messageBrokerBuilder.build(rabbitConnection());
     verify(connectionFactory).setUsername("guest");
   }
 
   @Test
   @DisplayName("Should set username")
-  void username() throws IOException {
+  void username() throws IOException, TimeoutException {
     messageBroker = messageBrokerBuilder
         .username("Hackerman")
-        .build(create_connection);
+        .build(new RabbitConnection(messageBrokerBuilder.getConnectionConfig(), connectionFactory));
     verify(connectionFactory).setUsername("Hackerman");
   }
 
   @Test
   @DisplayName("Default virtualHost is RabbitMQ default")
   void defaultVirtualHost() throws IOException {
-    messageBroker = messageBrokerBuilder.build(create_connection);
+    messageBroker = messageBrokerBuilder.build(rabbitConnection());
     verify(connectionFactory).setVirtualHost("/");
   }
 
   @Test
   @DisplayName("Default virtualHost is RabbitMQ default")
-  void virtualHost() throws IOException {
+  void virtualHost() throws IOException, TimeoutException {
     messageBroker = messageBrokerBuilder
         .virtualHost("/special")
-        .build(create_connection);
+        .build(new RabbitConnection(messageBrokerBuilder.getConnectionConfig(), connectionFactory));
     verify(connectionFactory).setVirtualHost("/special");
   }
 
   @Test
   @DisplayName("Default dead letter backoff time is 30s")
   void defaultDeadLetterWait() throws IOException {
-    messageBroker = messageBrokerBuilder.build(create_connection);
+    messageBroker = messageBrokerBuilder.build(rabbitConnection());
     assertThat(messageBroker.getConfig().getDeadLetterWait()).isEqualTo(30 * 1000);
   }
 
@@ -141,14 +140,14 @@ class MessageBrokerBuilderTest {
   void deadLetterWait() throws IOException {
     messageBroker = messageBrokerBuilder
         .deadLetterWait(321)
-        .build(create_connection);
+        .build(rabbitConnection());
     assertThat(messageBroker.getConfig().getDeadLetterWait()).isEqualTo(321);
   }
 
   @Test
   @DisplayName("Default max retries is 5")
   void defaultMaxRetries() throws IOException {
-    messageBroker = messageBrokerBuilder.build(create_connection);
+    messageBroker = messageBrokerBuilder.build(rabbitConnection());
     assertThat(messageBroker.getConfig().getMaxRetries()).isEqualTo(5);
   }
 
@@ -157,14 +156,14 @@ class MessageBrokerBuilderTest {
   void maxRetries() throws IOException {
     messageBroker = messageBrokerBuilder
         .maxRetries(42)
-        .build(create_connection);
+        .build(rabbitConnection());
     assertThat(messageBroker.getConfig().getMaxRetries()).isEqualTo(42);
   }
 
   @Test
   @DisplayName("Default exchanges should be workflow and workflow.retry")
   void defaultExchanges() throws IOException {
-    messageBroker = messageBrokerBuilder.build(create_connection);
+    messageBroker = messageBrokerBuilder.build(rabbitConnection());
     verify(channel).exchangeDeclare(eq("workflow"), any(BuiltinExchangeType.class), anyBoolean());
     verify(channel).exchangeDeclare(eq("workflow.retry"), any(BuiltinExchangeType.class), anyBoolean());
   }
@@ -175,7 +174,7 @@ class MessageBrokerBuilderTest {
     messageBroker = messageBrokerBuilder
         .exchange("another")
         .deadLetterExchange("another.retry")
-        .build(create_connection);
+        .build(rabbitConnection());
     verify(channel).exchangeDeclare(eq("another"), any(BuiltinExchangeType.class), anyBoolean());
     verify(channel).exchangeDeclare(eq("another.retry"), any(BuiltinExchangeType.class), anyBoolean());
   }

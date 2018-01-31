@@ -6,7 +6,6 @@ import de.digitalcollections.workflow.engine.jackson.SingleClassModule;
 import de.digitalcollections.workflow.engine.model.Message;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
 
@@ -168,31 +167,15 @@ public class MessageBrokerBuilder {
    * @throws WorkflowSetupException If connection to RabbitMQ fails.
    */
   public MessageBroker build() throws WorkflowSetupException {
-    routingConfig.complete();
     try {
-      return build(MessageBrokerBuilder::defaultConnectionConstructor);
-    } catch (IOException | RuntimeException e) {
+      return build(new RabbitConnection(connectionConfig));
+    } catch (IOException | RuntimeException | TimeoutException e) {
       throw new WorkflowSetupException(e);
     }
   }
 
-  /**
-   * Can be exchanged for testing.
-   *
-   * @param config The config to set.
-   * @return The connection to the message broker.
-   */
-  private static RabbitConnection defaultConnectionConstructor(ConnectionConfig config) {
-    try {
-      return new RabbitConnection(config);
-    } catch (IOException | TimeoutException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  MessageBroker build(Function<ConnectionConfig, RabbitConnection> connectionConstructor) throws IOException {
+  MessageBroker build(RabbitConnection connection) throws IOException {
     routingConfig.complete();
-    RabbitConnection connection = connectionConstructor.apply(connectionConfig);
     return new MessageBroker(config, routingConfig, new RabbitClient(config, connection));
   }
 
@@ -221,6 +204,10 @@ public class MessageBrokerBuilder {
   public MessageBrokerBuilder writeTo(String outputRoutingKey) {
     routingConfig.setWriteTo(outputRoutingKey);
     return this;
+  }
+
+  ConnectionConfig getConnectionConfig() {
+    return connectionConfig;
   }
 
 }
