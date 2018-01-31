@@ -1,9 +1,11 @@
 package de.digitalcollections.workflow.engine.messagebroker;
 
+import com.rabbitmq.client.Address;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
@@ -41,19 +43,20 @@ class RabbitConnection {
   void waitForConnection() throws IOException {
     boolean connectionIsFailing = true;
     while (connectionIsFailing) {
+      List<Address> addresses = config.getAddresses();
       try {
-        LOGGER.info("Waiting for connection...");
-        Connection connection = factory.newConnection(config.getAddresses());
+        LOGGER.info("Waiting for connection to {} ...", addresses);
+        Connection connection = factory.newConnection(addresses);
         channel = connection.createChannel();
         channel.basicRecover(true);
         connectionIsFailing = false;
-        LOGGER.info("Connected");
+        LOGGER.info("Connected to {}", addresses);
       } catch (IOException | TimeoutException e) {
-        LOGGER.debug("Could not connect", e);
+        LOGGER.debug("Could not connect to {}", addresses, e);
         try {
           TimeUnit.SECONDS.sleep(RETRY_INTERVAL);
         } catch (InterruptedException e1) {
-          throw new IOException("Could not connect to RabbitMQ", e);
+          throw new IOException("Could not connect to RabbitMQ at " + addresses, e);
         }
       }
     }
