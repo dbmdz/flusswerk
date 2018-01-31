@@ -155,7 +155,10 @@ public class MessageBrokerBuilder {
    * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
    */
   public MessageBrokerBuilder deadLetterExchange(String deadLetterExchange) {
-    routingConfig.setDeadLetterExchange(requireNonNull(deadLetterExchange));
+    if (deadLetterExchange == null || deadLetterExchange.isEmpty()) {
+      throw new IllegalArgumentException("Dead letter exchange must not be null or empty");
+    }
+    routingConfig.setDeadLetterExchange(deadLetterExchange);
     return this;
   }
 
