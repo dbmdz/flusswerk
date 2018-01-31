@@ -59,7 +59,7 @@ public class StepDefinitions implements En {
       Flow flow = new FlowBuilder<DefaultMessage, String, String>()
           .read(DefaultMessage::getId)
           .transform(s -> s)
-          .write(s -> new DefaultMessage(s).put("blah", "blubb"))
+          .writeAndSend(s -> new DefaultMessage(s).put("blah", "blubb"))
           .build();
 
       // Preparation finished, start everything
