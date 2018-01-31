@@ -139,7 +139,7 @@ public class Engine {
   void process(Message receivedMessage) {
     try {
       Collection<? extends Message> messagesToSend = flow.process(receivedMessage);
-      if (flow.writesData()) {
+      if (flow.hasMessagesToSend()) {
         for (Message messageToSend : messagesToSend) {
           messageBroker.send(messageToSend);
         }

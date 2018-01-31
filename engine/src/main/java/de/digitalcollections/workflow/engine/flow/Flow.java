@@ -3,6 +3,7 @@ package de.digitalcollections.workflow.engine.flow;
 import de.digitalcollections.workflow.engine.model.Job;
 import de.digitalcollections.workflow.engine.model.Message;
 import java.util.Collection;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
@@ -23,10 +24,13 @@ public class Flow<M extends Message, R, W> {
 
   private Supplier<Function<W, Collection<? extends Message>>> writerFactory;
 
-  public Flow(Supplier<Function<M, R>> readerFactory, Supplier<Function<R, W>> transformerFactory, Supplier<Function<W, Collection<? extends Message>>> writerFactory) {
+  private Supplier<Consumer<W>> consumingWriterFactory;
+
+  public Flow(Supplier<Function<M, R>> readerFactory, Supplier<Function<R, W>> transformerFactory, Supplier<Function<W, Collection<? extends Message>>> writerFactory, Supplier<Consumer<W>> consumingWriterFactory) {
     this.readerFactory = readerFactory;
     this.transformerFactory = transformerFactory;
     this.writerFactory = writerFactory;
+    this.consumingWriterFactory = consumingWriterFactory;
   }
 
   public Collection<? extends Message> process(M message) {
@@ -40,10 +44,13 @@ public class Flow<M extends Message, R, W> {
     if (writerFactory != null) {
       job.write(writerFactory.get());
     }
+    if (consumingWriterFactory != null) {
+      job.write(consumingWriterFactory.get());
+    }
     return job.getResult();
   }
 
-  public boolean writesData() {
+  public boolean hasMessagesToSend() {
     return writerFactory != null;
   }
 

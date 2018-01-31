@@ -3,6 +3,7 @@ package de.digitalcollections.workflow.engine.flow;
 import de.digitalcollections.workflow.engine.Engine;
 import de.digitalcollections.workflow.engine.model.Message;
 import java.util.Collection;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -21,6 +22,8 @@ public class FlowBuilder<M extends Message, R, W> {
   private Supplier<Function<R, W>> transformerFactory;
 
   private Supplier<Function<W, Collection<? extends Message>>> writerFactory;
+
+  private Supplier<Consumer<W>> consumingWriterFactory;
 
   @SuppressWarnings("unchecked")
   private W cast(R value) {
@@ -92,8 +95,8 @@ public class FlowBuilder<M extends Message, R, W> {
    * @param writer The writer to produce outgoing messages.
    * @return This {@link FlowBuilder} instance for further configuration or creation of the {@link Flow}.
    */
-  public FlowBuilder<M, R, W> write(Function<W, Message> writer) {
-    requireNonNull(writer, "The writer factory cannot be null");
+  public FlowBuilder<M, R, W> writeAndSend(Function<W, Message> writer) {
+    requireNonNull(writer, "The writer cannot be null");
     createDefaultTransformer();
     final WriterAdapter<W> writerAdapter = new WriterAdapter<>(writer);
     this.writerFactory = () -> writerAdapter;
@@ -106,7 +109,7 @@ public class FlowBuilder<M extends Message, R, W> {
    * @param writerFactory The writer factory to provide a writer for every message.
    * @return This {@link FlowBuilder} instance for further configuration or creation of the {@link Flow}.
    */
-  public FlowBuilder<M, R, W> write(Supplier<Function<W, Message>> writerFactory) {
+  public FlowBuilder<M, R, W> writeAndSend(Supplier<Function<W, Message>> writerFactory) {
     createDefaultTransformer();
     requireNonNull(writerFactory, "The writer factory cannot be null");
     this.writerFactory = () -> new WriterAdapter<>(writerFactory.get());
@@ -119,7 +122,7 @@ public class FlowBuilder<M extends Message, R, W> {
    * @param writer The writer to produce outgoing messages.
    * @return This {@link FlowBuilder} instance for further configuration or creation of the {@link Flow}.
    */
-  public FlowBuilder<M, R, W> writeMany(Function<W, Collection<? extends Message>> writer) {
+  public FlowBuilder<M, R, W> writeAndSendMany(Function<W, Collection<? extends Message>> writer) {
     requireNonNull(writer, "The writer factory cannot be null");
     createDefaultTransformer();
     this.writerFactory = () -> writer;
@@ -132,9 +135,22 @@ public class FlowBuilder<M extends Message, R, W> {
    * @param writerFactory The writer factory to provide a writer for every message.
    * @return This {@link FlowBuilder} instance for further configuration or creation of the {@link Flow}.
    */
-  public FlowBuilder<M, R, W> writeMany(Supplier<Function<W, Collection<? extends Message>>> writerFactory) {
+  public FlowBuilder<M, R, W> writeAndSendMany(Supplier<Function<W, Collection<? extends Message>>> writerFactory) {
     createDefaultTransformer();
     this.writerFactory = requireNonNull(writerFactory, "The writer factory cannot be null");
+    return this;
+  }
+
+  public FlowBuilder<M, R, W> write(Supplier<Consumer<W>> consumingWriterFactory) {
+    createDefaultTransformer();
+    this.consumingWriterFactory = requireNonNull(consumingWriterFactory, "The writer factory cannot be null");
+    return this;
+  }
+
+  public FlowBuilder<M, R, W> write(Consumer<W> consumingWriter) {
+    requireNonNull(consumingWriter, "The writer cannot be null");
+    createDefaultTransformer();
+    this.consumingWriterFactory = () -> consumingWriter;
     return this;
   }
 
@@ -144,7 +160,7 @@ public class FlowBuilder<M extends Message, R, W> {
    * @return A new {@link Flow} as configured before.
    */
   public Flow<M, R, W> build() {
-    return new Flow<M, R, W>(readerFactory, transformerFactory, writerFactory);
+    return new Flow<M, R, W>(readerFactory, transformerFactory, writerFactory, consumingWriterFactory);
   }
 
   public static <M extends Message, R, W> FlowBuilder<M, R, W> receiving(Class<M> clazz) {
