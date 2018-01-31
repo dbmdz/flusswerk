@@ -6,6 +6,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
@@ -57,6 +58,19 @@ class MessageBrokerBuilderTest {
         .connectTo("example.com", 1234)
         .build(create_connection);
     verify(connectionFactory).newConnection(Collections.singletonList(new Address("example.com", 1234)));
+  }
+
+  @Test
+  @DisplayName("Should add new addresses to desired values, even with different separators")
+  void hostConnectionStrings() throws IOException, TimeoutException {
+    messageBroker = messageBrokerBuilder
+        .connectTo("rabbit1.example.com:1234,rabbit2.example.com:2345;rabbit3.example.org:3456")
+        .build(create_connection);
+    List<Address> expectedAddresses = new ArrayList<>();
+    expectedAddresses.add(new Address("rabbit1.example.com", 1234));
+    expectedAddresses.add(new Address("rabbit2.example.com", 2345));
+    expectedAddresses.add(new Address("rabbit3.example.org", 3456));
+    verify(connectionFactory).newConnection(expectedAddresses);
   }
 
   @Test
