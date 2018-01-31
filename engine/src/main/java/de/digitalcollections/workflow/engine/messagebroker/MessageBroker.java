@@ -42,7 +42,7 @@ public class MessageBroker {
    * @throws IOException if sending the message fails.
    */
   public void send(Message message) throws IOException {
-    rabbitClient.send(routingConfig.getExchange(), routingConfig.getWriteTo(), message);
+    send(routingConfig.getWriteTo(), message);
   }
 
   /**
@@ -147,7 +147,7 @@ public class MessageBroker {
   public boolean reject(Message message) throws IOException {
     final Envelope envelope = message.getEnvelope();
     ack(message);
-    System.out.println("Envelope="+ envelope.getRetries() + ", config=" + config.getMaxRetries());
+    System.out.println("Envelope=" + envelope.getRetries() + ", config=" + config.getMaxRetries());
     if (envelope.getRetries() < config.getMaxRetries()) {
       envelope.setRetries(envelope.getRetries() + 1);
       retry(message);
