@@ -35,7 +35,10 @@ class RabbitClient {
 
   private Class<? extends Message> messageClass;
 
+  private RabbitConnection connection;
+
   public RabbitClient(MessageBrokerConfig config, RabbitConnection connection) {
+    this.connection = connection;
     channel = connection.getChannel();
     objectMapper = new ObjectMapper();
     messageClass = config.getMessageClass();
@@ -53,7 +56,13 @@ class RabbitClient {
         .contentType("application/json")
         .deliveryMode(PERSISTENT)
         .build();
-    channel.basicPublish(exchange, routingKey, properties, data);
+
+    try {
+      channel.basicPublish(exchange, routingKey, properties, data);
+    } catch (IOException e) {
+      waitForConnection("Could not publish message to " + routingKey);
+      channel.basicPublish(exchange, routingKey, properties, data);
+    }
   }
 
   Message deserialize(String body) throws IOException {
@@ -65,11 +74,30 @@ class RabbitClient {
   }
 
   public void ack(Message message) throws IOException {
-    channel.basicAck(message.getEnvelope().getDeliveryTag(), SINGLE_MESSAGE);
+    try {
+      channel.basicAck(message.getEnvelope().getDeliveryTag(), SINGLE_MESSAGE);
+    } catch (IOException e) {
+      waitForConnection("Could not ack message");
+      channel.basicAck(message.getEnvelope().getDeliveryTag(), SINGLE_MESSAGE);
+    }
+  }
+
+  private void waitForConnection(String errorMessage) throws IOException {
+    try {
+      connection.waitForConnection();
+    } catch (IOException e) {
+      throw new IOException(errorMessage, e);
+    }
   }
 
   public Message receive(String queueName) throws IOException {
-    GetResponse response = channel.basicGet(queueName, NO_AUTO_ACK);
+    GetResponse response;
+    try {
+      response = channel.basicGet(queueName, NO_AUTO_ACK);
+    } catch (IOException e) {
+      waitForConnection("Could not receive message from " + queueName);
+      response = channel.basicGet(queueName, NO_AUTO_ACK);
+    }
     if (response != null) {
       String body = new String(response.getBody(), StandardCharsets.UTF_8);
       Message message = deserialize(body);
@@ -82,12 +110,37 @@ class RabbitClient {
   }
 
   public void provideExchange(String exchange) throws IOException {
-    channel.exchangeDeclare(exchange, BuiltinExchangeType.TOPIC, DURABLE);
+    GetResponse response;
+    try {
+      channel.exchangeDeclare(exchange, BuiltinExchangeType.TOPIC, DURABLE);
+    } catch (IOException e) {
+      waitForConnection("Could not declare exchange");
+      channel.exchangeDeclare(exchange, BuiltinExchangeType.TOPIC, DURABLE);
+    }
   }
 
+
   public void declareQueue(String name, String exchange, String routingKey, Map<String, Object> args) throws IOException {
-    channel.queueDeclare(name, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, args);
-    channel.queueBind(name, exchange, routingKey);
+    createQueue(name, args);
+    bindQueue(name, exchange, routingKey);
+  }
+
+  public void createQueue(String name, Map<String, Object> args) throws IOException {
+    try {
+      channel.queueDeclare(name, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, args);
+    } catch (IOException e) {
+      waitForConnection("Could not declare queue");
+      channel.queueDeclare(name, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, args);
+    }
+  }
+
+  public void bindQueue(String name, String exchange, String routingKey) throws IOException {
+    try {
+      channel.queueBind(name, exchange, routingKey);
+    } catch (IOException e) {
+      waitForConnection("Could not bind queue to exchange");
+      channel.queueBind(name, exchange, routingKey);
+    }
   }
 
 }

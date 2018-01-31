@@ -5,7 +5,6 @@ import de.digitalcollections.workflow.engine.exceptions.WorkflowSetupException;
 import de.digitalcollections.workflow.engine.jackson.SingleClassModule;
 import de.digitalcollections.workflow.engine.model.Message;
 import java.io.IOException;
-import java.util.concurrent.TimeoutException;
 
 import static java.util.Objects.requireNonNull;
 
@@ -169,7 +168,7 @@ public class MessageBrokerBuilder {
   public MessageBroker build() throws WorkflowSetupException {
     try {
       return build(new RabbitConnection(connectionConfig));
-    } catch (IOException | RuntimeException | TimeoutException e) {
+    } catch (IOException | RuntimeException e) {
       throw new WorkflowSetupException(e);
     }
   }

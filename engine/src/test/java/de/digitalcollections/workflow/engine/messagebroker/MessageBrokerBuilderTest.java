@@ -45,7 +45,7 @@ class MessageBrokerBuilderTest {
   private RabbitConnection rabbitConnection() {
     try {
       return new RabbitConnection(messageBrokerBuilder.getConnectionConfig(), connectionFactory);
-    } catch (IOException | TimeoutException e) {
+    } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
