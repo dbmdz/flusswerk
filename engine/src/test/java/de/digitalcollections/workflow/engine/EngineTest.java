@@ -54,7 +54,7 @@ class EngineTest {
     flowWithoutProblems = new FlowBuilder<DefaultMessage, String, String>()
         .read(READ_SOME_STRING)
         .transform(Function.identity())
-        .write(WRITE_SOME_STRING)
+        .writeAndSend(WRITE_SOME_STRING)
         .build();
   }
 
@@ -77,7 +77,7 @@ class EngineTest {
           }
           return s;
         })
-        .write((Function<String, Message>) DefaultMessage::new)
+        .writeAndSend((Function<String, Message>) DefaultMessage::new)
         .build();
 
     Engine engine = new Engine(messageBroker, flow);
@@ -148,7 +148,7 @@ class EngineTest {
         .transform(s -> {
           throw new RuntimeException("Aaaaaaah!");
         })
-        .write(WRITE_SOME_STRING)
+        .writeAndSend(WRITE_SOME_STRING)
         .build();
 
     Engine engine = new Engine(messageBroker, flow);
@@ -189,7 +189,7 @@ class EngineTest {
         .transform(s -> {
           throw new RetriableProcessException("Try again after a cup of coffee");
         })
-        .write(WRITE_SOME_STRING)
+        .writeAndSend(WRITE_SOME_STRING)
         .build();
 
     Engine engine = new Engine(messageBroker, flow);
@@ -208,7 +208,7 @@ class EngineTest {
         .transform(s -> {
           throw new FinallyFailedProcessException("Never again!");
         })
-        .write(WRITE_SOME_STRING)
+        .writeAndSend(WRITE_SOME_STRING)
         .build();
 
     Engine engine = new Engine(messageBroker, flow);

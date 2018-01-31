@@ -31,7 +31,7 @@ public class Application {
     Flow flow = new FlowBuilder<DefaultMessage, String, String>()
         .read(DefaultMessage::getId)
         .transform(new UppercaseTransformer(true))
-        .write((Function<String, Message>) DefaultMessage::new)
+        .writeAndSend((Function<String, Message>) DefaultMessage::new)
         .build();
 
     Engine engine = new Engine(messageBroker, flow);

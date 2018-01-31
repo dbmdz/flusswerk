@@ -66,7 +66,7 @@ class FlowBuilderTest {
     FlowBuilder<Message, String, String> builder = new FlowBuilder<>();
     Throwable exception = assertThrows(NullPointerException.class, () -> {
       builder.read(message -> null);
-      builder.write((Function<String, Message>) null);
+      builder.writeAndSend((Function<String, Message>) null);
     });
     assertThat(exception.getMessage()).contains("writer");
   }
@@ -77,7 +77,7 @@ class FlowBuilderTest {
     FlowBuilder<Message, String, String> builder = new FlowBuilder<>();
     Throwable exception = assertThrows(NullPointerException.class, () -> {
       builder.read(message -> null);
-      builder.write((Supplier<Function<String, Message>>) null);
+      builder.writeAndSend((Supplier<Function<String, Message>>) null);
     });
     assertThat(exception.getMessage()).contains("writer factory");
   }
@@ -87,7 +87,7 @@ class FlowBuilderTest {
   public void buildWithOnlyReadAndWrite() {
     Flow flow = new FlowBuilder<DefaultMessage, String, String>()
         .read(DefaultMessage::getId)
-        .write((Function<String, Message>) DefaultMessage::new)
+        .writeAndSend((Function<String, Message>) DefaultMessage::new)
         .build();
     String id = "Whiskey in the Jar";
     Collection<? extends Message> result = flow.process(new DefaultMessage(id));

@@ -35,7 +35,7 @@ public class WorkflowConfig {
     return new FlowBuilder<DefaultMessage, String, String>()
         .read(reader())
         .transform(transformer())
-        .write(writer())
+        .writeAndSend(writer())
         .build();
   }
 
