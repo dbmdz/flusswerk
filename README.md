@@ -226,10 +226,9 @@ class Application {
 
 | Property                          | Meaning                                       |
 | --------------------------------- | --------------------------------------------- | 
-| `hostName(String hostName)`       | RabbitMQ host name                            |
+| `connectTo(String connectionStr)` | RabbitMQ host name and port, separated by a colon. Can also be a list, separated by comma |
 | `username(String username)`       | Username for authentication (default `guest`) |
 | `password(String password)`       | Password for authentication (default `guest`) |
-| `port(int port)`                  | RabbitMQ port                                 |
 | `virtualHost(String virtualHost)` | RabbitMQ virtual host                         |
 
 ### Message Routing

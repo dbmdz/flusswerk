@@ -39,6 +39,21 @@ public class MessageBrokerBuilder {
     return this;
   }
 
+  public MessageBrokerBuilder connectTo(String connectionStr) {
+    if ( connectionStr != null ) {
+      String[] connections = connectionStr.split(",|;");
+      for ( String connection : connections ) {
+        String[] connectionParts = connection.split(":");
+        if ( connectionParts.length != 2 ) {
+          throw new RuntimeException("Invalid connection specified: '" + connection
+              + "'. Must be of format host:port");
+        }
+        connectionConfig.addAddress(connectionParts[0], Integer.parseInt(connectionParts[1]));
+      }
+    }
+    return this;
+  }
+
   /**
    * Sets the RabbitMQ password for authentication.
    *
