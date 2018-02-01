@@ -150,7 +150,6 @@ public class MessageBroker {
   public boolean reject(Message message) throws IOException {
     final Envelope envelope = message.getEnvelope();
     ack(message);
-    System.out.println("Envelope=" + envelope.getRetries() + ", config=" + config.getMaxRetries());
     if (envelope.getRetries() < config.getMaxRetries()) {
       envelope.setRetries(envelope.getRetries() + 1);
       retry(message);

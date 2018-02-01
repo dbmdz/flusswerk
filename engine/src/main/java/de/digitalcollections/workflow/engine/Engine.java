@@ -156,7 +156,6 @@ public class Engine {
     } catch (RuntimeException | IOException e) {
       try {
         boolean isRejected = messageBroker.reject(receivedMessage);
-        System.out.println("Rejected=" + isRejected + " for " + receivedMessage);
         if ( isRejected ) {
           processReport.reportReject(receivedMessage, e);
         } else {
