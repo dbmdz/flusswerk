@@ -1,6 +1,5 @@
 package de.digitalcollections.workflow.engine.messagebroker;
 
-import de.digitalcollections.workflow.engine.exceptions.WorkflowSetupException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,7 +18,7 @@ class RoutingConfigImpl implements RoutingConfig {
   private Map<String, FailurePolicy> failurePolicies;
 
   RoutingConfigImpl() {
-    readFrom = null;
+    readFrom = new String[] {};
     writeTo = null;
     failurePolicies = new HashMap<>();
   }
@@ -30,9 +29,6 @@ class RoutingConfigImpl implements RoutingConfig {
     }
     if (deadLetterExchange == null) {
       deadLetterExchange = exchange + ".retry";
-    }
-    if (readFrom == null) {
-      throw new WorkflowSetupException("A workflow always needs an input queue. Please configure 'readFrom'.");
     }
     for (String inputQueue : readFrom){
       if (!failurePolicies.containsKey(inputQueue)) {
