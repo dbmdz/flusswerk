@@ -48,7 +48,7 @@ class Application {
     Flow flow = new FlowBuilder<DefaultMessage, String, String>()
         .read(message -> message.get("value"))
         .transform(String::toUpperCase)
-        .write(value -> new DefaultMessage("your.id").put("value", value))
+        .writeAndSend(value -> new DefaultMessage("your.id").put("value", value))
         .build();
     
     Engine engine = new Engine(messageBroker, flow);
@@ -88,7 +88,7 @@ class Application {
     Flow flow = new FlowBuilder<DefaultMessage, String, String>()
         .read(new Reader())
         .transform(new Transformer())
-        .write(new Writer())
+        .writeAndSend(new Writer())
         .build();
     
     Engine engine = new Engine(messageBroker, flow);
@@ -96,6 +96,15 @@ class Application {
   }
 }
 ```
+
+Depending if you want to want to send one message, multiple messages or no message at all, the FlowBuilder has suitable API methods:
+
+
+ - `flowBuilder.write(Consumer<T>)` processes values of type `T`, but does not send messages returned by the writer.
+ - `flowBuilder.writeAndSend(Function<T, Message>)` processes values of type `T`, and sends the message returned by the writer to the default output queue.
+ - `flowBuilder.writeAndSendMany(Consumer<T, List<? extends Message>>)` processes values of type `T`, and sends all messages in the list returned by the writer to the default output queue.
+
+It is always possible to use `MessageBroker.send(Message)` anywhere to manually send messages.
 
 ## Isolating messages with suppliers
 
@@ -116,7 +125,7 @@ class Application {
     Flow flow = new FlowBuilder<DefaultMessage, String, String>()
         .read(new ReaderSuppiler())
         .transform(() -> new Transformer())
-        .write(new Writer())
+        .writeAndSend(new Writer())
         .build();
     // ...
   }
