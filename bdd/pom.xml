@@ -9,6 +9,8 @@
 
   <artifactId>dc-flusswerk-bdd</artifactId>
 
+  <name>Flusswerk - BDD tests</name>
+
   <properties>
     <cucumber.version>2.1.0</cucumber.version>
     <junit.version>4.12</junit.version>
