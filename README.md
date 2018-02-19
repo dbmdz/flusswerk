@@ -1,4 +1,4 @@
-# Digital Collections Workflow Engine
+# Flusswerk - Digital Collections Workflow Engine
 
 [![Build Status](https://www.travis-ci.org/dbmdz/workflow.svg?branch=master)](https://www.travis-ci.org/dbmdz/workflow)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -7,7 +7,7 @@
 [![Javadocs](https://javadoc.io/badge/de.digitalcollections.workflow/dc-workflow-engine.svg)](https://javadoc.io/doc/de.digitalcollections.workflow/dc-workflow-engine)
 [![Maven Central](https://img.shields.io/maven-central/v/de.digitalcollections.workflow/dc-workflow-engine.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22de.digitalcollections.workflow%22)
 
-The digital collections workflow engine makes it easy to create multithreaded workers for read-transform-write chains (aka ETL jobs). Workflows are coordinated via RabbitMQ, so it's easy to create chains of independent workflow jobs (each a new Java Application).
+Flusswerk makes it easy to create multithreaded workers for read-transform-write chains (aka ETL jobs). Workflows are coordinated via RabbitMQ, so it's easy to create chains of independent workflow jobs (each a new Java Application).
 
 Maven:
 
@@ -30,7 +30,7 @@ dependencies {
  
 ## Requirements
  
-Required libraries are Jackson and RabbitMQ Java API, the minimal Java version is 8 (will move to 9 in a few months). The workflow engine itself will *never require Spring*, but there might be examples how to integrate the engine in a Spring Boot Application. 
+Required libraries are Jackson and RabbitMQ Java API, the minimal Java version is 8 (will move to 9 in a few months). The Flusswerk engine itself *never require Spring*, but there are examples how to integrate the engine in a Spring Boot Application. 
 
 
 ## Basic setup
@@ -134,7 +134,7 @@ class Application {
 
 ## Sending messages to arbitrary queues
 
-The Writer always sends a message to the defined output queue, which satisfies most use cases. For more complex workflows the MessageBroke can be used to send messages to any queue you like:
+The Writer always sends a message to the defined output queue, which satisfies most use cases. For more complex workflows the `MessageBroker` can be used to send messages to any queue you like:
 
 ```java
 class Writer implements Function<String, Message> {
@@ -156,7 +156,7 @@ class Writer implements Function<String, Message> {
 
 ## How to use a custom message implementation
 
-The default message implementation `DefaultMessage` allows to set arbitrary key-value-pairs of type `String`. To use custom message it has to be registered:
+The default message implementation `DefaultMessage` allows to set arbitrary key-value-pairs of type `String`. To use a custom message implementation it has to be registered:
 
 ```java
 class Application {
@@ -171,9 +171,7 @@ class Application {
 
 ## Use custom reporting
 
-By default, the message stati (success, temporarily failed, finally failed) are just logged by the Logger of `DefaultProcessReport`.
-If you want to customize this (e.g. for writing structured logging messages with only specific information), you
-can provide a custom implementation of the `ProcessReport` interface and pass this to the Engine:
+By default, the message statuses (success, temporarily failed, finally failed) are just logged by the Logger of `DefaultProcessReport`. If you want to customize this (e.g. for writing structured logging messages with only specific information), you can provide a custom implementation of the `ProcessReport` interface and pass this to the Engine:
 
 ```java
 class Application {
@@ -208,8 +206,7 @@ If messages should not be retried, set `retryRoutingKey` to `null`. If permanent
 
 If your read/transform/write implementations, you can control the failure handling by failing a message temporarily or finally.
 
-If a message shall fail finally, just throw an `FinallyFailedProcessException`; if you want to fail temporarily and
-schedule a retry, throw a `RetriableProcessException`.
+If a message shall fail finally, just throw an `FinallyFailedProcessException`; if you want to fail temporarily and schedule a retry, throw a `RetriableProcessException`.
 
 
 ## Multithreading
