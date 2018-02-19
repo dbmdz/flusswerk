@@ -3,15 +3,15 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
-    <groupId>de.digitalcollections.workflow</groupId>
-    <artifactId>dc-workflow-parent</artifactId>
-    <version>0.5.0</version>
+    <groupId>de.digitalcollections.flusswerk</groupId>
+    <artifactId>dc-flusswerk-parent</artifactId>
+    <version>1.0.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>dc-workflow-examples</artifactId>
+  <artifactId>dc-flusswerk-examples</artifactId>
 
-  <name>Digital Collections Workflow Examples</name>
+  <name>Digital Collections Flusswerk workflow examples</name>
 
   <properties>
     <version.spring-boot>1.5.9.RELEASE</version.spring-boot>
@@ -25,8 +25,8 @@
       <artifactId>logback-classic</artifactId>
     </dependency>
     <dependency>
-      <groupId>de.digitalcollections.workflow</groupId>
-      <artifactId>dc-workflow-engine</artifactId>
+      <groupId>de.digitalcollections.flusswerk</groupId>
+      <artifactId>dc-flusswerk-engine</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>

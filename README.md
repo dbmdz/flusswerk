@@ -13,9 +13,9 @@ Maven:
 
 ```xml
 <dependency>
-  <groupId>de.digitalcollections.workflow</groupId>
-  <artifactId>dc-workflow-engine</artifactId>
-  <version>0.5.0</version>
+  <groupId>de.digitalcollections.flusswerk</groupId>
+  <artifactId>dc-flusswerk-engine</artifactId>
+  <version>1.0.0</version>
 </dependency>
 ```
 
@@ -23,7 +23,7 @@ Gradle:
 
 ```groovy
 dependencies {
-    compile group: 'de.digitalcollections.workflow', name: 'dc-workflow-engine', version: '0.5.0'
+    compile group: 'de.digitalcollections.flusswerk', name: 'dc-flusswerk-engine', version: '1.0.0'
 }
 ``` 
  

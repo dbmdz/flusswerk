@@ -2,21 +2,21 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>de.digitalcollections.workflow</groupId>
-  <artifactId>dc-workflow-parent</artifactId>
-  <version>0.5.0</version>
+  <groupId>de.digitalcollections.flusswerk</groupId>
+  <artifactId>dc-flusswerk-parent</artifactId>
+  <version>1.0.0</version>
   <packaging>pom</packaging>
 
-  <name>Digital Collections Workflow</name>
+  <name>Digital Collections Flusswerk</name>
 
   <description>
     Tooling for AMQP/RabbitMQ based workflow management.
   </description>
-  <url>https://github.com/dbmdz/workflow</url>
+  <url>https://github.com/dbmdz/flusswerk</url>
   <licenses>
     <license>
       <name>MIT License</name>
-      <url>https://github.com/dbmdz/workflow/blob/master/LICENSE</url>
+      <url>https://github.com/dbmdz/flusswerk/blob/master/LICENSE</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
@@ -33,17 +33,17 @@
     </developer>
   </developers>
   <ciManagement>
-    <url>https://travis-ci.org/dbmdz/workflow</url>
+    <url>https://travis-ci.org/dbmdz/flusswerk</url>
     <system>Travis CI</system>
   </ciManagement>
   <issueManagement>
-    <url>https://github.com/dbmdz/workflow/issues</url>
+    <url>https://github.com/dbmdz/flusswerk/issues</url>
     <system>GitHub Issues</system>
   </issueManagement>
   <scm>
-    <connection>https://github.com/dbmdz/workflow.git</connection>
-    <developerConnection>git@github.com:dbmdz/workflow.git</developerConnection>
-    <url>https://github.com/dbmdz/workflow</url>
+    <connection>https://github.com/dbmdz/flusswerk.git</connection>
+    <developerConnection>git@github.com:dbmdz/flusswerk.git</developerConnection>
+    <url>https://github.com/dbmdz/flusswerk</url>
   </scm>
 
   <modules>
@@ -98,8 +98,8 @@
         <version>${version.amqp-client}</version>
       </dependency>
       <dependency>
-        <groupId>de.digitalcollections.workflow</groupId>
-        <artifactId>dc-workflow-engine</artifactId>
+        <groupId>de.digitalcollections.flusswerk</groupId>
+        <artifactId>dc-flusswerk-engine</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

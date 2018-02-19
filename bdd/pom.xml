@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
-    <artifactId>dc-workflow-parent</artifactId>
-    <groupId>de.digitalcollections.workflow</groupId>
-    <version>0.5.0</version>
+    <artifactId>dc-flusswerk-parent</artifactId>
+    <groupId>de.digitalcollections.flusswerk</groupId>
+    <version>1.0.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>dc-workflow-bdd</artifactId>
+  <artifactId>dc-flusswerk-bdd</artifactId>
 
   <properties>
     <cucumber.version>2.1.0</cucumber.version>
@@ -45,8 +45,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>de.digitalcollections.workflow</groupId>
-      <artifactId>dc-workflow-engine</artifactId>
+      <groupId>de.digitalcollections.flusswerk</groupId>
+      <artifactId>dc-flusswerk-engine</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
