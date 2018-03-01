@@ -123,7 +123,7 @@ class Application {
   public static void main(String[] args) {
     // ...
     Flow flow = new FlowBuilder<DefaultMessage, String, String>()
-        .read(new ReaderSuppiler())
+        .read(new ReaderSupplier())
         .transform(() -> new Transformer())
         .writeAndSend(new Writer())
         .build();
