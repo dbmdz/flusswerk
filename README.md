@@ -104,7 +104,7 @@ Depending if you want to want to send one message, multiple messages or no messa
  - `flowBuilder.writeAndSend(Function<T, Message>)` processes values of type `T`, and sends the message returned by the writer to the default output queue.
  - `flowBuilder.writeAndSendMany(Consumer<T, List<? extends Message>>)` processes values of type `T`, and sends all messages in the list returned by the writer to the default output queue.
 
-It is always possible to use `MessageBroker.send("some.queue", Message)` anywhere to manually send messages.
+It is always possible to use `MessageBroker.send("some.queue", Message)` anywhere to manually [send messages to arbitrary queues](#sending-messages-to-arbitrary-queues).
 
 ## Isolating messages with suppliers
 
