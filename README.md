@@ -232,7 +232,7 @@ class Application {
 
 | Property                          | Meaning                                       |
 | --------------------------------- | --------------------------------------------- | 
-| `connectTo(String connectionStr)` | RabbitMQ host name and port, separated by a colon. Can also be a list, separated by comma |
+| `connectTo(String connectionStr)` | RabbitMQ host name and port, separated by a colon (default `localhost:5672`). Can also be a list, separated by comma |
 | `username(String username)`       | Username for authentication (default `guest`) |
 | `password(String password)`       | Password for authentication (default `guest`) |
 | `virtualHost(String virtualHost)` | RabbitMQ virtual host                         |
