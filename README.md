@@ -30,7 +30,7 @@ dependencies {
  
 ## Requirements
  
-Required libraries are Jackson and RabbitMQ Java API, the minimal Java version is 8 (will move to 9 in a few months). The Flusswerk engine itself *never require Spring*, but there are examples how to integrate the engine in a Spring Boot Application. 
+Required libraries are Jackson and RabbitMQ Java API, the minimal Java version is 8 (will move to 9 in a few months). The Flusswerk engine itself *never requires Spring*, but there are examples how to integrate the engine in a Spring Boot Application. 
 
 
 ## Basic setup
