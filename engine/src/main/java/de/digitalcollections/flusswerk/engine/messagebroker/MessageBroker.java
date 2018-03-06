@@ -5,6 +5,8 @@ import de.digitalcollections.flusswerk.engine.model.Message;
 import de.digitalcollections.flusswerk.engine.util.Maps;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,9 +19,9 @@ public class MessageBroker {
   private static final String MESSAGE_TTL = "x-message-ttl";
   private static final String DEAD_LETTER_EXCHANGE = "x-dead-letter-exchange";
 
-  private MessageBrokerConfig config;
+  private final MessageBrokerConfig config;
 
-  private RoutingConfig routingConfig;
+  private final RoutingConfig routingConfig;
 
   private final RabbitClient rabbitClient;
 
@@ -107,7 +109,7 @@ public class MessageBroker {
       rabbitClient.declareQueue(inputQueue, exchange, inputQueue,
           Maps.of(
               DEAD_LETTER_EXCHANGE, deadLetterExchange)
-        );
+      );
       if (failurePolicy.getRetryRoutingKey() != null) {
         rabbitClient.declareQueue(failurePolicy.getRetryRoutingKey(), deadLetterExchange, inputQueue,
             Maps.of(
@@ -186,4 +188,17 @@ public class MessageBroker {
   public MessageBrokerConfig getConfig() {
     return config;
   }
+
+  public Map<String, Long> getMessageCounts() throws IOException {
+    Map<String, Long> result = new HashMap<>();
+    for (String queue : routingConfig.getReadFrom()) {
+      result.put(queue, rabbitClient.getMessageCount(queue));
+    }
+    return result;
+  }
+
+  public boolean isConnectionOk() {
+    return rabbitClient.isChannelAvailable() && rabbitClient.isConnectionOk();
+  }
+
 }

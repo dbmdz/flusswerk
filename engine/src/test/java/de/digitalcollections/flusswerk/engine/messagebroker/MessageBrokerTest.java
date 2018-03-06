@@ -4,7 +4,9 @@ import de.digitalcollections.flusswerk.engine.model.DefaultMessage;
 import de.digitalcollections.flusswerk.engine.model.Message;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,6 +19,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class MessageBrokerTest {
 
@@ -110,6 +113,58 @@ class MessageBrokerTest {
   void defaultReceiveShouldPullTheInputQueue() throws IOException {
     messageBroker.receive();
     verify(rabbitClient).receive(routingConfig.getReadFrom()[0]);
+  }
+
+  @Test
+  @DisplayName("getMessageCount should return all message counts")
+  void getMessageCountsShouldGetAllMessageCounts() throws IOException {
+    RoutingConfigImpl routingConfig = new RoutingConfigImpl();
+    routingConfig.setReadFrom("input1", "input2");
+    routingConfig.complete();
+
+    Map<String, Long> expected = new HashMap<>();
+    expected.put("input1", 100L);
+    expected.put("input2", 200L);
+
+    for (String queue : expected.keySet()) {
+      when(rabbitClient.getMessageCount(queue)).thenReturn(expected.get(queue));
+    }
+
+    messageBroker = new MessageBroker(config, routingConfig, rabbitClient);
+    assertThat(messageBroker.getMessageCounts()).isEqualTo(expected);
+  }
+
+
+  @Test
+  @DisplayName("isConnectionOk should be true if channel and connection are ok")
+  void isConnectionOkShouldBeTrueIfChannelAndConnectionAreOk() throws IOException {
+    when(rabbitClient.isChannelAvailable()).thenReturn(true);
+    when(rabbitClient.isConnectionOk()).thenReturn(true);
+    assertThat(messageBroker.isConnectionOk()).isTrue();
+  }
+
+  @Test
+  @DisplayName("isConnectionOk should be false if channel is not available")
+  void isConnectionOkShouldBeTrueIfChannelIsNotAvailable() throws IOException {
+    when(rabbitClient.isChannelAvailable()).thenReturn(false);
+    when(rabbitClient.isConnectionOk()).thenReturn(true);
+    assertThat(messageBroker.isConnectionOk()).isFalse();
+  }
+
+  @Test
+  @DisplayName("isConnectionOk should be false if connection is not ok")
+  void isConnectionOkShouldBeTrueIfConnectionIsNotOk() throws IOException {
+    when(rabbitClient.isChannelAvailable()).thenReturn(true);
+    when(rabbitClient.isConnectionOk()).thenReturn(false);
+    assertThat(messageBroker.isConnectionOk()).isFalse();
+  }
+
+  @Test
+  @DisplayName("isConnectionOk should be false if channel is not available and connection is not ok")
+  void isConnectionOkShouldBeTrueIfChannelIsNotAvailableAndConnectionIsNotOk() throws IOException {
+    when(rabbitClient.isChannelAvailable()).thenReturn(false);
+    when(rabbitClient.isConnectionOk()).thenReturn(false);
+    assertThat(messageBroker.isConnectionOk()).isFalse();
   }
 
 }
