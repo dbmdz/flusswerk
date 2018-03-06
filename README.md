@@ -153,8 +153,41 @@ class Writer implements Function<String, Message> {
 }
 ```
 
+## Message Types
 
-## How to use a custom message implementation
+### Using DefaultMessage
+
+The `DefaultMessage` class provides a simple multi-purpose implementation of the `Message`interface. The `id` field is of type `String` and arbitrary key-value-pairs (all of type `String`) are possible.
+
+Example:
+
+```java
+DefaultMessage message = new DefaultMessage("123");
+message.put("color", "red")
+       .put("size", "42")
+       .put("niceness", "very nice");
+```
+
+would be represented as
+
+```json
+{
+  "envelope": {
+    "retries": 0,
+    "timestamp": "2018-03-06T14:25:05.002",
+    "source": null
+  },
+  "id": "123",
+  "data": {
+    "color": "red",
+    "size": "42",
+    "niceness": "very nice"
+  }
+}
+```
+
+
+### How to use a custom message implementation
 
 The default message implementation `DefaultMessage` allows to set arbitrary key-value-pairs of type `String`. To use a custom message implementation it has to be registered:
 
