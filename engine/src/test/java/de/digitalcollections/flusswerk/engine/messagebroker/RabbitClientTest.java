@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeoutException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -116,6 +117,32 @@ class RabbitClientTest {
         rabbitClient.serialize(message),
         1
     );
+  }
+
+  @Test
+  @DisplayName("getMessageCount should return message count for queue")
+  void getMessageCountShouldReturnMessageCount() throws IOException {
+    when(channel.messageCount("test")).thenReturn(123L);
+    RabbitClient rabbitClient = new RabbitClient(config, connection);
+    assertThat(rabbitClient.getMessageCount("test")).isEqualTo(123L);
+  }
+
+  @Test
+  @DisplayName("isConnectionOk should return if connection is ok")
+  void isConnectionOk() {
+    when(connection.isOk()).thenReturn(true, false);
+    RabbitClient rabbitClient = new RabbitClient(config, connection);
+    assertThat(rabbitClient.isConnectionOk()).isTrue();
+    assertThat(rabbitClient.isConnectionOk()).isFalse();
+  }
+
+  @Test
+  @DisplayName("isChannelAvailable should return if channel is available")
+  void isChannelAvailable() {
+    when(channel.isOpen()).thenReturn(true, false);
+    RabbitClient rabbitClient = new RabbitClient(config, connection);
+    assertThat(rabbitClient.isChannelAvailable()).isTrue();
+    assertThat(rabbitClient.isChannelAvailable()).isFalse();
   }
 
 }
