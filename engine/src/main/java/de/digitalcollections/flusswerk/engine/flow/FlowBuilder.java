@@ -21,7 +21,7 @@ public class FlowBuilder<M extends Message, R, W> {
 
   private Supplier<Function<R, W>> transformerFactory;
 
-  private Supplier<Function<W, Collection<? extends Message>>> writerFactory;
+  private Supplier<Function<W, Collection<Message>>> writerFactory;
 
   private Supplier<Consumer<W>> consumingWriterFactory;
 
@@ -122,7 +122,7 @@ public class FlowBuilder<M extends Message, R, W> {
    * @param writer The writer to produce outgoing messages.
    * @return This {@link FlowBuilder} instance for further configuration or creation of the {@link Flow}.
    */
-  public FlowBuilder<M, R, W> writeAndSendMany(Function<W, Collection<? extends Message>> writer) {
+  public FlowBuilder<M, R, W> writeAndSendMany(Function<W, Collection<Message>> writer) {
     requireNonNull(writer, "The writer factory cannot be null");
     createDefaultTransformer();
     this.writerFactory = () -> writer;
@@ -135,7 +135,7 @@ public class FlowBuilder<M extends Message, R, W> {
    * @param writerFactory The writer factory to provide a writer for every message.
    * @return This {@link FlowBuilder} instance for further configuration or creation of the {@link Flow}.
    */
-  public FlowBuilder<M, R, W> writeAndSendMany(Supplier<Function<W, Collection<? extends Message>>> writerFactory) {
+  public FlowBuilder<M, R, W> writeAndSendMany(Supplier<Function<W, Collection<Message>>> writerFactory) {
     createDefaultTransformer();
     this.writerFactory = requireNonNull(writerFactory, "The writer factory cannot be null");
     return this;

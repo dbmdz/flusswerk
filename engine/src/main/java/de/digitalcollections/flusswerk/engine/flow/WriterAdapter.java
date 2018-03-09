@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Function;
 
-public class WriterAdapter<T> implements Function<T, Collection<? extends Message>> {
+public class WriterAdapter<T> implements Function<T, Collection<Message>> {
 
   private final Function<T, Message> writer;
 
@@ -14,7 +14,7 @@ public class WriterAdapter<T> implements Function<T, Collection<? extends Messag
   }
 
   @Override
-  public Collection<? extends Message> apply(T t) {
+  public Collection<Message> apply(T t) {
     Message result = writer.apply(t);
     if (result == null) {
       return Collections.emptyList();

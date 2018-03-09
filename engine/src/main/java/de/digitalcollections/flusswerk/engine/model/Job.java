@@ -12,7 +12,7 @@ public class Job<M, R, W> {
 
   private M message;
 
-  private Collection<? extends Message> result;
+  private Collection<Message> result;
 
   public Job(M message) {
     this.message = message;
@@ -28,7 +28,7 @@ public class Job<M, R, W> {
     dataTransformed = transformer.apply(dataRead);
   }
 
-  public void write(Function<W, Collection<? extends Message>> writer) {
+  public void write(Function<W, Collection<Message>> writer) {
     result = writer.apply(dataTransformed);
   }
 
@@ -40,7 +40,7 @@ public class Job<M, R, W> {
     return message;
   }
 
-  public Collection<? extends Message> getResult() {
+  public Collection<Message> getResult() {
     return result;
   }
 

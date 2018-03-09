@@ -31,12 +31,12 @@ class JobTest {
     }
   }
 
-  class CheckIfWritten<R> implements Function<R, Collection<? extends Message>> {
+  class CheckIfWritten<R> implements Function<R, Collection<Message>> {
 
     boolean called = false;
 
     @Override
-    public Collection<? extends Message> apply(R r) {
+    public Collection<Message> apply(R r) {
       called = true;
       return null;
     }
@@ -78,7 +78,7 @@ class JobTest {
     Job<DefaultMessage, String, String> job = new Job<>(new DefaultMessage().put("message", message));
     job.read(m -> m.get("message"));
     job.transform(String::toUpperCase);
-    job.write((Function<String, Collection<? extends Message>>) s -> Collections.singleton(new DefaultMessage().put("message", s)));
+    job.write((Function<String, Collection<Message>>) s -> Collections.singleton(new DefaultMessage().put("message", s)));
     assertThat(job.getResult()).allSatisfy(
         result -> assertThat(assertThat(((DefaultMessage) result).get("message")).isEqualTo(message.toUpperCase()))
     );

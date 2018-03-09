@@ -32,6 +32,29 @@ dependencies {
  
 Required libraries are Jackson and RabbitMQ Java API, the minimal Java version is 8 (will move to 9 in a few months). The Flusswerk engine itself *never requires Spring*, but there are examples how to integrate the engine in a Spring Boot Application. 
 
+## Migration from version 1.x to 2.x
+
+Starting with version 2.0.0, the interface for flows sending many messages has been simplified. The writer now can use the message class generics directly: 
+
+```java
+class Writer implements java.util.function.Function<T, Collection<? extends Message>> {
+  @Override
+  public Collection<? extends Message> apply(T value) {
+    // ...
+  } 
+}
+```
+
+gets now 
+ 
+```java
+class Writer implements java.util.function.Function<T, Collection<Message>> {
+  @Override
+  public Collection<Message> apply(T value) {
+    // ...
+  } 
+}
+```
 
 ## Basic setup
 
@@ -102,7 +125,7 @@ Depending if you want to want to send one message, multiple messages or no messa
 
  - `flowBuilder.write(Consumer<T>)` processes values of type `T`, but does not send messages returned by the writer.
  - `flowBuilder.writeAndSend(Function<T, Message>)` processes values of type `T`, and sends the message returned by the writer to the default output queue.
- - `flowBuilder.writeAndSendMany(Function<T, List<? extends Message>>)` processes values of type `T`, and sends all messages in the list returned by the writer to the default output queue.
+ - `flowBuilder.writeAndSendMany(Function<T, List<Message>>)` processes values of type `T`, and sends all messages in the list returned by the writer to the default output queue.
 
 It is always possible to use `MessageBroker.send("some.queue", Message)` anywhere to manually [send messages to arbitrary queues](#sending-messages-to-arbitrary-queues).
 
