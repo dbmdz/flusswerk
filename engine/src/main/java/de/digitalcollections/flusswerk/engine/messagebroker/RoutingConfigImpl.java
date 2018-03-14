@@ -15,10 +15,10 @@ class RoutingConfigImpl implements RoutingConfig {
 
   private String writeTo;
 
-  private Map<String, FailurePolicy> failurePolicies;
+  private final Map<String, FailurePolicy> failurePolicies;
 
   RoutingConfigImpl() {
-    readFrom = new String[] {};
+    readFrom = new String[]{};
     writeTo = null;
     failurePolicies = new HashMap<>();
   }
@@ -30,7 +30,7 @@ class RoutingConfigImpl implements RoutingConfig {
     if (deadLetterExchange == null) {
       deadLetterExchange = exchange + ".retry";
     }
-    for (String inputQueue : readFrom){
+    for (String inputQueue : readFrom) {
       if (!failurePolicies.containsKey(inputQueue)) {
         failurePolicies.put(inputQueue, new FailurePolicy(inputQueue));
       }

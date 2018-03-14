@@ -4,9 +4,9 @@ import de.digitalcollections.flusswerk.engine.exceptions.FinallyFailedProcessExc
 import de.digitalcollections.flusswerk.engine.exceptions.RetriableProcessException;
 import de.digitalcollections.flusswerk.engine.flow.Flow;
 import de.digitalcollections.flusswerk.engine.flow.FlowBuilder;
+import de.digitalcollections.flusswerk.engine.messagebroker.MessageBroker;
 import de.digitalcollections.flusswerk.engine.model.DefaultMessage;
 import de.digitalcollections.flusswerk.engine.model.Message;
-import de.digitalcollections.flusswerk.engine.messagebroker.MessageBroker;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -52,10 +52,10 @@ class EngineTest {
   void setUp() {
     messageBroker = mock(MessageBroker.class);
     flowWithoutProblems = new FlowBuilder<DefaultMessage, String, String>()
-        .read(READ_SOME_STRING)
-        .transform(Function.identity())
-        .writeAndSend(WRITE_SOME_STRING)
-        .build();
+            .read(READ_SOME_STRING)
+            .transform(Function.identity())
+            .writeAndSend(WRITE_SOME_STRING)
+            .build();
   }
 
   @Test
@@ -66,19 +66,19 @@ class EngineTest {
     semaphore.drainPermits();
 
     Flow flow = new FlowBuilder<DefaultMessage, String, String>()
-        .read(DefaultMessage::getId)
-        .transform(s -> {
-          try {
-            LOGGER.debug("Trying to acquire semaphore, should block (Thread id {})", Thread.currentThread().getId());
-            semaphore.acquire(); // Block this worker to count it only once
-            LOGGER.debug("Got semaphore (Thread id {})", Thread.currentThread().getId());
-          } catch (InterruptedException e) {
-            e.printStackTrace();
-          }
-          return s;
-        })
-        .writeAndSend((Function<String, Message>) DefaultMessage::new)
-        .build();
+            .read(DefaultMessage::getId)
+            .transform(s -> {
+              try {
+                LOGGER.debug("Trying to acquire semaphore, should block (Thread id {})", Thread.currentThread().getId());
+                semaphore.acquire(); // Block this worker to count it only once
+                LOGGER.debug("Got semaphore (Thread id {})", Thread.currentThread().getId());
+              } catch (InterruptedException e) {
+                e.printStackTrace();
+              }
+              return s;
+            })
+            .writeAndSend((Function<String, Message>) DefaultMessage::new)
+            .build();
 
     Engine engine = new Engine(messageBroker, flow);
     ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -96,8 +96,8 @@ class EngineTest {
     }
 
     assertThat(engineStats.getActiveWorkers()).as("There were %d workers expected, but only %d running after waiting for %d ms",
-        engineStats.getConcurrentWorkers(), engineStats.getActiveWorkers(), millisecondsWaited)
-        .isEqualTo(engineStats.getConcurrentWorkers());
+                                                  engineStats.getConcurrentWorkers(), engineStats.getActiveWorkers(), millisecondsWaited)
+            .isEqualTo(engineStats.getConcurrentWorkers());
 
     engine.stop();
   }
@@ -135,7 +135,6 @@ class EngineTest {
 //    assertThat(messageCaptor.getValue().getType()).isEqualTo("White Room");
 //    System.out.println(messagesSent.get());
 //  }
-
   private final Function<DefaultMessage, String> READ_SOME_STRING = DefaultMessage::getId;
 
   private final Function<String, Message> WRITE_SOME_STRING = DefaultMessage::new;
@@ -144,12 +143,12 @@ class EngineTest {
   @DisplayName("Engine should reject a message failing processing")
   void processShouldRejectMessageOnFailure() throws IOException {
     Flow flow = new FlowBuilder<DefaultMessage, String, String>()
-        .read(READ_SOME_STRING)
-        .transform(s -> {
-          throw new RuntimeException("Aaaaaaah!");
-        })
-        .writeAndSend(WRITE_SOME_STRING)
-        .build();
+            .read(READ_SOME_STRING)
+            .transform(s -> {
+              throw new RuntimeException("Aaaaaaah!");
+            })
+            .writeAndSend(WRITE_SOME_STRING)
+            .build();
 
     Engine engine = new Engine(messageBroker, flow);
     Message message = new DefaultMessage();
@@ -171,7 +170,6 @@ class EngineTest {
     verify(messageBroker, never()).reject(message);
   }
 
-
   @Test
   @DisplayName("Engine should send a message")
   void processShouldSendMessage() throws IOException {
@@ -185,12 +183,12 @@ class EngineTest {
   @DisplayName("RetriableProcessException shall reject message temporarily")
   void retriableProcessExceptionShallRejectTemporarily() throws IOException {
     Flow flow = new FlowBuilder<DefaultMessage, String, String>()
-        .read(READ_SOME_STRING)
-        .transform(s -> {
-          throw new RetriableProcessException("Try again after a cup of coffee");
-        })
-        .writeAndSend(WRITE_SOME_STRING)
-        .build();
+            .read(READ_SOME_STRING)
+            .transform(s -> {
+              throw new RetriableProcessException("Try again after a cup of coffee");
+            })
+            .writeAndSend(WRITE_SOME_STRING)
+            .build();
 
     Engine engine = new Engine(messageBroker, flow);
     Message message = new DefaultMessage();
@@ -204,12 +202,12 @@ class EngineTest {
   @DisplayName("FinallyFailedProcessException shall fail message")
   void finallyFailedProcessExceptionShallFailMessage() throws IOException {
     Flow flow = new FlowBuilder<DefaultMessage, String, String>()
-        .read(READ_SOME_STRING)
-        .transform(s -> {
-          throw new FinallyFailedProcessException("Never again!");
-        })
-        .writeAndSend(WRITE_SOME_STRING)
-        .build();
+            .read(READ_SOME_STRING)
+            .transform(s -> {
+              throw new FinallyFailedProcessException("Never again!");
+            })
+            .writeAndSend(WRITE_SOME_STRING)
+            .build();
 
     Engine engine = new Engine(messageBroker, flow);
     Message message = new DefaultMessage();

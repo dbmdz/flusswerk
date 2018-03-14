@@ -19,7 +19,6 @@ class JobTest {
 
   private static final Function<String, Message> DUMMY_WRITER = DefaultMessage::new;
 
-
   class CheckIfCalled<R, W> implements Function<R, W> {
 
     boolean called = false;
@@ -80,15 +79,7 @@ class JobTest {
     job.transform(String::toUpperCase);
     job.write((Function<String, Collection<Message>>) s -> Collections.singleton(new DefaultMessage().put("message", s)));
     assertThat(job.getResult()).allSatisfy(
-        result -> assertThat(assertThat(((DefaultMessage) result).get("message")).isEqualTo(message.toUpperCase()))
+            result -> assertThat(assertThat(((DefaultMessage) result).get("message")).isEqualTo(message.toUpperCase()))
     );
   }
-
-  @Test
-  void getMessage() {
-    Message message = new DefaultMessage("Wuthering Heights");
-    Job<Message, String, String> job = new Job<>(message);
-    assertThat(job.getMessage()).isEqualTo(message);
-  }
-
 }

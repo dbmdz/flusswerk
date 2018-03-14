@@ -107,14 +107,14 @@ public class MessageBroker {
     for (String inputQueue : routingConfig.getReadFrom()) {
       FailurePolicy failurePolicy = routingConfig.getFailurePolicy(inputQueue);
       rabbitClient.declareQueue(inputQueue, exchange, inputQueue,
-          Maps.of(
-              DEAD_LETTER_EXCHANGE, deadLetterExchange)
+                                Maps.of(
+                                        DEAD_LETTER_EXCHANGE, deadLetterExchange)
       );
       if (failurePolicy.getRetryRoutingKey() != null) {
         rabbitClient.declareQueue(failurePolicy.getRetryRoutingKey(), deadLetterExchange, inputQueue,
-            Maps.of(
-                MESSAGE_TTL, config.getDeadLetterWait(),
-                DEAD_LETTER_EXCHANGE, exchange)
+                                  Maps.of(
+                                          MESSAGE_TTL, config.getDeadLetterWait(),
+                                          DEAD_LETTER_EXCHANGE, exchange)
         );
       }
       if (failurePolicy.getFailedRoutingKey() != null) {
@@ -125,10 +125,10 @@ public class MessageBroker {
 
   private void provideOutputQueue() throws IOException {
     rabbitClient.declareQueue(
-        routingConfig.getWriteTo(),
-        routingConfig.getExchange(),
-        routingConfig.getWriteTo(),
-        Maps.of(DEAD_LETTER_EXCHANGE, routingConfig.getDeadLetterExchange())
+            routingConfig.getWriteTo(),
+            routingConfig.getExchange(),
+            routingConfig.getWriteTo(),
+            Maps.of(DEAD_LETTER_EXCHANGE, routingConfig.getDeadLetterExchange())
     );
   }
 
@@ -142,11 +142,11 @@ public class MessageBroker {
     rabbitClient.ack(message);
   }
 
-
   /**
    * Rejects a messaging and takes care of proper dead lettering, retries and, if the message failed too often, routing to the failed queue.
    *
    * @param message the message to reject
+   * @return
    * @throws IOException if communication with RabbitMQ failed
    */
   public boolean reject(Message message) throws IOException {

@@ -37,8 +37,8 @@ public class DefaultMessage implements Message<String> {
   }
 
   public DefaultMessage put(Map<String, String> data) {
-    if ( data != null ) {
-      for ( Map.Entry<String, String> entry : data.entrySet() ) {
+    if (data != null) {
+      for (Map.Entry<String, String> entry : data.entrySet()) {
         this.data.put(entry.getKey(), entry.getValue());
       }
     }

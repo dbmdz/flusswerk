@@ -1,9 +1,9 @@
 package de.digitalcollections.flusswerk.engine.messagebroker;
 
 import com.fasterxml.jackson.databind.Module;
+import de.digitalcollections.flusswerk.engine.exceptions.WorkflowSetupException;
 import de.digitalcollections.flusswerk.engine.jackson.SingleClassModule;
 import de.digitalcollections.flusswerk.engine.model.Message;
-import de.digitalcollections.flusswerk.engine.exceptions.WorkflowSetupException;
 import java.io.IOException;
 
 import static java.util.Objects.requireNonNull;
@@ -38,13 +38,13 @@ public class MessageBrokerBuilder {
   }
 
   public MessageBrokerBuilder connectTo(String connectionStr) {
-    if ( connectionStr != null ) {
+    if (connectionStr != null) {
       String[] connections = connectionStr.split(",|;");
-      for ( String connection : connections ) {
+      for (String connection : connections) {
         String[] connectionParts = connection.split(":");
-        if ( connectionParts.length != 2 ) {
+        if (connectionParts.length != 2) {
           throw new RuntimeException("Invalid connection specified: '" + connection
-              + "'. Must be of format host:port");
+                  + "'. Must be of format host:port");
         }
         connectionConfig.addAddress(connectionParts[0], Integer.parseInt(connectionParts[1]));
       }
@@ -84,7 +84,6 @@ public class MessageBrokerBuilder {
     connectionConfig.setVirtualHost(requireNonNull(virtualHost));
     return this;
   }
-
 
   /**
    * Registers Jackson Modules to use with the object mapper.

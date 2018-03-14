@@ -1,9 +1,9 @@
 package de.digitalcollections.flusswerk.engine;
 
-import de.digitalcollections.flusswerk.engine.model.Message;
 import de.digitalcollections.flusswerk.engine.exceptions.FinallyFailedProcessException;
 import de.digitalcollections.flusswerk.engine.flow.Flow;
 import de.digitalcollections.flusswerk.engine.messagebroker.MessageBroker;
+import de.digitalcollections.flusswerk.engine.model.Message;
 import de.digitalcollections.flusswerk.engine.reporting.DefaultProcessReport;
 import de.digitalcollections.flusswerk.engine.reporting.ProcessReport;
 import java.io.IOException;
@@ -15,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * Run flows {@link Flow} for every message from the {@link MessageBroker} - usually several in parallel.
@@ -93,7 +92,7 @@ public class Engine {
     this.executorService = Executors.newFixedThreadPool(concurrentWorkers);
     this.semaphore = new Semaphore(concurrentWorkers);
     this.activeWorkers = new AtomicInteger();
-    if ( processReport != null ) {
+    if (processReport != null) {
       this.processReport = processReport;
     }
   }
@@ -118,7 +117,7 @@ public class Engine {
           continue;
         }
 
-        if ( LOGGER.isDebugEnabled() ) {
+        if (LOGGER.isDebugEnabled()) {
           LOGGER.debug("Checking for new message (available semaphores: {}), got {}", semaphore.availablePermits(), message.getEnvelope().getBody());
         }
 
@@ -156,7 +155,7 @@ public class Engine {
     } catch (RuntimeException | IOException e) {
       try {
         boolean isRejected = messageBroker.reject(receivedMessage);
-        if ( isRejected ) {
+        if (isRejected) {
           processReport.reportReject(receivedMessage, e);
         } else {
           processReport.reportFailAfterMaxRetries(receivedMessage, e);
@@ -182,9 +181,9 @@ public class Engine {
    */
   public EngineStats getStats() {
     return new EngineStats(
-        concurrentWorkers,
-        activeWorkers.get(),
-        semaphore.availablePermits()
+            concurrentWorkers,
+            activeWorkers.get(),
+            semaphore.availablePermits()
     );
   }
 

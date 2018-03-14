@@ -13,7 +13,7 @@ class MessageBrokerConfigImpl implements MessageBrokerConfig {
 
   private int maxRetries;
 
-  private List<Module> jacksonModules;
+  private final List<Module> jacksonModules;
 
   private Class<? extends Message> messageClass;
 
@@ -29,7 +29,7 @@ class MessageBrokerConfigImpl implements MessageBrokerConfig {
     return deadLetterWait;
   }
 
-  public void setDeadLetterWait(int milliseconds) {
+  public final void setDeadLetterWait(int milliseconds) {
     this.deadLetterWait = milliseconds;
   }
 
@@ -38,7 +38,7 @@ class MessageBrokerConfigImpl implements MessageBrokerConfig {
     return maxRetries;
   }
 
-  public void setMaxRetries(int maxRetries) {
+  public final void setMaxRetries(int maxRetries) {
     this.maxRetries = maxRetries;
   }
 
@@ -47,7 +47,7 @@ class MessageBrokerConfigImpl implements MessageBrokerConfig {
     return messageClass;
   }
 
-  public void setMessageClass(Class<? extends Message> messageClass) {
+  public final void setMessageClass(Class<? extends Message> messageClass) {
     this.messageClass = messageClass;
   }
 

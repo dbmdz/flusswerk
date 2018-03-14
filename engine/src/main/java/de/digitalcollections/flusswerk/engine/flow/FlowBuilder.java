@@ -12,6 +12,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Builder to create the {@link Flow} to process the data using an {@link Engine}.
  *
+ * @param <M>
  * @param <R> The data type produced by the reader. Input data type of the transformer.
  * @param <W> The data type consumed by the writer. Output data type of the transformer.
  */
@@ -42,7 +43,6 @@ public class FlowBuilder<M extends Message, R, W> {
     return this;
   }
 
-
   /**
    * Sets a reader factory for this flow which creates a new reader for every processed message.
    *
@@ -50,7 +50,7 @@ public class FlowBuilder<M extends Message, R, W> {
    * @return This {@link FlowBuilder} instance for further configuration or creation of the {@link Flow}.
    */
   public FlowBuilder<M, R, W> read(Supplier<Function<M, R>> readerFactory) {
-    this.readerFactory = requireNonNull(readerFactory,"The reader factory cannot be null.");
+    this.readerFactory = requireNonNull(readerFactory, "The reader factory cannot be null.");
     return this;
   }
 
@@ -160,7 +160,7 @@ public class FlowBuilder<M extends Message, R, W> {
    * @return A new {@link Flow} as configured before.
    */
   public Flow<M, R, W> build() {
-    return new Flow<M, R, W>(readerFactory, transformerFactory, writerFactory, consumingWriterFactory);
+    return new Flow<>(readerFactory, transformerFactory, writerFactory, consumingWriterFactory);
   }
 
   public static <M extends Message, R, W> FlowBuilder<M, R, W> receiving(Class<M> clazz) {

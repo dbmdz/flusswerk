@@ -33,9 +33,9 @@ class RabbitClient {
 
   private final ObjectMapper objectMapper;
 
-  private Class<? extends Message> messageClass;
+  private final Class<? extends Message> messageClass;
 
-  private RabbitConnection connection;
+  private final RabbitConnection connection;
 
   public RabbitClient(MessageBrokerConfig config, RabbitConnection connection) {
     this.connection = connection;
@@ -53,9 +53,9 @@ class RabbitClient {
   void send(String exchange, String routingKey, Message message) throws IOException {
     byte[] data = serialize(message);
     AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder()
-        .contentType("application/json")
-        .deliveryMode(PERSISTENT)
-        .build();
+            .contentType("application/json")
+            .deliveryMode(PERSISTENT)
+            .build();
 
     try {
       channel.basicPublish(exchange, routingKey, properties, data);
@@ -118,7 +118,6 @@ class RabbitClient {
       channel.exchangeDeclare(exchange, BuiltinExchangeType.TOPIC, DURABLE);
     }
   }
-
 
   public void declareQueue(String name, String exchange, String routingKey, Map<String, Object> args) throws IOException {
     createQueue(name, args);

@@ -13,7 +13,7 @@ class ConnectionConfigImpl implements ConnectionConfig {
 
   private String virtualHost;
 
-  private List<Address> addresses;
+  private final List<Address> addresses;
 
   ConnectionConfigImpl() {
     addresses = new ArrayList<>();
@@ -27,7 +27,7 @@ class ConnectionConfigImpl implements ConnectionConfig {
     return username;
   }
 
-  public void setUsername(String username) {
+  public final void setUsername(String username) {
     this.username = username;
   }
 
@@ -36,7 +36,7 @@ class ConnectionConfigImpl implements ConnectionConfig {
     return password;
   }
 
-  public void setPassword(String password) {
+  public final void setPassword(String password) {
     this.password = password;
   }
 
@@ -45,7 +45,7 @@ class ConnectionConfigImpl implements ConnectionConfig {
     return virtualHost;
   }
 
-  public void setVirtualHost(String virtualHost) {
+  public final void setVirtualHost(String virtualHost) {
     this.virtualHost = virtualHost;
   }
 

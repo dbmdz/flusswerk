@@ -40,7 +40,7 @@ class RabbitConnection {
     return channel;
   }
 
-  void waitForConnection() throws IOException {
+  final void waitForConnection() throws IOException {
     boolean connectionIsFailing = true;
     while (connectionIsFailing) {
       List<Address> addresses = config.getAddresses();
