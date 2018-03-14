@@ -1,6 +1,7 @@
 package de.digitalcollections.flusswerk.engine.model;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -10,7 +11,7 @@ public class Job<M, R, W> {
 
   private W dataTransformed;
 
-  private M message;
+  private final M message;
 
   private Collection<Message> result;
 
@@ -36,11 +37,15 @@ public class Job<M, R, W> {
     writer.accept(dataTransformed);
   }
 
+  @Deprecated
   public M getMessage() {
     return message;
   }
 
   public Collection<Message> getResult() {
+    if (result == null) {
+      return Collections.emptyList();
+    }
     return result;
   }
 
