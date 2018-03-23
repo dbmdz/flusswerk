@@ -197,6 +197,24 @@ public class MessageBroker {
     return result;
   }
 
+  public Map<String, Long> getFailedMessageCounts() throws IOException {
+    Map<String, Long> result = new HashMap<>();
+    for (String inputQueue : routingConfig.getReadFrom()) {
+      String queue = routingConfig.getFailurePolicy(inputQueue).getFailedRoutingKey();
+      result.put(queue, rabbitClient.getMessageCount(queue));
+    }
+    return result;
+  }
+
+  public Map<String, Long> getRetryMessageCounts() throws IOException {
+    Map<String, Long> result = new HashMap<>();
+    for (String inputQueue : routingConfig.getReadFrom()) {
+      String queue = routingConfig.getFailurePolicy(inputQueue).getRetryRoutingKey();
+      result.put(queue, rabbitClient.getMessageCount(queue));
+    }
+    return result;
+  }
+
   public boolean isConnectionOk() {
     return rabbitClient.isChannelAvailable() && rabbitClient.isConnectionOk();
   }
