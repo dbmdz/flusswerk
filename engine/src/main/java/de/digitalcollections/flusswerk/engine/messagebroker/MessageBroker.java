@@ -169,6 +169,7 @@ public class MessageBroker {
     if (failedRoutingKey != null) {
       send(failedRoutingKey, message);
     }
+    ack(message);
   }
 
   private void retry(Message message) throws IOException {
@@ -200,8 +201,11 @@ public class MessageBroker {
   public Map<String, Long> getFailedMessageCounts() throws IOException {
     Map<String, Long> result = new HashMap<>();
     for (String inputQueue : routingConfig.getReadFrom()) {
-      String queue = routingConfig.getFailurePolicy(inputQueue).getFailedRoutingKey();
-      result.put(queue, rabbitClient.getMessageCount(queue));
+      FailurePolicy failurePolicy = routingConfig.getFailurePolicy(inputQueue);
+      if ( failurePolicy != null ) {
+        String queue = failurePolicy.getFailedRoutingKey();
+        result.put(queue, rabbitClient.getMessageCount(queue));
+      }
     }
     return result;
   }
@@ -209,8 +213,11 @@ public class MessageBroker {
   public Map<String, Long> getRetryMessageCounts() throws IOException {
     Map<String, Long> result = new HashMap<>();
     for (String inputQueue : routingConfig.getReadFrom()) {
-      String queue = routingConfig.getFailurePolicy(inputQueue).getRetryRoutingKey();
-      result.put(queue, rabbitClient.getMessageCount(queue));
+      FailurePolicy failurePolicy = routingConfig.getFailurePolicy(inputQueue);
+      if ( failurePolicy != null ) {
+        String queue = failurePolicy.getRetryRoutingKey();
+        result.put(queue, rabbitClient.getMessageCount(queue));
+      }
     }
     return result;
   }
