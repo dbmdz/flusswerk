@@ -157,19 +157,25 @@ public class MessageBroker {
       retry(message);
       return true;
     } else {
-      fail(message);
+      fail(message, false);   // Avoid double ACKing the origin message
       return false;
     }
   }
 
-  public void fail(Message message) throws IOException {
+  public void fail(Message message, boolean ackMessage) throws IOException {
+    if ( ackMessage ) {
+      ack(message);
+    }
     LOGGER.debug("Send message to failed queue: " + message);
     FailurePolicy failurePolicy = routingConfig.getFailurePolicy(message);
     String failedRoutingKey = failurePolicy.getFailedRoutingKey();
     if (failedRoutingKey != null) {
       send(failedRoutingKey, message);
     }
-    ack(message);
+  }
+
+  public void fail(Message message) throws IOException {
+    fail(message, true);
   }
 
   private void retry(Message message) throws IOException {
