@@ -15,7 +15,7 @@ Maven:
 <dependency>
   <groupId>de.digitalcollections.flusswerk</groupId>
   <artifactId>dc-flusswerk-engine</artifactId>
-  <version>2.0.1</version>
+  <version>2.0.2</version>
 </dependency>
 ```
 
@@ -23,7 +23,7 @@ Gradle:
 
 ```groovy
 dependencies {
-    compile group: 'de.digitalcollections.flusswerk', name: 'dc-flusswerk-engine', version: '2.0.1'
+    compile group: 'de.digitalcollections.flusswerk', name: 'dc-flusswerk-engine', version: '2.0.2'
 }
 ``` 
  
