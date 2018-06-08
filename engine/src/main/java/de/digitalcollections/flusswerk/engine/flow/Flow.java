@@ -27,11 +27,14 @@ public class Flow<M extends Message, R, W> {
 
   private final Supplier<Consumer<W>> consumingWriterFactory;
 
-  public Flow(Supplier<Function<M, R>> readerFactory, Supplier<Function<R, W>> transformerFactory, Supplier<Function<W, Collection<Message>>> writerFactory, Supplier<Consumer<W>> consumingWriterFactory) {
+  private final Runnable cleanup;
+
+  public Flow(Supplier<Function<M, R>> readerFactory, Supplier<Function<R, W>> transformerFactory, Supplier<Function<W, Collection<Message>>> writerFactory, Supplier<Consumer<W>> consumingWriterFactory, Runnable cleanup) {
     this.readerFactory = readerFactory;
     this.transformerFactory = transformerFactory;
     this.writerFactory = writerFactory;
     this.consumingWriterFactory = consumingWriterFactory;
+    this.cleanup = cleanup;
   }
 
   public Collection<Message> process(M message) {
@@ -48,7 +51,15 @@ public class Flow<M extends Message, R, W> {
     if (consumingWriterFactory != null) {
       job.write(consumingWriterFactory.get());
     }
-    return job.getResult();
+
+    Collection<Message> result = job.getResult();
+    job = null;   // If in the cleanup stage, a garbage collection is forced, it helps to clean up before.
+
+    if ( cleanup != null ) {
+      cleanup.run();
+    }
+
+    return result;
   }
 
   public boolean hasMessagesToSend() {

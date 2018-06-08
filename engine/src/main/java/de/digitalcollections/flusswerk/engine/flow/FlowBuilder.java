@@ -26,6 +26,8 @@ public class FlowBuilder<M extends Message, R, W> {
 
   private Supplier<Consumer<W>> consumingWriterFactory;
 
+  private Runnable cleanup;
+
   @SuppressWarnings("unchecked")
   private W cast(R value) {
     return (W) value;
@@ -154,13 +156,26 @@ public class FlowBuilder<M extends Message, R, W> {
     return this;
   }
 
+
+  /**
+   * Sets cleanup runnable, which is executed after the message was processed.
+   *
+   * @param runnable The runnable to be executed after the message was processed
+   * @return This {@link FlowBuilder} instance for further configuration or creation of the {@link Flow}.
+   */
+  public FlowBuilder<M, R, W> cleanup(Runnable runnable) {
+    requireNonNull(runnable, "The runnable cannot be null");
+    this.cleanup = runnable;
+    return this;
+  }
+
   /**
    * Finally builds the flow.
    *
    * @return A new {@link Flow} as configured before.
    */
   public Flow<M, R, W> build() {
-    return new Flow<>(readerFactory, transformerFactory, writerFactory, consumingWriterFactory);
+    return new Flow<>(readerFactory, transformerFactory, writerFactory, consumingWriterFactory, cleanup);
   }
 
   public static <M extends Message, R, W> FlowBuilder<M, R, W> receiving(Class<M> clazz) {

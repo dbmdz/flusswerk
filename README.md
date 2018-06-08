@@ -15,7 +15,7 @@ Maven:
 <dependency>
   <groupId>de.digitalcollections.flusswerk</groupId>
   <artifactId>dc-flusswerk-engine</artifactId>
-  <version>2.0.2</version>
+  <version>2.1.0</version>
 </dependency>
 ```
 
@@ -23,7 +23,7 @@ Gradle:
 
 ```groovy
 dependencies {
-    compile group: 'de.digitalcollections.flusswerk', name: 'dc-flusswerk-engine', version: '2.0.2'
+    compile group: 'de.digitalcollections.flusswerk', name: 'dc-flusswerk-engine', version: '2.1.0'
 }
 ``` 
  
@@ -172,6 +172,32 @@ class Writer implements Function<String, Message> {
     messageBroker.send("iiif", new DefaultMessage("1000001"));
     messageBroker.send("import", new DefaultMessage("1000001"));
     // ...
+  }
+}
+```
+
+## Cleanup
+
+If you want to perform cleanups after processing of the message, e.g. for triggering a garbage collection, you can use the
+```cleanup()``` method of the FlowBuilder:
+
+```java
+class Application {
+  public static void main(String[] args) {
+    MessageBroker messageBroker = new MessageBrokerBuilder()
+        .readFrom("your.input.queue")
+        .writeTo("your.output.queue")
+        .build();
+    
+    Flow flow = new FlowBuilder<DefaultMessage, String, String>()
+        .read(new Reader())
+        .transform(new Transformer())
+        .writeAndSend(new Writer())
+        .cleanup(() -> Runtime.getRuntime().gc())
+        .build();
+    
+    Engine engine = new Engine(messageBroker, flow);
+    engine.start();
   }
 }
 ```
