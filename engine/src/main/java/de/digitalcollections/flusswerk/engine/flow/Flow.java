@@ -39,24 +39,31 @@ public class Flow<M extends Message, R, W> {
 
   public Collection<Message> process(M message) {
     Job<M, R, W> job = new Job<>(message);
-    if (readerFactory != null) {
-      job.read(readerFactory.get());
-    }
-    if (transformerFactory != null) {
-      job.transform(transformerFactory.get());
-    }
-    if (writerFactory != null) {
-      job.write(writerFactory.get());
-    }
-    if (consumingWriterFactory != null) {
-      job.write(consumingWriterFactory.get());
-    }
 
-    Collection<Message> result = job.getResult();
-    job = null;   // If in the cleanup stage, a garbage collection is forced, it helps to clean up before.
+    Collection<Message> result = null;
 
-    if ( cleanup != null ) {
-      cleanup.run();
+    try {
+      if (readerFactory != null) {
+        job.read(readerFactory.get());
+      }
+      if (transformerFactory != null) {
+        job.transform(transformerFactory.get());
+      }
+      if (writerFactory != null) {
+        job.write(writerFactory.get());
+      }
+      if (consumingWriterFactory != null) {
+        job.write(consumingWriterFactory.get());
+      }
+
+
+    } finally {
+      result = job.getResult();
+      job = null;   // If in the cleanup stage, a garbage collection is forced, it helps to clean up before.
+
+      if (cleanup != null) {
+        cleanup.run();
+      }
     }
 
     return result;
