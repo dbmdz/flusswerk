@@ -1,5 +1,7 @@
 package de.digitalcollections.flusswerk.engine.messagebroker;
 
+import de.digitalcollections.flusswerk.engine.exceptions.InvalidMessageException;
+import de.digitalcollections.flusswerk.engine.model.DefaultMessage;
 import de.digitalcollections.flusswerk.engine.model.Envelope;
 import de.digitalcollections.flusswerk.engine.model.Message;
 import de.digitalcollections.flusswerk.engine.util.Maps;
@@ -58,6 +60,11 @@ public class MessageBroker {
     rabbitClient.send(routingConfig.getExchange(), routingKey, message);
   }
 
+
+  public void sendRaw(String routingKey, Message message) throws IOException {
+    rabbitClient.sendRaw(routingConfig.getExchange(), routingKey, message.getEnvelope().getBody().getBytes());
+  }
+
   /**
    * Sends multiple messages to a certain queue as JSON documents. The messages are sent in the same order
    * as returned by the iterator over <code>messages</code>.
@@ -78,8 +85,9 @@ public class MessageBroker {
    * @param queueName the queue to receive.
    * @return the received message.
    * @throws IOException if communication with RabbitMQ failed.
+   * @throws InvalidMessageException if the message could not be read and deserialized
    */
-  public Message receive(String queueName) throws IOException {
+  public Message receive(String queueName) throws IOException, InvalidMessageException {
     return rabbitClient.receive(queueName);
   }
 
@@ -92,12 +100,24 @@ public class MessageBroker {
   public Message receive() throws IOException {
     Message message = null;
     for (String inputQueue : routingConfig.getReadFrom()) {
-      message = receive(inputQueue);
+      try {
+        message = receive(inputQueue);
+      } catch ( InvalidMessageException e ) {
+        failInvalidMessage(inputQueue, e);
+        return null;
+      }
+
       if (message != null) {
         break;
       }
     }
     return message;
+  }
+
+  private void failInvalidMessage(String inputQueue, InvalidMessageException e) throws IOException {
+    Message message = e.getInvalidMessage();
+    LOGGER.warn("Invalid message detected. Will be shifted into 'failed' queue: " + e.getMessage());
+    failRawWithAck(message);
   }
 
   private void provideInputQueues() throws IOException {
@@ -159,6 +179,16 @@ public class MessageBroker {
     } else {
       fail(message, false);   // Avoid double ACKing the origin message
       return false;
+    }
+  }
+
+  public void failRawWithAck(Message message) throws IOException {
+    ack(message);
+    LOGGER.debug("Send message to failed queue: " + message);
+    FailurePolicy failurePolicy = routingConfig.getFailurePolicy(message);
+    String failedRoutingKey = failurePolicy.getFailedRoutingKey();
+    if (failedRoutingKey != null) {
+      sendRaw(failedRoutingKey, message);
     }
   }
 

@@ -1,5 +1,6 @@
 package de.digitalcollections.flusswerk.engine.messagebroker;
 
+import de.digitalcollections.flusswerk.engine.exceptions.InvalidMessageException;
 import de.digitalcollections.flusswerk.engine.model.DefaultMessage;
 import de.digitalcollections.flusswerk.engine.model.Message;
 import java.io.IOException;
@@ -38,7 +39,10 @@ class MessageBrokerTest {
     routingConfig = new RoutingConfigImpl();
     routingConfig.setReadFrom("some.input.queue");
     routingConfig.setWriteTo("some.output.queue");
+    FailurePolicy failurePolicy = new FailurePolicy("some.input.queue");
+    routingConfig.addFailurePolicy(failurePolicy);
     routingConfig.complete();
+
     rabbitClient = mock(RabbitClient.class);
     messageBroker = new MessageBroker(config, routingConfig, rabbitClient);
     message = new DefaultMessage("Hey");
@@ -102,7 +106,7 @@ class MessageBrokerTest {
 
   @Test
   @DisplayName("Receive should pull from the specified queue")
-  void receiveShouldPullTheSpecifiedQueue() throws IOException {
+  void receiveShouldPullTheSpecifiedQueue() throws IOException, InvalidMessageException {
     String queue = "a.very.special.queue";
     messageBroker.receive(queue);
     verify(rabbitClient).receive(queue);
@@ -110,7 +114,7 @@ class MessageBrokerTest {
 
   @Test
   @DisplayName("Default receive should pull from the input queue")
-  void defaultReceiveShouldPullTheInputQueue() throws IOException {
+  void defaultReceiveShouldPullTheInputQueue() throws IOException, InvalidMessageException {
     messageBroker.receive();
     verify(rabbitClient).receive(routingConfig.getReadFrom()[0]);
   }
@@ -165,6 +169,23 @@ class MessageBrokerTest {
     when(rabbitClient.isChannelAvailable()).thenReturn(false);
     when(rabbitClient.isConnectionOk()).thenReturn(false);
     assertThat(messageBroker.isConnectionOk()).isFalse();
+  }
+
+  @Test
+  @DisplayName("invalidMessage should be ACKed and shifted into fqiled queue")
+  void handleInvalidMessage() throws IOException, InvalidMessageException {
+    String invalidMessageBody = "invalid";
+
+    Message invalidMessage = new DefaultMessage();
+    invalidMessage.getEnvelope().setDeliveryTag(1);
+    invalidMessage.getEnvelope().setBody(invalidMessageBody);
+    invalidMessage.getEnvelope().setSource("some.input.queue");
+    when(rabbitClient.receive(eq("some.input.queue"))).thenThrow(new InvalidMessageException(invalidMessage, "Invalid message"));
+
+    assertThat(messageBroker.receive()).isNull();
+
+    verify(rabbitClient, times(1)).ack(any(Message.class));
+    verify(rabbitClient, times(1)).sendRaw(anyString(), eq("some.input.queue.failed"), eq(invalidMessageBody.getBytes()));
   }
 
 }

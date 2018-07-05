@@ -3,12 +3,13 @@ package de.digitalcollections.flusswerk.engine.messagebroker;
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.GetResponse;
+import de.digitalcollections.flusswerk.engine.CustomMessage;
+import de.digitalcollections.flusswerk.engine.CustomMessageMixin;
+import de.digitalcollections.flusswerk.engine.exceptions.InvalidMessageException;
 import de.digitalcollections.flusswerk.engine.jackson.SingleClassModule;
 import de.digitalcollections.flusswerk.engine.model.DefaultMessage;
 import de.digitalcollections.flusswerk.engine.model.Envelope;
 import de.digitalcollections.flusswerk.engine.model.Message;
-import de.digitalcollections.flusswerk.engine.CustomMessage;
-import de.digitalcollections.flusswerk.engine.CustomMessageMixin;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.from;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -74,7 +76,7 @@ class RabbitClientTest {
 
 
   @Test
-  void receiveShouldPullTheInputQueue() throws IOException {
+  void receiveShouldPullTheInputQueue() throws IOException, InvalidMessageException {
     RabbitClient rabbitClient = new RabbitClient(config, connection);
 
     long deliveryTag = 476253;
@@ -143,6 +145,31 @@ class RabbitClientTest {
     RabbitClient rabbitClient = new RabbitClient(config, connection);
     assertThat(rabbitClient.isChannelAvailable()).isTrue();
     assertThat(rabbitClient.isChannelAvailable()).isFalse();
+  }
+
+  @Test
+  @DisplayName("Invalid JSON message throws an InvalidMessageException")
+  void shiftInvalidMessageToFailedQueue() throws IOException {
+    final String queueName = "test";
+    final String failedQueueName = queueName + ".failed";
+    final String retryQueueName = queueName + ".retry";
+
+    GetResponse getResponse = mock(GetResponse.class);
+    when(getResponse.getBody()).thenReturn("NoValidJson".getBytes());
+    com.rabbitmq.client.Envelope envelope = mock(com.rabbitmq.client.Envelope.class);
+    when(envelope.getDeliveryTag()).thenReturn(1L);
+    when(getResponse.getEnvelope()).thenReturn(envelope);
+    when(channel.basicGet(queueName, false)).thenReturn(getResponse);
+
+    RabbitClient rabbitClient = new RabbitClient(config, connection);
+
+    InvalidMessageException thrown = assertThrows(
+        InvalidMessageException.class,
+        () -> { rabbitClient.receive("test"); }
+    );
+    assertThat(thrown.getMessage()).isEqualTo("Unrecognized token 'NoValidJson'"
+        + ": was expecting 'null', 'true', 'false' or NaN\n"
+        + " at [Source: (String)\"NoValidJson\"; line: 1, column: 23]");
   }
 
 }

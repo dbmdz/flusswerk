@@ -1,6 +1,7 @@
 package de.digitalcollections.flusswerk.bdd;
 
 import cucumber.api.java8.En;
+import de.digitalcollections.flusswerk.engine.exceptions.InvalidMessageException;
 import de.digitalcollections.flusswerk.engine.flow.Flow;
 import de.digitalcollections.flusswerk.engine.flow.FlowBuilder;
 import de.digitalcollections.flusswerk.engine.messagebroker.MessageBroker;
@@ -84,7 +85,7 @@ public class StepDefinitions implements En {
 
   }
 
-  private Message<?> waitForMessageFrom(String queue) throws IOException, InterruptedException {
+  private Message<?> waitForMessageFrom(String queue) throws IOException, InterruptedException, InvalidMessageException {
     Message<?> message = null;
     long time = System.currentTimeMillis();
     long timeout = 30 * 1000;

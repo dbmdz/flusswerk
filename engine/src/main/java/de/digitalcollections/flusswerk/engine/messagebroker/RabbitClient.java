@@ -6,6 +6,7 @@ import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.GetResponse;
+import de.digitalcollections.flusswerk.engine.exceptions.InvalidMessageException;
 import de.digitalcollections.flusswerk.engine.jackson.DefaultMessageMixin;
 import de.digitalcollections.flusswerk.engine.jackson.EnvelopeMixin;
 import de.digitalcollections.flusswerk.engine.model.DefaultMessage;
@@ -52,10 +53,14 @@ class RabbitClient {
 
   void send(String exchange, String routingKey, Message message) throws IOException {
     byte[] data = serialize(message);
+    sendRaw(exchange, routingKey, data);
+  }
+
+  void sendRaw(String exchange, String routingKey, byte[] data) throws IOException {
     AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder()
-            .contentType("application/json")
-            .deliveryMode(PERSISTENT)
-            .build();
+        .contentType("application/json")
+        .deliveryMode(PERSISTENT)
+        .build();
 
     try {
       channel.basicPublish(exchange, routingKey, properties, data);
@@ -90,7 +95,7 @@ class RabbitClient {
     }
   }
 
-  public Message receive(String queueName) throws IOException {
+  public Message receive(String queueName) throws IOException, InvalidMessageException {
     GetResponse response;
     try {
       response = channel.basicGet(queueName, NO_AUTO_ACK);
@@ -100,11 +105,20 @@ class RabbitClient {
     }
     if (response != null) {
       String body = new String(response.getBody(), StandardCharsets.UTF_8);
-      Message message = deserialize(body);
-      message.getEnvelope().setBody(body);
-      message.getEnvelope().setDeliveryTag(response.getEnvelope().getDeliveryTag());
-      message.getEnvelope().setSource(queueName);
-      return message;
+
+      try {
+        Message message = deserialize(body);
+        message.getEnvelope().setBody(body);
+        message.getEnvelope().setDeliveryTag(response.getEnvelope().getDeliveryTag());
+        message.getEnvelope().setSource(queueName);
+        return message;
+      } catch ( Exception e ) {
+        Message invalidMessage = new DefaultMessage();
+        invalidMessage.getEnvelope().setBody(body);
+        invalidMessage.getEnvelope().setDeliveryTag(response.getEnvelope().getDeliveryTag());
+        invalidMessage.getEnvelope().setSource(queueName);
+        throw new InvalidMessageException(invalidMessage, e.getMessage());
+      }
     }
     return null;
   }
