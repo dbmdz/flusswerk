@@ -3,16 +3,22 @@ jdk:
 - openjdk8
 - oraclejdk8
 - oraclejdk9
+addons:
+  apt:
+    packages:
+    - libxml2-utils
 sudo: required
 services:
 - docker
 before_script:
+- PROJECT_VERSION=$(xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]/text()' pom.xml)
 - if [ ! -z "$TRAVIS_TAG" ]; then mvn versions:set -DnewVersion=$TRAVIS_TAG; fi
 script:
 - mvn clean install
 - mvn -B --projects bdd -Pbdd surefire:test
 after_success:
 - bash <(curl -s https://codecov.io/bash)
+- if [[ "$PROJECT_VERSION" == *SNAPSHOT ]]; then mvn deploy -B -DskipTests=true --settings settings.xml; fi
 deploy:
   provider: releases
   api_key:
@@ -23,3 +29,7 @@ deploy:
   skip_cleanup: true
   on:
     tags: true
+env:
+  global:
+  - secure: FiyuN9981QyLIP1goPqR/dnmPCxKxK4WJRTuu/pS29oRYWNclLtpCtvDKu96SS0f8vV1/RxOFodnJQtpw+WEPwCTBdEVhxPQHPGE3q7JFuaZIcFD2p2CdHq5tnBk+X7cpog9+rkDgUUcEgPmMlFVNVIo3KDl+WWzZtX7ko7gBJBIX5UzPIv10cJ1XZc5/7soRBbcfv/8ZdW43Q1LRIy/MifRle+QFawETjZXRMd2QOByv8dvVIbwTOk8tt75+48Ebw8tNyY4mUS99cOuUwJpmIr1O+ECx+aqZJGlQl9KDWASGMAQitkRHUCXymP4FyMJ0ndh20gBuxRiPPNJT6+Kf+3mQB335Zv+YLpU9sjYnwS+XkPqbk9Pk2OQUozJb1SdC5mq8buCTj8hhlfemBrKjvGdNTto79Pl24CLGad2WrBJEaRJQFIJAqyR6/8fzC8JmmYqviCmowp7Yabn56gGLuexIoOCYoRfb9P28br9AhNHfFWgqyw2kKkb4YgU8ymV9q5s3mxNolz4XOmYndUI8AJdMU/wE22glvSTKHjW2iL4GMgpohMK64HLUMqRIOMLEFTYkvyBCOPK5f8Ayoi/jAcAeZCd4+bxaF/WabDfIz3bmDPMofkciQdjqUm82pFyldsXOLGxRlLDRhYmVSdNk6rJ66ZuAC00w9luVVpWI98=
+  - secure: XApDCRp+toAMHs32fNunhrUiRKKHz5/f2nqrQaVOtHE/Xxo4cyFB9nb9zm76TVaqI12BCzrJ3y2ndET2m/OlZ0NedM9JDZyGdKCcfLhihhgGZcwmHZf1gjn2brzy+u4+YnetLeBS2hoUht+56p9ziA9I4HRqT1e8f3yk7/IxEermxGoOidredwd/xb+/qxTmRrk1DGezofuF2kAMvzoXKexqqP0vNsJac+2ZLGVeDSq+szLyDDM3a8zqvGIm6Tf31nvFq8GHBPosCf8seFyIX5KA4y6sjCiLthn8QJdF5foPjjD2s2Dcc7gbOHtJ4M+cxBTapYe7Kh9+E1BLZvrnr//5f8R2+4nox54tpbcg8AVEE14PdLxv0zzVy1TlemOC0o5joFCscM/Gzux4CL1P3A40NqITtJ9QpkGnNRGJtVxCZjlJJUPH1qr3irRmknQepjsgOxYVrjqMJQbK+oYgtEo2J/0dQVccK2IHhfM6W8n5f/L8ApaSiJ+reR/0GoY9x2dD3sQc1mHGcQSkgBFHkrJyPV5Ru6q4B6k2PvlJeaLwow8bcm69UEWqXNM9vGbZB7eFpsiWSztDxk6yL3hfrp4VlQmYHdNbI48bP0WPk7SQAGKlzEorZhBPjBnnLO+3rFVAOeGQ79meiO44Yp8g2Viule6dL43kfvnJ1vWM9is=
