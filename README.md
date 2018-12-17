@@ -131,7 +131,7 @@ It is always possible to use `MessageBroker.send("some.queue", Message)` anywher
 
 ## Isolating messages with suppliers
 
-By using the same instance of an abstractDigipressReader, transformer or writer for every message it is easy to introduce side-effects and thread-safety issues. Therefore, `FlowBuilder` supports Suppliers to create a new instance for every message.  
+By using the same instance of a reader, transformer or writer for every message it is easy to introduce side-effects and thread-safety issues. Therefore, `FlowBuilder` supports Suppliers to create a new instance for every message.  
 
 This example uses a custom Supplier implementation for `Reader` and a supplier lambda for `Transformer`. The same instance of `Writer` is used for every message:
 
@@ -154,6 +154,25 @@ class Application {
   }
 }
 ```  
+
+In case, you want to use autowiring from Spring, you should annotate the `Reader`, `Transformer` and/or `Writer` beans with `@Scope("prototype")` and
+use the following bean configuration:
+
+```java
+  // ...
+  @Bean
+  public Flow flow(ObjectFactory<Reader> readerObjectFactory,
+      ObjectFactory<Transformer> transformerObjectFactory,
+      ObjectFactory<Writer> writerObjectFactory) {
+    return new FlowBuilder<DefaultMessage, String, String>()
+        .read(() -> readerObjectFactory.getObject())
+        .transform(() -> transformerObjectFactory.getObject())
+        .write(() -> writerObjectFactory.getObject())
+        .build();
+  }
+  // ...
+```
+
 
 ## Sending messages to arbitrary queues
 
