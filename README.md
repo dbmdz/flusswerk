@@ -3,7 +3,7 @@
 [![Javadocs](https://javadoc.io/badge/de.digitalcollections.flusswerk/dc-flusswerk-parent.svg)](https://javadoc.io/doc/de.digitalcollections.flusswerk/dc-flusswerk-parent)
 [![Build Status](https://img.shields.io/travis/dbmdz/flusswerk/master.svg)](https://travis-ci.org/dbmdz/flusswerk)
 [![Codecov](https://img.shields.io/codecov/c/github/dbmdz/flusswerk/master.svg)](https://codecov.io/gh/dbmdz/flusswerk)
-[![MIT License](https://img.shields.io/github/license/dbmdz/flusswerk.svg)](LICENSE)
+[![License](https://img.shields.io/github/license/dbmdz/flusswerk.svg)](LICENSE)
 [![GitHub release](https://img.shields.io/github/release/dbmdz/flusswerk.svg)](https://github.com/dbmdz/flusswerk/releases)
 [![Maven Central](https://img.shields.io/maven-central/v/de.digitalcollections.flusswerk/dc-flusswerk-parent.svg)](https://search.maven.org/search?q=a:dc-flusswerk-parent)
 
