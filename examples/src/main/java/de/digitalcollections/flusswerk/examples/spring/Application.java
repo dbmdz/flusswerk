@@ -12,9 +12,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class Application implements CommandLineRunner {
 
-  private MessageBroker messageBroker;
+  private final MessageBroker messageBroker;
 
-  private Engine engine;
+  private final Engine engine;
 
   @Autowired
   public Application(MessageBroker messageBroker, Engine engine) {
