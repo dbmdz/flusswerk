@@ -6,55 +6,63 @@ import de.digitalcollections.flusswerk.engine.flow.FlowBuilder;
 import de.digitalcollections.flusswerk.engine.messagebroker.MessageBroker;
 import de.digitalcollections.flusswerk.engine.messagebroker.MessageBrokerBuilder;
 import de.digitalcollections.flusswerk.engine.model.DefaultMessage;
-import de.digitalcollections.flusswerk.engine.model.Message;
 import java.io.IOException;
-import java.util.function.Function;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class WorkflowConfig {
 
-  @Bean
-  public Function<DefaultMessage, String> reader() {
-    return new StringReader();
-  }
+  @Value("${spring.rabbitmq.host}")
+  private String rabbitMQHost;
+
+  @Value("${spring.rabbitmq.port}")
+  private int rabbitMQPort;
+
+  @Value("${spring.rabbitmq.username}")
+  private String rabbitMQUsername;
+
+  @Value("${spring.rabbitmq.password}")
+  private String rabbitMQPassword;
+
+  @Value("${spring.rabbitmq.template.exchange}")
+  private String rabbitMQExchange;
+
+  @Value("${messageBroker.deadLetterExchange}")
+  private String deadLetterExchange;
+
+  @Value("${messageBroker.queues.read}")
+  private String inputQueue;
+
+  @Value("${messageBroker.queues.write}")
+  private String outputQueue;
 
   @Bean
-  public Function<String, String> transformer() {
-    return new UppercaseTransformer();
-  }
-
-  @Bean
-  public Function<String, Message> writer() {
-    return new StringWriter();
-  }
-
-  @Bean
-  public Flow flow() {
+  public Flow flow(StringReader reader, UppercaseTransformer transformer, StringWriter writer) {
     return new FlowBuilder<DefaultMessage, String, String>()
-        .read(reader())
-        .transform(transformer())
-        .writeAndSend(writer())
-        .build();
+            .read(reader)
+            .transform(transformer)
+            .writeAndSend(writer)
+            .build();
   }
 
   @Bean
   public MessageBroker messageBroker() {
     return new MessageBrokerBuilder()
-        .connectTo("localhost", 5672)
-        .username("guest")
-        .password("guest")
-        .exchange("workflow")
-        .deadLetterExchange("workflow.dlx")
-        .readFrom("someInputQueue")
-        .writeTo("someOutputQueue")
-        .build();
+            .connectTo(rabbitMQHost, rabbitMQPort)
+            .username(rabbitMQUsername)
+            .password(rabbitMQPassword)
+            .exchange(rabbitMQExchange)
+            .deadLetterExchange(deadLetterExchange)
+            .readFrom(inputQueue)
+            .writeTo(outputQueue)
+            .build();
   }
 
   @Bean
-  public Engine engine() throws IOException {
-    return new Engine(messageBroker(), flow());
+  public Engine engine(MessageBroker messageBroker, Flow flow) throws IOException {
+    return new Engine(messageBroker, flow);
   }
 
 }
