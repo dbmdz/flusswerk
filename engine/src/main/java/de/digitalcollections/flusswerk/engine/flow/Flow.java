@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Recipe for the data processing. Every message will be processed by the readerFactory, then the transformerFactory and finally the writerFactory. The transformerFactory can be omitted if <code>R</code> and <code>W</code> are the same.
- * @param <M>
- * @param <R>
- * @param <W>
+ * @param <M> The data type of the message.
+ * @param <R> The data type produced by the reader. Input data type of the transformer.
+ * @param <W> The data type consumed by the writer. Output data type of the transformer.
  */
 public class Flow<M extends Message, R, W> {
 
@@ -55,7 +55,6 @@ public class Flow<M extends Message, R, W> {
       if (consumingWriterFactory != null) {
         job.write(consumingWriterFactory.get());
       }
-
 
     } finally {
       result = job.getResult();

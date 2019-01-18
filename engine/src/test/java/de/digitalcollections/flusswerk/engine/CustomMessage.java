@@ -21,13 +21,11 @@ public class CustomMessage implements Message<Long> {
     data = new HashMap<>();
   }
 
-
   public CustomMessage(Long id) {
     this.envelope = new Envelope();
     this.data = new HashMap<>();
     this.id = id;
   }
-
 
   @Override
   public Envelope getEnvelope() {

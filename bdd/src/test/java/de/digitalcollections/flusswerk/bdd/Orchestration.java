@@ -25,7 +25,7 @@ public class Orchestration {
 
   public Orchestration() {
     rabbitMQ = new GenericContainer("rabbitmq:latest")
-        .withExposedPorts(5672);
+            .withExposedPorts(5672);
   }
 
   public static Orchestration getInstance() {
@@ -81,4 +81,3 @@ public class Orchestration {
   }
 
 }
-

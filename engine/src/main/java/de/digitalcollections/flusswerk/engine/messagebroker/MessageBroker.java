@@ -1,7 +1,6 @@
 package de.digitalcollections.flusswerk.engine.messagebroker;
 
 import de.digitalcollections.flusswerk.engine.exceptions.InvalidMessageException;
-import de.digitalcollections.flusswerk.engine.model.DefaultMessage;
 import de.digitalcollections.flusswerk.engine.model.Envelope;
 import de.digitalcollections.flusswerk.engine.model.Message;
 import de.digitalcollections.flusswerk.engine.util.Maps;
@@ -60,11 +59,6 @@ public class MessageBroker {
     rabbitClient.send(routingConfig.getExchange(), routingKey, message);
   }
 
-
-  public void sendRaw(String routingKey, Message message) throws IOException {
-    rabbitClient.sendRaw(routingConfig.getExchange(), routingKey, message.getEnvelope().getBody().getBytes());
-  }
-
   /**
    * Sends multiple messages to a certain queue as JSON documents. The messages are sent in the same order
    * as returned by the iterator over <code>messages</code>.
@@ -77,6 +71,10 @@ public class MessageBroker {
     for (Message message : messages) {
       send(routingKey, message);
     }
+  }
+
+  public void sendRaw(String routingKey, Message message) throws IOException {
+    rabbitClient.sendRaw(routingConfig.getExchange(), routingKey, message.getEnvelope().getBody().getBytes());
   }
 
   /**
@@ -102,7 +100,7 @@ public class MessageBroker {
     for (String inputQueue : routingConfig.getReadFrom()) {
       try {
         message = receive(inputQueue);
-      } catch ( InvalidMessageException e ) {
+      } catch (InvalidMessageException e) {
         failInvalidMessage(inputQueue, e);
         return null;
       }
@@ -127,14 +125,14 @@ public class MessageBroker {
     for (String inputQueue : routingConfig.getReadFrom()) {
       FailurePolicy failurePolicy = routingConfig.getFailurePolicy(inputQueue);
       rabbitClient.declareQueue(inputQueue, exchange, inputQueue,
-                                Maps.of(
-                                        DEAD_LETTER_EXCHANGE, deadLetterExchange)
+              Maps.of(
+                      DEAD_LETTER_EXCHANGE, deadLetterExchange)
       );
       if (failurePolicy.getRetryRoutingKey() != null) {
         rabbitClient.declareQueue(failurePolicy.getRetryRoutingKey(), deadLetterExchange, inputQueue,
-                                  Maps.of(
-                                          MESSAGE_TTL, config.getDeadLetterWait(),
-                                          DEAD_LETTER_EXCHANGE, exchange)
+                Maps.of(
+                        MESSAGE_TTL, config.getDeadLetterWait(),
+                        DEAD_LETTER_EXCHANGE, exchange)
         );
       }
       if (failurePolicy.getFailedRoutingKey() != null) {
@@ -166,7 +164,7 @@ public class MessageBroker {
    * Rejects a messaging and takes care of proper dead lettering, retries and, if the message failed too often, routing to the failed queue.
    *
    * @param message the message to reject
-   * @return
+   * @return true if retry, false if failed
    * @throws IOException if communication with RabbitMQ failed
    */
   public boolean reject(Message message) throws IOException {
@@ -193,7 +191,7 @@ public class MessageBroker {
   }
 
   public void fail(Message message, boolean ackMessage) throws IOException {
-    if ( ackMessage ) {
+    if (ackMessage) {
       ack(message);
     }
     LOGGER.debug("Send message to failed queue: " + message);
@@ -238,7 +236,7 @@ public class MessageBroker {
     Map<String, Long> result = new HashMap<>();
     for (String inputQueue : routingConfig.getReadFrom()) {
       FailurePolicy failurePolicy = routingConfig.getFailurePolicy(inputQueue);
-      if ( failurePolicy != null ) {
+      if (failurePolicy != null) {
         String queue = failurePolicy.getFailedRoutingKey();
         result.put(queue, rabbitClient.getMessageCount(queue));
       }
@@ -250,7 +248,7 @@ public class MessageBroker {
     Map<String, Long> result = new HashMap<>();
     for (String inputQueue : routingConfig.getReadFrom()) {
       FailurePolicy failurePolicy = routingConfig.getFailurePolicy(inputQueue);
-      if ( failurePolicy != null ) {
+      if (failurePolicy != null) {
         String queue = failurePolicy.getRetryRoutingKey();
         result.put(queue, rabbitClient.getMessageCount(queue));
       }

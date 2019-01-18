@@ -5,7 +5,7 @@ import de.digitalcollections.flusswerk.engine.model.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DefaultProcessReport implements ProcessReport{
+public class DefaultProcessReport implements ProcessReport {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DefaultProcessReport.class);
 

@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 public class StepDefinitions implements En {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StepDefinitions.class);
@@ -30,14 +29,13 @@ public class StepDefinitions implements En {
 
   private String queueToSendTo;
 
-
   public StepDefinitions() {
     Given("I have an message broker with default config and a message in ([\\w\\.]+)", (String queue) -> {
       messageBroker = orchestration.createMessageBroker(
-          new MessageBrokerBuilder()
-              .deadLetterWait(20)
-              .readFrom("bdd.in")
-              .writeTo("bdd.out")
+              new MessageBrokerBuilder()
+                      .deadLetterWait(20)
+                      .readFrom("bdd.in")
+                      .writeTo("bdd.out")
       );
       messagesToSend = Collections.singletonList(new DefaultMessage("happy message"));
       queueToSendTo = queue;
@@ -45,12 +43,12 @@ public class StepDefinitions implements En {
 
     When("the processing always fails", () -> {
       Flow flow = new FlowBuilder<>()
-          .read(Message::toString)
-          .transform(s -> {
-            throw new RuntimeException("Fail!");
-          })
-          .write(s -> new DefaultMessage(s.toString()))
-          .build();
+              .read(Message::toString)
+              .transform(s -> {
+                throw new RuntimeException("Fail!");
+              })
+              .write(s -> new DefaultMessage(s.toString()))
+              .build();
 
       // Preparation finished, start everything
       start(flow);
@@ -58,10 +56,10 @@ public class StepDefinitions implements En {
 
     When("^the processing always works$", () -> {
       Flow flow = new FlowBuilder<DefaultMessage, String, String>()
-          .read(DefaultMessage::getId)
-          .transform(s -> s)
-          .writeAndSend(s -> new DefaultMessage(s).put("blah", "blubb"))
-          .build();
+              .read(DefaultMessage::getId)
+              .transform(s -> s)
+              .writeAndSend(s -> new DefaultMessage(s).put("blah", "blubb"))
+              .build();
 
       // Preparation finished, start everything
       start(flow);

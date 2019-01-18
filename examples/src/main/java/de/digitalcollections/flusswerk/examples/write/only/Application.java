@@ -10,11 +10,11 @@ public class Application {
 
   private void run() throws IOException {
     MessageBroker messageBroker = new MessageBrokerBuilder()
-        .exchange("workflow")
-        .writeTo("someOutputQueue")
-        .build();
+            .exchange("workflow")
+            .writeTo("someOutputQueue")
+            .build();
 
-    for (int i=0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
       messageBroker.send(new DefaultMessage(Integer.toString(i)));
     }
 

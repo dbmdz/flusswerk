@@ -58,9 +58,9 @@ class RabbitClient {
 
   void sendRaw(String exchange, String routingKey, byte[] data) throws IOException {
     AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder()
-        .contentType("application/json")
-        .deliveryMode(PERSISTENT)
-        .build();
+            .contentType("application/json")
+            .deliveryMode(PERSISTENT)
+            .build();
 
     try {
       channel.basicPublish(exchange, routingKey, properties, data);
@@ -112,7 +112,7 @@ class RabbitClient {
         message.getEnvelope().setDeliveryTag(response.getEnvelope().getDeliveryTag());
         message.getEnvelope().setSource(queueName);
         return message;
-      } catch ( Exception e ) {
+      } catch (Exception e) {
         Message invalidMessage = new DefaultMessage();
         invalidMessage.getEnvelope().setBody(body);
         invalidMessage.getEnvelope().setDeliveryTag(response.getEnvelope().getDeliveryTag());

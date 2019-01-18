@@ -17,7 +17,7 @@ class DefaultMessageTest {
 
   @Test
   void putWorksWithNull() {
-    DefaultMessage message = new DefaultMessage("hurz").put("key1","value1").put(null);
+    DefaultMessage message = new DefaultMessage("hurz").put("key1", "value1").put(null);
     assertThat(message.get("key1")).isEqualTo("value1");
   }
 
