@@ -54,8 +54,8 @@ class MessageBrokerBuilderTest {
   @DisplayName("Should add new address to desired value")
   void hostNameAndPort() throws IOException, TimeoutException {
     messageBroker = messageBrokerBuilder
-        .connectTo("example.com", 1234)
-        .build(rabbitConnection());
+            .connectTo("example.com", 1234)
+            .build(rabbitConnection());
     verify(connectionFactory).newConnection(Collections.singletonList(new Address("example.com", 1234)));
   }
 
@@ -63,8 +63,8 @@ class MessageBrokerBuilderTest {
   @DisplayName("Should add new addresses to desired values, even with different separators")
   void hostConnectionStrings() throws IOException, TimeoutException {
     messageBroker = messageBrokerBuilder
-        .connectTo("rabbit1.example.com:1234,rabbit2.example.com:2345;rabbit3.example.org:3456")
-        .build(rabbitConnection());
+            .connectTo("rabbit1.example.com:1234,rabbit2.example.com:2345;rabbit3.example.org:3456")
+            .build(rabbitConnection());
     List<Address> expectedAddresses = new ArrayList<>();
     expectedAddresses.add(new Address("rabbit1.example.com", 1234));
     expectedAddresses.add(new Address("rabbit2.example.com", 2345));
@@ -79,13 +79,12 @@ class MessageBrokerBuilderTest {
     verify(connectionFactory).setPassword("guest");
   }
 
-
   @Test
   @DisplayName("Password should be set")
   void password() throws IOException, TimeoutException {
     messageBroker = messageBrokerBuilder
-        .password("secretsecretsecret")
-        .build(rabbitConnection());
+            .password("secretsecretsecret")
+            .build(rabbitConnection());
     verify(connectionFactory).setPassword("secretsecretsecret");
   }
 
@@ -107,8 +106,8 @@ class MessageBrokerBuilderTest {
   @DisplayName("Should set username")
   void username() throws IOException, TimeoutException {
     messageBroker = messageBrokerBuilder
-        .username("Hackerman")
-        .build(new RabbitConnection(messageBrokerBuilder.getConnectionConfig(), connectionFactory));
+            .username("Hackerman")
+            .build(new RabbitConnection(messageBrokerBuilder.getConnectionConfig(), connectionFactory));
     verify(connectionFactory).setUsername("Hackerman");
   }
 
@@ -123,8 +122,8 @@ class MessageBrokerBuilderTest {
   @DisplayName("Default virtualHost is RabbitMQ default")
   void virtualHost() throws IOException, TimeoutException {
     messageBroker = messageBrokerBuilder
-        .virtualHost("/special")
-        .build(new RabbitConnection(messageBrokerBuilder.getConnectionConfig(), connectionFactory));
+            .virtualHost("/special")
+            .build(new RabbitConnection(messageBrokerBuilder.getConnectionConfig(), connectionFactory));
     verify(connectionFactory).setVirtualHost("/special");
   }
 
@@ -139,8 +138,8 @@ class MessageBrokerBuilderTest {
   @DisplayName("Default dead letter backoff time is 30s")
   void deadLetterWait() throws IOException {
     messageBroker = messageBrokerBuilder
-        .deadLetterWait(321)
-        .build(rabbitConnection());
+            .deadLetterWait(321)
+            .build(rabbitConnection());
     assertThat(messageBroker.getConfig().getDeadLetterWait()).isEqualTo(321);
   }
 
@@ -155,8 +154,8 @@ class MessageBrokerBuilderTest {
   @DisplayName("Default max retries is 5")
   void maxRetries() throws IOException {
     messageBroker = messageBrokerBuilder
-        .maxRetries(42)
-        .build(rabbitConnection());
+            .maxRetries(42)
+            .build(rabbitConnection());
     assertThat(messageBroker.getConfig().getMaxRetries()).isEqualTo(42);
   }
 
@@ -172,9 +171,9 @@ class MessageBrokerBuilderTest {
   @DisplayName("Default exchanges should be workflow and workflow.retry")
   void exchanges() throws IOException {
     messageBroker = messageBrokerBuilder
-        .exchange("another")
-        .deadLetterExchange("another.retry")
-        .build(rabbitConnection());
+            .exchange("another")
+            .deadLetterExchange("another.retry")
+            .build(rabbitConnection());
     verify(channel).exchangeDeclare(eq("another"), any(BuiltinExchangeType.class), anyBoolean());
     verify(channel).exchangeDeclare(eq("another.retry"), any(BuiltinExchangeType.class), anyBoolean());
   }

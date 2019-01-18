@@ -38,7 +38,6 @@ class RabbitClientTest {
 
   private Message message;
 
-
   @BeforeEach
   void setUp() throws IOException, TimeoutException {
     connection = mock(RabbitConnection.class);
@@ -46,7 +45,6 @@ class RabbitClientTest {
     when(connection.getChannel()).thenReturn(channel);
     message = new DefaultMessage("Hey");
   }
-
 
   @Test
   void ack() throws IOException {
@@ -74,7 +72,6 @@ class RabbitClientTest {
     assertThat(message.getCustomField()).isEqualTo(((CustomMessage) recreated).getCustomField());
   }
 
-
   @Test
   void receiveShouldPullTheInputQueue() throws IOException, InvalidMessageException {
     RabbitClient rabbitClient = new RabbitClient(config, connection);
@@ -86,7 +83,6 @@ class RabbitClientTest {
     LocalDateTime timestamp = LocalDateTime.now();
     String inputQueue = "some.input.queue";
 
-
     Message<String> messageToReceive = createMessage(messageType, messageId, retries, timestamp);
     GetResponse response = createResponse(deliveryTag, messageToReceive, rabbitClient);
 
@@ -95,12 +91,12 @@ class RabbitClientTest {
     when(channel.basicGet(inputQueue, false)).thenReturn(response);
     Message message = rabbitClient.receive(inputQueue);
     assertThat(message.getEnvelope())
-        .returns(body, from(Envelope::getBody))
-        .returns(deliveryTag, from(Envelope::getDeliveryTag))
-        .returns(retries, from(Envelope::getRetries))
-        .returns(timestamp, from(Envelope::getTimestamp));
+            .returns(body, from(Envelope::getBody))
+            .returns(deliveryTag, from(Envelope::getDeliveryTag))
+            .returns(retries, from(Envelope::getRetries))
+            .returns(timestamp, from(Envelope::getTimestamp));
     assertThat(message)
-        .returns(messageId, from(Message<String>::getId));
+            .returns(messageId, from(Message<String>::getId));
   }
 
   private Message<String> createMessage(String messageType, String messageId, int retries, LocalDateTime timestamp) throws IOException {
@@ -114,10 +110,10 @@ class RabbitClientTest {
     com.rabbitmq.client.Envelope envelope = new com.rabbitmq.client.Envelope(deliveryTag, true, "workflow", "some.input.queue");
     BasicProperties basicProperties = new BasicProperties.Builder().build();
     return new GetResponse(
-        envelope,
-        basicProperties,
-        rabbitClient.serialize(message),
-        1
+            envelope,
+            basicProperties,
+            rabbitClient.serialize(message),
+            1
     );
   }
 
@@ -164,12 +160,14 @@ class RabbitClientTest {
     RabbitClient rabbitClient = new RabbitClient(config, connection);
 
     InvalidMessageException thrown = assertThrows(
-        InvalidMessageException.class,
-        () -> { rabbitClient.receive("test"); }
+            InvalidMessageException.class,
+            () -> {
+              rabbitClient.receive("test");
+            }
     );
     assertThat(thrown.getMessage()).isEqualTo("Unrecognized token 'NoValidJson'"
-        + ": was expecting 'null', 'true', 'false' or NaN\n"
-        + " at [Source: (String)\"NoValidJson\"; line: 1, column: 23]");
+            + ": was expecting 'null', 'true', 'false' or NaN\n"
+            + " at [Source: (String)\"NoValidJson\"; line: 1, column: 23]");
   }
 
 }

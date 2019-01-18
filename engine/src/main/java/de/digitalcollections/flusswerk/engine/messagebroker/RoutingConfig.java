@@ -16,7 +16,7 @@ public interface RoutingConfig {
 
   FailurePolicy getFailurePolicy(String inputQueue);
 
-  default  FailurePolicy getFailurePolicy(Message message) {
+  default FailurePolicy getFailurePolicy(Message message) {
     return getFailurePolicy(message.getEnvelope().getSource());
   }
 

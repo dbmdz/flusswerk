@@ -19,20 +19,20 @@ public class Application {
 
   private void run() throws IOException {
     MessageBroker messageBroker = new MessageBrokerBuilder()
-        .connectTo("localhost", 5672)
-        .username("guest")
-        .password("guest")
-        .exchange("workflow")
-        .deadLetterExchange("workflow.dlx")
-        .readFrom("someInputQueue")
-        .writeTo("someOutputQueue")
-        .build();
+            .connectTo("localhost", 5672)
+            .username("guest")
+            .password("guest")
+            .exchange("workflow")
+            .deadLetterExchange("workflow.dlx")
+            .readFrom("someInputQueue")
+            .writeTo("someOutputQueue")
+            .build();
 
     Flow flow = new FlowBuilder<DefaultMessage, String, String>()
-        .read(DefaultMessage::getId)
-        .transform(new UppercaseTransformer(true))
-        .writeAndSend((Function<String, Message>) DefaultMessage::new)
-        .build();
+            .read(DefaultMessage::getId)
+            .transform(new UppercaseTransformer(true))
+            .writeAndSend((Function<String, Message>) DefaultMessage::new)
+            .build();
 
     Engine engine = new Engine(messageBroker, flow);
     messageBroker.send("someInputQueue", new DefaultMessage("lowercase-text").put("text", "Shibuyara"));

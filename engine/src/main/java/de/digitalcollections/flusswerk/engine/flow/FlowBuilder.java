@@ -12,7 +12,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Builder to create the {@link Flow} to process the data using an {@link Engine}.
  *
- * @param <M>
+ * @param <M> message
  * @param <R> The data type produced by the reader. Input data type of the transformer.
  * @param <W> The data type consumed by the writer. Output data type of the transformer.
  */
@@ -155,7 +155,6 @@ public class FlowBuilder<M extends Message, R, W> {
     this.consumingWriterFactory = () -> consumingWriter;
     return this;
   }
-
 
   /**
    * Sets cleanup runnable, which is executed after the message was processed.

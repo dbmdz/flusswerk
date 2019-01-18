@@ -1,6 +1,5 @@
 package de.digitalcollections.flusswerk.engine.flow;
 
-
 import de.digitalcollections.flusswerk.engine.model.DefaultMessage;
 import de.digitalcollections.flusswerk.engine.model.Message;
 import java.util.Collection;
@@ -86,9 +85,9 @@ class FlowBuilderTest {
   @DisplayName("build should create an working Flow if only reader and writer are set")
   public void buildWithOnlyReadAndWrite() {
     Flow flow = new FlowBuilder<DefaultMessage, String, String>()
-        .read(DefaultMessage::getId)
-        .writeAndSend((Function<String, Message>) DefaultMessage::new)
-        .build();
+            .read(DefaultMessage::getId)
+            .writeAndSend((Function<String, Message>) DefaultMessage::new)
+            .build();
     String id = "Whiskey in the Jar";
     Collection<? extends Message> result = flow.process(new DefaultMessage(id));
     assertThat(result).hasSize(1);

@@ -91,15 +91,14 @@ class MessageBrokerTest {
     verify(rabbitClient).send(any(), eq(routingConfig.getWriteTo()), any());
   }
 
-
   @Test
   @DisplayName("Should send multiple messages to the specified queue")
   void sendMultipleMessagesShouldRouteMessagesToSpecifiedQueue() throws IOException {
     String queue = "specified.queue";
     List<Message> messages = Arrays.asList(
-        new DefaultMessage("test"),
-        new DefaultMessage("test"),
-        new DefaultMessage("test"));
+            new DefaultMessage("test"),
+            new DefaultMessage("test"),
+            new DefaultMessage("test"));
     messageBroker.send(queue, messages);
     verify(rabbitClient, times(messages.size())).send(any(), eq(queue), any());
   }
@@ -137,7 +136,6 @@ class MessageBrokerTest {
     messageBroker = new MessageBroker(config, routingConfig, rabbitClient);
     assertThat(messageBroker.getMessageCounts()).isEqualTo(expected);
   }
-
 
   @Test
   @DisplayName("isConnectionOk should be true if channel and connection are ok")
