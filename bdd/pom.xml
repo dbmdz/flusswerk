@@ -29,16 +29,10 @@
       <version>${cucumber.version}</version>
       <scope>test</scope>
     </dependency>
-    <!--<dependency>-->
-    <!--<groupId>junit</groupId>-->
-    <!--<artifactId>junit</artifactId>-->
-    <!--<version>${junit.version}</version>-->
-    <!--<scope>test</scope>-->
-    <!--</dependency>-->
     <dependency>
       <groupId>org.junit.vintage</groupId>
       <artifactId>junit-vintage-engine</artifactId>
-      <version>4.12.2</version>
+      <version>5.4.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
