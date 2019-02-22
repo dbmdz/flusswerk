@@ -68,7 +68,7 @@
     <version.junit-jupiter>5.4.0</version.junit-jupiter>
     <version.logback>1.2.3</version.logback>
     <version.mockito>2.24.5</version.mockito>
-    <version.slf4j>1.7.25</version.slf4j>
+    <version.slf4j>1.7.26</version.slf4j>
     <!-- Plugin versions -->
     <version.maven-checkstyle-plugin>3.0.0</version.maven-checkstyle-plugin>
     <version.maven-compiler-plugin>3.8.0</version.maven-compiler-plugin>
