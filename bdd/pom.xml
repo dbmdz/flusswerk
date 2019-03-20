@@ -12,7 +12,7 @@
   <name>DigitalCollections: Flusswerk - BDD tests</name>
 
   <properties>
-    <cucumber.version>4.2.3</cucumber.version>
+    <cucumber.version>4.2.6</cucumber.version>
     <junit.version>4.12</junit.version>
   </properties>
 
