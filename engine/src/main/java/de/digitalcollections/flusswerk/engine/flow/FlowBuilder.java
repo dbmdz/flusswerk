@@ -28,6 +28,12 @@ public class FlowBuilder<M extends Message, R, W> {
 
   private Runnable cleanup;
 
+  private boolean propagateFlowIds;
+
+  public FlowBuilder() {
+    propagateFlowIds = false;
+  }
+
   @SuppressWarnings("unchecked")
   private W cast(R value) {
     return (W) value;
@@ -174,7 +180,7 @@ public class FlowBuilder<M extends Message, R, W> {
    * @return A new {@link Flow} as configured before.
    */
   public Flow<M, R, W> build() {
-    return new Flow<>(readerFactory, transformerFactory, writerFactory, consumingWriterFactory, cleanup);
+    return new Flow<>(readerFactory, transformerFactory, writerFactory, consumingWriterFactory, cleanup, propagateFlowIds);
   }
 
   public static <M extends Message, R, W> FlowBuilder<M, R, W> receiving(Class<M> clazz) {

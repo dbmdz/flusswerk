@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Job<M, R, W> {
 
@@ -15,10 +16,17 @@ public class Job<M, R, W> {
 
   private Collection<Message> result;
 
+  private boolean propagateFlowIds;
+
   public Job(M message) {
     this.message = message;
     this.dataRead = null;
     this.dataTransformed = null;
+  }
+
+  public Job(M message, boolean propagateFlowIds) {
+    this(message);
+    this.propagateFlowIds = propagateFlowIds;
   }
 
   public void read(Function<M, R> reader) {
@@ -45,6 +53,12 @@ public class Job<M, R, W> {
   public Collection<Message> getResult() {
     if (result == null) {
       return Collections.emptyList();
+    }
+    if (propagateFlowIds) {
+      FlowMessage flowMessage = (FlowMessage) message;
+      for (Message message : result) {
+        ((HasFlowId) message).setFlowId(flowMessage.getFlowId());
+      }
     }
     return result;
   }
