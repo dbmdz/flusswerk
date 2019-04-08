@@ -4,14 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A {@link Message} implementation with an additional identifier to trace
- * jobs through multiple workflow steps.
+ * A {@link Message} implementation with an additional identifier to trace jobs through multiple workflow steps.
  */
 public class FlowMessage extends DefaultMessage implements HasFlowId {
 
   private long flowId;
 
-  protected FlowMessage() {}
+  protected FlowMessage() {
+  }
 
   public FlowMessage(String id) {
     super(id);
@@ -34,8 +34,8 @@ public class FlowMessage extends DefaultMessage implements HasFlowId {
 
   @Override
   public String toString() {
-    return "Message{id=" + getId() + ", flowId=" + getFlowId() +
-           ", envelope=" + getEnvelope() + ", data=" + getData() + "}";
+    return "Message{id=" + getId() + ", flowId=" + getFlowId()
+           + ", envelope=" + getEnvelope() + ", data=" + getData() + "}";
   }
 
 }
