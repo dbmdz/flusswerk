@@ -1,6 +1,7 @@
 package de.digitalcollections.flusswerk.engine.flow;
 
 import de.digitalcollections.flusswerk.engine.model.DefaultMessage;
+import de.digitalcollections.flusswerk.engine.model.FlowMessage;
 import de.digitalcollections.flusswerk.engine.model.Message;
 import java.util.Collection;
 import java.util.function.Function;
@@ -84,7 +85,7 @@ class FlowBuilderTest {
   @Test
   @DisplayName("build should create an working Flow if only reader and writer are set")
   public void buildWithOnlyReadAndWrite() {
-    Flow flow = new FlowBuilder<DefaultMessage, String, String>()
+    Flow<DefaultMessage, String, String> flow = new FlowBuilder<DefaultMessage, String, String>()
             .read(DefaultMessage::getId)
             .writeAndSend((Function<String, Message>) DefaultMessage::new)
             .build();
@@ -93,5 +94,24 @@ class FlowBuilderTest {
     assertThat(result).hasSize(1);
     assertThat(result).allSatisfy(m -> assertThat(m.getId()).isEqualTo(id));
   }
+
+  @Test
+  @DisplayName("build should create an working Flow if only reader and writer are set")
+  public void buildShouldCreateFlowPropagatingFlowIds() {
+    Flow<DefaultMessage, String, String> flow = new FlowBuilder<DefaultMessage, String, String>()
+        .read(DefaultMessage::getId)
+        .writeAndSend((Function<String, Message>) FlowMessage::new)
+        .propagateFlowIds(true)
+        .build();
+
+    FlowMessage incomingMessage = new FlowMessage("123", 42);
+    FlowMessage outgoingMessage =  flow.process(incomingMessage).stream()
+                                     .map(FlowMessage.class::cast)
+                                     .findFirst()
+                                     .orElseThrow(() -> new RuntimeException("No messages found."));
+
+    assertThat(outgoingMessage.getFlowId()).isEqualTo(incomingMessage.getFlowId());
+  }
+
 
 }

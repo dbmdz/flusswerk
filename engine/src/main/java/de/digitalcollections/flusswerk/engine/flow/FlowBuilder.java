@@ -163,6 +163,17 @@ public class FlowBuilder<M extends Message, R, W> {
   }
 
   /**
+   * Copy flowIds from incoming messages to all outgoing messages. Requires both to implement
+   * {@link de.digitalcollections.flusswerk.engine.model.HasFlowId}.
+   * @param propagateFlowIds true to propagate flow ids (default: <code>false</code>)
+   * @return This {@link FlowBuilder} instance for further configuration or creation of the {@link Flow}.
+   */
+  public FlowBuilder<M, R, W> propagateFlowIds(boolean propagateFlowIds) {
+    this.propagateFlowIds = propagateFlowIds;
+    return this;
+  }
+
+  /**
    * Sets cleanup runnable, which is executed after the message was processed.
    *
    * @param runnable The runnable to be executed after the message was processed
