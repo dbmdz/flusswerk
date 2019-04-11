@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>dc-flusswerk-bdd</artifactId>
+  <artifactId>dc-flusswerk-integration</artifactId>
 
   <name>DigitalCollections: Flusswerk - BDD tests</name>
 
@@ -17,18 +17,6 @@
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>io.cucumber</groupId>
-      <artifactId>cucumber-java8</artifactId>
-      <version>${cucumber.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.cucumber</groupId>
-      <artifactId>cucumber-junit</artifactId>
-      <version>${cucumber.version}</version>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>org.junit.vintage</groupId>
       <artifactId>junit-vintage-engine</artifactId>
@@ -48,12 +36,6 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>testcontainers</artifactId>
-      <version>1.10.6</version>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 
