@@ -16,7 +16,7 @@ before_script:
 - if [ ! -z "$TRAVIS_TAG" ]; then mvn versions:set -DnewVersion=$TRAVIS_TAG; fi
 script:
 - mvn clean install
-- mvn -B --projects bdd -Pbdd surefire:test
+- mvn -B --projects integration -Pintegration surefire:test
 after_success:
 - bash <(curl -s https://codecov.io/bash)
 - if [[ "$PROJECT_VERSION" == *SNAPSHOT ]]; then mvn deploy -B -DskipTests=true --settings settings.xml; fi

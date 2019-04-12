@@ -1,4 +1,4 @@
-package de.digitalcollections.flusswerk.bdd;
+package de.digitalcollections.flusswerk.integration;
 
 import de.digitalcollections.flusswerk.engine.exceptions.InvalidMessageException;
 import de.digitalcollections.flusswerk.engine.messagebroker.MessageBroker;

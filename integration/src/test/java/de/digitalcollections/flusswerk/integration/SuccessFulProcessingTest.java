@@ -1,5 +1,4 @@
-package de.digitalcollections.flusswerk.bdd;
-
+package de.digitalcollections.flusswerk.integration;
 
 import de.digitalcollections.flusswerk.engine.Engine;
 import de.digitalcollections.flusswerk.engine.flow.Flow;
@@ -15,17 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Feature: Dead letter messages
- *
- *   Scenario: Message processing fails constantly
- *     Given I have an message broker with default config and a message in bdd.in
- *     When the processing always fails
- *     Then the message in queue bdd.in.failed has 5 retries
- *      And bdd.in is empty
- *      And bdd.out is empty
- */
-public class DeadletteringTest {
+public class SuccessFulProcessingTest {
 
   private final static String QUEUE_IN = "test.in";
   private final static String QUEUE_OUT = "test.out";
@@ -40,14 +29,12 @@ public class DeadletteringTest {
   }
 
   @Test
-  public void failingMessagesShouldEndInFailedQueue() throws Exception {
+  public void successfulMessagesShouldGoToOutQueue() throws Exception {
     MessageBroker messageBroker = backend.getMessageBroker();
-    Flow flow = new FlowBuilder<>()
-        .read(Message::toString)
-        .transform(s -> {
-          throw new RuntimeException("Fail!");
-        })
-        .write(s -> new DefaultMessage(s.toString()))
+    Flow flow = new FlowBuilder<DefaultMessage, DefaultMessage, DefaultMessage>()
+        .read(m -> m)
+        .transform(m -> m)
+        .writeAndSend((DefaultMessage m) -> m)
         .build();
 
     Engine engine = new Engine(messageBroker, flow);
@@ -55,12 +42,11 @@ public class DeadletteringTest {
     ExecutorService executorService = Executors.newSingleThreadExecutor();
     executorService.submit(engine::start);
     messageBroker.send(QUEUE_IN, new DefaultMessage("123456"));
-//    Thread.sleep(5000);
 
-    Message message = backend.waitForMessageFrom(QUEUE_FAILED, 10_000);
+    Message message = backend.waitForMessageFrom(QUEUE_OUT, 10_000);
     assertThat(message.getId()).isEqualTo("123456");
     assertThatMessageFrom(QUEUE_IN).isNull();
-    assertThatMessageFrom(QUEUE_OUT).isNull();
+    assertThatMessageFrom(QUEUE_FAILED).isNull();
     assertThatMessageFrom(QUEUE_RETRY).isNull();
 
     engine.stop();
@@ -72,3 +58,5 @@ public class DeadletteringTest {
   }
 
 }
+
+
