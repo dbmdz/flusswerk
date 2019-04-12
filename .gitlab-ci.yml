@@ -12,6 +12,8 @@ variables:
     - mvn clean install
     - mvn -B --projects integration -Pintegration -Dspring.profiles.active=$MAVEN_ACTIVE_PROFILE surefire:test
   stage: test
+  variables:
+    RABBIT_HOST: docker
 
 integration_tests:
   extends: .integration_tests
