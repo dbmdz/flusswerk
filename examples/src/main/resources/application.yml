@@ -16,3 +16,10 @@ messageBroker:
   queues:
     read: someInputQueue
     write: someOutputQueue
+
+---
+
+spring:
+  profiles: ci
+  rabbitmq:
+    host: docker
