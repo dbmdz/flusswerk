@@ -9,20 +9,13 @@
 
   <artifactId>dc-flusswerk-integration</artifactId>
 
-  <name>DigitalCollections: Flusswerk - BDD tests</name>
+  <name>DigitalCollections: Flusswerk - Integration Tests</name>
 
   <properties>
-    <cucumber.version>4.2.3</cucumber.version>
-    <junit.version>4.12</junit.version>
+    <skip.integration.tests>true</skip.integration.tests>
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>org.junit.vintage</groupId>
-      <artifactId>junit-vintage-engine</artifactId>
-      <version>5.4.2</version>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
@@ -37,6 +30,16 @@
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -47,9 +50,8 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <excludes>
-            <exclude>**/RunCucumberTest</exclude>
-          </excludes>
+<!--          <skipTests>${skip.integration.tests}</skipTests>-->
+          <skipTests>true</skipTests>
         </configuration>
       </plugin>
     </plugins>
@@ -57,15 +59,13 @@
 
   <profiles>
     <profile>
-      <id>bdd</id>
+      <id>integration</id>
       <build>
         <plugins>
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
-              <excludes>
-                <exclude>x</exclude>
-              </excludes>
+              <skipTests>false</skipTests>
             </configuration>
           </plugin>
         </plugins>

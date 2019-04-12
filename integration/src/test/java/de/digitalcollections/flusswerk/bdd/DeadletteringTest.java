@@ -10,8 +10,8 @@ import de.digitalcollections.flusswerk.engine.model.Message;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.assertj.core.api.ObjectAssert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,7 +34,7 @@ public class DeadletteringTest {
 
   private Backend backend;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     backend = new Backend(QUEUE_IN, QUEUE_OUT);
   }
