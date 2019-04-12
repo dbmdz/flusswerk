@@ -1,0 +1,23 @@
+include: "https://raw.githubusercontent.com/dbmdz/development/master/ci/.gitlab-ci-base.yml"
+
+services:
+  - docker:dind
+
+variables:
+  DOCKER_HOST: tcp://docker:2375/
+
+.integration_tests:
+  script:
+    - docker-compose up -d
+    - mvn clean install
+    - mvn -B --projects integration -Pintegration surefire:test
+  stage: test
+
+integration_tests:
+  extends: .integration_tests
+
+integration_tests:openjdk11:
+  extends: .integration_tests
+  image: "$BUILD_IMAGE_ANSIBLE_MAVEN_JDK11"
+  variables:
+    JAVA_HOME: "/usr/lib/jvm/java-11-openjdk-amd64"
