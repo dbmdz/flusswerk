@@ -31,7 +31,7 @@ class FlowMessageMixinTest {
   @Test
   @DisplayName("Deserialization should ignore unknown fields")
   void shouldIgnoreUnknownFields() throws IOException {
-    FlowMessage message = new FlowMessage("abc123", 3000);
+    FlowMessage message = new FlowMessage("abc123", "flow-3000");
     String json = objectMapper.writeValueAsString(message);
     json = json.substring(0, json.length() - 1) + ", \"stupidField\": 0}";
     FlowMessage restored = objectMapper.readValue(json, FlowMessage.class);
@@ -41,7 +41,7 @@ class FlowMessageMixinTest {
   @Test
   @DisplayName("Should serialize Envelope.retries")
   void shouldSerializeRetries() throws JsonProcessingException {
-    FlowMessage message = new FlowMessage("abc123", 3000);
+    FlowMessage message = new FlowMessage("abc123", "flow-3000");
     message.getEnvelope().setRetries(42);
     assertThat(objectMapper.writeValueAsString(message)).contains("42");
   }
@@ -49,7 +49,7 @@ class FlowMessageMixinTest {
   @Test
   @DisplayName("Should deserialize Envelope.retries")
   void shouldDeserializeRetries() throws IOException {
-    FlowMessage message = new FlowMessage("abc123", 3000);
+    FlowMessage message = new FlowMessage("abc123", "flow-3000");
     message.getEnvelope().setRetries(42);
     Message deserialized = objectMapper.readValue(objectMapper.writeValueAsString(message), FlowMessage.class);
     assertThat(deserialized.getEnvelope().getRetries()).isEqualTo(42);
@@ -58,7 +58,7 @@ class FlowMessageMixinTest {
   @Test
   @DisplayName("Should serialize and deserialize arbitrary values")
   void shouldSerializeAndDeserializeArbitraryValues() throws IOException {
-    FlowMessage message = new FlowMessage("abc123", 3000);
+    FlowMessage message = new FlowMessage("abc123", "flow-3000");
     message.put("purpose of life", "42");
     String json = objectMapper.writeValueAsString(message);
     FlowMessage deserialized = objectMapper.readValue(json, FlowMessage.class);

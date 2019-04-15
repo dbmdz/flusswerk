@@ -6,8 +6,8 @@ package de.digitalcollections.flusswerk.engine.model;
  */
 public interface HasFlowId {
 
-  long getFlowId();
+  String getFlowId();
 
-  void setFlowId(long flowId);
+  void setFlowId(String flowId);
 
 }

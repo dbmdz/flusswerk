@@ -104,7 +104,7 @@ class FlowBuilderTest {
         .propagateFlowIds(true)
         .build();
 
-    FlowMessage incomingMessage = new FlowMessage("123", 42);
+    FlowMessage incomingMessage = new FlowMessage("123", "flow-42");
     FlowMessage outgoingMessage =  flow.process(incomingMessage).stream()
                                      .map(FlowMessage.class::cast)
                                      .findFirst()

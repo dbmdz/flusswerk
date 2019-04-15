@@ -2,16 +2,13 @@ package de.digitalcollections.flusswerk.engine.model;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 
 class JobTest {
 
@@ -94,7 +91,7 @@ class JobTest {
   @Test
   @DisplayName("Should propagate flow ids")
   void propagateFlowIds() {
-    FlowMessage incomingMessage = new FlowMessage("12345", 42);
+    FlowMessage incomingMessage = new FlowMessage("12345", "flow-42");
     Job<FlowMessage, String, String> job = new Job<>(incomingMessage, true);
     job.read(Message::getId);
     job.transform(Function.identity());
