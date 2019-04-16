@@ -3,6 +3,7 @@ package de.digitalcollections.flusswerk.engine.model;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,10 @@ class JobTest {
       called = true;
       return null;
     }
+  }
+
+  private Supplier<RuntimeException> exception(String message) {
+    return () -> new RuntimeException(message);
   }
 
   @BeforeEach
@@ -82,4 +87,24 @@ class JobTest {
             result -> assertThat(assertThat(((DefaultMessage) result).get("message")).isEqualTo(message.toUpperCase()))
     );
   }
+
+  @Test
+  @DisplayName("Should propagate flow ids")
+  void propagateFlowIds() {
+    FlowMessage incomingMessage = new FlowMessage("12345", "flow-42");
+    Job<FlowMessage, String, String> job = new Job<>(incomingMessage, true);
+    job.read(Message::getId);
+    job.transform(Function.identity());
+    job.write((Function<String, Collection<Message>>) s -> Collections.singleton(new FlowMessage(s)));
+
+    FlowMessage outgoingMessage = job.getResult().stream()
+                                     .map(FlowMessage.class::cast)
+                                     .findFirst()
+                                     .orElseThrow(() -> new RuntimeException("No messages found."));
+
+     assertThat(outgoingMessage.getFlowId())
+        .isEqualTo(incomingMessage.getFlowId());
+  }
+
 }
+

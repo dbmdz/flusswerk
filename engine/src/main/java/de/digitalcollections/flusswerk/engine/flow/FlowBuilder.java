@@ -28,6 +28,12 @@ public class FlowBuilder<M extends Message, R, W> {
 
   private Runnable cleanup;
 
+  private boolean propagateFlowIds;
+
+  public FlowBuilder() {
+    this.propagateFlowIds = false;
+  }
+
   @SuppressWarnings("unchecked")
   private W cast(R value) {
     return (W) value;
@@ -157,6 +163,17 @@ public class FlowBuilder<M extends Message, R, W> {
   }
 
   /**
+   * Copy flowIds from incoming messages to all outgoing messages. Requires both to implement
+   * {@link de.digitalcollections.flusswerk.engine.model.HasFlowId}.
+   * @param propagateFlowIds true to propagate flow ids (default: <code>false</code>)
+   * @return This {@link FlowBuilder} instance for further configuration or creation of the {@link Flow}.
+   */
+  public FlowBuilder<M, R, W> propagateFlowIds(boolean propagateFlowIds) {
+    this.propagateFlowIds = propagateFlowIds;
+    return this;
+  }
+
+  /**
    * Sets cleanup runnable, which is executed after the message was processed.
    *
    * @param runnable The runnable to be executed after the message was processed
@@ -174,7 +191,7 @@ public class FlowBuilder<M extends Message, R, W> {
    * @return A new {@link Flow} as configured before.
    */
   public Flow<M, R, W> build() {
-    return new Flow<>(readerFactory, transformerFactory, writerFactory, consumingWriterFactory, cleanup);
+    return new Flow<>(readerFactory, transformerFactory, writerFactory, consumingWriterFactory, cleanup, propagateFlowIds);
   }
 
   public static <M extends Message, R, W> FlowBuilder<M, R, W> receiving(Class<M> clazz) {

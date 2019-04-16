@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Recipe for the data processing. Every message will be processed by the readerFactory, then the transformerFactory and finally the writerFactory. The transformerFactory can be omitted if <code>R</code> and <code>W</code> are the same.
+ *
  * @param <M> The data type of the message.
  * @param <R> The data type produced by the reader. Input data type of the transformer.
  * @param <W> The data type consumed by the writer. Output data type of the transformer.
@@ -29,16 +30,25 @@ public class Flow<M extends Message, R, W> {
 
   private final Runnable cleanup;
 
-  public Flow(Supplier<Function<M, R>> readerFactory, Supplier<Function<R, W>> transformerFactory, Supplier<Function<W, Collection<Message>>> writerFactory, Supplier<Consumer<W>> consumingWriterFactory, Runnable cleanup) {
+  private final boolean propagateFlowIds;
+
+  public Flow(
+      Supplier<Function<M, R>> readerFactory,
+      Supplier<Function<R, W>> transformerFactory,
+      Supplier<Function<W, Collection<Message>>> writerFactory,
+      Supplier<Consumer<W>> consumingWriterFactory,
+      Runnable cleanup,
+      boolean propagateFlowIds) {
     this.readerFactory = readerFactory;
     this.transformerFactory = transformerFactory;
     this.writerFactory = writerFactory;
     this.consumingWriterFactory = consumingWriterFactory;
     this.cleanup = cleanup;
+    this.propagateFlowIds = propagateFlowIds;
   }
 
   public Collection<Message> process(M message) {
-    Job<M, R, W> job = new Job<>(message);
+    Job<M, R, W> job = new Job<>(message, propagateFlowIds);
 
     Collection<Message> result = null;
 

@@ -221,6 +221,10 @@ class Application {
 }
 ```
 
+## Propagate FlowIds
+
+If incoming and outgoing message classes implement `HasFlowId`, automated propagation of flow ids is available. If the option `flowBuilder.propagateFlowId(true)` is set, Flusswerk copies flow ids from incoming to all outgoing messages.
+
 ## Message Types
 
 ### Using DefaultMessage
