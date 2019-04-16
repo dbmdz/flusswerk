@@ -31,7 +31,7 @@ public class FlowBuilder<M extends Message, R, W> {
   private boolean propagateFlowIds;
 
   public FlowBuilder() {
-    propagateFlowIds = false;
+    this.propagateFlowIds = false;
   }
 
   @SuppressWarnings("unchecked")
