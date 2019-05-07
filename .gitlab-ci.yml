@@ -1,5 +1,12 @@
 include: "https://raw.githubusercontent.com/dbmdz/development/master/ci/.gitlab-ci-base.yml"
 
+cache:
+  key: "$CI_COMMIT_SHA"
+  paths:
+    - engine/target/
+    - examples/target/
+    - integration/target/
+
 services:
   - docker:dind
 
