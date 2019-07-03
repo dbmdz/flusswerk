@@ -22,9 +22,6 @@ variables:
   variables:
     RABBIT_HOST: docker
 
-integration_tests:
-  extends: .integration_tests
-
 integration_tests:openjdk11:
   extends: .integration_tests
   image: "$BUILD_IMAGE_ANSIBLE_MAVEN_JDK11"
