@@ -7,11 +7,13 @@ import de.digitalcollections.flusswerk.engine.flow.FlowBuilder;
 import de.digitalcollections.flusswerk.engine.messagebroker.MessageBroker;
 import de.digitalcollections.flusswerk.engine.model.DefaultMessage;
 import de.digitalcollections.flusswerk.engine.model.Message;
+import de.digitalcollections.flusswerk.engine.reporting.ReportFunction;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -215,6 +217,25 @@ class EngineTest {
     engine.process(message);
 
     verify(messageBroker).fail(message);
+  }
+
+  @Test
+  @DisplayName("Functional reporter should work")
+  void testFunctionalReporter() throws IOException {
+    Flow flow = new FlowBuilder<DefaultMessage, String, String>()
+        .read(READ_SOME_STRING)
+        .transform(s -> {
+          throw new FinallyFailedProcessException("Never again!");
+        })
+        .writeAndSend(WRITE_SOME_STRING)
+        .build();
+
+    final AtomicBoolean reportHasBeenCalled = new AtomicBoolean(false);
+    ReportFunction reportFn = (r, msg, e) -> reportHasBeenCalled.set(true);
+    Engine engine = new Engine(messageBroker, flow, 4, reportFn);
+    Message msg = new DefaultMessage();
+    engine.process(msg);
+    assertThat(reportHasBeenCalled).isTrue();
   }
 
 }
