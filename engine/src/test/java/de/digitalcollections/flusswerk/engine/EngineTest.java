@@ -88,7 +88,7 @@ class EngineTest {
     EngineStats engineStats = engine.getStats();
     boolean shouldWait = engineStats.getAvailableWorkers() > 0;
     while (shouldWait) {
-      LOGGER.info("Waiting for workers to get busy: {} active, {} free after {} ms", engineStats.getActiveWorkers(), engineStats.getAvailableWorkers(), millisecondsWaited);
+      LOGGER.debug("Waiting for workers to get busy: {} active, {} free after {} ms", engineStats.getActiveWorkers(), engineStats.getAvailableWorkers(), millisecondsWaited);
       millisecondsWaited += 100;
       TimeUnit.MILLISECONDS.sleep(100);
       engineStats = engine.getStats();

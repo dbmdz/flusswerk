@@ -45,12 +45,12 @@ class RabbitConnection {
     while (connectionIsFailing) {
       List<Address> addresses = config.getAddresses();
       try {
-        LOGGER.info("Waiting for connection to {} ...", addresses);
+        LOGGER.debug("Waiting for connection to {} ...", addresses);
         Connection connection = factory.newConnection(addresses);
         channel = connection.createChannel();
         channel.basicRecover(true);
         connectionIsFailing = false;
-        LOGGER.info("Connected to {}", addresses);
+        LOGGER.debug("Connected to {}", addresses);
       } catch (IOException | TimeoutException e) {
         LOGGER.debug("Could not connect to {}", addresses, e);
         try {
