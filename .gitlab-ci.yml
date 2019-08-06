@@ -8,7 +8,7 @@ cache:
     - integration/target/
 
 services:
-  - docker:dind
+  - "$DIND_IMAGE"
 
 variables:
   DOCKER_HOST: tcp://docker:2375/
