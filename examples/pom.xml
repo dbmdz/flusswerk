@@ -14,7 +14,7 @@
   <name>DigitalCollections: Flusswerk - Examples</name>
 
   <properties>
-    <version.spring-boot>2.1.6.RELEASE</version.spring-boot>
+    <version.spring-boot>2.1.9.RELEASE</version.spring-boot>
   </properties>
 
   <dependencies>
