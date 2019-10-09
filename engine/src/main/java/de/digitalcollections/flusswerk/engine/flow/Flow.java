@@ -70,9 +70,10 @@ public class Flow<M extends Message, R, W> {
 
     } finally {
       result = job.getResult();
-      job =
-          null; // If in the cleanup stage, a garbage collection is forced, it helps to clean up
-                // before.
+
+      // If in the cleanup stage, a garbage collection is forced,
+      // then it helps to clean up before.
+      job = null;
 
       if (cleanup != null) {
         cleanup.run();
