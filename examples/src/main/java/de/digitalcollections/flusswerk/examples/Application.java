@@ -18,7 +18,8 @@ public class Application {
   private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
   private void run() throws IOException {
-    MessageBroker messageBroker = new MessageBrokerBuilder()
+    MessageBroker messageBroker =
+        new MessageBrokerBuilder()
             .connectTo("localhost", 5672)
             .username("guest")
             .password("guest")
@@ -28,14 +29,16 @@ public class Application {
             .writeTo("someOutputQueue")
             .build();
 
-    Flow flow = new FlowBuilder<DefaultMessage, String, String>()
+    Flow flow =
+        new FlowBuilder<DefaultMessage, String, String>()
             .read(DefaultMessage::getId)
             .transform(new UppercaseTransformer(true))
             .writeAndSend((Function<String, Message>) DefaultMessage::new)
             .build();
 
     Engine engine = new Engine(messageBroker, flow);
-    messageBroker.send("someInputQueue", new DefaultMessage("lowercase-text").put("text", "Shibuyara"));
+    messageBroker.send(
+        "someInputQueue", new DefaultMessage("lowercase-text").put("text", "Shibuyara"));
     engine.start();
   }
 
@@ -43,5 +46,4 @@ public class Application {
     Application application = new Application();
     application.run();
   }
-
 }

@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class Job<M, R, W> {
 
@@ -62,5 +61,4 @@ public class Job<M, R, W> {
     }
     return result;
   }
-
 }

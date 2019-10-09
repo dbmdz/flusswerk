@@ -2,9 +2,7 @@ package de.digitalcollections.flusswerk.engine.model;
 
 import java.time.LocalDateTime;
 
-/**
- * Technical metadata all implementations of {@link Message} must have.
- */
+/** Technical metadata all implementations of {@link Message} must have. */
 public class Envelope {
 
   private String body;
@@ -17,15 +15,14 @@ public class Envelope {
 
   private String source;
 
-  /**
-   * Default constructor setting the Envelope.timestamp to now.
-   */
+  /** Default constructor setting the Envelope.timestamp to now. */
   public Envelope() {
     timestamp = LocalDateTime.now();
   }
 
   /**
-   * The original String representation before serializing into an {@link Message} instance. This field will not be serialized when the message is sent.
+   * The original String representation before serializing into an {@link Message} instance. This
+   * field will not be serialized when the message is sent.
    *
    * @return The original String representation of the {@link Message} as received from RabbitMQ.
    */
@@ -34,7 +31,8 @@ public class Envelope {
   }
 
   /**
-   * The original String representation before serializing into an {@link Message} instance. This field will not be serialized when the message is sent.
+   * The original String representation before serializing into an {@link Message} instance. This
+   * field will not be serialized when the message is sent.
    *
    * @param body The string representation to set.
    */
@@ -98,6 +96,7 @@ public class Envelope {
 
   /**
    * Gets the queue name where this message was received from.
+   *
    * @return the queue name where this message was received from.
    */
   public String getSource() {
@@ -106,6 +105,7 @@ public class Envelope {
 
   /**
    * Gets the queue name where this message was received from.
+   *
    * @param source the queue name where this message was received from.
    */
   public void setSource(String source) {

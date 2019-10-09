@@ -14,25 +14,18 @@ public class EngineStats {
     this.availableWorkers = availableWorkers;
   }
 
-  /**
-   * @return the maximum number of concurrent workers
-   */
+  /** @return the maximum number of concurrent workers */
   public int getConcurrentWorkers() {
     return concurrentWorkers;
   }
 
-  /**
-   * @return the number of workers currently processing a message
-   */
+  /** @return the number of workers currently processing a message */
   public int getActiveWorkers() {
     return activeWorkers;
   }
 
-  /**
-   * @return the number of idle workers
-   */
+  /** @return the number of idle workers */
   public int getAvailableWorkers() {
     return availableWorkers;
   }
-
 }

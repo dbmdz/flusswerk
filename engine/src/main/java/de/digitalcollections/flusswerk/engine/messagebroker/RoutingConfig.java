@@ -19,5 +19,4 @@ public interface RoutingConfig {
   default FailurePolicy getFailurePolicy(Message message) {
     return getFailurePolicy(message.getEnvelope().getSource());
   }
-
 }

@@ -9,5 +9,4 @@ public class RetriableProcessException extends RuntimeException {
   public RetriableProcessException(String message) {
     super(message);
   }
-
 }

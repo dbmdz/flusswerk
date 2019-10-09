@@ -1,9 +1,9 @@
 package de.digitalcollections.flusswerk.examples.spring;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class UppercaseTransformerTest {
 
@@ -20,5 +20,4 @@ class UppercaseTransformerTest {
     UppercaseTransformer uppercaseTransformer = new UppercaseTransformer();
     assertThat(uppercaseTransformer.apply(null)).isNull();
   }
-
 }

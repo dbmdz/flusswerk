@@ -1,5 +1,15 @@
 package de.digitalcollections.flusswerk.engine.messagebroker;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.from;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.GetResponse;
@@ -17,16 +27,6 @@ import java.util.concurrent.TimeoutException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.from;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 class RabbitClientTest {
 
@@ -68,7 +68,9 @@ class RabbitClientTest {
     RabbitClient rabbitClient = new RabbitClient(config, connection);
     CustomMessage message = new CustomMessage();
     message.setCustomField("Blah!");
-    Message recreated = rabbitClient.deserialize(new String(rabbitClient.serialize(message), StandardCharsets.UTF_8));
+    Message recreated =
+        rabbitClient.deserialize(
+            new String(rabbitClient.serialize(message), StandardCharsets.UTF_8));
     assertThat(message.getCustomField()).isEqualTo(((CustomMessage) recreated).getCustomField());
   }
 
@@ -91,30 +93,28 @@ class RabbitClientTest {
     when(channel.basicGet(inputQueue, false)).thenReturn(response);
     Message message = rabbitClient.receive(inputQueue);
     assertThat(message.getEnvelope())
-            .returns(body, from(Envelope::getBody))
-            .returns(deliveryTag, from(Envelope::getDeliveryTag))
-            .returns(retries, from(Envelope::getRetries))
-            .returns(timestamp, from(Envelope::getTimestamp));
-    assertThat(message)
-            .returns(messageId, from(Message<String>::getId));
+        .returns(body, from(Envelope::getBody))
+        .returns(deliveryTag, from(Envelope::getDeliveryTag))
+        .returns(retries, from(Envelope::getRetries))
+        .returns(timestamp, from(Envelope::getTimestamp));
+    assertThat(message).returns(messageId, from(Message<String>::getId));
   }
 
-  private Message<String> createMessage(String messageType, String messageId, int retries, LocalDateTime timestamp) throws IOException {
+  private Message<String> createMessage(
+      String messageType, String messageId, int retries, LocalDateTime timestamp)
+      throws IOException {
     Message<String> messageToReceive = new DefaultMessage(messageId);
     messageToReceive.getEnvelope().setRetries(retries);
     messageToReceive.getEnvelope().setTimestamp(timestamp);
     return messageToReceive;
   }
 
-  private GetResponse createResponse(long deliveryTag, Message<?> message, RabbitClient rabbitClient) throws IOException {
-    com.rabbitmq.client.Envelope envelope = new com.rabbitmq.client.Envelope(deliveryTag, true, "workflow", "some.input.queue");
+  private GetResponse createResponse(
+      long deliveryTag, Message<?> message, RabbitClient rabbitClient) throws IOException {
+    com.rabbitmq.client.Envelope envelope =
+        new com.rabbitmq.client.Envelope(deliveryTag, true, "workflow", "some.input.queue");
     BasicProperties basicProperties = new BasicProperties.Builder().build();
-    return new GetResponse(
-            envelope,
-            basicProperties,
-            rabbitClient.serialize(message),
-            1
-    );
+    return new GetResponse(envelope, basicProperties, rabbitClient.serialize(message), 1);
   }
 
   @Test
@@ -159,15 +159,16 @@ class RabbitClientTest {
 
     RabbitClient rabbitClient = new RabbitClient(config, connection);
 
-    InvalidMessageException thrown = assertThrows(
+    InvalidMessageException thrown =
+        assertThrows(
             InvalidMessageException.class,
             () -> {
               rabbitClient.receive("test");
-            }
-    );
-    assertThat(thrown.getMessage()).isEqualTo("Unrecognized token 'NoValidJson'"
-            + ": was expecting 'null', 'true', 'false' or NaN\n"
-            + " at [Source: (String)\"NoValidJson\"; line: 1, column: 23]");
+            });
+    assertThat(thrown.getMessage())
+        .isEqualTo(
+            "Unrecognized token 'NoValidJson'"
+                + ": was expecting 'null', 'true', 'false' or NaN\n"
+                + " at [Source: (String)\"NoValidJson\"; line: 1, column: 23]");
   }
-
 }

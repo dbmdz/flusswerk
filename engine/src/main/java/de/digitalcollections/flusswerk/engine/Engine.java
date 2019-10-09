@@ -17,7 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Run flows {@link Flow} for every message from the {@link MessageBroker} - usually several in parallel.
+ * Run flows {@link Flow} for every message from the {@link MessageBroker} - usually several in
+ * parallel.
  */
 public class Engine {
 
@@ -72,7 +73,8 @@ public class Engine {
    * @param processReport Reporting implementation
    * @throws IOException if reading/writing to the message broker fails
    */
-  public Engine(MessageBroker messageBroker, Flow flow, ProcessReport processReport) throws IOException {
+  public Engine(MessageBroker messageBroker, Flow flow, ProcessReport processReport)
+      throws IOException {
     this(messageBroker, flow, DEFAULT_CONCURRENT_WORKERS, null);
   }
 
@@ -85,7 +87,9 @@ public class Engine {
    * @param processReport Reporting implementation (or null, if DefaultProcessReport shall be used)
    * @throws IOException if reading/writing to the message broker fails
    */
-  public Engine(MessageBroker messageBroker, Flow flow, int concurrentWorkers, ProcessReport processReport) throws IOException {
+  public Engine(
+      MessageBroker messageBroker, Flow flow, int concurrentWorkers, ProcessReport processReport)
+      throws IOException {
     this.messageBroker = messageBroker;
     this.flow = flow;
     this.concurrentWorkers = concurrentWorkers;
@@ -98,8 +102,8 @@ public class Engine {
   }
 
   /**
-   * Starts processing messages until {@link Engine#stop()} is called. If there are no
-   * messages in the input queue, the engine waits for new messages to arrive.
+   * Starts processing messages until {@link Engine#stop()} is called. If there are no messages in
+   * the input queue, the engine waits for new messages to arrive.
    */
   public void start() {
     LOGGER.debug("Starting engine...");
@@ -111,22 +115,28 @@ public class Engine {
         Message message = messageBroker.receive();
 
         if (message == null) {
-          LOGGER.debug("Checking for new message (available semaphores: {}) - Queue is empty", semaphore.availablePermits());
+          LOGGER.debug(
+              "Checking for new message (available semaphores: {}) - Queue is empty",
+              semaphore.availablePermits());
           TimeUnit.SECONDS.sleep(1);
           semaphore.release();
           continue;
         }
 
         if (LOGGER.isDebugEnabled()) {
-          LOGGER.debug("Checking for new message (available semaphores: {}), got {}", semaphore.availablePermits(), message.getEnvelope().getBody());
+          LOGGER.debug(
+              "Checking for new message (available semaphores: {}), got {}",
+              semaphore.availablePermits(),
+              message.getEnvelope().getBody());
         }
 
-        executorService.execute(() -> {
-          activeWorkers.incrementAndGet();
-          process(message);
-          activeWorkers.decrementAndGet();
-          semaphore.release();
-        });
+        executorService.execute(
+            () -> {
+              activeWorkers.incrementAndGet();
+              process(message);
+              activeWorkers.decrementAndGet();
+              semaphore.release();
+            });
 
       } catch (IOException | InterruptedException e) {
         LOGGER.error("Got some error: " + e, e);
@@ -175,16 +185,8 @@ public class Engine {
     LOGGER.debug("Stopping engine...");
   }
 
-  /**
-   *
-   * @return statistics about the engine's state like active workers
-   */
+  /** @return statistics about the engine's state like active workers */
   public EngineStats getStats() {
-    return new EngineStats(
-            concurrentWorkers,
-            activeWorkers.get(),
-            semaphore.availablePermits()
-    );
+    return new EngineStats(concurrentWorkers, activeWorkers.get(), semaphore.availablePermits());
   }
-
 }

@@ -1,5 +1,7 @@
 package de.digitalcollections.flusswerk.engine.model;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Function;
@@ -7,8 +9,6 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class JobTest {
 
@@ -47,8 +47,7 @@ class JobTest {
   }
 
   @BeforeEach
-  void setUp() {
-  }
+  void setUp() {}
 
   @Test
   @DisplayName("Read should call the read function")
@@ -79,13 +78,19 @@ class JobTest {
   @DisplayName("Read, Transform, Write should pass values along")
   void readTransformWriteShouldPassValues() {
     String message = "Jolene, Jolene, Jolene, Jolene";
-    Job<DefaultMessage, String, String> job = new Job<>(new DefaultMessage().put("message", message));
+    Job<DefaultMessage, String, String> job =
+        new Job<>(new DefaultMessage().put("message", message));
     job.read(m -> m.get("message"));
     job.transform(String::toUpperCase);
-    job.write((Function<String, Collection<Message>>) s -> Collections.singleton(new DefaultMessage().put("message", s)));
-    assertThat(job.getResult()).allSatisfy(
-            result -> assertThat(assertThat(((DefaultMessage) result).get("message")).isEqualTo(message.toUpperCase()))
-    );
+    job.write(
+        (Function<String, Collection<Message>>)
+            s -> Collections.singleton(new DefaultMessage().put("message", s)));
+    assertThat(job.getResult())
+        .allSatisfy(
+            result ->
+                assertThat(
+                    assertThat(((DefaultMessage) result).get("message"))
+                        .isEqualTo(message.toUpperCase())));
   }
 
   @Test
@@ -95,16 +100,15 @@ class JobTest {
     Job<FlowMessage, String, String> job = new Job<>(incomingMessage, true);
     job.read(Message::getId);
     job.transform(Function.identity());
-    job.write((Function<String, Collection<Message>>) s -> Collections.singleton(new FlowMessage(s)));
+    job.write(
+        (Function<String, Collection<Message>>) s -> Collections.singleton(new FlowMessage(s)));
 
-    FlowMessage outgoingMessage = job.getResult().stream()
-                                     .map(FlowMessage.class::cast)
-                                     .findFirst()
-                                     .orElseThrow(() -> new RuntimeException("No messages found."));
+    FlowMessage outgoingMessage =
+        job.getResult().stream()
+            .map(FlowMessage.class::cast)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("No messages found."));
 
-     assertThat(outgoingMessage.getFlowId())
-        .isEqualTo(incomingMessage.getFlowId());
+    assertThat(outgoingMessage.getFlowId()).isEqualTo(incomingMessage.getFlowId());
   }
-
 }
-

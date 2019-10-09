@@ -22,5 +22,4 @@ public class WriterAdapter<T> implements Function<T, Collection<Message>> {
       return Collections.singletonList(result);
     }
   }
-
 }

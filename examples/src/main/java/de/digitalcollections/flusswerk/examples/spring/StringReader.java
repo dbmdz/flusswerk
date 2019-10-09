@@ -11,5 +11,4 @@ public class StringReader implements Function<DefaultMessage, String> {
   public String apply(DefaultMessage defaultMessage) {
     return defaultMessage.get("text");
   }
-
 }

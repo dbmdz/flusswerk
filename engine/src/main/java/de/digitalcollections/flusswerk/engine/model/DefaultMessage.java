@@ -1,9 +1,9 @@
 package de.digitalcollections.flusswerk.engine.model;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import static java.util.Objects.requireNonNull;
 
 public class DefaultMessage implements Message<String> {
 

@@ -34,5 +34,4 @@ public class UppercaseTransformer implements Function<String, String> {
       LOGGER.error("Sleep interrupted...", e);
     }
   }
-
 }

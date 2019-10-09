@@ -1,16 +1,17 @@
 package de.digitalcollections.flusswerk.engine.model;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class DefaultMessageTest {
 
   @Test
   void putCanBeChained() {
-    DefaultMessage message = new DefaultMessage("sundry").put("first", "is the first").put("second", "is the second");
+    DefaultMessage message =
+        new DefaultMessage("sundry").put("first", "is the first").put("second", "is the second");
     assertThat(message.get("first")).isEqualTo("is the first");
     assertThat(message.get("second")).isEqualTo("is the second");
   }
@@ -39,5 +40,4 @@ class DefaultMessageTest {
     assertThat(message.get("key1")).isEqualTo("value2");
     assertThat(message.getData().keySet().size()).isEqualTo(1);
   }
-
 }

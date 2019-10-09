@@ -20,5 +20,4 @@ public interface Message<ID> {
    * @return The corresponding object's id.
    */
   ID getId();
-
 }

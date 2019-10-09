@@ -9,5 +9,4 @@ public interface CustomMessageMixin {
 
   @JsonIgnore
   String getId();
-
 }

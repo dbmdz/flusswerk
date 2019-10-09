@@ -9,5 +9,4 @@ public interface EnvelopeMixin {
 
   @JsonIgnore
   long getDeliveryTag();
-
 }

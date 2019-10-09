@@ -1,15 +1,16 @@
 package de.digitalcollections.flusswerk.engine.messagebroker;
 
+import static java.util.Objects.requireNonNull;
+
 import com.fasterxml.jackson.databind.Module;
 import de.digitalcollections.flusswerk.engine.exceptions.WorkflowSetupException;
 import de.digitalcollections.flusswerk.engine.jackson.SingleClassModule;
 import de.digitalcollections.flusswerk.engine.model.Message;
 import java.io.IOException;
 
-import static java.util.Objects.requireNonNull;
-
 /**
- * Builder to create an instance of the {@link MessageBroker} which manages the connection to RabbitMQ and all related configuration and setups like creating queues and exchanges.
+ * Builder to create an instance of the {@link MessageBroker} which manages the connection to
+ * RabbitMQ and all related configuration and setups like creating queues and exchanges.
  */
 public class MessageBrokerBuilder {
 
@@ -26,7 +27,8 @@ public class MessageBrokerBuilder {
   }
 
   /**
-   * Adds an RabbitMQ host to connect to. Default would be <em>localhost</em> with port 5672. To configure cluster access call this method once for each server.
+   * Adds an RabbitMQ host to connect to. Default would be <em>localhost</em> with port 5672. To
+   * configure cluster access call this method once for each server.
    *
    * @param host The host to connect to.
    * @param port The port to use for this connection
@@ -43,8 +45,8 @@ public class MessageBrokerBuilder {
       for (String connection : connections) {
         String[] connectionParts = connection.split(":");
         if (connectionParts.length != 2) {
-          throw new RuntimeException("Invalid connection specified: '" + connection
-                  + "'. Must be of format host:port");
+          throw new RuntimeException(
+              "Invalid connection specified: '" + connection + "'. Must be of format host:port");
         }
         connectionConfig.addAddress(connectionParts[0], Integer.parseInt(connectionParts[1]));
       }
@@ -110,7 +112,8 @@ public class MessageBrokerBuilder {
   }
 
   /**
-   * Sets the maximum number of attempts before a message is sent to the failed queue instead of the dead letter queue.
+   * Sets the maximum number of attempts before a message is sent to the failed queue instead of the
+   * dead letter queue.
    *
    * @param number The maximum number of attempts to process a message.
    * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
@@ -130,14 +133,16 @@ public class MessageBrokerBuilder {
    * @param messageMixin The mixin to serialize/deserialize this message.
    * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
    */
-  public MessageBrokerBuilder messageMapping(Class<? extends Message> messageClass, Class<?> messageMixin) {
+  public MessageBrokerBuilder messageMapping(
+      Class<? extends Message> messageClass, Class<?> messageMixin) {
     config.addJacksonModule(new SingleClassModule(messageClass, messageMixin));
     config.setMessageClass(messageClass);
     return this;
   }
 
   /**
-   * Sets the AMQP exchange (optional, defaults to 'workflow'). If an exchange does not exist it will be created.
+   * Sets the AMQP exchange (optional, defaults to 'workflow'). If an exchange does not exist it
+   * will be created.
    *
    * @param exchange The regular exchange.
    * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
@@ -148,7 +153,8 @@ public class MessageBrokerBuilder {
   }
 
   /**
-   * Sets the AMQP dead letter exchange (optional, defaults to 'workflow.dlx'). If an exchange does not exist it will be created.
+   * Sets the AMQP dead letter exchange (optional, defaults to 'workflow.dlx'). If an exchange does
+   * not exist it will be created.
    *
    * @param deadLetterExchange The dead letter exchange.
    * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
@@ -162,7 +168,8 @@ public class MessageBrokerBuilder {
   }
 
   /**
-   * Finally builds the {@link MessageBroker} as configured, up and running and connected it to RabbitMQ.
+   * Finally builds the {@link MessageBroker} as configured, up and running and connected it to
+   * RabbitMQ.
    *
    * @return A new MessageBroker
    * @throws WorkflowSetupException If connection to RabbitMQ fails.
@@ -182,7 +189,8 @@ public class MessageBrokerBuilder {
   }
 
   /**
-   * The queues to read from. All queues are considered in order. Only if a queue is empty, the next queue will be queried.
+   * The queues to read from. All queues are considered in order. Only if a queue is empty, the next
+   * queue will be queried.
    *
    * @param inputQueues The queue names to read from.
    * @return This builder for a fluent interface.
@@ -211,5 +219,4 @@ public class MessageBrokerBuilder {
   ConnectionConfig getConnectionConfig() {
     return connectionConfig;
   }
-
 }

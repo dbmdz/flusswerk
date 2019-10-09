@@ -12,5 +12,4 @@ public class StringWriter implements Function<String, Message> {
   public DefaultMessage apply(String s) {
     return new DefaultMessage("uppercase-strings").put("text", s);
   }
-
 }

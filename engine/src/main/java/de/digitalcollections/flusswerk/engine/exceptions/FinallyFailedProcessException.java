@@ -13,5 +13,4 @@ public class FinallyFailedProcessException extends RuntimeException {
   public FinallyFailedProcessException(String message, Throwable cause) {
     super(message, cause);
   }
-
 }

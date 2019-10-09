@@ -1,5 +1,14 @@
 package de.digitalcollections.flusswerk.engine.messagebroker;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import de.digitalcollections.flusswerk.engine.exceptions.InvalidMessageException;
 import de.digitalcollections.flusswerk.engine.model.DefaultMessage;
 import de.digitalcollections.flusswerk.engine.model.Message;
@@ -12,15 +21,6 @@ import java.util.concurrent.TimeoutException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 class MessageBrokerTest {
 
@@ -95,10 +95,9 @@ class MessageBrokerTest {
   @DisplayName("Should send multiple messages to the specified queue")
   void sendMultipleMessagesShouldRouteMessagesToSpecifiedQueue() throws IOException {
     String queue = "specified.queue";
-    List<Message> messages = Arrays.asList(
-            new DefaultMessage("test"),
-            new DefaultMessage("test"),
-            new DefaultMessage("test"));
+    List<Message> messages =
+        Arrays.asList(
+            new DefaultMessage("test"), new DefaultMessage("test"), new DefaultMessage("test"));
     messageBroker.send(queue, messages);
     verify(rabbitClient, times(messages.size())).send(any(), eq(queue), any());
   }
@@ -162,7 +161,8 @@ class MessageBrokerTest {
   }
 
   @Test
-  @DisplayName("isConnectionOk should be false if channel is not available and connection is not ok")
+  @DisplayName(
+      "isConnectionOk should be false if channel is not available and connection is not ok")
   void isConnectionOkShouldBeTrueIfChannelIsNotAvailableAndConnectionIsNotOk() throws IOException {
     when(rabbitClient.isChannelAvailable()).thenReturn(false);
     when(rabbitClient.isConnectionOk()).thenReturn(false);
@@ -178,12 +178,13 @@ class MessageBrokerTest {
     invalidMessage.getEnvelope().setDeliveryTag(1);
     invalidMessage.getEnvelope().setBody(invalidMessageBody);
     invalidMessage.getEnvelope().setSource("some.input.queue");
-    when(rabbitClient.receive(eq("some.input.queue"))).thenThrow(new InvalidMessageException(invalidMessage, "Invalid message"));
+    when(rabbitClient.receive(eq("some.input.queue")))
+        .thenThrow(new InvalidMessageException(invalidMessage, "Invalid message"));
 
     assertThat(messageBroker.receive()).isNull();
 
     verify(rabbitClient, times(1)).ack(any(Message.class));
-    verify(rabbitClient, times(1)).sendRaw(anyString(), eq("some.input.queue.failed"), eq(invalidMessageBody.getBytes()));
+    verify(rabbitClient, times(1))
+        .sendRaw(anyString(), eq("some.input.queue.failed"), eq(invalidMessageBody.getBytes()));
   }
-
 }

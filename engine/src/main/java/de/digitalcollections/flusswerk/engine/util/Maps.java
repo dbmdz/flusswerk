@@ -18,5 +18,4 @@ public class Maps {
     result.put(key2, value2);
     return result;
   }
-
 }
