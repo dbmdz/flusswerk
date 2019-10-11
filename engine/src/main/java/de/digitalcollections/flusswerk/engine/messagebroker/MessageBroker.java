@@ -12,7 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A MessageBroker provides a high level API to interact with an MessageBroker like RabbitMQ and provides the framework engines logic for message operations like sending, retrieving or rejecting for messages.
+ * A MessageBroker provides a high level API to interact with an MessageBroker like RabbitMQ and
+ * provides the framework engines logic for message operations like sending, retrieving or rejecting
+ * for messages.
  */
 public class MessageBroker {
 
@@ -26,7 +28,8 @@ public class MessageBroker {
 
   private final RabbitClient rabbitClient;
 
-  MessageBroker(MessageBrokerConfig config, RoutingConfig routingConfig, RabbitClient rabbitClient) throws IOException {
+  MessageBroker(MessageBrokerConfig config, RoutingConfig routingConfig, RabbitClient rabbitClient)
+      throws IOException {
     this.config = config;
     this.routingConfig = routingConfig;
     this.rabbitClient = rabbitClient;
@@ -51,7 +54,8 @@ public class MessageBroker {
   /**
    * Sends a message to a certain queue as JSON document.
    *
-   * @param routingKey the routing key for the queue to send the message to (usually the queue name).
+   * @param routingKey the routing key for the queue to send the message to (usually the queue
+   *     name).
    * @param message the message to send.
    * @throws IOException if sending the message fails.
    */
@@ -60,10 +64,11 @@ public class MessageBroker {
   }
 
   /**
-   * Sends multiple messages to a certain queue as JSON documents. The messages are sent in the same order
-   * as returned by the iterator over <code>messages</code>.
+   * Sends multiple messages to a certain queue as JSON documents. The messages are sent in the same
+   * order as returned by the iterator over <code>messages</code>.
    *
-   * @param routingKey the routing key for the queue to send the message to (usually the queue name).
+   * @param routingKey the routing key for the queue to send the message to (usually the queue
+   *     name).
    * @param messages the messages to send.
    * @throws IOException if sending a message fails.
    */
@@ -74,11 +79,13 @@ public class MessageBroker {
   }
 
   public void sendRaw(String routingKey, Message message) throws IOException {
-    rabbitClient.sendRaw(routingConfig.getExchange(), routingKey, message.getEnvelope().getBody().getBytes());
+    rabbitClient.sendRaw(
+        routingConfig.getExchange(), routingKey, message.getEnvelope().getBody().getBytes());
   }
 
   /**
-   * Gets one message from the queue but does not acknowledge it. To do so, use {@link MessageBroker#ack(Message)}.
+   * Gets one message from the queue but does not acknowledge it. To do so, use {@link
+   * MessageBroker#ack(Message)}.
    *
    * @param queueName the queue to receive.
    * @return the received message.
@@ -90,7 +97,8 @@ public class MessageBroker {
   }
 
   /**
-   * Gets one message from the input queue but does not acknowledge it. To do so, use {@link MessageBroker#ack(Message)}.
+   * Gets one message from the input queue but does not acknowledge it. To do so, use {@link
+   * MessageBroker#ack(Message)}.
    *
    * @return the received message.
    * @throws IOException if communication with RabbitMQ failed.
@@ -124,30 +132,31 @@ public class MessageBroker {
 
     for (String inputQueue : routingConfig.getReadFrom()) {
       FailurePolicy failurePolicy = routingConfig.getFailurePolicy(inputQueue);
-      rabbitClient.declareQueue(inputQueue, exchange, inputQueue,
-              Maps.of(
-                      DEAD_LETTER_EXCHANGE, deadLetterExchange)
-      );
+      rabbitClient.declareQueue(
+          inputQueue, exchange, inputQueue, Maps.of(DEAD_LETTER_EXCHANGE, deadLetterExchange));
       if (failurePolicy.getRetryRoutingKey() != null) {
-        rabbitClient.declareQueue(failurePolicy.getRetryRoutingKey(), deadLetterExchange, inputQueue,
-                Maps.of(
-                        MESSAGE_TTL, config.getDeadLetterWait(),
-                        DEAD_LETTER_EXCHANGE, exchange)
-        );
+        rabbitClient.declareQueue(
+            failurePolicy.getRetryRoutingKey(),
+            deadLetterExchange,
+            inputQueue,
+            Maps.of(MESSAGE_TTL, config.getDeadLetterWait(), DEAD_LETTER_EXCHANGE, exchange));
       }
       if (failurePolicy.getFailedRoutingKey() != null) {
-        rabbitClient.declareQueue(failurePolicy.getFailedRoutingKey(), exchange, failurePolicy.getFailedRoutingKey(), null);
+        rabbitClient.declareQueue(
+            failurePolicy.getFailedRoutingKey(),
+            exchange,
+            failurePolicy.getFailedRoutingKey(),
+            null);
       }
     }
   }
 
   private void provideOutputQueue() throws IOException {
     rabbitClient.declareQueue(
-            routingConfig.getWriteTo(),
-            routingConfig.getExchange(),
-            routingConfig.getWriteTo(),
-            Maps.of(DEAD_LETTER_EXCHANGE, routingConfig.getDeadLetterExchange())
-    );
+        routingConfig.getWriteTo(),
+        routingConfig.getExchange(),
+        routingConfig.getWriteTo(),
+        Maps.of(DEAD_LETTER_EXCHANGE, routingConfig.getDeadLetterExchange()));
   }
 
   /**
@@ -161,7 +170,8 @@ public class MessageBroker {
   }
 
   /**
-   * Rejects a messaging and takes care of proper dead lettering, retries and, if the message failed too often, routing to the failed queue.
+   * Rejects a messaging and takes care of proper dead lettering, retries and, if the message failed
+   * too often, routing to the failed queue.
    *
    * @param message the message to reject
    * @return true if retry, false if failed
@@ -175,7 +185,7 @@ public class MessageBroker {
       retry(message);
       return true;
     } else {
-      fail(message, false);   // Avoid double ACKing the origin message
+      fail(message, false); // Avoid double ACKing the origin message
       return false;
     }
   }
@@ -211,7 +221,8 @@ public class MessageBroker {
     FailurePolicy failurePolicy = routingConfig.getFailurePolicy(message);
     String retryRoutingKey = failurePolicy.getRetryRoutingKey();
     if (retryRoutingKey != null) {
-      rabbitClient.send(routingConfig.getDeadLetterExchange(), message.getEnvelope().getSource(), message);
+      rabbitClient.send(
+          routingConfig.getDeadLetterExchange(), message.getEnvelope().getSource(), message);
     }
   }
 
@@ -259,5 +270,4 @@ public class MessageBroker {
   public boolean isConnectionOk() {
     return rabbitClient.isChannelAvailable() && rabbitClient.isConnectionOk();
   }
-
 }

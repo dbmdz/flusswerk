@@ -59,5 +59,4 @@ class MessageBrokerConfigImpl implements MessageBrokerConfig {
   public List<Module> getJacksonModules() {
     return Collections.unmodifiableList(jacksonModules);
   }
-
 }

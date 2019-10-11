@@ -1,8 +1,6 @@
 package de.digitalcollections.flusswerk.engine.exceptions;
 
-/**
- * This exception is thrown when the workflow cannot be started because of configuration issues.
- */
+/** This exception is thrown when the workflow cannot be started because of configuration issues. */
 public class WorkflowSetupException extends RuntimeException {
 
   public WorkflowSetupException(Throwable cause) {
@@ -12,5 +10,4 @@ public class WorkflowSetupException extends RuntimeException {
   public WorkflowSetupException(String message) {
     super(message);
   }
-
 }

@@ -1,9 +1,9 @@
 package de.digitalcollections.flusswerk.engine.messagebroker;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import static java.util.Objects.requireNonNull;
 
 class RoutingConfigImpl implements RoutingConfig {
 
@@ -18,7 +18,7 @@ class RoutingConfigImpl implements RoutingConfig {
   private final Map<String, FailurePolicy> failurePolicies;
 
   RoutingConfigImpl() {
-    readFrom = new String[]{};
+    readFrom = new String[] {};
     writeTo = null;
     failurePolicies = new HashMap<>();
   }
@@ -86,5 +86,4 @@ class RoutingConfigImpl implements RoutingConfig {
   public void addFailurePolicy(FailurePolicy failurePolicy) {
     failurePolicies.put(failurePolicy.getInputQueue(), failurePolicy);
   }
-
 }

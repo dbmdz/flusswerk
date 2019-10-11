@@ -57,7 +57,8 @@ class RabbitClient {
   }
 
   void sendRaw(String exchange, String routingKey, byte[] data) throws IOException {
-    AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder()
+    AMQP.BasicProperties properties =
+        new AMQP.BasicProperties.Builder()
             .contentType("application/json")
             .deliveryMode(PERSISTENT)
             .build();
@@ -134,7 +135,9 @@ class RabbitClient {
     }
   }
 
-  public void declareQueue(String name, String exchange, String routingKey, Map<String, Object> args) throws IOException {
+  public void declareQueue(
+      String name, String exchange, String routingKey, Map<String, Object> args)
+      throws IOException {
     createQueue(name, args);
     bindQueue(name, exchange, routingKey);
   }
@@ -168,5 +171,4 @@ class RabbitClient {
   public boolean isChannelAvailable() {
     return channel.isOpen();
   }
-
 }

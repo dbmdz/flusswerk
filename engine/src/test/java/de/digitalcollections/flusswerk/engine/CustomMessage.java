@@ -1,11 +1,11 @@
 package de.digitalcollections.flusswerk.engine;
 
+import static java.util.Objects.requireNonNull;
+
 import de.digitalcollections.flusswerk.engine.model.Envelope;
 import de.digitalcollections.flusswerk.engine.model.Message;
 import java.util.HashMap;
 import java.util.Map;
-
-import static java.util.Objects.requireNonNull;
 
 public class CustomMessage implements Message<Long> {
 

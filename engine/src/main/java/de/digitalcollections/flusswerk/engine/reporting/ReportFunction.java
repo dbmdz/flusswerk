@@ -3,12 +3,15 @@ package de.digitalcollections.flusswerk.engine.reporting;
 import de.digitalcollections.flusswerk.engine.exceptions.FinallyFailedProcessException;
 import de.digitalcollections.flusswerk.engine.model.Message;
 
-/**
- * Functional interface to easily create custom reporters with a lambda.
- */
+/** Functional interface to easily create custom reporters with a lambda. */
 @FunctionalInterface
 public interface ReportFunction extends ProcessReport {
-  enum ReportType { SUCCESS, FAIL, FAIL_AFTER_MAX_RETRIES, REJECT };
+  enum ReportType {
+    SUCCESS,
+    FAIL,
+    FAIL_AFTER_MAX_RETRIES,
+    REJECT
+  };
 
   void report(ReportType type, Message msg, Exception e);
 

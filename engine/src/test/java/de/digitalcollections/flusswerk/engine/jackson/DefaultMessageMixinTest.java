@@ -1,5 +1,7 @@
 package de.digitalcollections.flusswerk.engine.jackson;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -11,8 +13,6 @@ import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class DefaultMessageMixinTest {
 
@@ -65,9 +65,8 @@ class DefaultMessageMixinTest {
   void shouldDeserializeRetries() throws IOException {
     DefaultMessage message = new DefaultMessage("something happened");
     message.getEnvelope().setRetries(42);
-    Message deserialized = objectMapper.readValue(objectMapper.writeValueAsString(message), DefaultMessage.class);
+    Message deserialized =
+        objectMapper.readValue(objectMapper.writeValueAsString(message), DefaultMessage.class);
     assertThat(deserialized.getEnvelope().getRetries()).isEqualTo(42);
-
   }
-
 }

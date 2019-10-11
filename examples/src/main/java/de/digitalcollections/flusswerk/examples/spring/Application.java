@@ -24,12 +24,12 @@ public class Application implements CommandLineRunner {
 
   @Override
   public void run(String... strings) throws WorkflowSetupException, java.io.IOException {
-    messageBroker.send("someInputQueue", new DefaultMessage("lowercase-text").put("text", "Shibuyara"));
+    messageBroker.send(
+        "someInputQueue", new DefaultMessage("lowercase-text").put("text", "Shibuyara"));
     engine.start();
   }
 
   public static void main(String[] args) {
     SpringApplication.run(Application.class, args);
   }
-
 }

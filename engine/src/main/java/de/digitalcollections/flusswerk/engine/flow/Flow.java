@@ -10,7 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Recipe for the data processing. Every message will be processed by the readerFactory, then the transformerFactory and finally the writerFactory. The transformerFactory can be omitted if <code>R</code> and <code>W</code> are the same.
+ * Recipe for the data processing. Every message will be processed by the readerFactory, then the
+ * transformerFactory and finally the writerFactory. The transformerFactory can be omitted if <code>
+ * R</code> and <code>W</code> are the same.
  *
  * @param <M> The data type of the message.
  * @param <R> The data type produced by the reader. Input data type of the transformer.
@@ -68,7 +70,10 @@ public class Flow<M extends Message, R, W> {
 
     } finally {
       result = job.getResult();
-      job = null;   // If in the cleanup stage, a garbage collection is forced, it helps to clean up before.
+
+      // If in the cleanup stage, a garbage collection is forced,
+      // then it helps to clean up before.
+      job = null;
 
       if (cleanup != null) {
         cleanup.run();
@@ -81,5 +86,4 @@ public class Flow<M extends Message, R, W> {
   public boolean hasMessagesToSend() {
     return writerFactory != null;
   }
-
 }

@@ -13,5 +13,4 @@ public class UppercaseTransformer implements Function<String, String> {
     }
     return s.toUpperCase();
   }
-
 }

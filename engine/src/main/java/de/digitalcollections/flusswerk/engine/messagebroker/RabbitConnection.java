@@ -66,5 +66,4 @@ class RabbitConnection {
     channel.getConnection().isOpen();
     return true;
   }
-
 }

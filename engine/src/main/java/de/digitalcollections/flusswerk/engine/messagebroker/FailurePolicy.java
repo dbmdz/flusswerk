@@ -21,7 +21,8 @@ public class FailurePolicy {
     this.retryRoutingKey = inputQueue + ".retry";
   }
 
-  public FailurePolicy(String inputQueue, String retryRoutingKey, String failedRoutingKey, int maxRetries) {
+  public FailurePolicy(
+      String inputQueue, String retryRoutingKey, String failedRoutingKey, int maxRetries) {
     this(inputQueue, maxRetries);
     this.failedRoutingKey = failedRoutingKey;
     this.retryRoutingKey = retryRoutingKey;
@@ -42,5 +43,4 @@ public class FailurePolicy {
   public String getRetryRoutingKey() {
     return retryRoutingKey;
   }
-
 }

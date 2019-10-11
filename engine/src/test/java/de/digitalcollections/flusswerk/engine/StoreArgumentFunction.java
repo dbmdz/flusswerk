@@ -15,5 +15,4 @@ public class StoreArgumentFunction<R, T> implements Function<R, T> {
   public R getValue() {
     return value;
   }
-
 }

@@ -41,28 +41,27 @@ public class WorkflowConfig {
   @Bean
   public Flow flow(StringReader reader, UppercaseTransformer transformer, StringWriter writer) {
     return new FlowBuilder<DefaultMessage, String, String>()
-            .read(reader)
-            .transform(transformer)
-            .writeAndSend(writer)
-            .build();
+        .read(reader)
+        .transform(transformer)
+        .writeAndSend(writer)
+        .build();
   }
 
   @Bean
   public MessageBroker messageBroker() {
     return new MessageBrokerBuilder()
-            .connectTo(rabbitMQHost, rabbitMQPort)
-            .username(rabbitMQUsername)
-            .password(rabbitMQPassword)
-            .exchange(rabbitMQExchange)
-            .deadLetterExchange(deadLetterExchange)
-            .readFrom(inputQueue)
-            .writeTo(outputQueue)
-            .build();
+        .connectTo(rabbitMQHost, rabbitMQPort)
+        .username(rabbitMQUsername)
+        .password(rabbitMQPassword)
+        .exchange(rabbitMQExchange)
+        .deadLetterExchange(deadLetterExchange)
+        .readFrom(inputQueue)
+        .writeTo(outputQueue)
+        .build();
   }
 
   @Bean
   public Engine engine(MessageBroker messageBroker, Flow flow) throws IOException {
     return new Engine(messageBroker, flow);
   }
-
 }

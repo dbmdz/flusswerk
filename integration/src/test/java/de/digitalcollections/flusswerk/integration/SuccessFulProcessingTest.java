@@ -1,5 +1,7 @@
 package de.digitalcollections.flusswerk.integration;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import de.digitalcollections.flusswerk.engine.Engine;
 import de.digitalcollections.flusswerk.engine.flow.Flow;
 import de.digitalcollections.flusswerk.engine.flow.FlowBuilder;
@@ -12,14 +14,12 @@ import org.assertj.core.api.ObjectAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 public class SuccessFulProcessingTest {
 
-  private final static String QUEUE_IN = "test.in";
-  private final static String QUEUE_OUT = "test.out";
-  private final static String QUEUE_FAILED = "test.in.failed";
-  private final static String QUEUE_RETRY = "test.in.retry";
+  private static final String QUEUE_IN = "test.in";
+  private static final String QUEUE_OUT = "test.out";
+  private static final String QUEUE_FAILED = "test.in.failed";
+  private static final String QUEUE_RETRY = "test.in.retry";
 
   private Backend backend;
 
@@ -31,11 +31,12 @@ public class SuccessFulProcessingTest {
   @Test
   public void successfulMessagesShouldGoToOutQueue() throws Exception {
     MessageBroker messageBroker = backend.getMessageBroker();
-    Flow flow = new FlowBuilder<DefaultMessage, DefaultMessage, DefaultMessage>()
-        .read(m -> m)
-        .transform(m -> m)
-        .writeAndSend((DefaultMessage m) -> m)
-        .build();
+    Flow flow =
+        new FlowBuilder<DefaultMessage, DefaultMessage, DefaultMessage>()
+            .read(m -> m)
+            .transform(m -> m)
+            .writeAndSend((DefaultMessage m) -> m)
+            .build();
 
     Engine engine = new Engine(messageBroker, flow);
 
@@ -56,7 +57,4 @@ public class SuccessFulProcessingTest {
   private ObjectAssert<? extends Message<?>> assertThatMessageFrom(String name) throws Exception {
     return assertThat(backend.waitForMessageFrom(QUEUE_FAILED, 1000));
   }
-
 }
-
-

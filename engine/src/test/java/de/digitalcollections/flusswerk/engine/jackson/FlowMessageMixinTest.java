@@ -1,18 +1,18 @@
 package de.digitalcollections.flusswerk.engine.jackson;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import de.digitalcollections.flusswerk.engine.model.FlowMessage;
 import de.digitalcollections.flusswerk.engine.model.Envelope;
+import de.digitalcollections.flusswerk.engine.model.FlowMessage;
 import de.digitalcollections.flusswerk.engine.model.Message;
 import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class FlowMessageMixinTest {
 
@@ -20,12 +20,13 @@ class FlowMessageMixinTest {
 
   @BeforeEach
   void setUp() {
-    objectMapper = new ObjectMapper()
-        .addMixIn(Message.class, FlowMessageMixin.class)
-        .addMixIn(Envelope.class, EnvelopeMixin.class)
-        .registerModule(new JavaTimeModule())
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        .enable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
+    objectMapper =
+        new ObjectMapper()
+            .addMixIn(Message.class, FlowMessageMixin.class)
+            .addMixIn(Envelope.class, EnvelopeMixin.class)
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .enable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
   }
 
   @Test
@@ -51,7 +52,8 @@ class FlowMessageMixinTest {
   void shouldDeserializeRetries() throws IOException {
     FlowMessage message = new FlowMessage("abc123", "flow-3000");
     message.getEnvelope().setRetries(42);
-    Message deserialized = objectMapper.readValue(objectMapper.writeValueAsString(message), FlowMessage.class);
+    Message deserialized =
+        objectMapper.readValue(objectMapper.writeValueAsString(message), FlowMessage.class);
     assertThat(deserialized.getEnvelope().getRetries()).isEqualTo(42);
   }
 
@@ -64,5 +66,4 @@ class FlowMessageMixinTest {
     FlowMessage deserialized = objectMapper.readValue(json, FlowMessage.class);
     assertThat(deserialized.get("purpose of life")).isEqualTo("42");
   }
-
 }

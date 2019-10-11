@@ -12,5 +12,4 @@ public interface ConnectionConfig {
   String getVirtualHost();
 
   List<Address> getAddresses();
-
 }
