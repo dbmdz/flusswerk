@@ -166,9 +166,6 @@ class RabbitClientTest {
               rabbitClient.receive("test");
             });
     assertThat(thrown.getMessage())
-        .isEqualTo(
-            "Unrecognized token 'NoValidJson'"
-                + ": was expecting 'null', 'true', 'false' or NaN\n"
-                + " at [Source: (String)\"NoValidJson\"; line: 1, column: 23]");
+        .startsWith("Unrecognized token 'NoValidJson'");
   }
 }
