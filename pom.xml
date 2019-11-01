@@ -68,7 +68,7 @@
     <version.junit>5.5.2</version.junit>
     <version.logback>1.2.3</version.logback>
     <version.mockito>3.1.0</version.mockito>
-    <version.slf4j>1.7.28</version.slf4j>
+    <version.slf4j>1.7.29</version.slf4j>
     <!-- Plugin versions -->
     <version.maven-checkstyle-plugin>3.1.0</version.maven-checkstyle-plugin>
     <version.maven-compiler-plugin>3.8.1</version.maven-compiler-plugin>
