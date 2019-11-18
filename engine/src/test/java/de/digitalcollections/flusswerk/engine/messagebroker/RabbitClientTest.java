@@ -165,7 +165,6 @@ class RabbitClientTest {
             () -> {
               rabbitClient.receive("test");
             });
-    assertThat(thrown.getMessage())
-        .startsWith("Unrecognized token 'NoValidJson'");
+    assertThat(thrown.getMessage()).startsWith("Unrecognized token 'NoValidJson'");
   }
 }
