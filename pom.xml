@@ -55,6 +55,8 @@
     <module>engine</module>
     <module>examples</module>
     <module>integration</module>
+    <module>spring-boot-starter-flusswerk</module>
+    <module>spring-boot-example</module>
   </modules>
 
   <properties>
