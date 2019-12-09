@@ -12,34 +12,30 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * Spring configuration to provide beans for{@link MessageBroker} and {@link Engine}.
- */
+/** Spring configuration to provide beans for{@link MessageBroker} and {@link Engine}. */
 @Configuration
 @EnableConfigurationProperties(FlusswerkProperties.class)
 public class FlusswerkConfiguration {
 
   /**
-   *
    * @param flusswerkProperties The external configuration from <code>application.yml</code>
    * @param messageMapping A mapping between a custom Message class and a Jackson mixin (optional).
    * @return The message broker for this job.
    */
   @Bean
   public MessageBroker messageBroker(
-      FlusswerkProperties flusswerkProperties,
-      ObjectProvider<MessageMapping<?>> messageMapping
-  ) {
+      FlusswerkProperties flusswerkProperties, ObjectProvider<MessageMapping<?>> messageMapping) {
     FlusswerkProperties.Connection connection = flusswerkProperties.getConnection();
     FlusswerkProperties.Processing processing = flusswerkProperties.getProcessing();
     FlusswerkProperties.Routing routing = flusswerkProperties.getRouting();
-    final MessageBrokerBuilder builder = new MessageBrokerBuilder()
-        .username(connection.getUsername())
-        .password(connection.getPassword())
-        .exchange(routing.getExchange())
-        .virtualHost(connection.getVirtualHost())
-        .maxRetries(processing.getMaxRetries())
-        .connectTo(connection.getConnectTo());
+    final MessageBrokerBuilder builder =
+        new MessageBrokerBuilder()
+            .username(connection.getUsername())
+            .password(connection.getPassword())
+            .exchange(routing.getExchange())
+            .virtualHost(connection.getVirtualHost())
+            .maxRetries(processing.getMaxRetries())
+            .connectTo(connection.getConnectTo());
 
     messageMapping.ifAvailable(
         mapping -> builder.messageMapping(mapping.getMessageClass(), mapping.getMixin()));
@@ -54,7 +50,6 @@ public class FlusswerkConfiguration {
   }
 
   /**
-   *
    * @param messageBroker The messageBroker to use.
    * @param flowProvider The flow to use (optional).
    * @param flusswerkProperties The external configuration from <code>application.yml</code>.
@@ -71,8 +66,8 @@ public class FlusswerkConfiguration {
       MessageBroker messageBroker,
       ObjectProvider<Flow<M, R, W>> flowProvider,
       FlusswerkProperties flusswerkProperties,
-      ObjectProvider<ProcessReport> processReportProvider
-  ) throws IOException {
+      ObjectProvider<ProcessReport> processReportProvider)
+      throws IOException {
     Flow<M, R, W> flow = flowProvider.getIfAvailable();
     if (flow == null) {
       throw new RuntimeException("Missing flow definition. Please create a Flow bean.");
@@ -81,5 +76,4 @@ public class FlusswerkConfiguration {
     ProcessReport processReport = processReportProvider.getIfAvailable();
     return new Engine(messageBroker, flow, threads, processReport);
   }
-
 }
