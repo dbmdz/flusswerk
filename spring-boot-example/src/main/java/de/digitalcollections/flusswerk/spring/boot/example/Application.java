@@ -22,16 +22,15 @@ public class Application implements ApplicationRunner {
   private Engine engine;
 
   @Autowired
-  public Application(
-      FlusswerkProperties flusswerkProperties, Engine engine) {
+  public Application(FlusswerkProperties flusswerkProperties, Engine engine) {
     this.flusswerkProperties = flusswerkProperties;
     this.engine = engine;
   }
 
   @Override
   public void run(ApplicationArguments args) throws Exception {
-    LOGGER.info("Starting Spring Boot Demo with configuration:\n\n{}",
-        flusswerkProperties.toString());
+    LOGGER.info(
+        "Starting Spring Boot Demo with configuration:\n\n{}", flusswerkProperties.toString());
     engine.start();
   }
 

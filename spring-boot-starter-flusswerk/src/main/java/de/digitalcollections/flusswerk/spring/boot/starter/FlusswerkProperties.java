@@ -5,9 +5,7 @@ import javax.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
-/**
- * Model for the configuration parameters in <code>application.yml</code>.
- */
+/** Model for the configuration parameters in <code>application.yml</code>. */
 @ConstructorBinding
 @ConfigurationProperties(prefix = "flusswerk")
 public class FlusswerkProperties {
@@ -18,10 +16,7 @@ public class FlusswerkProperties {
 
   private Routing routing;
 
-
-  /**
-   * Configuration related to the processing.
-   */
+  /** Configuration related to the processing. */
   static class Processing {
 
     @Min(0)
@@ -35,18 +30,12 @@ public class FlusswerkProperties {
       this.threads = threads;
     }
 
-    /**
-     *
-     * @return the maximum number of retries before a message ends up in the failed queue.
-     */
+    /** @return the maximum number of retries before a message ends up in the failed queue. */
     public int getMaxRetries() {
       return maxRetries;
     }
 
-    /**
-     *
-     * @return The number of concurrent processing threads in one job instance.
-     */
+    /** @return The number of concurrent processing threads in one job instance. */
     public int getThreads() {
       return threads;
     }
@@ -60,65 +49,50 @@ public class FlusswerkProperties {
     }
   }
 
-  /**
-   * Connection information for RabbitMQ.
-   */
+  /** Connection information for RabbitMQ. */
   static class Connection {
 
-    @NotBlank
-    private String connectTo;
+    @NotBlank private String connectTo;
 
     private String virtualHost;
 
-    @NotBlank
-    private String username;
+    @NotBlank private String username;
 
-    @NotBlank
-    private String password;
+    @NotBlank private String password;
 
     /**
-     *
      * @param connectTo The RabbitMQ connection String
      * @param virtualHost The RabbitMQ/AMQP virtual host. <em>Can be null.</em>
      * @param username The username for RabbitMQ login
      * @param password The password for RabbitMQ login
      */
-    public Connection(@NotBlank String connectTo, String virtualHost,
-        @NotBlank String username, @NotBlank String password) {
+    public Connection(
+        @NotBlank String connectTo,
+        String virtualHost,
+        @NotBlank String username,
+        @NotBlank String password) {
       this.connectTo = connectTo;
       this.virtualHost = virtualHost;
       this.username = username;
       this.password = password;
     }
 
-    /**
-     *
-     * @return The RabbitMQ connection String
-     */
+    /** @return The RabbitMQ connection String */
     public String getConnectTo() {
       return connectTo;
     }
 
-    /**
-     *
-     * @return The RabbitMQ/AMQP virtual host. <em>Can be null.</em>
-     */
+    /** @return The RabbitMQ/AMQP virtual host. <em>Can be null.</em> */
     public String getVirtualHost() {
       return virtualHost;
     }
 
-    /**
-     *
-     * @return The username for RabbitMQ login
-     */
+    /** @return The username for RabbitMQ login */
     public String getUsername() {
       return username;
     }
 
-    /**
-     *
-     * @return The password for RabbitMQ login
-     */
+    /** @return The password for RabbitMQ login */
     public String getPassword() {
       return password;
     }
@@ -134,20 +108,16 @@ public class FlusswerkProperties {
     }
   }
 
-  /**
-   * AMQP/RabbitMQ routing information.
-   */
+  /** AMQP/RabbitMQ routing information. */
   static class Routing {
 
-    @NotBlank
-    private String exchange;
+    @NotBlank private String exchange;
 
     private String readFrom;
 
     private String writeTo;
 
     /**
-     *
      * @param exchange The exchange name to use (required).
      * @param readFrom The queue to read from (optional).
      * @param writeTo The topic to send to per default (optional).
@@ -158,26 +128,17 @@ public class FlusswerkProperties {
       this.writeTo = writeTo;
     }
 
-    /**
-     *
-     * @return The exchange name to use (required).
-     */
+    /** @return The exchange name to use (required). */
     public String getExchange() {
       return exchange;
     }
 
-    /**
-     *
-     * @return The queue to read from (optional).
-     */
+    /** @return The queue to read from (optional). */
     public String getReadFrom() {
       return readFrom;
     }
 
-    /**
-     *
-     * @return The topic to send to per default (optional).
-     */
+    /** @return The topic to send to per default (optional). */
     public String getWriteTo() {
       return writeTo;
     }
@@ -192,12 +153,8 @@ public class FlusswerkProperties {
     }
   }
 
-
   @ConstructorBinding
-  public FlusswerkProperties(
-      Processing processing,
-      Connection connection,
-      Routing routing) {
+  public FlusswerkProperties(Processing processing, Connection connection, Routing routing) {
     this.processing = processing;
     this.connection = connection;
     this.routing = routing;
@@ -223,5 +180,4 @@ public class FlusswerkProperties {
         .property("connection", connection.toString())
         .toString();
   }
-
 }

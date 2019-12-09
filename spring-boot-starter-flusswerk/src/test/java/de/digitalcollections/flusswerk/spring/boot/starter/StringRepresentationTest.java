@@ -10,9 +10,8 @@ class StringRepresentationTest {
 
   private static final String INDENTATION = "\t";
 
-  private static final Condition<String> STARTING_WITH_INDENTATION = new Condition<>(
-      line -> line.startsWith(INDENTATION), "starting with indentation"
-  );
+  private static final Condition<String> STARTING_WITH_INDENTATION =
+      new Condition<>(line -> line.startsWith(INDENTATION), "starting with indentation");
 
   @Test
   void shouldContainClassName() {
@@ -22,11 +21,11 @@ class StringRepresentationTest {
 
   @Test
   void propertiesAreIntended() {
-    String stringRepresentation = StringRepresentation
-        .of(FlusswerkProperties.class)
-        .property("host", "example.com")
-        .property("username", "guest")
-        .toString();
+    String stringRepresentation =
+        StringRepresentation.of(FlusswerkProperties.class)
+            .property("host", "example.com")
+            .property("username", "guest")
+            .toString();
     System.out.println(stringRepresentation);
     String[] lines = stringRepresentation.split("\n");
     assertThat(titleOf(stringRepresentation)).doesNotStartWith(INDENTATION);
@@ -35,11 +34,11 @@ class StringRepresentationTest {
 
   @Test
   void multilinePropertiesAreIntended() {
-    String stringRepresentation = StringRepresentation
-        .of(FlusswerkProperties.class)
-        .property("host", "example.com")
-        .property("description", "abc\ndef")
-        .toString();
+    String stringRepresentation =
+        StringRepresentation.of(FlusswerkProperties.class)
+            .property("host", "example.com")
+            .property("description", "abc\ndef")
+            .toString();
 
     System.out.println(stringRepresentation);
     assertThat(titleOf(stringRepresentation)).doesNotStartWith(INDENTATION);
@@ -54,5 +53,4 @@ class StringRepresentationTest {
     var lines = List.of(text.split("\n"));
     return lines.subList(1, lines.size());
   }
-
 }

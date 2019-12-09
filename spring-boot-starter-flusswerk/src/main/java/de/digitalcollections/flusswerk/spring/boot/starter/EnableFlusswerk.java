@@ -1,6 +1,5 @@
 package de.digitalcollections.flusswerk.spring.boot.starter;
 
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -10,14 +9,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 /**
- * Spring Boot annotation to enable automatic configuration of Flusswerk via
- * <code>application.yml</code> and provide beans for autowiring.
+ * Spring Boot annotation to enable automatic configuration of Flusswerk via <code>application.yml
+ * </code> and provide beans for autowiring.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Documented
 @Import(FlusswerkConfiguration.class)
 @Configuration
-public @interface EnableFlusswerk {
-
-}
+public @interface EnableFlusswerk {}

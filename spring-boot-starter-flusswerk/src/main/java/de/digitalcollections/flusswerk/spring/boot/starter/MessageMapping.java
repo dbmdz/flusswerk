@@ -25,20 +25,13 @@ public class MessageMapping<T extends Message<?>> {
     this.mixin = mixin;
   }
 
-  /**
-   *
-   * @return The message class to register a mixin for.
-   */
+  /** @return The message class to register a mixin for. */
   public Class<T> getMessageClass() {
     return messageClass;
   }
 
-  /**
-   *
-   * @return The mixin to register for the message class.
-   */
+  /** @return The mixin to register for the message class. */
   public Class<?> getMixin() {
     return mixin;
   }
-
 }

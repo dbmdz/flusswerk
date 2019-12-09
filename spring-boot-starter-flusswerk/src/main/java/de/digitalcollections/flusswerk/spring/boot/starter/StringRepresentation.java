@@ -1,8 +1,6 @@
 package de.digitalcollections.flusswerk.spring.boot.starter;
 
-/**
- * Creates a nice string representation for hierarchical data structures.
- */
+/** Creates a nice string representation for hierarchical data structures. */
 class StringRepresentation {
 
   private StringBuilder stringBuilder;
@@ -67,5 +65,4 @@ class StringRepresentation {
     stringBuilder.append("*".repeat(5)); // Fixed number of stars to hide real password length
     return this;
   }
-
 }

@@ -10,5 +10,4 @@ public class ComposePerfectGreeting implements Function<String, String> {
         "Behold, %s, my friend and be greeted as wonderful as no one has been greeted before!",
         name);
   }
-
 }
