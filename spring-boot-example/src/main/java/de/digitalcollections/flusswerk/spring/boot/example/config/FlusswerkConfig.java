@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Configuration;
 public class FlusswerkConfig {
 
   @Bean
-  MessageMapping<Integer> messageMapping() {
+  MessageMapping<Greeting> messageMapping() {
     return new MessageMapping<>(Greeting.class, GreetingMixin.class);
   }
 
@@ -30,11 +30,8 @@ public class FlusswerkConfig {
         .build();
   }
 
-
   @Bean
   public ProcessReport processReport() {
     return new FancyConsoleProcessReport();
   }
-
-
 }
