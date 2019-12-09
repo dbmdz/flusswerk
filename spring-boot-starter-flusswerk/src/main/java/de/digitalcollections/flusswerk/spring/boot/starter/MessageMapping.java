@@ -3,7 +3,7 @@ package de.digitalcollections.flusswerk.spring.boot.starter;
 import de.digitalcollections.flusswerk.engine.model.Message;
 
 /**
- * Mapping declaration for <code>Message</code> implementatopms and Jackson mixins to allow
+ * Mapping declaration for <code>Message</code> implementations and Jackson mixins to allow
  * registration as a Spring bean.
  *
  * @param <T> The message class
