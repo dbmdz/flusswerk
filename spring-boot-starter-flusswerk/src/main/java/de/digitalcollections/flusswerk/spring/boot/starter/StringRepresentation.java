@@ -1,6 +1,8 @@
 package de.digitalcollections.flusswerk.spring.boot.starter;
 
-/** Creates a nice string representation for hierarchical data structures. */
+/**
+ * Creates a nice string representation for hierarchical data structures.
+ */
 class StringRepresentation {
 
   private StringBuilder stringBuilder;
@@ -18,6 +20,13 @@ class StringRepresentation {
     return property(name, Integer.toString(value));
   }
 
+  /**
+   * Add a property as key-value-pair with proper intendation.
+   *
+   * @param name The properties name.
+   * @param value The properties value.
+   * @return The <code>StringRepresentation</code> object to allow fluent method chaining.
+   */
   public StringRepresentation property(String name, String value) {
     if (value == null) {
       value = "null";
@@ -57,6 +66,14 @@ class StringRepresentation {
     return stringBuilder.toString();
   }
 
+  /**
+   * Creates a masked version of the property, hiding all but the first letter. The remaining
+   * letters are replaced by exactly five "*" characters to conceal the value's true length.
+   *
+   * @param name The properties name.
+   * @param value The properties value.
+   * @return The <code>StringRepresentation</code> object to allow fluent method chaining.
+   */
   public StringRepresentation maskedProperty(String name, String value) {
     stringBuilder.append("\n\t");
     stringBuilder.append(name);

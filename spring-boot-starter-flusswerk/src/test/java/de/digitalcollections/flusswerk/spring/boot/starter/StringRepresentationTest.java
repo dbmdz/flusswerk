@@ -26,8 +26,7 @@ class StringRepresentationTest {
             .property("host", "example.com")
             .property("username", "guest")
             .toString();
-    System.out.println(stringRepresentation);
-    String[] lines = stringRepresentation.split("\n");
+
     assertThat(titleOf(stringRepresentation)).doesNotStartWith(INDENTATION);
     assertThat(linesWithPropertiesOf(stringRepresentation)).are(STARTING_WITH_INDENTATION);
   }
@@ -40,9 +39,18 @@ class StringRepresentationTest {
             .property("description", "abc\ndef")
             .toString();
 
-    System.out.println(stringRepresentation);
     assertThat(titleOf(stringRepresentation)).doesNotStartWith(INDENTATION);
     assertThat(linesWithPropertiesOf(stringRepresentation)).are(STARTING_WITH_INDENTATION);
+  }
+
+  @Test
+  void maskedPropertiesAreMasked() {
+    String stringRepresentation =
+        StringRepresentation.of(FlusswerkProperties.class)
+            .maskedProperty("secret", "verysecret")
+            .toString();
+
+    assertThat(getPropertyValue("secret", stringRepresentation)).isEqualTo("v*****");
   }
 
   private String titleOf(String text) {
@@ -53,4 +61,15 @@ class StringRepresentationTest {
     var lines = List.of(text.split("\n"));
     return lines.subList(1, lines.size());
   }
+
+  private String getPropertyValue(String property, String stringRepresentation) {
+    for (String line : linesWithPropertiesOf(stringRepresentation)) {
+      String[] kv = line.strip().split(":");
+      if (property.equals(kv[0])) {
+        return kv[1].strip();
+      }
+    }
+    return null;
+  }
+
 }
