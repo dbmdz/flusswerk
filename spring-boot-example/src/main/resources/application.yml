@@ -1,0 +1,13 @@
+flusswerk:
+  processing:
+    maxRetries: 5
+    threads: 5
+  connection:
+    connectTo: my.rabbit.example.com:5672
+    virtualHost: vh1
+    username: guest
+    password: guest
+  routing:
+    exchange: my.exchange
+    readFrom: queue.to.read.from
+    writeTo: defalt.queue.to.write.to
