@@ -134,7 +134,7 @@ public class MessageBrokerBuilder {
    * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
    */
   public MessageBrokerBuilder messageMapping(
-      Class<? extends Message> messageClass, Class<?> messageMixin) {
+      Class<? extends Message<?>> messageClass, Class<?> messageMixin) {
     config.addJacksonModule(new SingleClassModule(messageClass, messageMixin));
     config.setMessageClass(messageClass);
     return this;
