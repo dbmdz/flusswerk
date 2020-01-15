@@ -71,5 +71,4 @@ class StringRepresentationTest {
     }
     return null;
   }
-
 }
