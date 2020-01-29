@@ -9,16 +9,16 @@ public abstract class FlusswerkMessage<T> implements Message<T> {
 
   private Envelope envelope;
 
-  protected T identifier;
+  protected T id;
 
   public FlusswerkMessage() {
     this.envelope = new Envelope();
-    this.identifier = null;
+    this.id = null;
   }
 
-  public FlusswerkMessage(T identifier) {
+  public FlusswerkMessage(T id) {
     this.envelope = new Envelope();
-    this.identifier = identifier;
+    this.id = id;
   }
 
   @Override
@@ -28,6 +28,6 @@ public abstract class FlusswerkMessage<T> implements Message<T> {
 
   @Override
   public T getId() {
-    return identifier;
+    return id;
   }
 }

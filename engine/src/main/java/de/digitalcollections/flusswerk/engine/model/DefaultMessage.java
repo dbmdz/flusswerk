@@ -46,6 +46,6 @@ public class DefaultMessage extends FlusswerkMessage<String> {
 
   @Override
   public String toString() {
-    return "Message{id=" + identifier + ", envelope=" + getEnvelope() + ", data=" + data + "}";
+    return "Message{id=" + id + ", envelope=" + getEnvelope() + ", data=" + data + "}";
   }
 }
