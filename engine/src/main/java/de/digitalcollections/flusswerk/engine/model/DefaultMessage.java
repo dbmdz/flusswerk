@@ -5,11 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DefaultMessage implements Message<String> {
-
-  private Envelope envelope;
-
-  private String id;
+public class DefaultMessage extends FlusswerkMessage<String> {
 
   private Map<String, String> data;
 
@@ -18,14 +14,8 @@ public class DefaultMessage implements Message<String> {
   }
 
   public DefaultMessage(String id) {
-    this.envelope = new Envelope();
+    super(id);
     this.data = new HashMap<>();
-    this.id = id;
-  }
-
-  @Override
-  public Envelope getEnvelope() {
-    return envelope;
   }
 
   public Map<String, String> getData() {
@@ -55,12 +45,7 @@ public class DefaultMessage implements Message<String> {
   }
 
   @Override
-  public String getId() {
-    return id;
-  }
-
-  @Override
   public String toString() {
-    return "Message{id=" + id + ", envelope=" + envelope + ", data=" + data + "}";
+    return "Message{id=" + id + ", envelope=" + getEnvelope() + ", data=" + data + "}";
   }
 }

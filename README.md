@@ -261,13 +261,48 @@ would be represented as
 
 ### How to use a custom message implementation
 
-The default message implementation `DefaultMessage` allows to set arbitrary key-value-pairs of type `String`. To use a custom message implementation it has to be registered:
+If your data is more than just an id and a few `String` key-value-pairs it is recommended to use your own message implementation:
+
+```java
+public class ExampleMessage extends FlusswerkMessage<Integer> {
+
+  private int priority;
+
+  private String[] tags;
+
+  public PowerMessage(Integer id, int priority, String... tags) {
+    this.priority = priority;
+    this.tags = requireNonNullElseGet(tags, () -> new String[]{});
+  }
+
+  public int getPriority() {
+    return priority;
+  }
+
+  public String[] getTags() {
+    return tags;
+  }
+
+  @Override
+  public String toString() {
+    return String.format("ExampleMessage{%d, %d, %s}", id, priority, Arrays.toString(tags));
+  }
+}
+```
+
+The custom message implementation needs a Jackson Mixin that needs to be registered with the `MessageBroker`:
+
+```java
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(Include.NON_EMPTY)
+public interface ExampleMessageMixin {}
+```
 
 ```java
 class Application {
   public static void main(String[] args) {
     MessageBroker messageBroker = new MessageBrokerBuilder()
-        .messageMapping(CustomMessage.class, CustomMessageMixin.class)
+        .messageMapping(ExampleMessage.class, ExampleMessageMixin.class)
         .build();
     /* ... */
   }
