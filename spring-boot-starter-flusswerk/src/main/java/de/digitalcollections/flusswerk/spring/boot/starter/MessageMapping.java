@@ -7,7 +7,9 @@ import de.digitalcollections.flusswerk.engine.model.Message;
  * registration as a Spring bean.
  *
  * @param <T> The message class
+ * @deprecated Use the easier and more flexible {@link MessageImplementation} instead
  */
+@Deprecated
 public class MessageMapping<T extends Message<?>> {
 
   private Class<T> messageClass;

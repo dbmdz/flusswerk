@@ -6,4 +6,4 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_EMPTY)
-public interface FlowMessageMixin {}
+public interface DefaultMixin {}

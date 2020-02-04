@@ -14,7 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class FlowMessageMixinTest {
+class DefaultMixinTest {
 
   private ObjectMapper objectMapper;
 
@@ -22,7 +22,7 @@ class FlowMessageMixinTest {
   void setUp() {
     objectMapper =
         new ObjectMapper()
-            .addMixIn(Message.class, FlowMessageMixin.class)
+            .addMixIn(Message.class, DefaultMixin.class)
             .addMixIn(Envelope.class, EnvelopeMixin.class)
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)

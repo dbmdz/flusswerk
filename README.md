@@ -290,7 +290,20 @@ public class ExampleMessage extends FlusswerkMessage<Integer> {
 }
 ```
 
-The custom message implementation needs a Jackson Mixin that needs to be registered with the `MessageBroker`:
+The custom message implementation needs to be registered with the MessageBrokerBuilder:
+
+```java
+class Application {
+  public static void main(String[] args) {
+    MessageBroker messageBroker = new MessageBrokerBuilder()
+        .useMessageClass(ExampleMessage.class)
+        .build();
+    /* ... */
+  }
+}
+```
+
+For a more fine grained serialization control, a custom Jackson mixin is also possible:
 
 ```java
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -302,7 +315,7 @@ public interface ExampleMessageMixin {}
 class Application {
   public static void main(String[] args) {
     MessageBroker messageBroker = new MessageBrokerBuilder()
-        .messageMapping(ExampleMessage.class, ExampleMessageMixin.class)
+        .useMessageClass(ExampleMessage.class, ExampleMessageMixin.class)
         .build();
     /* ... */
   }

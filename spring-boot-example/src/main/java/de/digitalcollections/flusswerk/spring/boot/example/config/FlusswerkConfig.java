@@ -7,8 +7,7 @@ import de.digitalcollections.flusswerk.engine.reporting.ProcessReport;
 import de.digitalcollections.flusswerk.spring.boot.example.ComposePerfectGreeting;
 import de.digitalcollections.flusswerk.spring.boot.example.FancyConsoleProcessReport;
 import de.digitalcollections.flusswerk.spring.boot.example.model.Greeting;
-import de.digitalcollections.flusswerk.spring.boot.example.model.GreetingMixin;
-import de.digitalcollections.flusswerk.spring.boot.starter.MessageMapping;
+import de.digitalcollections.flusswerk.spring.boot.starter.MessageImplementation;
 import java.util.function.Consumer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,8 +16,8 @@ import org.springframework.context.annotation.Configuration;
 public class FlusswerkConfig {
 
   @Bean
-  MessageMapping<Greeting> messageMapping() {
-    return new MessageMapping<>(Greeting.class, GreetingMixin.class);
+  MessageImplementation messageImplementation() {
+    return new MessageImplementation(Greeting.class);
   }
 
   @Bean
