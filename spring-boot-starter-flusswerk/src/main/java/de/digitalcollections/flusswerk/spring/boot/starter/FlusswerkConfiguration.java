@@ -8,13 +8,13 @@ import de.digitalcollections.flusswerk.engine.model.Message;
 import de.digitalcollections.flusswerk.engine.reporting.ProcessReport;
 import java.io.IOException;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /** Spring configuration to provide beans for{@link MessageBroker} and {@link Engine}. */
 @Configuration
-@EnableConfigurationProperties(FlusswerkProperties.class)
+@Import(FlusswerkPropertiesConfiguration.class)
 public class FlusswerkConfiguration {
 
   /**
@@ -41,7 +41,7 @@ public class FlusswerkConfiguration {
         mapping -> builder.messageMapping(mapping.getMessageClass(), mapping.getMixin()));
 
     if (routing.getReadFrom() != null) {
-      builder.readFrom(routing.getReadFrom() + ".priority", routing.getReadFrom());
+      builder.readFrom(routing.getReadFrom());
     }
     if (routing.getWriteTo() != null) {
       builder.writeTo(routing.getWriteTo());
