@@ -113,7 +113,7 @@ public class FlusswerkProperties {
 
     @NotBlank private String exchange;
 
-    private String readFrom;
+    private String[] readFrom;
 
     private String writeTo;
 
@@ -122,7 +122,7 @@ public class FlusswerkProperties {
      * @param readFrom The queue to read from (optional).
      * @param writeTo The topic to send to per default (optional).
      */
-    public Routing(@NotBlank String exchange, String readFrom, String writeTo) {
+    public Routing(@NotBlank String exchange, String[] readFrom, String writeTo) {
       this.exchange = exchange;
       this.readFrom = readFrom;
       this.writeTo = writeTo;
@@ -134,7 +134,7 @@ public class FlusswerkProperties {
     }
 
     /** @return The queue to read from (optional). */
-    public String getReadFrom() {
+    public String[] getReadFrom() {
       return readFrom;
     }
 
@@ -147,7 +147,7 @@ public class FlusswerkProperties {
     public String toString() {
       return StringRepresentation.of(Routing.class)
           .property("exchange", exchange)
-          .property("readFrom", readFrom)
+          .property("readFrom", String.join(",", readFrom))
           .property("writeTo", writeTo)
           .toString();
     }
