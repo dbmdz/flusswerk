@@ -34,9 +34,12 @@ public class FlusswerkConfiguration {
             .username(connection.getUsername())
             .password(connection.getPassword())
             .exchange(routing.getExchange())
-            .virtualHost(connection.getVirtualHost())
             .maxRetries(processing.getMaxRetries())
             .connectTo(connection.getConnectTo());
+
+    if (connection.getVirtualHost() != null) {
+      builder.virtualHost(connection.getVirtualHost());
+    }
 
     messageImplementation.ifAvailable(
         impl -> {
