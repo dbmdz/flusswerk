@@ -52,7 +52,12 @@ class RabbitConnection {
         connectionIsFailing = false;
         LOGGER.debug("Connected to {}", addresses);
       } catch (IOException | TimeoutException e) {
-        LOGGER.warn("Could not connect to {}: {} {}", addresses, e.getClass().getSimpleName(), e.getMessage(), e);
+        LOGGER.warn(
+            "Could not connect to {}: {} {}",
+            addresses,
+            e.getClass().getSimpleName(),
+            e.getMessage(),
+            e);
         try {
           TimeUnit.SECONDS.sleep(RETRY_INTERVAL);
         } catch (InterruptedException e1) {
