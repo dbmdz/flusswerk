@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.fasterxml.jackson.databind.Module;
 import de.digitalcollections.flusswerk.engine.exceptions.WorkflowSetupException;
+import de.digitalcollections.flusswerk.engine.jackson.DefaultMixin;
 import de.digitalcollections.flusswerk.engine.jackson.SingleClassModule;
 import de.digitalcollections.flusswerk.engine.model.Message;
 import java.io.IOException;
@@ -132,11 +133,38 @@ public class MessageBrokerBuilder {
    * @param messageClass The custom message implementation you want to use.
    * @param messageMixin The mixin to serialize/deserialize this message.
    * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
+   * @deprecated Replaced by {@link #useMessageClass(Class)} and {@link #useMessageClass(Class,
+   *     Class)}
    */
+  @Deprecated
   public MessageBrokerBuilder messageMapping(
       Class<? extends Message<?>> messageClass, Class<?> messageMixin) {
-    config.addJacksonModule(new SingleClassModule(messageClass, messageMixin));
-    config.setMessageClass(messageClass);
+    return useMessageClass(messageClass, messageMixin);
+  }
+
+  /**
+   * Registers a custom {@link Message} implementation (usually a subclass of {@link
+   * de.digitalcollections.flusswerk.engine.model.FlusswerkMessage}).
+   *
+   * @param cls The custom message implementation you want to use.
+   * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
+   */
+  public MessageBrokerBuilder useMessageClass(Class<? extends Message<?>> cls) {
+    return useMessageClass(cls, DefaultMixin.class);
+  }
+
+  /**
+   * Registers a custom {@link Message} implementation (usually a subclass of {@link
+   * de.digitalcollections.flusswerk.engine.model.FlusswerkMessage}) and custom Jackson mixin for
+   * more fine grained serialization control.
+   *
+   * @param cls The custom message implementation you want to use.
+   * @param mixin The Jackson mixin to use
+   * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
+   */
+  public MessageBrokerBuilder useMessageClass(Class<? extends Message<?>> cls, Class<?> mixin) {
+    config.addJacksonModule(new SingleClassModule(cls, mixin));
+    config.setMessageClass(cls);
     return this;
   }
 

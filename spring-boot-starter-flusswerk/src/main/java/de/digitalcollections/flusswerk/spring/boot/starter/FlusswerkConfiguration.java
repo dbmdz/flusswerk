@@ -19,12 +19,13 @@ public class FlusswerkConfiguration {
 
   /**
    * @param flusswerkProperties The external configuration from <code>application.yml</code>
-   * @param messageMapping A mapping between a custom Message class and a Jackson mixin (optional).
+   * @param messageImplementation A custom {@link Message} implementation to use.
    * @return The message broker for this job.
    */
   @Bean
   public MessageBroker messageBroker(
-      FlusswerkProperties flusswerkProperties, ObjectProvider<MessageMapping<?>> messageMapping) {
+      FlusswerkProperties flusswerkProperties,
+      ObjectProvider<MessageImplementation> messageImplementation) {
     FlusswerkProperties.Connection connection = flusswerkProperties.getConnection();
     FlusswerkProperties.Processing processing = flusswerkProperties.getProcessing();
     FlusswerkProperties.Routing routing = flusswerkProperties.getRouting();
@@ -37,8 +38,14 @@ public class FlusswerkConfiguration {
             .maxRetries(processing.getMaxRetries())
             .connectTo(connection.getConnectTo());
 
-    messageMapping.ifAvailable(
-        mapping -> builder.messageMapping(mapping.getMessageClass(), mapping.getMixin()));
+    messageImplementation.ifAvailable(
+        impl -> {
+          if (impl.hasMixin()) {
+            builder.useMessageClass(impl.getMessageClass(), impl.getMixin());
+          } else {
+            builder.useMessageClass(impl.getMessageClass());
+          }
+        });
 
     if (routing.getReadFrom() != null) {
       builder.readFrom(routing.getReadFrom() + ".priority", routing.getReadFrom());
