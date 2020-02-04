@@ -12,8 +12,7 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = FlusswerkPropertiesConfiguration.class)
 public class FlusswerkPropertiesTest {
 
-  @Autowired
-  private FlusswerkProperties properties;
+  @Autowired private FlusswerkProperties properties;
 
   @Test
   @DisplayName("Values of FlusswerkProperties.Processing are all set")
@@ -25,7 +24,6 @@ public class FlusswerkPropertiesTest {
 
   @Test
   @DisplayName("Values of FlusswerkProperties.Connection are all set")
-
   public void valuesOfConnection() {
     assertThat(properties.getConnection())
         .hasFieldOrPropertyWithValue("connectTo", "my.rabbit.example.com:5672")
@@ -39,8 +37,7 @@ public class FlusswerkPropertiesTest {
   public void valuesOfRouting() {
     assertThat(properties.getRouting())
         .hasFieldOrPropertyWithValue("exchange", "my.exchange")
-        .hasFieldOrPropertyWithValue("readFrom", new String[]{ "first", "second" })
+        .hasFieldOrPropertyWithValue("readFrom", new String[] {"first", "second"})
         .hasFieldOrPropertyWithValue("writeTo", "defalt.queue.to.write.to");
   }
-
 }
