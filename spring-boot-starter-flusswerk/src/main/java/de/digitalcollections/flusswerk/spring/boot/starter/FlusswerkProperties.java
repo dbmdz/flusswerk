@@ -20,23 +20,23 @@ public class FlusswerkProperties {
   static class Processing {
 
     @Min(0)
-    private int maxRetries;
+    private Integer maxRetries;
 
     @Min(1)
-    private int threads;
+    private Integer threads;
 
-    public Processing(@Min(0) int maxRetries, @Min(1) int threads) {
+    public Processing(@Min(0) Integer maxRetries, @Min(1) Integer threads) {
       this.maxRetries = maxRetries;
       this.threads = threads;
     }
 
     /** @return the maximum number of retries before a message ends up in the failed queue. */
-    public int getMaxRetries() {
+    public Integer getMaxRetries() {
       return maxRetries;
     }
 
     /** @return The number of concurrent processing threads in one job instance. */
-    public int getThreads() {
+    public Integer getThreads() {
       return threads;
     }
 
