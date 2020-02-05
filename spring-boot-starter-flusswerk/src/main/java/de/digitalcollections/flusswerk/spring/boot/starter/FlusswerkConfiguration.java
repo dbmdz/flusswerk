@@ -31,36 +31,36 @@ public class FlusswerkConfiguration {
     FlusswerkProperties.Routing routing = flusswerkProperties.getRouting();
     final MessageBrokerBuilder builder = new MessageBrokerBuilder();
 
-    if (connection.getUsername() != null) {
+    if (isSet(connection.getUsername())) {
       builder.username(connection.getUsername());
     }
 
-    if (connection.getPassword() != null) {
+    if (isSet(connection.getPassword())) {
       builder.password(connection.getPassword());
     }
 
-    if (connection.getConnectTo() != null) {
+    if (isSet(connection.getConnectTo())) {
       builder.connectTo(connection.getConnectTo());
     } else {
       throw new IllegalArgumentException("connect-to is missing");
     }
 
-    if (connection.getVirtualHost() != null) {
+    if (isSet(connection.getVirtualHost())) {
       builder.virtualHost(connection.getVirtualHost());
     }
 
-    if (processing.getMaxRetries() != null) {
+    if (isSet(processing.getMaxRetries())) {
       builder.maxRetries(processing.getMaxRetries());
     }
 
-    if (routing.getExchange() != null) {
+    if (isSet(routing.getExchange())) {
       builder.exchange(routing.getExchange());
     }
 
-    if (routing.getReadFrom() != null) {
+    if (isSet(routing.getReadFrom())) {
       builder.readFrom(routing.getReadFrom());
     }
-    if (routing.getWriteTo() != null) {
+    if (isSet(routing.getWriteTo())) {
       builder.writeTo(routing.getWriteTo());
     }
 
@@ -110,4 +110,15 @@ public class FlusswerkConfiguration {
     ProcessReport processReport = processReportProvider.getIfAvailable();
     return new Engine(messageBroker, flow, threads, processReport);
   }
+
+  public static boolean isSet(Object value) {
+    if (value == null) {
+      return false;
+    }
+    if (value instanceof String) {
+      return !((String) value).matches("\\s*");
+    }
+    return true;
+  }
+
 }
