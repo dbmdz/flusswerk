@@ -12,13 +12,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-/** Spring configuration to provide beans for{@link MessageBroker} and {@link Engine}. */
+/**
+ * Spring configuration to provide beans for{@link MessageBroker} and {@link Engine}.
+ */
 @Configuration
 @Import(FlusswerkPropertiesConfiguration.class)
 public class FlusswerkConfiguration {
 
   /**
-   * @param flusswerkProperties The external configuration from <code>application.yml</code>
+   * @param flusswerkProperties   The external configuration from <code>application.yml</code>
    * @param messageImplementation A custom {@link Message} implementation to use.
    * @return The message broker for this job.
    */
@@ -26,10 +28,15 @@ public class FlusswerkConfiguration {
   public MessageBroker messageBroker(
       FlusswerkProperties flusswerkProperties,
       ObjectProvider<MessageImplementation> messageImplementation) {
-    FlusswerkProperties.Connection connection = flusswerkProperties.getConnection();
-    FlusswerkProperties.Processing processing = flusswerkProperties.getProcessing();
-    FlusswerkProperties.Routing routing = flusswerkProperties.getRouting();
-    final MessageBrokerBuilder builder = new MessageBrokerBuilder();
+
+    var connection = flusswerkProperties.getConnection();
+    MessageBrokerBuilder builder = new MessageBrokerBuilder();
+
+    if (connection == null || !isSet(connection.getConnectTo())) {
+      throw new IllegalArgumentException("flusswerk.connection.connect-to is missing");
+    }
+
+    builder.connectTo(connection.getConnectTo());
 
     if (isSet(connection.getUsername())) {
       builder.username(connection.getUsername());
@@ -39,28 +46,25 @@ public class FlusswerkConfiguration {
       builder.password(connection.getPassword());
     }
 
-    if (isSet(connection.getConnectTo())) {
-      builder.connectTo(connection.getConnectTo());
-    } else {
-      throw new IllegalArgumentException("connect-to is missing");
-    }
-
     if (isSet(connection.getVirtualHost())) {
       builder.virtualHost(connection.getVirtualHost());
     }
 
-    if (isSet(processing.getMaxRetries())) {
+    var processing = flusswerkProperties.getProcessing();
+    if (processing != null && isSet(processing.getMaxRetries())) {
       builder.maxRetries(processing.getMaxRetries());
     }
 
-    if (isSet(routing.getExchange())) {
+    var routing = flusswerkProperties.getRouting();
+    if (routing != null && isSet(routing.getExchange())) {
       builder.exchange(routing.getExchange());
     }
 
-    if (isSet(routing.getReadFrom())) {
+    if (routing != null && isSet(routing.getReadFrom())) {
       builder.readFrom(routing.getReadFrom());
     }
-    if (isSet(routing.getWriteTo())) {
+
+    if (routing != null && isSet(routing.getWriteTo())) {
       builder.writeTo(routing.getWriteTo());
     }
 
@@ -77,14 +81,14 @@ public class FlusswerkConfiguration {
   }
 
   /**
-   * @param messageBroker The messageBroker to use.
-   * @param flowProvider The flow to use (optional).
-   * @param flusswerkProperties The external configuration from <code>application.yml</code>.
+   * @param messageBroker         The messageBroker to use.
+   * @param flowProvider          The flow to use (optional).
+   * @param flusswerkProperties   The external configuration from <code>application.yml</code>.
    * @param processReportProvider A custom process report provider (optional).
-   * @param <I> The message's identifier type.
-   * @param <M> The used {@link Message} type
-   * @param <R> The type of the reader implementation
-   * @param <W> The type of the writer implementation
+   * @param <I>                   The message's identifier type.
+   * @param <M>                   The used {@link Message} type
+   * @param <R>                   The type of the reader implementation
+   * @param <W>                   The type of the writer implementation
    * @return The {@link Engine} used for this job.
    * @throws IOException If connection to RabbitMQ fails permanently.
    */
@@ -101,7 +105,8 @@ public class FlusswerkConfiguration {
     }
 
     int threads;
-    if (flusswerkProperties.getProcessing().getThreads() != null) {
+    var processing = flusswerkProperties.getProcessing();
+    if (processing != null && processing.getThreads() != null) {
       threads = flusswerkProperties.getProcessing().getThreads();
     } else {
       threads = 5;
