@@ -221,4 +221,23 @@ public class FlowBuilder<M extends Message, R, W> {
   public static <M extends Message, R, W> FlowBuilder<M, R, W> receiving(Class<M> clazz) {
     return new FlowBuilder<>();
   }
+
+  public static <M extends Message<?>, R, W> Flow<M, R, W> createFlow(
+      Class<M> cls, Function<M, R> reader, Function<R, W> transformer, Consumer<W> writer) {
+    return FlowBuilder.<M, R, W>receiving(cls)
+        .read(reader)
+        .transform(transformer)
+        .write(writer)
+        .build();
+  }
+
+  public static <M extends Message<?>, R, W> Flow<M, R, W> createFlow(
+      Class<M> cls, Function<M, R> reader, Consumer<W> writer) {
+    return FlowBuilder.<M, R, W>receiving(cls).read(reader).write(writer).build();
+  }
+
+  public static <M extends Message<?>, R, W> Flow<M, R, W> createFlow(
+      Class<M> cls, Function<M, R> reader) {
+    return FlowBuilder.<M, R, W>receiving(cls).read(reader).build();
+  }
 }
