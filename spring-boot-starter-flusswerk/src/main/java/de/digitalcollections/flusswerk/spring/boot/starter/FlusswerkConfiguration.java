@@ -68,6 +68,10 @@ public class FlusswerkConfiguration {
       builder.writeTo(routing.getWriteTo());
     }
 
+    if (connection.getVirtualHost() != null) {
+      builder.virtualHost(connection.getVirtualHost());
+    }
+
     messageImplementation.ifAvailable(
         impl -> {
           if (impl.hasMixin()) {
