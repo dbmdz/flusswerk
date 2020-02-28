@@ -1,6 +1,6 @@
 package de.digitalcollections.flusswerk.engine;
 
-import de.digitalcollections.flusswerk.engine.exceptions.FinallyFailedProcessException;
+import de.digitalcollections.flusswerk.engine.exceptions.StopProcessingException;
 import de.digitalcollections.flusswerk.engine.flow.Flow;
 import de.digitalcollections.flusswerk.engine.messagebroker.MessageBroker;
 import de.digitalcollections.flusswerk.engine.model.Message;
@@ -155,7 +155,7 @@ public class Engine {
       }
       messageBroker.ack(receivedMessage);
       processReport.reportSuccess(receivedMessage);
-    } catch (FinallyFailedProcessException e) {
+    } catch (StopProcessingException e) {
       try {
         processReport.reportFail(receivedMessage, e);
         messageBroker.fail(receivedMessage);

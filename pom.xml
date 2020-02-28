@@ -70,6 +70,7 @@
     <version.javax.annotation-api>1.3.2</version.javax.annotation-api>
     <version.junit>5.6.0</version.junit>
     <version.logback>1.2.3</version.logback>
+    <version.logstash>6.3</version.logstash>
     <version.mockito>3.3.0</version.mockito>
     <version.slf4j>1.7.30</version.slf4j>
     <version.spring-boot>2.2.5.RELEASE</version.spring-boot>
