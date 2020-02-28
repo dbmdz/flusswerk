@@ -1,6 +1,6 @@
 package de.digitalcollections.flusswerk.spring.boot.example;
 
-import de.digitalcollections.flusswerk.engine.exceptions.FinallyFailedProcessException;
+import de.digitalcollections.flusswerk.engine.exceptions.StopProcessingException;
 import de.digitalcollections.flusswerk.engine.model.Message;
 import de.digitalcollections.flusswerk.engine.reporting.ProcessReport;
 
@@ -12,7 +12,7 @@ public class FancyConsoleProcessReport implements ProcessReport {
   }
 
   @Override
-  public void reportFail(Message message, FinallyFailedProcessException e) {
+  public void reportFail(Message message, StopProcessingException e) {
     print("\uD83D\uDCA5", message, e);
   }
 

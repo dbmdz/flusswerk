@@ -1,9 +1,14 @@
 package de.digitalcollections.flusswerk.engine.exceptions;
 
-public class FinallyFailedProcessException extends RuntimeException {
+/**
+ * @deprecated Use {@link de.digitalcollections.flusswerk.engine.exceptions.StopProcessingException}
+ *     instead.
+ */
+@Deprecated
+public class FinallyFailedProcessException extends StopProcessingException {
 
   public FinallyFailedProcessException(Throwable cause) {
-    super(cause);
+    super("Using FinallyFailedProcessException is deprecated", cause);
   }
 
   public FinallyFailedProcessException(String message) {

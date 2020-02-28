@@ -31,10 +31,8 @@ public class FlusswerkConfigurationTest {
     assertThat(FlusswerkConfiguration.isSet("name")).isTrue();
   }
 
-
   @Test
   public void isSetShouldAcceptNonStrings() {
     assertThat(FlusswerkConfiguration.isSet(42)).isTrue();
   }
-
 }

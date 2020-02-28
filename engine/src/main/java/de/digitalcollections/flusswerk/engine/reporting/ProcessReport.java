@@ -1,6 +1,6 @@
 package de.digitalcollections.flusswerk.engine.reporting;
 
-import de.digitalcollections.flusswerk.engine.exceptions.FinallyFailedProcessException;
+import de.digitalcollections.flusswerk.engine.exceptions.StopProcessingException;
 import de.digitalcollections.flusswerk.engine.model.Message;
 
 public interface ProcessReport {
@@ -18,7 +18,7 @@ public interface ProcessReport {
    * @param message The message, which finally failed
    * @param e The exception, why the message failed
    */
-  void reportFail(Message message, FinallyFailedProcessException e);
+  void reportFail(Message message, StopProcessingException e);
 
   /**
    * Report a failed message, which failed after the maximum number of retries

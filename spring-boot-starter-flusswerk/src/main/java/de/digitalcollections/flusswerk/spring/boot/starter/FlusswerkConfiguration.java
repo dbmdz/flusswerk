@@ -12,15 +12,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-/**
- * Spring configuration to provide beans for{@link MessageBroker} and {@link Engine}.
- */
+/** Spring configuration to provide beans for{@link MessageBroker} and {@link Engine}. */
 @Configuration
 @Import(FlusswerkPropertiesConfiguration.class)
 public class FlusswerkConfiguration {
 
   /**
-   * @param flusswerkProperties   The external configuration from <code>application.yml</code>
+   * @param flusswerkProperties The external configuration from <code>application.yml</code>
    * @param messageImplementation A custom {@link Message} implementation to use.
    * @return The message broker for this job.
    */
@@ -85,14 +83,14 @@ public class FlusswerkConfiguration {
   }
 
   /**
-   * @param messageBroker         The messageBroker to use.
-   * @param flowProvider          The flow to use (optional).
-   * @param flusswerkProperties   The external configuration from <code>application.yml</code>.
+   * @param messageBroker The messageBroker to use.
+   * @param flowProvider The flow to use (optional).
+   * @param flusswerkProperties The external configuration from <code>application.yml</code>.
    * @param processReportProvider A custom process report provider (optional).
-   * @param <I>                   The message's identifier type.
-   * @param <M>                   The used {@link Message} type
-   * @param <R>                   The type of the reader implementation
-   * @param <W>                   The type of the writer implementation
+   * @param <I> The message's identifier type.
+   * @param <M> The used {@link Message} type
+   * @param <R> The type of the reader implementation
+   * @param <W> The type of the writer implementation
    * @return The {@link Engine} used for this job.
    * @throws IOException If connection to RabbitMQ fails permanently.
    */
@@ -129,5 +127,4 @@ public class FlusswerkConfiguration {
     }
     return true;
   }
-
 }
