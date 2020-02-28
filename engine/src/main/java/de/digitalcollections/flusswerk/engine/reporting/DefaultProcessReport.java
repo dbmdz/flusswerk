@@ -1,6 +1,6 @@
 package de.digitalcollections.flusswerk.engine.reporting;
 
-import de.digitalcollections.flusswerk.engine.exceptions.FinallyFailedProcessException;
+import de.digitalcollections.flusswerk.engine.exceptions.StopProcessingException;
 import de.digitalcollections.flusswerk.engine.model.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,7 @@ public class DefaultProcessReport implements ProcessReport {
   }
 
   @Override
-  public void reportFail(Message message, FinallyFailedProcessException e) {
+  public void reportFail(Message message, StopProcessingException e) {
     LOGGER.error(
         "Failed message because of processing error: {}", message.getEnvelope().getBody(), e);
   }

@@ -1,6 +1,6 @@
 package de.digitalcollections.flusswerk.engine.reporting;
 
-import de.digitalcollections.flusswerk.engine.exceptions.FinallyFailedProcessException;
+import de.digitalcollections.flusswerk.engine.exceptions.StopProcessingException;
 import de.digitalcollections.flusswerk.engine.model.Message;
 
 /** Functional interface to easily create custom reporters with a lambda. */
@@ -21,7 +21,7 @@ public interface ReportFunction extends ProcessReport {
   }
 
   @Override
-  default void reportFail(Message msg, FinallyFailedProcessException e) {
+  default void reportFail(Message msg, StopProcessingException e) {
     this.report(ReportType.FAIL, msg, e);
   }
 

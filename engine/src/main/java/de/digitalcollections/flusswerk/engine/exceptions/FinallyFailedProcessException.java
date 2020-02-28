@@ -2,8 +2,7 @@ package de.digitalcollections.flusswerk.engine.exceptions;
 
 /**
  * @deprecated Use {@link de.digitalcollections.flusswerk.engine.exceptions.StopProcessingException}
- * instead.
- *
+ *     instead.
  */
 @Deprecated
 public class FinallyFailedProcessException extends StopProcessingException {
