@@ -35,10 +35,11 @@ public class ExceptionSupplier<T extends Exception> implements Supplier<T> {
   private T createException() throws ReflectiveOperationException {
     String renderedMessage = String.format(message, args);
     if (cause == null) {
-      var constructor = exceptionClass.getConstructor(String.class);
+      var constructor = exceptionClass.getDeclaredConstructor(String.class);
       return constructor.newInstance(renderedMessage);
     } else {
-      var constructor = exceptionClass.getConstructor(String.class, Throwable.class);
+      var constructor = exceptionClass.getDeclaredConstructor(String.class, Throwable.class);
+      constructor.setAccessible(true);
       return constructor.newInstance(renderedMessage, cause);
     }
   }

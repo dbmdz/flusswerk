@@ -8,6 +8,13 @@ public class RetryProcessingException extends RuntimeException {
 
   /**
    * @param message The message, possibly including format strings
+   */
+  public RetryProcessingException(String message) {
+    super(message); // String-only constructor is needed for supplier
+  }
+
+  /**
+   * @param message The message, possibly including format strings
    * @param args Arguments for the format string in <code>message</code>
    */
   public RetryProcessingException(String message, Object... args) {
