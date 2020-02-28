@@ -8,11 +8,11 @@ import java.util.function.Supplier;
  */
 public class ExceptionSupplier<T extends Exception> implements Supplier<T> {
 
-  private Class<T> exceptionClass;
+  private final Class<T> exceptionClass;
 
-  private String message;
+  private final String message;
 
-  private Object[] args;
+  private final Object[] args;
 
   private Throwable cause;
 
@@ -20,6 +20,7 @@ public class ExceptionSupplier<T extends Exception> implements Supplier<T> {
     this.exceptionClass = exceptionClass;
     this.message = message;
     this.args = args;
+    this.cause = null;
   }
 
   @Override

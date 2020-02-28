@@ -9,14 +9,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A simple compact {@link ProcessReport} for structured messages. Requieres the optional
+ * A simple compact {@link ProcessReport} for structured messages. Requires the optional
  * logstash-logback dependency.
  */
 public class CompactProcessReport implements ProcessReport {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CompactProcessReport.class);
 
-  private String name;
+  private final String name;
 
   public CompactProcessReport(String name) {
     this.name = requireNonNull(name);
