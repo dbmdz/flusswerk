@@ -1,5 +1,7 @@
 package de.digitalcollections.flusswerk.engine.flow;
 
+import de.digitalcollections.flusswerk.engine.exceptions.StopProcessingException;
+import de.digitalcollections.flusswerk.engine.flow.FlowStatus.Status;
 import de.digitalcollections.flusswerk.engine.model.Job;
 import de.digitalcollections.flusswerk.engine.model.Message;
 import java.util.Collection;
@@ -34,22 +36,27 @@ public class Flow<M extends Message, R, W> {
 
   private final boolean propagateFlowIds;
 
+  private final Consumer<FlowStatus> monitor;
+
   public Flow(
       Supplier<Function<M, R>> readerFactory,
       Supplier<Function<R, W>> transformerFactory,
       Supplier<Function<W, Collection<Message>>> writerFactory,
       Supplier<Consumer<W>> consumingWriterFactory,
       Runnable cleanup,
-      boolean propagateFlowIds) {
+      boolean propagateFlowIds,
+      Consumer<FlowStatus> monitor) {
     this.readerFactory = readerFactory;
     this.transformerFactory = transformerFactory;
     this.writerFactory = writerFactory;
     this.consumingWriterFactory = consumingWriterFactory;
     this.cleanup = cleanup;
     this.propagateFlowIds = propagateFlowIds;
+    this.monitor = monitor;
   }
 
   public Collection<Message> process(M message) {
+    FlowStatus flowStatus = new FlowStatus();
     Job<M, R, W> job = new Job<>(message, propagateFlowIds);
 
     Collection<Message> result = null;
@@ -68,6 +75,13 @@ public class Flow<M extends Message, R, W> {
         job.write(consumingWriterFactory.get());
       }
 
+    } catch (RuntimeException e) {
+      if (e instanceof StopProcessingException) {
+        flowStatus.setStatus(Status.ERROR_STOP);
+      } else {
+        flowStatus.setStatus(Status.ERROR_RETRY);
+      }
+      throw e; // Throw exception again after inspecting for ensure control flow in engine
     } finally {
       result = job.getResult();
 
@@ -77,6 +91,10 @@ public class Flow<M extends Message, R, W> {
 
       if (cleanup != null) {
         cleanup.run();
+      }
+      flowStatus.stop();
+      if (monitor != null) {
+        monitor.accept(flowStatus);
       }
     }
 
