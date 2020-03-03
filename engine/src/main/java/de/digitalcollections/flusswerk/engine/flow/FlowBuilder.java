@@ -30,6 +30,8 @@ public class FlowBuilder<M extends Message, R, W> {
 
   private boolean propagateFlowIds;
 
+  private Consumer<FlowStatus> monitor;
+
   public FlowBuilder() {
     this.propagateFlowIds = false;
   }
@@ -204,6 +206,19 @@ public class FlowBuilder<M extends Message, R, W> {
   }
 
   /**
+   * Sets a monitoring callback that is called after all processing and cleanup is finished.
+   *
+   * @param consumer The consumer to be executed to record status.
+   * @return This {@link FlowBuilder} instance for further configuration or creation of the {@link
+   *     Flow}.
+   */
+  public FlowBuilder<M, R, W> monitor(Consumer<FlowStatus> consumer) {
+    requireNonNull(consumer, "The runnable cannot be null");
+    this.monitor = consumer;
+    return this;
+  }
+
+  /**
    * Finally builds the flow.
    *
    * @return A new {@link Flow} as configured before.
@@ -215,7 +230,8 @@ public class FlowBuilder<M extends Message, R, W> {
         writerFactory,
         consumingWriterFactory,
         cleanup,
-        propagateFlowIds);
+        propagateFlowIds,
+        monitor);
   }
 
   public static <M extends Message, R, W> FlowBuilder<M, R, W> receiving(Class<M> clazz) {
