@@ -238,6 +238,16 @@ public class FlowBuilder<M extends Message, R, W> {
     return new FlowBuilder<>();
   }
 
+  public static <M extends Message, R, W> FlowBuilder<M, R, W> with(
+      Class<M> messageClass, Class<R> transformerInput, Class<W> transformerOutput) {
+    return new FlowBuilder<>();
+  }
+
+  public static <M extends Message, T> FlowBuilder<M, T, T> with(
+      Class<M> messageClass, Class<T> dataClass) {
+    return new FlowBuilder<>();
+  }
+
   public static <M extends Message<?>, R, W> Flow<M, R, W> createFlow(
       Class<M> cls, Function<M, R> reader, Function<R, W> transformer, Consumer<W> writer) {
     return FlowBuilder.<M, R, W>receiving(cls)

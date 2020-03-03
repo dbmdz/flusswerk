@@ -2,7 +2,7 @@ package de.digitalcollections.flusswerk.engine.flow;
 
 public class FlowStatus {
 
-  enum Status {
+  public enum Status {
     SUCCESS,
     ERROR_RETRY,
     ERROR_STOP
