@@ -9,7 +9,7 @@ class ExceptionSupplierTest {
 
   @Test
   void shoudlSupplyExceptionWithOnlyMessage() {
-    var args = new String[]{};
+    var args = new String[] {};
     var supplier = new ExceptionSupplier<>(RetryProcessingException.class, "Hallo Welt", null);
     assertThat(supplier.get())
         .isInstanceOf(RetryProcessingException.class)
@@ -18,17 +18,17 @@ class ExceptionSupplierTest {
 
   @Test
   void shoudlSupplyStopProcessingExceptionWithOnlyMessage() {
-    var args = new String[]{};
+    var args = new String[] {};
     var supplier = new ExceptionSupplier<>(StopProcessingException.class, "Hallo Welt", null);
-    assertThat(supplier.get())
-        .isInstanceOf(StopProcessingException.class)
-        .hasMessage("Hallo Welt");
+    assertThat(supplier.get()).isInstanceOf(StopProcessingException.class).hasMessage("Hallo Welt");
   }
 
   @Test
   void shoudlSupplyExceptionWithMessageAndCause() {
-    var args = new String[]{};
-    var supplier = new ExceptionSupplier<>(RetryProcessingException.class, "Hallo Welt", null).causedBy(new RuntimeException("THE CAUSE"));
+    var args = new String[] {};
+    var supplier =
+        new ExceptionSupplier<>(RetryProcessingException.class, "Hallo Welt", null)
+            .causedBy(new RuntimeException("THE CAUSE"));
     assertThat(supplier.get())
         .isInstanceOf(RetryProcessingException.class)
         .hasMessage("Hallo Welt");
@@ -36,11 +36,11 @@ class ExceptionSupplierTest {
 
   @Test
   void shoudlSupplyStopProcessingExceptionWithMessageAndCause() {
-    var args = new String[]{};
-    var supplier = new ExceptionSupplier<>(StopProcessingException.class, "Hallo Welt", null).causedBy(new RuntimeException("THE CAUSE"));;
-    assertThat(supplier.get())
-        .isInstanceOf(StopProcessingException.class)
-        .hasMessage("Hallo Welt");
+    var args = new String[] {};
+    var supplier =
+        new ExceptionSupplier<>(StopProcessingException.class, "Hallo Welt", null)
+            .causedBy(new RuntimeException("THE CAUSE"));
+    ;
+    assertThat(supplier.get()).isInstanceOf(StopProcessingException.class).hasMessage("Hallo Welt");
   }
-
 }

@@ -94,7 +94,7 @@ public class Flow<M extends Message, R, W> {
       }
       flowStatus.stop();
       if (monitor != null) {
-        monitor.accept(flowStatus);
+        monitor.accept(flowStatus); // record metrics only available from inside the framework
       }
     }
 

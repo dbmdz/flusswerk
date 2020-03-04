@@ -206,7 +206,8 @@ public class FlowBuilder<M extends Message, R, W> {
   }
 
   /**
-   * Sets a monitoring callback that is called after all processing and cleanup is finished.
+   * Sets a monitoring callback that is called after all processing and cleanup is finished. Metrics
+   * provided by flow status are provided by Flusswerk and would be inaccessible otherwise.
    *
    * @param consumer The consumer to be executed to record status.
    * @return This {@link FlowBuilder} instance for further configuration or creation of the {@link
