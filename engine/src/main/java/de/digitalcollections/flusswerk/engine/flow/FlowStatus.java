@@ -1,5 +1,12 @@
 package de.digitalcollections.flusswerk.engine.flow;
 
+import java.util.function.Consumer;
+
+/**
+ * Collect base metrics for a single flow - did the execution have errors and how long does it take?
+ *
+ * <p>Used for metrics handlers in {@link FlowBuilder#monitor(Consumer)}
+ */
 public class FlowStatus {
 
   public enum Status {
