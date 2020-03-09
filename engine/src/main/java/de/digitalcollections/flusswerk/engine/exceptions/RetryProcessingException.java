@@ -6,9 +6,7 @@ import java.util.function.Supplier;
 /** Throw this exception in case of errors that might go away when trying again later. */
 public class RetryProcessingException extends RuntimeException {
 
-  /**
-   * @param message The message, possibly including format strings
-   */
+  /** @param message The message, possibly including format strings */
   public RetryProcessingException(String message) {
     super(message); // String-only constructor is needed for supplier
   }

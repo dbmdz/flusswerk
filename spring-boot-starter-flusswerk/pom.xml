@@ -54,6 +54,11 @@
       <scope>test</scope>
       <version>${version.spring-boot}</version>
     </dependency>
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-core</artifactId>
+      <version>${version.micrometer}</version>
+    </dependency>
   </dependencies>
 
 

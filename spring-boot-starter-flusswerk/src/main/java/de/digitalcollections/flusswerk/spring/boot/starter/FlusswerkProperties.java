@@ -17,7 +17,7 @@ public class FlusswerkProperties {
   private Routing routing;
 
   /** Configuration related to the processing. */
-  static class Processing {
+  public static class Processing {
 
     @Min(0)
     private Integer maxRetries;
@@ -50,7 +50,7 @@ public class FlusswerkProperties {
   }
 
   /** Connection information for RabbitMQ. */
-  static class Connection {
+  public static class Connection {
 
     @NotBlank private String connectTo;
 
@@ -109,7 +109,7 @@ public class FlusswerkProperties {
   }
 
   /** AMQP/RabbitMQ routing information. */
-  static class Routing {
+  public static class Routing {
 
     @NotBlank private String exchange;
 
