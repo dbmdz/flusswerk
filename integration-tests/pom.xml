@@ -9,7 +9,7 @@
 
   <artifactId>dc-flusswerk-integration-tests</artifactId>
 
-  <name>DigitalCollections: Flusswerk - Integration Tests</name>
+  <name>Flusswerk - Integration Tests</name>
 
   <properties>
     <skip.integration.tests>true</skip.integration.tests>

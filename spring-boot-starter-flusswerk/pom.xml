@@ -9,6 +9,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
+  <name>Flusswerk - Spring Boot Starter</name>
   <artifactId>spring-boot-starter-flusswerk</artifactId>
   <packaging>jar</packaging>
 

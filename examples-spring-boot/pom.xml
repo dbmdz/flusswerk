@@ -9,6 +9,8 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
+  <name>Flusswerk - Examples (Spring Boot)</name>
+
   <artifactId>examples-spring-boot</artifactId>
   <dependencies>
     <dependency>

@@ -11,7 +11,7 @@
 
   <artifactId>examples-plain</artifactId>
 
-  <name>DigitalCollections: Flusswerk - Examples</name>
+  <name>Flusswerk - Examples</name>
 
   <properties>
     <version.spring-boot>2.2.5.RELEASE</version.spring-boot>
