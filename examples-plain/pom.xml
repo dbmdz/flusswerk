@@ -13,10 +13,6 @@
 
   <name>Flusswerk - Examples</name>
 
-  <properties>
-    <version.spring-boot>2.2.5.RELEASE</version.spring-boot>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>ch.qos.logback</groupId>
@@ -40,10 +36,6 @@
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter</artifactId>
-    </dependency>
   </dependencies>
 
   <dependencyManagement>
@@ -59,23 +51,10 @@
   </dependencyManagement>
 
   <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot-maven-plugin</artifactId>
-          <version>${version.spring-boot}</version>
-        </plugin>
-      </plugins>
-    </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

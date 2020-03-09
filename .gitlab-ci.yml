@@ -4,8 +4,10 @@ cache:
   key: "$CI_COMMIT_SHA"
   paths:
     - engine/target/
-    - examples/target/
-    - integration/target/
+    - examples-plain/target/
+    - examples-spring-boot/target/
+    - spring-boot-starter-flusswerk/target/
+    - integration-test/target/
 
 services:
   - "$DIND_IMAGE"
@@ -17,7 +19,7 @@ variables:
   script:
     - docker-compose up -d
     - mvn clean install
-    - mvn -B --projects integration -Pintegration -Dspring.profiles.active=$MAVEN_ACTIVE_PROFILE surefire:test
+    - mvn -B --projects integration-tests -Pintegration -Dspring.profiles.active=$MAVEN_ACTIVE_PROFILE surefire:test
   stage: test
   variables:
     RABBIT_HOST: docker
