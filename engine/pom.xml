@@ -10,7 +10,7 @@
 
   <artifactId>dc-flusswerk-engine</artifactId>
 
-  <name>DigitalCollections: Flusswerk - Engine</name>
+  <name>Flusswerk - Engine</name>
 
   <dependencies>
     <dependency>

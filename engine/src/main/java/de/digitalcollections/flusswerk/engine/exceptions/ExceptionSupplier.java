@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 /**
  * Generic supplier for exceptions.
+ *
  * @param <T>
  */
 public class ExceptionSupplier<T extends Exception> implements Supplier<T> {
