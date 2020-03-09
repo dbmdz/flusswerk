@@ -6,6 +6,7 @@ import de.digitalcollections.flusswerk.engine.model.DefaultMessage;
 import de.digitalcollections.flusswerk.engine.reporting.ProcessReport;
 import de.digitalcollections.flusswerk.spring.boot.example.ComposePerfectGreeting;
 import de.digitalcollections.flusswerk.spring.boot.example.FancyConsoleProcessReport;
+import de.digitalcollections.flusswerk.spring.boot.example.Metrics;
 import de.digitalcollections.flusswerk.spring.boot.example.model.Greeting;
 import de.digitalcollections.flusswerk.spring.boot.starter.MessageImplementation;
 import java.util.function.Consumer;
@@ -21,11 +22,12 @@ public class FlusswerkConfig {
   }
 
   @Bean
-  public Flow<DefaultMessage, String, String> flow() {
+  public Flow<DefaultMessage, String, String> flow(Metrics metrics) {
     return new FlowBuilder<DefaultMessage, String, String>()
         .read(message -> message.get("name"))
         .transform(new ComposePerfectGreeting())
         .write((Consumer<String>) System.out::println)
+        .monitor(metrics)
         .build();
   }
 
