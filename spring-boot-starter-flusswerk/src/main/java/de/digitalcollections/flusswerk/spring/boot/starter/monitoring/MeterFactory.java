@@ -21,7 +21,7 @@ public class MeterFactory {
    * @param flusswerkProperties The properties containing the prefix for the created metrics ("e.g.
    *     workflow.job for workflow.job.items.total"
    * @param app The app name to add as a tag to all metrics
-   * @param registry the
+   * @param registry the Micrometer registry to create the counters
    */
   public MeterFactory(
       FlusswerkProperties flusswerkProperties,
