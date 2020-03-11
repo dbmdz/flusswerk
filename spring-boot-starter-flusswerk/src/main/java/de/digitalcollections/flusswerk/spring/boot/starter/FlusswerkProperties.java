@@ -181,6 +181,7 @@ public class FlusswerkProperties {
     this.processing = processing;
     this.connection = connection;
     this.routing = routing;
+    this.monitoring = monitoring;
   }
 
   public Processing getProcessing() {

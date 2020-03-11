@@ -28,5 +28,4 @@ class MeterFactoryTest {
     Search search = meterRegistry.find(monitoringPrefix + "." + monitoringMetric);
     assertThat(search.counter()).isEqualTo(counter);
   }
-
 }
