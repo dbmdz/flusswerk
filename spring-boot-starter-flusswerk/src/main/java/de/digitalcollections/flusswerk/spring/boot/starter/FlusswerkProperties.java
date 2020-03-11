@@ -1,5 +1,6 @@
 package de.digitalcollections.flusswerk.spring.boot.starter;
 
+import java.util.Objects;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -15,6 +16,8 @@ public class FlusswerkProperties {
   private Connection connection;
 
   private Routing routing;
+
+  private Monitoring monitoring;
 
   /** Configuration related to the processing. */
   public static class Processing {
@@ -153,8 +156,28 @@ public class FlusswerkProperties {
     }
   }
 
+  /** Settings for monitoring endpoints. */
+  public static class Monitoring {
+
+    private String prefix;
+
+    public Monitoring(String prefix) {
+      this.prefix = Objects.requireNonNullElse(prefix, "");
+    }
+
+    public String getPrefix() {
+      return prefix;
+    }
+
+    @Override
+    public String toString() {
+      return StringRepresentation.of(Monitoring.class).property("prefix", prefix).toString();
+    }
+  }
+
   @ConstructorBinding
-  public FlusswerkProperties(Processing processing, Connection connection, Routing routing) {
+  public FlusswerkProperties(
+      Processing processing, Connection connection, Routing routing, Monitoring monitoring) {
     this.processing = processing;
     this.connection = connection;
     this.routing = routing;
@@ -172,12 +195,17 @@ public class FlusswerkProperties {
     return routing;
   }
 
+  public Monitoring getMonitoring() {
+    return monitoring;
+  }
+
   @Override
   public String toString() {
     return StringRepresentation.of(FlusswerkProperties.class)
         .property("processing", processing.toString())
         .property("routing", routing.toString())
         .property("connection", connection.toString())
+        .property("monitoring", monitoring.toString())
         .toString();
   }
 }
