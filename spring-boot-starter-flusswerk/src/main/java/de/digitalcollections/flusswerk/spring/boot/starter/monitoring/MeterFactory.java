@@ -25,9 +25,9 @@ public class MeterFactory {
    */
   public MeterFactory(
       FlusswerkProperties flusswerkProperties,
-      @Value("spring.application.name") String app,
+      @Value("${spring.application.name}") String app,
       MeterRegistry registry) {
-    this.basename = flusswerkProperties.getConnection().getConnectTo();
+    this.basename = flusswerkProperties.getMonitoring().getPrefix();
     this.app = app;
     this.registry = registry;
   }
