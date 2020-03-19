@@ -28,4 +28,8 @@ public class EngineStats {
   public int getAvailableWorkers() {
     return availableWorkers;
   }
+
+  public boolean allWorkersBusy() {
+    return activeWorkers == concurrentWorkers;
+  }
 }

@@ -9,6 +9,8 @@ import static org.mockito.Mockito.when;
 
 import de.digitalcollections.flusswerk.engine.exceptions.FinallyFailedProcessException;
 import de.digitalcollections.flusswerk.engine.exceptions.RetriableProcessException;
+import de.digitalcollections.flusswerk.engine.exceptions.RetryProcessingException;
+import de.digitalcollections.flusswerk.engine.exceptions.StopProcessingException;
 import de.digitalcollections.flusswerk.engine.flow.Flow;
 import de.digitalcollections.flusswerk.engine.flow.FlowBuilder;
 import de.digitalcollections.flusswerk.engine.messagebroker.MessageBroker;
@@ -16,157 +18,94 @@ import de.digitalcollections.flusswerk.engine.model.DefaultMessage;
 import de.digitalcollections.flusswerk.engine.model.Message;
 import de.digitalcollections.flusswerk.engine.reporting.ReportFunction;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@DisplayName("The Engine")
 class EngineTest {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(EngineTest.class);
-
-  private static final String IN = "in";
-
-  private static final String OUT = "out";
-
-  private static final String EXCHANGE = "exchange";
-
-  private static final String DLX = "exchange.retry";
   private MessageBroker messageBroker;
-  private Flow<DefaultMessage, String, String> flowWithoutProblems;
-
-  private Message[] moreMessages(int number) {
-    Message[] messages = new Message[number];
-    for (int i = 0; i < messages.length; i++) {
-      messages[i] = new DefaultMessage("White Room");
-    }
-    return messages;
-  }
 
   @BeforeEach
   void setUp() {
     messageBroker = mock(MessageBroker.class);
-    flowWithoutProblems =
-        new FlowBuilder<DefaultMessage, String, String>()
-            .read(READ_SOME_STRING)
-            .transform(Function.identity())
-            .writeAndSend(WRITE_SOME_STRING)
-            .build();
   }
 
+  private Flow<DefaultMessage, String, String> flowSendingMessage() {
+    return flowWithTransformer(Function.identity());
+  }
+
+  private Flow<DefaultMessage, String, String> flowWithTransformer(Function<String, String> transformer) {
+    return new FlowBuilder<DefaultMessage, String, String>()
+        .read(DefaultMessage::getId)
+        .transform(transformer)
+        .writeAndSend((Function<String, Message>) DefaultMessage::new)
+        .build();
+  }
+
+  private Flow<DefaultMessage, String, String> flowThrowing(Class<? extends RuntimeException> cls) {
+    var message = String.format("Generated %s for unit test", cls.getSimpleName());
+    final RuntimeException exception;
+    try {
+      exception = cls.getConstructor(String.class).newInstance(message);
+    } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+      throw new Error("Could not instantiate exception", e); // If test is broken give up
+    }
+    Function<String, String> transformerWithException = s -> {
+      throw exception;
+    };
+    return flowWithTransformer(transformerWithException);
+  }
+
+
   @Test
+  @DisplayName("should use the maximum number of workers")
   public void engineShouldUseMaxNumberOfWorkers() throws IOException, InterruptedException {
     when(messageBroker.receive()).thenReturn(new DefaultMessage("White Room"));
 
-    Semaphore semaphore = new Semaphore(1);
-    semaphore.drainPermits();
-
-    Flow flow =
-        new FlowBuilder<DefaultMessage, String, String>()
-            .read(DefaultMessage::getId)
-            .transform(
-                s -> {
-                  try {
-                    LOGGER.debug(
-                        "Trying to acquire semaphore, should block (Thread id {})",
-                        Thread.currentThread().getId());
-                    semaphore.acquire(); // Block this worker to count it only once
-                    LOGGER.debug("Got semaphore (Thread id {})", Thread.currentThread().getId());
-                  } catch (InterruptedException e) {
-                    e.printStackTrace();
-                  }
-                  return s;
-                })
-            .writeAndSend((Function<String, Message>) DefaultMessage::new)
-            .build();
-
-    Engine engine = new Engine(messageBroker, flow);
+    Engine engine = new Engine(
+        messageBroker,
+        flowWithTransformer(new ThreadBlockingTransformer<>()) // Force engine to use all worker threads
+    );
     ExecutorService executorService = Executors.newSingleThreadExecutor();
     executorService.submit(engine::start);
 
-    int millisecondsWaited = 0;
-    EngineStats engineStats = engine.getStats();
-    boolean shouldWait = engineStats.getAvailableWorkers() > 0;
-    while (shouldWait) {
-      LOGGER.debug(
-          "Waiting for workers to get busy: {} active, {} free after {} ms",
-          engineStats.getActiveWorkers(),
-          engineStats.getAvailableWorkers(),
-          millisecondsWaited);
-      millisecondsWaited += 100;
+    long start = System.currentTimeMillis();
+    int timeout = 5 * 60 * 300;
+    while (!engine.getStats().allWorkersBusy() && System.currentTimeMillis() - start < timeout) {
       TimeUnit.MILLISECONDS.sleep(100);
-      engineStats = engine.getStats();
-      shouldWait = (engineStats.getAvailableWorkers() > 0) && (millisecondsWaited < 300000);
     }
 
+    var engineStats = engine.getStats();
     assertThat(engineStats.getActiveWorkers())
         .as(
             "There were %d workers expected, but only %d running after waiting for %d ms",
-            engineStats.getConcurrentWorkers(), engineStats.getActiveWorkers(), millisecondsWaited)
+            engineStats.getConcurrentWorkers(),
+            engineStats.getActiveWorkers(),
+            System.currentTimeMillis() - start)
         .isEqualTo(engineStats.getConcurrentWorkers());
 
     engine.stop();
   }
 
-  //  @Test
-  //  public void engineShouldSendMessageToOut() throws IOException, InterruptedException {
-  //    when(messageBroker.receive(any())).thenReturn(withType("White Room"));
-  //
-  //    AtomicInteger messagesSent = new AtomicInteger();
-  //
-  //    Flow<Message, String, String> flow = new FlowBuilder<Message, String, String>()
-  //        .read(Message::getType)
-  //        .transform(s -> {
-  //          messagesSent.incrementAndGet();
-  //          return s;
-  //        })
-  //        .write(DefaultMessage::withType)
-  //        .build();
-  //
-  //    Engine engine = new Engine(messageBroker, flow);
-  //    ExecutorService executorService = Executors.newSingleThreadExecutor();
-  //    executorService.submit(engine::start);
-  //
-  //    int millisecondsWaited = 0;
-  //    while (messagesSent.get() == 0 && millisecondsWaited < 250) {
-  //      millisecondsWaited += 1;
-  //      TimeUnit.MILLISECONDS.sleep(1);
-  //    }
-  //
-  //    ArgumentCaptor<String> routingCaptor = ArgumentCaptor.forClass(String.class);
-  //    ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
-  //    verify(messageBroker, atLeastOnce()).send(routingCaptor.capture(), messageCaptor.capture());
-  //
-  //    assertThat(routingCaptor.getValue()).isEqualTo("out");
-  //    assertThat(messageCaptor.getValue().getType()).isEqualTo("White Room");
-  //    System.out.println(messagesSent.get());
-  //  }
-  private final Function<DefaultMessage, String> READ_SOME_STRING = DefaultMessage::getId;
-
-  private final Function<String, Message> WRITE_SOME_STRING = DefaultMessage::new;
-
   @Test
-  @DisplayName("Engine should reject a message failing processing")
+  @DisplayName("should reject a message when processing fails")
   void processShouldRejectMessageOnFailure() throws IOException {
-    Flow flow =
-        new FlowBuilder<DefaultMessage, String, String>()
-            .read(READ_SOME_STRING)
-            .transform(
-                s -> {
-                  throw new RuntimeException("Aaaaaaah!");
-                })
-            .writeAndSend(WRITE_SOME_STRING)
-            .build();
+    Function<String, String> transformerWithException = s -> {
+      throw new RuntimeException("Aaaaaaah!");
+    };
+
+    var flow = flowWithTransformer(transformerWithException);
 
     Engine engine = new Engine(messageBroker, flow);
-    Message message = new DefaultMessage();
+    Message<String> message = new DefaultMessage();
 
     engine.process(message);
 
@@ -175,10 +114,10 @@ class EngineTest {
   }
 
   @Test
-  @DisplayName("Engine should accept a message processed without failure")
+  @DisplayName("should accept a message processed without failure")
   void processShouldAcceptMessageWithoutFailure() throws IOException {
-    Engine engine = new Engine(messageBroker, flowWithoutProblems);
-    Message message = new DefaultMessage();
+    Engine engine = new Engine(messageBroker, flowSendingMessage());
+    Message<String> message = new DefaultMessage();
     engine.process(message);
 
     verify(messageBroker).ack(message);
@@ -186,74 +125,59 @@ class EngineTest {
   }
 
   @Test
-  @DisplayName("Engine should send a message")
+  @DisplayName("should send a message")
   void processShouldSendMessage() throws IOException {
-    Engine engine = new Engine(messageBroker, flowWithoutProblems);
+    Engine engine = new Engine(messageBroker, flowSendingMessage());
     engine.process(new DefaultMessage());
-
     verify(messageBroker).send(any(Message.class));
   }
 
   @Test
-  @DisplayName("RetriableProcessException shall reject message temporarily")
+  @DisplayName("should stop with retry for RetriableProcessException")
   void retriableProcessExceptionShallRejectTemporarily() throws IOException {
-    Flow flow =
-        new FlowBuilder<DefaultMessage, String, String>()
-            .read(READ_SOME_STRING)
-            .transform(
-                s -> {
-                  throw new RetriableProcessException("Try again after a cup of coffee");
-                })
-            .writeAndSend(WRITE_SOME_STRING)
-            .build();
-
-    Engine engine = new Engine(messageBroker, flow);
-    Message message = new DefaultMessage();
-
+    Engine engine = new Engine(messageBroker, flowThrowing(RetriableProcessException.class));
+    Message<?> message = new DefaultMessage();
     engine.process(message);
 
     verify(messageBroker).reject(message);
   }
 
   @Test
-  @DisplayName("FinallyFailedProcessException shall fail message")
+  @DisplayName("should stop with retry for RetriableProcessException")
+  void retryProcessExceptionShouldRejectTemporarily() throws IOException {
+    Engine engine = new Engine(messageBroker, flowThrowing(RetryProcessingException.class));
+    Message<?> message = new DefaultMessage();
+    engine.process(message);
+
+    verify(messageBroker).reject(message);
+  }
+
+  @Test
+  @DisplayName("should stop processing for good for FinallyFailedProcessException")
   void finallyFailedProcessExceptionShallFailMessage() throws IOException {
-    Flow flow =
-        new FlowBuilder<DefaultMessage, String, String>()
-            .read(READ_SOME_STRING)
-            .transform(
-                s -> {
-                  throw new FinallyFailedProcessException("Never again!");
-                })
-            .writeAndSend(WRITE_SOME_STRING)
-            .build();
+    Engine engine = new Engine(messageBroker, flowThrowing(FinallyFailedProcessException.class));
+    Message<?> message = new DefaultMessage();
+    engine.process(message);
 
-    Engine engine = new Engine(messageBroker, flow);
-    Message message = new DefaultMessage();
-
+    verify(messageBroker).fail(message);
+  }
+  @Test
+  @DisplayName("should stop processing for good for StopProcessingException")
+  void shoudlFailMessageForStopProcessingException() throws IOException {
+    Engine engine = new Engine(messageBroker, flowThrowing(StopProcessingException.class));
+    Message<?> message = new DefaultMessage();
     engine.process(message);
 
     verify(messageBroker).fail(message);
   }
 
   @Test
-  @DisplayName("Functional reporter should work")
+  @DisplayName("should use functional reporter")
   void testFunctionalReporter() throws IOException {
-    Flow flow =
-        new FlowBuilder<DefaultMessage, String, String>()
-            .read(READ_SOME_STRING)
-            .transform(
-                s -> {
-                  throw new FinallyFailedProcessException("Never again!");
-                })
-            .writeAndSend(WRITE_SOME_STRING)
-            .build();
-
     final AtomicBoolean reportHasBeenCalled = new AtomicBoolean(false);
     ReportFunction reportFn = (r, msg, e) -> reportHasBeenCalled.set(true);
-    Engine engine = new Engine(messageBroker, flow, 4, reportFn);
-    Message msg = new DefaultMessage();
-    engine.process(msg);
+    Engine engine = new Engine(messageBroker, flowThrowing(StopProcessingException.class), 4, reportFn);
+    engine.process(new DefaultMessage());
     assertThat(reportHasBeenCalled).isTrue();
   }
 }
