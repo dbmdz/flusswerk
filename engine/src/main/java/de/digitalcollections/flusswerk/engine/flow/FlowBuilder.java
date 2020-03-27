@@ -244,8 +244,54 @@ public class FlowBuilder<M extends Message, R, W> {
     return new FlowBuilder<>();
   }
 
+  /**
+   * Create a FlowBuilder for the specified types. The use of {@link Type} instances allows to
+   * declare types with specific generics (e.g. <code>Type<&lt;List&lt;String&gt;&gt;</code>).
+   * @param message The message type
+   * @param transformerInput The type for the transformer input (=reader output)
+   * @param transformerOutput The type for the transformer output (=writer input)
+   * @param <M> The message type
+   * @param <R> The type for the transformer input (=reader output).
+   * @param <W> The type for the transformer output (=writer input)
+   * @return a new {@link FlowBuilder} instance.
+   */
+  public static <M extends Message, R, W> FlowBuilder<M, R, W> with(
+      Type<M> message, Type<R> transformerInput, Type<W> transformerOutput) {
+    return new FlowBuilder<>();
+  }
+
+  /**
+   *  <p>Create a FlowBuilder for the specified types.</p>
+   *
+   *  <p>This is a convenience API for flows that use the same input datatype for transformer and
+   *  writer</p>
+   *
+   * @param messageClass The message class
+   * @param dataClass The data class
+   * @param <M> The message type
+   * @param <T> The data type
+   * @return a new {@link FlowBuilder} instance
+   */
   public static <M extends Message, T> FlowBuilder<M, T, T> with(
       Class<M> messageClass, Class<T> dataClass) {
+    return new FlowBuilder<>();
+  }
+
+  /**
+   *  <p>Create a FlowBuilder for the specified types. The use of {@link Type} instances allows to
+   *  declare types with specific generics (e.g. <code>Type<&lt;List&lt;String&gt;&gt;</code>).</p>
+   *
+   *  <p>This is a convenience API for flows that use the same input datatype for transformer and
+   *  writer</p>
+   *
+   * @param message The message type
+   * @param data The data type
+   * @param <M> The message type
+   * @param <T> The data type
+   * @return a new {@link FlowBuilder} instance
+   */
+  public static <M extends Message, T> FlowBuilder<M, T, T> with(
+      Type<M> message, Type<T> data) {
     return new FlowBuilder<>();
   }
 
