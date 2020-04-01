@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Transformer that blocks the current thread by trying to acquire a drained semaphor.
+ *
  * @param <T> The data type to operate on.
  */
 class ThreadBlockingTransformer<T> implements UnaryOperator<T> {

@@ -42,7 +42,8 @@ class EngineTest {
     return flowWithTransformer(Function.identity());
   }
 
-  private Flow<DefaultMessage, String, String> flowWithTransformer(Function<String, String> transformer) {
+  private Flow<DefaultMessage, String, String> flowWithTransformer(
+      Function<String, String> transformer) {
     return new FlowBuilder<DefaultMessage, String, String>()
         .read(DefaultMessage::getId)
         .transform(transformer)
@@ -55,25 +56,30 @@ class EngineTest {
     final RuntimeException exception;
     try {
       exception = cls.getConstructor(String.class).newInstance(message);
-    } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+    } catch (InstantiationException
+        | IllegalAccessException
+        | InvocationTargetException
+        | NoSuchMethodException e) {
       throw new Error("Could not instantiate exception", e); // If test is broken give up
     }
-    Function<String, String> transformerWithException = s -> {
-      throw exception;
-    };
+    Function<String, String> transformerWithException =
+        s -> {
+          throw exception;
+        };
     return flowWithTransformer(transformerWithException);
   }
-
 
   @Test
   @DisplayName("should use the maximum number of workers")
   public void engineShouldUseMaxNumberOfWorkers() throws IOException, InterruptedException {
     when(messageBroker.receive()).thenReturn(new DefaultMessage("White Room"));
 
-    Engine engine = new Engine(
-        messageBroker,
-        flowWithTransformer(new ThreadBlockingTransformer<>()) // Force engine to use all worker threads
-    );
+    Engine engine =
+        new Engine(
+            messageBroker,
+            flowWithTransformer(
+                new ThreadBlockingTransformer<>()) // Force engine to use all worker threads
+            );
     ExecutorService executorService = Executors.newSingleThreadExecutor();
     executorService.submit(engine::start);
 
@@ -98,9 +104,10 @@ class EngineTest {
   @Test
   @DisplayName("should reject a message when processing fails")
   void processShouldRejectMessageOnFailure() throws IOException {
-    Function<String, String> transformerWithException = s -> {
-      throw new RuntimeException("Aaaaaaah!");
-    };
+    Function<String, String> transformerWithException =
+        s -> {
+          throw new RuntimeException("Aaaaaaah!");
+        };
 
     var flow = flowWithTransformer(transformerWithException);
 
@@ -161,6 +168,7 @@ class EngineTest {
 
     verify(messageBroker).fail(message);
   }
+
   @Test
   @DisplayName("should stop processing for good for StopProcessingException")
   void shoudlFailMessageForStopProcessingException() throws IOException {
@@ -176,7 +184,8 @@ class EngineTest {
   void testFunctionalReporter() throws IOException {
     final AtomicBoolean reportHasBeenCalled = new AtomicBoolean(false);
     ReportFunction reportFn = (r, msg, e) -> reportHasBeenCalled.set(true);
-    Engine engine = new Engine(messageBroker, flowThrowing(StopProcessingException.class), 4, reportFn);
+    Engine engine =
+        new Engine(messageBroker, flowThrowing(StopProcessingException.class), 4, reportFn);
     engine.process(new DefaultMessage());
     assertThat(reportHasBeenCalled).isTrue();
   }
