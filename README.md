@@ -227,41 +227,8 @@ If incoming and outgoing message classes implement `HasFlowId`, automated propag
 
 ## Message Types
 
-### Using DefaultMessage
-
-The `DefaultMessage` class provides a simple multi-purpose implementation of the `Message`interface. The `id` field is of type `String` and arbitrary key-value-pairs (all of type `String`) are possible.
-
-Example:
-
-```java
-DefaultMessage message = new DefaultMessage("123");
-message.put("color", "red")
-       .put("size", "42")
-       .put("niceness", "very nice");
-```
-
-would be represented as
-
-```json
-{
-  "envelope": {
-    "retries": 0,
-    "timestamp": "2018-03-06T14:25:05.002",
-    "source": null
-  },
-  "id": "123",
-  "data": {
-    "color": "red",
-    "size": "42",
-    "niceness": "very nice"
-  }
-}
-```
-
-
-### How to use a custom message implementation
-
-If your data is more than just an id and a few `String` key-value-pairs it is recommended to use your own message implementation:
+It is recommended to implement your own message class to add type safety, expressiveness and easy to
+understand algorithms:
 
 ```java
 public class ExampleMessage extends FlusswerkMessage<Integer> {
@@ -378,6 +345,76 @@ class Application {
   }
 }
 ```
+
+## Collect metrics
+
+To collect metrics for a flow, one can register a `Consumer<FlowStatus>` with the FlowBuilder:
+
+```java
+Flow flow = new FlowBuilder<DefaultMessage, String, String>()
+        // ...
+        .measure(metrics)
+        .build();
+``` 
+
+If you use Spring Boot, there is a complete support for Micrometer Metrics 
+
+```java
+@Configuration
+class FlusswerkConfig {
+
+  @Bean
+  public Flow<Message, String, String> flow(
+      Reader reader,
+      Transformer transformer,
+      Writer writer,
+      Metrics metrics) {
+    return FlowBuilder.with(Message.class, String.class, String.class)
+        // reader, transformer, writer,...
+        .measure(metrics)
+        .build();
+  }
+
+}
+``` 
+
+To implement your own Metrics Bean, either use
+```java
+class Metrics implements Consumer<FlowStatus> {
+
+  public void accept(FlowStatus flowStatus) {
+    // ...
+  }
+
+}
+``` 
+
+or subclass Flusswerk Metrics-Bean:
+
+```java
+@Component
+public class Metrics
+    extends de.digitalcollections.flusswerk.spring.boot.starter.monitoring.Metrics {
+
+  private final Counter buzz;
+
+  public Metrics(MeterFactory meterFactory) {
+    super(meterFactory);
+
+    // your definitions here
+    this.buzz = meterFactory.counter("buzz");
+  }
+
+  public void accept(FlowStatus flowStatus) {
+    super.accept(flowStatus);
+  }
+
+  public void buzz() {
+    this.buzz.increment();
+  }
+}
+```
+
 
 ## MessageBrokerBuilder properties
 
