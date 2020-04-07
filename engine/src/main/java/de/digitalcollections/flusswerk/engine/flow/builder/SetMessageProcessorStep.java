@@ -20,15 +20,30 @@ public class SetMessageProcessorStep<M extends Message> {
 
   /**
    * Set a message processor that receives a message of type <code>M</code> and returns a {@link
-   * List} of {@link Message}, then moves you to the next builder step.
+   * java.util.Collection} of {@link Message}, then moves you to the next builder step.
    *
    * @param p the message processor to set
    * @return the next reader step
    */
-  public SetConfigurationStep<M, M, M> process(Function<M, Collection<Message>> p) {
+  public SetConfigurationStep<M, M, M> expand(Function<M, Collection<Message>> p) {
     model.setReader(m -> m);
     model.setTransformer(m -> m);
     model.setWriter(p);
+    return new SetConfigurationStep<>(model);
+  }
+
+
+  /**
+   * Set a message processor that receives a message of type <code>M</code> and returns an arbitrary
+   * {@link Message}, then moves you to the next builder step.
+   *
+   * @param p the message processor to set
+   * @return the next reader step
+   */
+  public SetConfigurationStep<M, M, M> process(Function<M, Message> p) {
+    model.setReader(m -> m);
+    model.setTransformer(m -> m);
+    model.setWriter(List::of);
     return new SetConfigurationStep<>(model);
   }
 }
