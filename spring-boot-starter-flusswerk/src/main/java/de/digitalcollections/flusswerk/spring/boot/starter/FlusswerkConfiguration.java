@@ -6,8 +6,11 @@ import de.digitalcollections.flusswerk.engine.messagebroker.MessageBroker;
 import de.digitalcollections.flusswerk.engine.messagebroker.MessageBrokerBuilder;
 import de.digitalcollections.flusswerk.engine.model.Message;
 import de.digitalcollections.flusswerk.engine.reporting.ProcessReport;
+import de.digitalcollections.flusswerk.spring.boot.starter.monitoring.MeterFactory;
+import de.digitalcollections.flusswerk.spring.boot.starter.monitoring.Metrics;
 import java.io.IOException;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -116,6 +119,12 @@ public class FlusswerkConfiguration {
 
     ProcessReport processReport = processReportProvider.getIfAvailable();
     return new Engine(messageBroker, flow, threads, processReport);
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  public Metrics metrics(MeterFactory meterFactory) {
+    return new Metrics(meterFactory);
   }
 
   public static boolean isSet(Object value) {
