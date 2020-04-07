@@ -21,14 +21,14 @@ public class SetConfigurationStep<M extends Message, R, W> {
   }
 
   /**
-   * Sets a process monitor that consumes a {@link FlowStatus} instance every time a message has
-   * been processed. builder step.
+   * Sets a process metrics monitor that consumes a {@link FlowStatus} instance every time a message
+   * has been processed. builder step.
    *
-   * @param m the process monitor
+   * @param m the process metrics monitor
    * @return the next step (setting configuration or build the flow)
    */
-  public SetConfigurationStep<M, R, W> monitor(Consumer<FlowStatus> m) {
-    model.setMonitor(m);
+  public SetConfigurationStep<M, R, W> metrics(Consumer<FlowStatus> m) {
+    model.setMetrics(m);
     return this;
   }
 
@@ -60,6 +60,6 @@ public class SetConfigurationStep<M extends Message, R, W> {
         // the builder
         model.getCleanup(),
         model.isPropagateFlowIds(),
-        model.getMonitor());
+        model.getMetrics());
   }
 }

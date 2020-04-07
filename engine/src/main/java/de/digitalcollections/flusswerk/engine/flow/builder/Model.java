@@ -10,7 +10,7 @@ class Model<M extends Message, R, W> {
   private Function<M, R> reader = null;
   private Function<R, W> transformer = null;
   private Function<W, Collection<Message>> writer = null;
-  private Consumer<FlowStatus> monitor = null;
+  private Consumer<FlowStatus> metrics = null;
   private Runnable cleanup = null;
   private boolean propagateFlowIds = false;
 
@@ -38,12 +38,12 @@ class Model<M extends Message, R, W> {
     this.writer = writer;
   }
 
-  public Consumer<FlowStatus> getMonitor() {
-    return monitor;
+  public Consumer<FlowStatus> getMetrics() {
+    return metrics;
   }
 
-  public void setMonitor(Consumer<FlowStatus> monitor) {
-    this.monitor = monitor;
+  public void setMetrics(Consumer<FlowStatus> monitor) {
+    this.metrics = monitor;
   }
 
   public Runnable getCleanup() {
