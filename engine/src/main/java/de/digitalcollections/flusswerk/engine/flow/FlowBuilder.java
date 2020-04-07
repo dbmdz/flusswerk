@@ -212,8 +212,25 @@ public class FlowBuilder<M extends Message, R, W> {
    * @param consumer The consumer to be executed to record status.
    * @return This {@link FlowBuilder} instance for further configuration or creation of the {@link
    *     Flow}.
+   * @deprecated use <code>measure</code> instead
    */
+  @Deprecated
   public FlowBuilder<M, R, W> monitor(Consumer<FlowStatus> consumer) {
+    requireNonNull(consumer, "The runnable cannot be null");
+    this.monitor = consumer;
+    return this;
+  }
+
+  /**
+   * Sets a callback that is called after all processing and cleanup is finished to collect data on
+   * flow execution. Metrics provided by flow status are provided by Flusswerk and would be
+   * inaccessible otherwise.
+   *
+   * @param consumer The consumer to be executed to record status.
+   * @return This {@link FlowBuilder} instance for further configuration or creation of the {@link
+   *     Flow}.
+   */
+  public FlowBuilder<M, R, W> measure(Consumer<FlowStatus> consumer) {
     requireNonNull(consumer, "The runnable cannot be null");
     this.monitor = consumer;
     return this;
