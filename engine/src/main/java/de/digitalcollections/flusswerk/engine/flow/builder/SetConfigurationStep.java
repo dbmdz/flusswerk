@@ -45,6 +45,19 @@ public class SetConfigurationStep<M extends Message, R, W> {
   }
 
   /**
+   * Sets if flow ids should be propagated from input to output messages. This will be replaced by a
+   * more automatic process in the next Flusswerk version and is here for compatibility reasons
+   * only.
+   *
+   * @param p true, if flow ids should be propagated
+   * @return the next step (setting configuration or build the flow)
+   */
+  public SetConfigurationStep<M, R, W> propagateFlowIds(boolean p) {
+    model.setPropagateFlowIds(p);
+    return this;
+  }
+
+  /**
    * Build the new flow.
    *
    * @return the new flow
