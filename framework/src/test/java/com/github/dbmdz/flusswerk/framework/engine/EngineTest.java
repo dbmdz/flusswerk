@@ -1,4 +1,4 @@
-package com.github.dbmdz.flusswerk.framework;
+package com.github.dbmdz.flusswerk.framework.engine;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;

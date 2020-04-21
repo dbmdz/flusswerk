@@ -1,4 +1,4 @@
-package com.github.dbmdz.flusswerk.framework;
+package com.github.dbmdz.flusswerk.framework.engine;
 
 import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;

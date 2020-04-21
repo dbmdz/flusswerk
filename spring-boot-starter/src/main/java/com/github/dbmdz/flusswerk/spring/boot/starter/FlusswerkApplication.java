@@ -1,6 +1,6 @@
 package com.github.dbmdz.flusswerk.spring.boot.starter;
 
-import com.github.dbmdz.flusswerk.framework.Engine;
+import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

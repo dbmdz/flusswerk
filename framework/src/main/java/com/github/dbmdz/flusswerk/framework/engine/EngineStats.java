@@ -1,4 +1,4 @@
-package com.github.dbmdz.flusswerk.framework;
+package com.github.dbmdz.flusswerk.framework.engine;
 
 public class EngineStats {
 
