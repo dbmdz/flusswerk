@@ -4,4 +4,6 @@
 *.iml
 .project
 .settings/
+site/
 target/
+.vscode/
