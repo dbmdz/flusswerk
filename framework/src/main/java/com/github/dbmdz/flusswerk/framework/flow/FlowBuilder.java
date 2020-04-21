@@ -2,7 +2,7 @@ package com.github.dbmdz.flusswerk.framework.flow;
 
 import static java.util.Objects.requireNonNull;
 
-import com.github.dbmdz.flusswerk.framework.Engine;
+import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.model.HasFlowId;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.util.Collection;

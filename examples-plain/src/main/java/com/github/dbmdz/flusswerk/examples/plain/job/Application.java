@@ -1,6 +1,6 @@
 package com.github.dbmdz.flusswerk.examples.plain.job;
 
-import com.github.dbmdz.flusswerk.framework.Engine;
+import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.exceptions.WorkflowSetupException;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.flow.FlowBuilder;

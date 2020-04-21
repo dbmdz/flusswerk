@@ -2,7 +2,7 @@ package com.github.dbmdz.flusswerk.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.github.dbmdz.flusswerk.framework.Engine;
+import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.flow.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;

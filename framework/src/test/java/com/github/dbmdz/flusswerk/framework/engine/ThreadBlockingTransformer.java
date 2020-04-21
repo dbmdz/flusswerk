@@ -1,4 +1,4 @@
-package com.github.dbmdz.flusswerk.framework;
+package com.github.dbmdz.flusswerk.framework.engine;
 
 import java.util.concurrent.Semaphore;
 import java.util.function.UnaryOperator;

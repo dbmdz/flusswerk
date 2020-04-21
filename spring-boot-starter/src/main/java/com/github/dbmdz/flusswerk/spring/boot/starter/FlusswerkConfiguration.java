@@ -1,6 +1,6 @@
 package com.github.dbmdz.flusswerk.spring.boot.starter;
 
-import com.github.dbmdz.flusswerk.framework.Engine;
+import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBrokerBuilder;
