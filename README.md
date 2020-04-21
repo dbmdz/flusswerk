@@ -394,7 +394,7 @@ or subclass Flusswerk Metrics-Bean:
 ```java
 @Component
 public class Metrics
-    extends de.digitalcollections.flusswerk.spring.boot.starter.monitoring.Metrics {
+    extends Metrics {
 
   private final Counter buzz;
 
