@@ -1,0 +1,15 @@
+package com.github.dbmdz.flusswerk.framework.messagebroker;
+
+import com.rabbitmq.client.Address;
+import java.util.List;
+
+public interface ConnectionConfig {
+
+  String getUsername();
+
+  String getPassword();
+
+  String getVirtualHost();
+
+  List<Address> getAddresses();
+}
