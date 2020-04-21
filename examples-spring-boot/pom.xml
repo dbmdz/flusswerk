@@ -3,9 +3,9 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
-    <artifactId>dc-flusswerk-parent</artifactId>
-    <groupId>de.digitalcollections.flusswerk</groupId>
-    <version>3.2.0</version>
+    <groupId>com.github.dbmdz.flusswerk</groupId>
+    <artifactId>flusswerk</artifactId>
+    <version>4.0.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -14,8 +14,8 @@
   <artifactId>examples-spring-boot</artifactId>
   <dependencies>
     <dependency>
-      <groupId>de.digitalcollections.flusswerk</groupId>
-      <artifactId>spring-boot-starter-flusswerk</artifactId>
+      <groupId>com.github.dbmdz.flusswerk</groupId>
+      <artifactId>spring-boot-starter</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>

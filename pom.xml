@@ -2,9 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>de.digitalcollections.flusswerk</groupId>
-  <artifactId>dc-flusswerk-parent</artifactId>
-  <version>3.2.0</version>
+  <groupId>com.github.dbmdz.flusswerk</groupId>
+  <artifactId>flusswerk</artifactId>
+  <version>4.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Flusswerk</name>
@@ -52,11 +52,11 @@
   </scm>
 
   <modules>
-    <module>engine</module>
+    <module>framework</module>
     <module>examples-plain</module>
     <module>examples-spring-boot</module>
     <module>integration-tests</module>
-    <module>spring-boot-starter-flusswerk</module>
+    <module>spring-boot-starter</module>
   </modules>
 
   <properties>
@@ -115,8 +115,8 @@
         <version>${version.amqp-client}</version>
       </dependency>
       <dependency>
-        <groupId>de.digitalcollections.flusswerk</groupId>
-        <artifactId>dc-flusswerk-engine</artifactId>
+        <groupId>com.github.dbmdz.flusswerk</groupId>
+        <artifactId>framework</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

@@ -13,9 +13,9 @@ Maven:
 
 ```xml
 <dependency>
-  <groupId>de.digitalcollections.flusswerk</groupId>
-  <artifactId>dc-flusswerk-engine</artifactId>
-  <version>2.2.1</version>
+  <groupId>com.github.dbmdz.flusswerk</groupId>
+  <artifactId>framework</artifactId>
+  <version>4.0.0</version>
 </dependency>
 ```
 
