@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 /**
  * Collect base metrics for a single flow - did the execution have errors and how long does it take?
  *
- * <p>Used for metrics handlers in {@link FlowBuilder#monitor(Consumer)}
+ * <p>Used for metrics handlers in {@link FlowBuilder#measure(Consumer)}
  */
 public class FlowStatus {
 
