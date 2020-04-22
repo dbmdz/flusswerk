@@ -1,7 +1,6 @@
 package com.github.dbmdz.flusswerk.examples.plain.job;
 
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
-import com.github.dbmdz.flusswerk.framework.exceptions.WorkflowSetupException;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.flow.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
@@ -43,7 +42,7 @@ public class Application {
     engine.start();
   }
 
-  public static void main(String[] args) throws IOException, WorkflowSetupException {
+  public static void main(String[] args) throws IOException {
     Application application = new Application();
     application.run();
   }

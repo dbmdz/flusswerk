@@ -7,8 +7,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.github.dbmdz.flusswerk.framework.exceptions.FinallyFailedProcessException;
-import com.github.dbmdz.flusswerk.framework.exceptions.RetriableProcessException;
 import com.github.dbmdz.flusswerk.framework.exceptions.RetryProcessingException;
 import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
@@ -141,32 +139,12 @@ class EngineTest {
 
   @Test
   @DisplayName("should stop with retry for RetriableProcessException")
-  void retriableProcessExceptionShallRejectTemporarily() throws IOException {
-    Engine engine = new Engine(messageBroker, flowThrowing(RetriableProcessException.class));
-    Message<?> message = new DefaultMessage();
-    engine.process(message);
-
-    verify(messageBroker).reject(message);
-  }
-
-  @Test
-  @DisplayName("should stop with retry for RetriableProcessException")
   void retryProcessExceptionShouldRejectTemporarily() throws IOException {
     Engine engine = new Engine(messageBroker, flowThrowing(RetryProcessingException.class));
     Message<?> message = new DefaultMessage();
     engine.process(message);
 
     verify(messageBroker).reject(message);
-  }
-
-  @Test
-  @DisplayName("should stop processing for good for FinallyFailedProcessException")
-  void finallyFailedProcessExceptionShallFailMessage() throws IOException {
-    Engine engine = new Engine(messageBroker, flowThrowing(FinallyFailedProcessException.class));
-    Message<?> message = new DefaultMessage();
-    engine.process(message);
-
-    verify(messageBroker).fail(message);
   }
 
   @Test

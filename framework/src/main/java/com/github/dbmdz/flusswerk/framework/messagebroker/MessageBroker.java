@@ -3,7 +3,6 @@ package com.github.dbmdz.flusswerk.framework.messagebroker;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.model.Envelope;
 import com.github.dbmdz.flusswerk.framework.model.Message;
-import com.github.dbmdz.flusswerk.framework.util.Maps;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -133,13 +132,13 @@ public class MessageBroker {
     for (String inputQueue : routingConfig.getReadFrom()) {
       FailurePolicy failurePolicy = routingConfig.getFailurePolicy(inputQueue);
       rabbitClient.declareQueue(
-          inputQueue, exchange, inputQueue, Maps.of(DEAD_LETTER_EXCHANGE, deadLetterExchange));
+          inputQueue, exchange, inputQueue, Map.of(DEAD_LETTER_EXCHANGE, deadLetterExchange));
       if (failurePolicy.getRetryRoutingKey() != null) {
         rabbitClient.declareQueue(
             failurePolicy.getRetryRoutingKey(),
             deadLetterExchange,
             inputQueue,
-            Maps.of(MESSAGE_TTL, config.getDeadLetterWait(), DEAD_LETTER_EXCHANGE, exchange));
+            Map.of(MESSAGE_TTL, config.getDeadLetterWait(), DEAD_LETTER_EXCHANGE, exchange));
       }
       if (failurePolicy.getFailedRoutingKey() != null) {
         rabbitClient.declareQueue(
@@ -156,7 +155,7 @@ public class MessageBroker {
         routingConfig.getWriteTo(),
         routingConfig.getExchange(),
         routingConfig.getWriteTo(),
-        Maps.of(DEAD_LETTER_EXCHANGE, routingConfig.getDeadLetterExchange()));
+        Map.of(DEAD_LETTER_EXCHANGE, routingConfig.getDeadLetterExchange()));
   }
 
   /**
