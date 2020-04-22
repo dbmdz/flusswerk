@@ -3,7 +3,6 @@ package com.github.dbmdz.flusswerk.framework.messagebroker;
 import static java.util.Objects.requireNonNull;
 
 import com.fasterxml.jackson.databind.Module;
-import com.github.dbmdz.flusswerk.framework.exceptions.WorkflowSetupException;
 import com.github.dbmdz.flusswerk.framework.jackson.DefaultMixin;
 import com.github.dbmdz.flusswerk.framework.jackson.SingleClassModule;
 import com.github.dbmdz.flusswerk.framework.model.FlusswerkMessage;
@@ -129,21 +128,6 @@ public class MessageBrokerBuilder {
   }
 
   /**
-   * Sets a Jackson mixin for a custom message implementation.
-   *
-   * @param messageClass The custom message implementation you want to use.
-   * @param messageMixin The mixin to serialize/deserialize this message.
-   * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
-   * @deprecated Replaced by {@link #useMessageClass(Class)} and {@link #useMessageClass(Class,
-   *     Class)}
-   */
-  @Deprecated
-  public MessageBrokerBuilder messageMapping(
-      Class<? extends Message<?>> messageClass, Class<?> messageMixin) {
-    return useMessageClass(messageClass, messageMixin);
-  }
-
-  /**
    * Registers a custom {@link Message} implementation (usually a subclass of {@link
    * FlusswerkMessage}).
    *
@@ -200,14 +184,14 @@ public class MessageBrokerBuilder {
    * RabbitMQ.
    *
    * @return A new MessageBroker
-   * @throws WorkflowSetupException If connection to RabbitMQ fails.
+   * @throws RuntimeException If communication with RabbitMQ fails.
    */
-  public MessageBroker build() throws WorkflowSetupException {
+  public MessageBroker build() {
     routingConfig.complete();
     try {
       return build(new RabbitConnection(connectionConfig));
     } catch (IOException | RuntimeException e) {
-      throw new WorkflowSetupException(e);
+      throw new RuntimeException("Error initializing communications", e);
     }
   }
 

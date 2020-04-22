@@ -44,11 +44,6 @@ public class Job<M, R, W> {
     writer.accept(dataTransformed);
   }
 
-  @Deprecated
-  public M getMessage() {
-    return message;
-  }
-
   public Collection<Message> getResult() {
     if (result == null) {
       return Collections.emptyList();

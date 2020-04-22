@@ -6,9 +6,9 @@ import com.github.dbmdz.flusswerk.framework.model.DefaultMessage;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import com.github.dbmdz.flusswerk.spring.boot.example.ComposePerfectGreeting;
 import com.github.dbmdz.flusswerk.spring.boot.example.FancyConsoleProcessReport;
-import com.github.dbmdz.flusswerk.spring.boot.example.Metrics;
 import com.github.dbmdz.flusswerk.spring.boot.example.model.Greeting;
 import com.github.dbmdz.flusswerk.spring.boot.starter.MessageImplementation;
+import com.github.dbmdz.flusswerk.spring.boot.starter.monitoring.BaseMetrics;
 import java.util.function.Consumer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,12 +22,12 @@ public class FlusswerkConfig {
   }
 
   @Bean
-  public Flow<DefaultMessage, String, String> flow(Metrics metrics) {
+  public Flow<DefaultMessage, String, String> flow(BaseMetrics metrics) {
     return new FlowBuilder<DefaultMessage, String, String>()
         .read(message -> message.get("name"))
         .transform(new ComposePerfectGreeting())
         .write((Consumer<String>) System.out::println)
-        .monitor(metrics)
+        .measure(metrics)
         .build();
   }
 

@@ -1,6 +1,5 @@
 package com.github.dbmdz.flusswerk.examples.plain.justsending;
 
-import com.github.dbmdz.flusswerk.framework.exceptions.WorkflowSetupException;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBrokerBuilder;
 import com.github.dbmdz.flusswerk.framework.model.DefaultMessage;
@@ -18,7 +17,7 @@ public class Application {
     }
   }
 
-  public static void main(String[] args) throws IOException, WorkflowSetupException {
+  public static void main(String[] args) throws IOException {
     Application application = new Application();
     application.run();
   }
