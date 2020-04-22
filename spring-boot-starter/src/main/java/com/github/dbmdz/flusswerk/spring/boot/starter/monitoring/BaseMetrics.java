@@ -8,12 +8,12 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 /** Collect metrics on flow execution. */
-public class Metrics implements Consumer<FlowStatus> {
+public class BaseMetrics implements Consumer<FlowStatus> {
 
   private final Map<Status, Counter> executionTime;
   private final Map<Status, Counter> processedItems;
 
-  public Metrics(MeterFactory meterFactory) {
+  public BaseMetrics(MeterFactory meterFactory) {
     this.executionTime = new EnumMap<>(Status.class);
     this.processedItems = new EnumMap<>(Status.class);
 
