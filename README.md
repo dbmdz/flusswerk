@@ -389,12 +389,11 @@ class Metrics implements Consumer<FlowStatus> {
 }
 ``` 
 
-or subclass Flusswerk Metrics-Bean:
+or subclass Flusswerk BaseMetrics-Bean:
 
 ```java
 @Component
-public class Metrics
-    extends Metrics {
+public class Metrics extends BaseMetrics {
 
   private final Counter buzz;
 
@@ -405,8 +404,12 @@ public class Metrics
     this.buzz = meterFactory.counter("buzz");
   }
 
+  @Override
   public void accept(FlowStatus flowStatus) {
     super.accept(flowStatus);
+    // do something with flowStatus (you don't have to
+    // override this method if you don't need flowStatus)
+    // ...
   }
 
   public void buzz() {

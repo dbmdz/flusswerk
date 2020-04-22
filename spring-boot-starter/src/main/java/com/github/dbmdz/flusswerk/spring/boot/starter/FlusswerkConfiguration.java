@@ -6,8 +6,8 @@ import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBrokerBuilder;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
+import com.github.dbmdz.flusswerk.spring.boot.starter.monitoring.BaseMetrics;
 import com.github.dbmdz.flusswerk.spring.boot.starter.monitoring.MeterFactory;
-import com.github.dbmdz.flusswerk.spring.boot.starter.monitoring.Metrics;
 import java.io.IOException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -123,8 +123,8 @@ public class FlusswerkConfiguration {
 
   @Bean
   @ConditionalOnMissingBean
-  public Metrics metrics(MeterFactory meterFactory) {
-    return new Metrics(meterFactory);
+  public BaseMetrics metrics(MeterFactory meterFactory) {
+    return new BaseMetrics(meterFactory);
   }
 
   public static boolean isSet(Object value) {
