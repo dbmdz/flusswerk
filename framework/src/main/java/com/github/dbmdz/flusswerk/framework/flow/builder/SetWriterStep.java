@@ -16,7 +16,7 @@ import java.util.function.Function;
  */
 public class SetWriterStep<M extends Message, R, W> {
 
-  private Model<M, R, W> model;
+  private final Model<M, R, W> model;
 
   public SetWriterStep(Model<M, R, W> model) {
     this.model = model;

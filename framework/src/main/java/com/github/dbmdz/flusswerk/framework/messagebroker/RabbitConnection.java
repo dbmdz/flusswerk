@@ -68,6 +68,7 @@ class RabbitConnection {
   }
 
   public boolean isOk() {
+    // FIXME should it be "return channel.getConnection().isOpen()"? If not, comment!
     channel.getConnection().isOpen();
     return true;
   }

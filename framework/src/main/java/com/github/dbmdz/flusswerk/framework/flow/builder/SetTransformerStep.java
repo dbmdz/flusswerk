@@ -12,7 +12,7 @@ import java.util.function.Function;
  */
 public class SetTransformerStep<M extends Message, R, W> {
 
-  private Model<M, R, W> model;
+  private final Model<M, R, W> model;
 
   public SetTransformerStep(Model<M, R, W> model) {
     this.model = model;

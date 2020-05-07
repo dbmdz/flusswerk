@@ -12,7 +12,7 @@ import java.util.function.Function;
  */
 public class SetReaderStep<M extends Message, R, W> {
 
-  private Model<M, R, W> model;
+  private final Model<M, R, W> model;
 
   SetReaderStep(Model<M, R, W> model) {
     this.model = model;

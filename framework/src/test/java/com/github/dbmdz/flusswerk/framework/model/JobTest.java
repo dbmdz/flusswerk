@@ -40,9 +40,6 @@ class JobTest {
     return () -> new RuntimeException(message);
   }
 
-  @BeforeEach
-  void setUp() {}
-
   @Test
   @DisplayName("Read should call the read function")
   void read() {

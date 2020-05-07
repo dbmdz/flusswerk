@@ -2,9 +2,9 @@ package com.github.dbmdz.flusswerk.framework.messagebroker;
 
 public class FailurePolicy {
 
-  private String inputQueue;
+  private final String inputQueue;
 
-  private int maxRetries;
+  private final int maxRetries;
 
   private String failedRoutingKey;
 

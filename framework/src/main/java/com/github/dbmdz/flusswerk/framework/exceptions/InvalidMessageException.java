@@ -4,7 +4,7 @@ import com.github.dbmdz.flusswerk.framework.model.Message;
 
 public class InvalidMessageException extends Exception {
 
-  private Message message;
+  private final Message message;
 
   public InvalidMessageException(Message message, String msg) {
     super(msg);

@@ -3,7 +3,7 @@ package com.github.dbmdz.flusswerk.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
-import com.github.dbmdz.flusswerk.framework.flow.FlowBuilder;
+import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.util.concurrent.ExecutorService;
@@ -37,13 +37,13 @@ public class DeadletteringTest {
   public void failingMessagesShouldEndInFailedQueue() throws Exception {
     MessageBroker messageBroker = backend.getMessageBroker();
     var flow =
-        new FlowBuilder<>()
-            .read(Message::toString)
-            .transform(
+        FlowBuilder.flow(Message.class, String.class, String.class)
+            .reader(Message::toString)
+            .transformer(
                 s -> {
                   throw new RuntimeException("Fail!");
                 })
-            .write(s -> new Message(s.toString()))
+            .writerSendingMessage(s -> new Message(s))
             .build();
 
     Engine engine = new Engine(messageBroker, flow);
