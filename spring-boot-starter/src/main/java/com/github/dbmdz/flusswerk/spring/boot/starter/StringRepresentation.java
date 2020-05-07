@@ -3,7 +3,7 @@ package com.github.dbmdz.flusswerk.spring.boot.starter;
 /** Creates a nice string representation for hierarchical data structures. */
 class StringRepresentation {
 
-  private StringBuilder stringBuilder;
+  private final StringBuilder stringBuilder;
 
   private StringRepresentation(String name) {
     stringBuilder = new StringBuilder(name);

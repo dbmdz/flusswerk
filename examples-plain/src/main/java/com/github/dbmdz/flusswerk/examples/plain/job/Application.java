@@ -1,14 +1,12 @@
 package com.github.dbmdz.flusswerk.examples.plain.job;
 
+import com.github.dbmdz.flusswerk.examples.plain.AppMessage;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.flow.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBrokerBuilder;
-import com.github.dbmdz.flusswerk.framework.model.DefaultMessage;
-import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.io.IOException;
-import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,16 +27,15 @@ public class Application {
             .writeTo("someOutputQueue")
             .build();
 
-    Flow<DefaultMessage, String, String> flow =
-        new FlowBuilder<DefaultMessage, String, String>()
-            .read(DefaultMessage::getId)
+    Flow<AppMessage, String, String> flow =
+        new FlowBuilder<AppMessage, String, String>()
+            .read(AppMessage::getId)
             .transform(new UppercaseTransformer(true))
-            .writeAndSend((Function<String, Message>) DefaultMessage::new)
+            .writeAndSend(AppMessage::new)
             .build();
 
     Engine engine = new Engine(messageBroker, flow);
-    messageBroker.send(
-        "someInputQueue", new DefaultMessage("lowercase-text").put("text", "Shibuyara"));
+    messageBroker.send("someInputQueue", new AppMessage("lowercase-text"));
     engine.start();
   }
 

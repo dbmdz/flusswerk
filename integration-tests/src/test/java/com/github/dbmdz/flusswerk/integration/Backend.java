@@ -66,9 +66,9 @@ public class Backend {
    * @throws InterruptedException if waiting is interrupted
    * @throws InvalidMessageException if the message cannot be parsed
    */
-  public Message<?> waitForMessageFrom(String queue, int timeout)
+  public Message waitForMessageFrom(String queue, int timeout)
       throws IOException, InterruptedException, InvalidMessageException {
-    Message<?> message = null;
+    Message message = null;
     long time = System.currentTimeMillis();
     while (message == null && (System.currentTimeMillis() - time < timeout)) {
       message = messageBroker.receive(queue);

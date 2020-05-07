@@ -6,8 +6,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.github.dbmdz.flusswerk.framework.flow.builder.TestMessage;
 import com.github.dbmdz.flusswerk.framework.model.Envelope;
-import com.github.dbmdz.flusswerk.framework.model.FlowMessage;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,17 +32,17 @@ class DefaultMixinTest {
   @Test
   @DisplayName("Deserialization should ignore unknown fields")
   void shouldIgnoreUnknownFields() throws IOException {
-    FlowMessage message = new FlowMessage("abc123", "flow-3000");
+    Message message = new Message("tracing-123");
     String json = objectMapper.writeValueAsString(message);
     json = json.substring(0, json.length() - 1) + ", \"stupidField\": 0}";
-    FlowMessage restored = objectMapper.readValue(json, FlowMessage.class);
-    assertThat(message.getId()).isEqualTo(restored.getId());
+    Message restored = objectMapper.readValue(json, Message.class);
+    assertThat(message.getTracingId()).isEqualTo(restored.getTracingId());
   }
 
   @Test
   @DisplayName("Should serialize Envelope.retries")
   void shouldSerializeRetries() throws JsonProcessingException {
-    FlowMessage message = new FlowMessage("abc123", "flow-3000");
+    TestMessage message = new TestMessage("abc123", "flow-3000");
     message.getEnvelope().setRetries(42);
     assertThat(objectMapper.writeValueAsString(message)).contains("42");
   }
@@ -50,20 +50,10 @@ class DefaultMixinTest {
   @Test
   @DisplayName("Should deserialize Envelope.retries")
   void shouldDeserializeRetries() throws IOException {
-    FlowMessage message = new FlowMessage("abc123", "flow-3000");
+    Message message = new Message("tracing-123");
     message.getEnvelope().setRetries(42);
     Message deserialized =
-        objectMapper.readValue(objectMapper.writeValueAsString(message), FlowMessage.class);
+        objectMapper.readValue(objectMapper.writeValueAsString(message), Message.class);
     assertThat(deserialized.getEnvelope().getRetries()).isEqualTo(42);
-  }
-
-  @Test
-  @DisplayName("Should serialize and deserialize arbitrary values")
-  void shouldSerializeAndDeserializeArbitraryValues() throws IOException {
-    FlowMessage message = new FlowMessage("abc123", "flow-3000");
-    message.put("purpose of life", "42");
-    String json = objectMapper.writeValueAsString(message);
-    FlowMessage deserialized = objectMapper.readValue(json, FlowMessage.class);
-    assertThat(deserialized.get("purpose of life")).isEqualTo("42");
   }
 }

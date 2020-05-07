@@ -2,14 +2,11 @@ package com.github.dbmdz.flusswerk.framework;
 
 import static java.util.Objects.requireNonNull;
 
-import com.github.dbmdz.flusswerk.framework.model.Envelope;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CustomMessage implements Message<Long> {
-
-  private Envelope envelope;
+public class CustomMessage extends Message {
 
   private Map<String, String> data;
 
@@ -22,14 +19,8 @@ public class CustomMessage implements Message<Long> {
   }
 
   public CustomMessage(Long id) {
-    this.envelope = new Envelope();
     this.data = new HashMap<>();
     this.id = id;
-  }
-
-  @Override
-  public Envelope getEnvelope() {
-    return envelope;
   }
 
   public Map<String, String> getData() {
@@ -49,7 +40,6 @@ public class CustomMessage implements Message<Long> {
     return data.get(key);
   }
 
-  @Override
   public Long getId() {
     return id;
   }

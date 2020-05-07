@@ -10,7 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
-import com.github.dbmdz.flusswerk.framework.model.DefaultMessage;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.io.IOException;
 import java.util.Arrays;
@@ -25,7 +24,7 @@ import org.junit.jupiter.api.Test;
 
 class MessageBrokerTest {
 
-  private MessageBrokerConfig config = new MessageBrokerConfigImpl();
+  private final MessageBrokerConfig config = new MessageBrokerConfigImpl();
 
   private MessageBroker messageBroker;
 
@@ -46,7 +45,7 @@ class MessageBrokerTest {
 
     rabbitClient = mock(RabbitClient.class);
     messageBroker = new MessageBroker(config, routingConfig, rabbitClient);
-    message = new DefaultMessage("Hey");
+    message = new Message("Hey");
     message.getEnvelope().setSource("some.input.queue");
   }
 
@@ -88,7 +87,7 @@ class MessageBrokerTest {
   @Test
   @DisplayName("Should send a message to the output queue")
   void sendShouldRouteMessageToOutputQueue() throws IOException {
-    messageBroker.send(new DefaultMessage("test"));
+    messageBroker.send(new Message("test"));
     verify(rabbitClient).send(any(), eq(routingConfig.getWriteTo()), any());
   }
 
@@ -97,8 +96,7 @@ class MessageBrokerTest {
   void sendMultipleMessagesShouldRouteMessagesToSpecifiedQueue() throws IOException {
     String queue = "specified.queue";
     List<Message> messages =
-        Arrays.asList(
-            new DefaultMessage("test"), new DefaultMessage("test"), new DefaultMessage("test"));
+        Arrays.asList(new Message("test"), new Message("test"), new Message("test"));
     messageBroker.send(queue, messages);
     verify(rabbitClient, times(messages.size())).send(any(), eq(queue), any());
   }
@@ -175,7 +173,7 @@ class MessageBrokerTest {
   void handleInvalidMessage() throws IOException, InvalidMessageException {
     String invalidMessageBody = "invalid";
 
-    Message invalidMessage = new DefaultMessage();
+    Message invalidMessage = new Message();
     invalidMessage.getEnvelope().setDeliveryTag(1);
     invalidMessage.getEnvelope().setBody(invalidMessageBody);
     invalidMessage.getEnvelope().setSource("some.input.queue");

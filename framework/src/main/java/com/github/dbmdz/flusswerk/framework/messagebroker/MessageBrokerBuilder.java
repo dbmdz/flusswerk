@@ -5,7 +5,6 @@ import static java.util.Objects.requireNonNull;
 import com.fasterxml.jackson.databind.Module;
 import com.github.dbmdz.flusswerk.framework.jackson.DefaultMixin;
 import com.github.dbmdz.flusswerk.framework.jackson.SingleClassModule;
-import com.github.dbmdz.flusswerk.framework.model.FlusswerkMessage;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.io.IOException;
 
@@ -128,25 +127,24 @@ public class MessageBrokerBuilder {
   }
 
   /**
-   * Registers a custom {@link Message} implementation (usually a subclass of {@link
-   * FlusswerkMessage}).
+   * Registers a custom {@link Message} implementation.
    *
    * @param cls The custom message implementation you want to use.
    * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
    */
-  public MessageBrokerBuilder useMessageClass(Class<? extends Message<?>> cls) {
+  public MessageBrokerBuilder useMessageClass(Class<? extends Message> cls) {
     return useMessageClass(cls, DefaultMixin.class);
   }
 
   /**
-   * Registers a custom {@link Message} implementation (usually a subclass of {@link
-   * FlusswerkMessage}) and custom Jackson mixin for more fine grained serialization control.
+   * Registers a custom {@link Message} implementation) and custom Jackson mixin for more fine
+   * grained serialization control.
    *
    * @param cls The custom message implementation you want to use.
    * @param mixin The Jackson mixin to use
    * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
    */
-  public MessageBrokerBuilder useMessageClass(Class<? extends Message<?>> cls, Class<?> mixin) {
+  public MessageBrokerBuilder useMessageClass(Class<? extends Message> cls, Class<?> mixin) {
     config.addJacksonModule(new SingleClassModule(cls, mixin));
     config.setMessageClass(cls);
     return this;

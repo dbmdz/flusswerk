@@ -2,7 +2,6 @@ package com.github.dbmdz.flusswerk.spring.boot.example.config;
 
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.flow.FlowBuilder;
-import com.github.dbmdz.flusswerk.framework.model.DefaultMessage;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import com.github.dbmdz.flusswerk.spring.boot.example.ComposePerfectGreeting;
 import com.github.dbmdz.flusswerk.spring.boot.example.FancyConsoleProcessReport;
@@ -22,9 +21,9 @@ public class FlusswerkConfig {
   }
 
   @Bean
-  public Flow<DefaultMessage, String, String> flow(BaseMetrics metrics) {
-    return new FlowBuilder<DefaultMessage, String, String>()
-        .read(message -> message.get("name"))
+  public Flow<Greeting, String, String> flow(BaseMetrics metrics) {
+    return new FlowBuilder<Greeting, String, String>()
+        .read(Greeting::getText)
         .transform(new ComposePerfectGreeting())
         .write((Consumer<String>) System.out::println)
         .measure(metrics)

@@ -2,8 +2,10 @@ package com.github.dbmdz.flusswerk.framework.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.github.dbmdz.flusswerk.framework.flow.builder.TestMessage;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,15 +14,7 @@ import org.junit.jupiter.api.Test;
 
 class JobTest {
 
-  private static final Message<String> SOME_MESSAGE = new DefaultMessage("Hey!");
-
-  private static final Function<Message, String> DUMMY_READER = Message<String>::getId;
-
-  private static final Function<String, String> DUMMY_TRANSFORMER = Function.identity();
-
-  private static final Function<String, Message> DUMMY_WRITER = DefaultMessage::new;
-
-  class CheckIfCalled<R, W> implements Function<R, W> {
+  static class CheckIfCalled<R, W> implements Function<R, W> {
 
     boolean called = false;
 
@@ -31,7 +25,7 @@ class JobTest {
     }
   }
 
-  class CheckIfWritten<R> implements Function<R, Collection<Message>> {
+  static class CheckIfWritten<R> implements Function<R, Collection<Message>> {
 
     boolean called = false;
 
@@ -53,7 +47,7 @@ class JobTest {
   @DisplayName("Read should call the read function")
   void read() {
     CheckIfCalled<Message, String> reader = new CheckIfCalled<>();
-    Job<Message, String, String> job = new Job<>(SOME_MESSAGE);
+    Job<Message, String, String> job = new Job<>(new Message());
     job.read(reader);
     assertThat(reader.called).isTrue();
   }
@@ -61,7 +55,7 @@ class JobTest {
   @Test
   void transform() {
     CheckIfCalled<String, String> transformer = new CheckIfCalled<>();
-    Job<Message, String, String> job = new Job<>(SOME_MESSAGE);
+    Job<Message, String, String> job = new Job<>(new Message());
     job.transform(transformer);
     assertThat(transformer.called).isTrue();
   }
@@ -69,7 +63,7 @@ class JobTest {
   @Test
   void write() {
     CheckIfWritten<String> writer = new CheckIfWritten<>();
-    Job<Message, String, String> job = new Job<>(SOME_MESSAGE);
+    Job<Message, String, String> job = new Job<>(new Message());
     job.write(writer);
     assertThat(writer.called).isTrue();
   }
@@ -77,38 +71,31 @@ class JobTest {
   @Test
   @DisplayName("Read, Transform, Write should pass values along")
   void readTransformWriteShouldPassValues() {
-    String message = "Jolene, Jolene, Jolene, Jolene";
-    Job<DefaultMessage, String, String> job =
-        new Job<>(new DefaultMessage().put("message", message));
-    job.read(m -> m.get("message"));
+    TestMessage message = new TestMessage("testid");
+    Job<TestMessage, String, String> job = new Job<>(message);
+    job.read(TestMessage::getId);
     job.transform(String::toUpperCase);
     job.write(
-        (Function<String, Collection<Message>>)
-            s -> Collections.singleton(new DefaultMessage().put("message", s)));
-    assertThat(job.getResult())
-        .allSatisfy(
-            result ->
-                assertThat(
-                    assertThat(((DefaultMessage) result).get("message"))
-                        .isEqualTo(message.toUpperCase())));
+        (Function<String, Collection<Message>>) id -> Collections.singleton(new TestMessage(id)));
+
+    var actual = (TestMessage) unbox(job.getResult());
+    assertThat(actual.getId()).isEqualTo(message.getId().toUpperCase());
   }
 
   @Test
   @DisplayName("Should propagate flow ids")
-  void propagateFlowIds() {
-    FlowMessage incomingMessage = new FlowMessage("12345", "flow-42");
-    Job<FlowMessage, String, String> job = new Job<>(incomingMessage, true);
-    job.read(Message::getId);
+  void propagateTracingIds() {
+    Message incomingMessage = new Message("12345");
+    Job<Message, String, String> job = new Job<>(incomingMessage, true);
+    job.read(m -> "");
     job.transform(Function.identity());
-    job.write(
-        (Function<String, Collection<Message>>) s -> Collections.singleton(new FlowMessage(s)));
+    job.write((Function<String, Collection<Message>>) s -> List.of(new Message()));
 
-    FlowMessage outgoingMessage =
-        job.getResult().stream()
-            .map(FlowMessage.class::cast)
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("No messages found."));
+    var actual = unbox(job.getResult());
+    assertThat(actual.getTracingId()).isEqualTo(incomingMessage.getTracingId());
+  }
 
-    assertThat(outgoingMessage.getFlowId()).isEqualTo(incomingMessage.getFlowId());
+  private Message unbox(Collection<Message> collection) {
+    return collection.stream().findFirst().orElseThrow();
   }
 }

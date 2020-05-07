@@ -14,7 +14,6 @@ import com.github.dbmdz.flusswerk.framework.CustomMessage;
 import com.github.dbmdz.flusswerk.framework.CustomMessageMixin;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.jackson.SingleClassModule;
-import com.github.dbmdz.flusswerk.framework.model.DefaultMessage;
 import com.github.dbmdz.flusswerk.framework.model.Envelope;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.rabbitmq.client.AMQP.BasicProperties;
@@ -43,7 +42,7 @@ class RabbitClientTest {
     connection = mock(RabbitConnection.class);
     channel = mock(Channel.class);
     when(connection.getChannel()).thenReturn(channel);
-    message = new DefaultMessage("Hey");
+    message = new Message("Hey");
   }
 
   @Test
@@ -79,13 +78,12 @@ class RabbitClientTest {
     RabbitClient rabbitClient = new RabbitClient(config, connection);
 
     long deliveryTag = 476253;
-    String messageType = "test-message";
-    String messageId = "123123123";
+    String tracingId = "123123123";
     int retries = 333;
     LocalDateTime timestamp = LocalDateTime.now();
     String inputQueue = "some.input.queue";
 
-    Message<String> messageToReceive = createMessage(messageType, messageId, retries, timestamp);
+    Message messageToReceive = createMessage(tracingId, retries, timestamp);
     GetResponse response = createResponse(deliveryTag, messageToReceive, rabbitClient);
 
     String body = new String(response.getBody(), StandardCharsets.UTF_8);
@@ -97,20 +95,18 @@ class RabbitClientTest {
         .returns(deliveryTag, from(Envelope::getDeliveryTag))
         .returns(retries, from(Envelope::getRetries))
         .returns(timestamp, from(Envelope::getTimestamp));
-    assertThat(message).returns(messageId, from(Message<String>::getId));
+    assertThat(message).returns(tracingId, from(Message::getTracingId));
   }
 
-  private Message<String> createMessage(
-      String messageType, String messageId, int retries, LocalDateTime timestamp)
-      throws IOException {
-    Message<String> messageToReceive = new DefaultMessage(messageId);
+  private Message createMessage(String tracingId, int retries, LocalDateTime timestamp) {
+    Message messageToReceive = new Message(tracingId);
     messageToReceive.getEnvelope().setRetries(retries);
     messageToReceive.getEnvelope().setTimestamp(timestamp);
     return messageToReceive;
   }
 
-  private GetResponse createResponse(
-      long deliveryTag, Message<?> message, RabbitClient rabbitClient) throws IOException {
+  private GetResponse createResponse(long deliveryTag, Message message, RabbitClient rabbitClient)
+      throws IOException {
     com.rabbitmq.client.Envelope envelope =
         new com.rabbitmq.client.Envelope(deliveryTag, true, "workflow", "some.input.queue");
     BasicProperties basicProperties = new BasicProperties.Builder().build();

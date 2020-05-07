@@ -3,8 +3,6 @@ package com.github.dbmdz.flusswerk.framework.flow;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.github.dbmdz.flusswerk.framework.model.DefaultMessage;
-import com.github.dbmdz.flusswerk.framework.model.FlowMessage;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.util.Collection;
 import java.util.function.Function;
@@ -103,34 +101,14 @@ class FlowBuilderTest {
   @Test
   @DisplayName("build should create an working Flow if only reader and writer are set")
   public void buildWithOnlyReadAndWrite() {
-    Flow<DefaultMessage, String, String> flow =
-        new FlowBuilder<DefaultMessage, String, String>()
-            .read(DefaultMessage::getId)
-            .writeAndSend((Function<String, Message>) DefaultMessage::new)
+    Flow<Message, String, String> flow =
+        new FlowBuilder<Message, String, String>()
+            .read(Message::getTracingId)
+            .writeAndSend((Function<String, Message>) Message::new)
             .build();
     String id = "Whiskey in the Jar";
-    Collection<? extends Message> result = flow.process(new DefaultMessage(id));
+    Collection<? extends Message> result = flow.process(new Message(id));
     assertThat(result).hasSize(1);
-    assertThat(result).allSatisfy(m -> assertThat(m.getId()).isEqualTo(id));
-  }
-
-  @Test
-  @DisplayName("build should create an working Flow if only reader and writer are set")
-  public void buildShouldCreateFlowPropagatingFlowIds() {
-    Flow<DefaultMessage, String, String> flow =
-        new FlowBuilder<DefaultMessage, String, String>()
-            .read(DefaultMessage::getId)
-            .writeAndSend((Function<String, Message>) FlowMessage::new)
-            .propagateFlowIds(true)
-            .build();
-
-    FlowMessage incomingMessage = new FlowMessage("123", "flow-42");
-    FlowMessage outgoingMessage =
-        flow.process(incomingMessage).stream()
-            .map(FlowMessage.class::cast)
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("No messages found."));
-
-    assertThat(outgoingMessage.getFlowId()).isEqualTo(incomingMessage.getFlowId());
+    assertThat(result).allSatisfy(m -> assertThat(m.getTracingId()).isEqualTo(id));
   }
 }

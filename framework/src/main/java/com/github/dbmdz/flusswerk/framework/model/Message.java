@@ -1,23 +1,41 @@
 package com.github.dbmdz.flusswerk.framework.model;
 
-/**
- * A generic message as it will be sent over RabbitMQ.
- *
- * @param <ID> The type of the identifier field.
- */
-public interface Message<ID> {
+/** A generic message as it will be sent over RabbitMQ. */
+public class Message {
+
+  private final Envelope envelope;
+
+  private String tracingId;
+
+  public Message() {
+    this.envelope = new Envelope();
+    this.tracingId = null;
+  }
+
+  public Message(String tracingId) {
+    this.envelope = new Envelope();
+    this.tracingId = tracingId;
+  }
 
   /**
    * Technical metadata like timestamps and retries.
    *
    * @return An object containing the messages technical metadata.
    */
-  Envelope getEnvelope();
+  public Envelope getEnvelope() {
+    return envelope;
+  }
+
+  void setTracingId(String tracingId) {
+    this.tracingId = tracingId;
+  }
 
   /**
-   * The optional ID can hold the identifier of an corresponding object (e.g. a book to be indexed).
+   * Tracing ids allow to follow the processing of one object across multiple workflow jobs,
    *
-   * @return The corresponding object's id.
+   * @return the tracing id
    */
-  ID getId();
+  public String getTracingId() {
+    return tracingId;
+  }
 }
