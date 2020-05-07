@@ -2,8 +2,7 @@ package com.github.dbmdz.flusswerk.examples.plain.job;
 
 import com.github.dbmdz.flusswerk.examples.plain.AppMessage;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
-import com.github.dbmdz.flusswerk.framework.flow.Flow;
-import com.github.dbmdz.flusswerk.framework.flow.FlowBuilder;
+import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBrokerBuilder;
 import java.io.IOException;
@@ -27,11 +26,11 @@ public class Application {
             .writeTo("someOutputQueue")
             .build();
 
-    Flow<AppMessage, String, String> flow =
-        new FlowBuilder<AppMessage, String, String>()
-            .read(AppMessage::getId)
-            .transform(new UppercaseTransformer(true))
-            .writeAndSend(AppMessage::new)
+    var flow =
+        FlowBuilder.flow(AppMessage.class, String.class, String.class)
+            .reader(AppMessage::getId)
+            .transformer(new UppercaseTransformer(true))
+            .writerSendingMessage(AppMessage::new)
             .build();
 
     Engine engine = new Engine(messageBroker, flow);

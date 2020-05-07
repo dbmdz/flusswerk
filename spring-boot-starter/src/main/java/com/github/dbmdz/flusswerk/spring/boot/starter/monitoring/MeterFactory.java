@@ -13,9 +13,9 @@ import org.springframework.stereotype.Component;
 /** Convenience factory to simplify the creation of {@link Counter} meters. */
 @Component
 public class MeterFactory {
-  private String basename;
-  private String app;
-  private MeterRegistry registry;
+  private final String basename;
+  private final String app;
+  private final MeterRegistry registry;
 
   /**
    * @param flusswerkProperties The properties containing the prefix for the created metrics ("e.g.

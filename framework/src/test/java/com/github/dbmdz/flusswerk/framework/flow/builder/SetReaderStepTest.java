@@ -9,9 +9,6 @@ import org.junit.jupiter.api.Test;
 @DisplayName("The SetReaderStep")
 class SetReaderStepTest {
 
-  @BeforeEach
-  void setUp() {}
-
   @DisplayName("should set a reader")
   @Test
   void shouldSetReader() {

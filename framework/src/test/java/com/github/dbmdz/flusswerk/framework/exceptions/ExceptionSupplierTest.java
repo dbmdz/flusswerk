@@ -39,7 +39,6 @@ class ExceptionSupplierTest {
     var supplier =
         new ExceptionSupplier<>(StopProcessingException.class, "Hallo Welt", null)
             .causedBy(new RuntimeException("THE CAUSE"));
-    ;
     assertThat(supplier.get()).isInstanceOf(StopProcessingException.class).hasMessage("Hallo Welt");
   }
 }

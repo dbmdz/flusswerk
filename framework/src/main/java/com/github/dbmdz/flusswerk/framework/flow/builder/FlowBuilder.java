@@ -7,7 +7,7 @@ import com.github.dbmdz.flusswerk.framework.model.Message;
  * Experimental implementation of a new FlowBuilderApi. This might change in details in Flusswerk 4
  * where it will become the regular implementation.
  */
-public class ExperimentalFlowBuilder {
+public class FlowBuilder {
 
   /**
    * Create a builder for a new read/transform/write flow. Transform might be omitted later if types

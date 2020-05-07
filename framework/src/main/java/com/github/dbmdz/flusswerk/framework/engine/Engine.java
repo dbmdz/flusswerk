@@ -38,7 +38,7 @@ public class Engine {
 
   private boolean running;
 
-  private AtomicInteger activeWorkers;
+  private final AtomicInteger activeWorkers;
 
   private ProcessReport processReport = new DefaultProcessReport();
 
@@ -85,11 +85,9 @@ public class Engine {
    * @param flow the flow to execute agains every message
    * @param concurrentWorkers the number of concurrent workers
    * @param processReport Reporting implementation (or null, if DefaultProcessReport shall be used)
-   * @throws IOException if reading/writing to the message broker fails
    */
   public Engine(
-      MessageBroker messageBroker, Flow flow, int concurrentWorkers, ProcessReport processReport)
-      throws IOException {
+      MessageBroker messageBroker, Flow flow, int concurrentWorkers, ProcessReport processReport) {
     this.messageBroker = messageBroker;
     this.flow = flow;
     this.concurrentWorkers = concurrentWorkers;

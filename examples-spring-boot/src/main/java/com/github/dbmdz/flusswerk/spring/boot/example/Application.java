@@ -14,7 +14,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @EnableFlusswerk
 public class Application extends FlusswerkApplication {
 
-  private static Logger LOGGER = LoggerFactory.getLogger(Application.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
   private FlusswerkProperties flusswerkProperties;
 
