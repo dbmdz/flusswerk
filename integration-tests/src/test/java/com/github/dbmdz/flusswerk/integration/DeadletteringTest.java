@@ -3,10 +3,8 @@ package com.github.dbmdz.flusswerk.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
-import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.flow.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
-import com.github.dbmdz.flusswerk.framework.model.DefaultMessage;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -38,25 +36,24 @@ public class DeadletteringTest {
   @Test
   public void failingMessagesShouldEndInFailedQueue() throws Exception {
     MessageBroker messageBroker = backend.getMessageBroker();
-    Flow flow =
+    var flow =
         new FlowBuilder<>()
             .read(Message::toString)
             .transform(
                 s -> {
                   throw new RuntimeException("Fail!");
                 })
-            .write(s -> new DefaultMessage(s.toString()))
+            .write(s -> new Message(s.toString()))
             .build();
 
     Engine engine = new Engine(messageBroker, flow);
 
     ExecutorService executorService = Executors.newSingleThreadExecutor();
     executorService.submit(engine::start);
-    messageBroker.send(QUEUE_IN, new DefaultMessage("123456"));
-    //    Thread.sleep(5000);
+    messageBroker.send(QUEUE_IN, new Message("123456"));
 
     Message message = backend.waitForMessageFrom(QUEUE_FAILED, 10_000);
-    assertThat(message.getId()).isEqualTo("123456");
+    assertThat(message.getTracingId()).isEqualTo("123456");
     assertThatMessageFrom(QUEUE_IN).isNull();
     assertThatMessageFrom(QUEUE_OUT).isNull();
     assertThatMessageFrom(QUEUE_RETRY).isNull();
@@ -65,7 +62,7 @@ public class DeadletteringTest {
     executorService.shutdownNow();
   }
 
-  private ObjectAssert<? extends Message<?>> assertThatMessageFrom(String name) throws Exception {
+  private ObjectAssert<? extends Message> assertThatMessageFrom(String name) throws Exception {
     return assertThat(backend.waitForMessageFrom(QUEUE_FAILED, 1000));
   }
 }

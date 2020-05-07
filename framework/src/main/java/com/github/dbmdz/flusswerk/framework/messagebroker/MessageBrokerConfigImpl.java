@@ -1,7 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.messagebroker;
 
 import com.fasterxml.jackson.databind.Module;
-import com.github.dbmdz.flusswerk.framework.model.DefaultMessage;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,7 +20,7 @@ class MessageBrokerConfigImpl implements MessageBrokerConfig {
     jacksonModules = new ArrayList<>();
     setMaxRetries(5);
     setDeadLetterWait(30 * 1000);
-    setMessageClass(DefaultMessage.class);
+    setMessageClass(Message.class);
   }
 
   @Override

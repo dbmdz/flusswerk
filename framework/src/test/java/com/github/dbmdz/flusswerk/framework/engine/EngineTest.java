@@ -12,7 +12,6 @@ import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.flow.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
-import com.github.dbmdz.flusswerk.framework.model.DefaultMessage;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.reporting.ReportFunction;
 import java.io.IOException;
@@ -36,20 +35,19 @@ class EngineTest {
     messageBroker = mock(MessageBroker.class);
   }
 
-  private Flow<DefaultMessage, String, String> flowSendingMessage() {
+  private Flow<Message, String, String> flowSendingMessage() {
     return flowWithTransformer(Function.identity());
   }
 
-  private Flow<DefaultMessage, String, String> flowWithTransformer(
-      Function<String, String> transformer) {
-    return new FlowBuilder<DefaultMessage, String, String>()
-        .read(DefaultMessage::getId)
+  private Flow<Message, String, String> flowWithTransformer(Function<String, String> transformer) {
+    return new FlowBuilder<Message, String, String>()
+        .read(Message::getTracingId)
         .transform(transformer)
-        .writeAndSend((Function<String, Message>) DefaultMessage::new)
+        .writeAndSend((Function<String, Message>) Message::new)
         .build();
   }
 
-  private Flow<DefaultMessage, String, String> flowThrowing(Class<? extends RuntimeException> cls) {
+  private Flow<Message, String, String> flowThrowing(Class<? extends RuntimeException> cls) {
     var message = String.format("Generated %s for unit test", cls.getSimpleName());
     final RuntimeException exception;
     try {
@@ -70,7 +68,7 @@ class EngineTest {
   @Test
   @DisplayName("should use the maximum number of workers")
   public void engineShouldUseMaxNumberOfWorkers() throws IOException, InterruptedException {
-    when(messageBroker.receive()).thenReturn(new DefaultMessage("White Room"));
+    when(messageBroker.receive()).thenReturn(new Message("White Room"));
 
     Engine engine =
         new Engine(
@@ -110,7 +108,7 @@ class EngineTest {
     var flow = flowWithTransformer(transformerWithException);
 
     Engine engine = new Engine(messageBroker, flow);
-    Message<String> message = new DefaultMessage();
+    Message message = new Message();
 
     engine.process(message);
 
@@ -122,7 +120,7 @@ class EngineTest {
   @DisplayName("should accept a message processed without failure")
   void processShouldAcceptMessageWithoutFailure() throws IOException {
     Engine engine = new Engine(messageBroker, flowSendingMessage());
-    Message<String> message = new DefaultMessage();
+    Message message = new Message();
     engine.process(message);
 
     verify(messageBroker).ack(message);
@@ -133,7 +131,7 @@ class EngineTest {
   @DisplayName("should send a message")
   void processShouldSendMessage() throws IOException {
     Engine engine = new Engine(messageBroker, flowSendingMessage());
-    engine.process(new DefaultMessage());
+    engine.process(new Message());
     verify(messageBroker).send(any(Message.class));
   }
 
@@ -141,7 +139,7 @@ class EngineTest {
   @DisplayName("should stop with retry for RetriableProcessException")
   void retryProcessExceptionShouldRejectTemporarily() throws IOException {
     Engine engine = new Engine(messageBroker, flowThrowing(RetryProcessingException.class));
-    Message<?> message = new DefaultMessage();
+    Message message = new Message();
     engine.process(message);
 
     verify(messageBroker).reject(message);
@@ -151,7 +149,7 @@ class EngineTest {
   @DisplayName("should stop processing for good for StopProcessingException")
   void shoudlFailMessageForStopProcessingException() throws IOException {
     Engine engine = new Engine(messageBroker, flowThrowing(StopProcessingException.class));
-    Message<?> message = new DefaultMessage();
+    Message message = new Message();
     engine.process(message);
 
     verify(messageBroker).fail(message);
@@ -164,7 +162,7 @@ class EngineTest {
     ReportFunction reportFn = (r, msg, e) -> reportHasBeenCalled.set(true);
     Engine engine =
         new Engine(messageBroker, flowThrowing(StopProcessingException.class), 4, reportFn);
-    engine.process(new DefaultMessage());
-    assertThat(reportHasBeenCalled).isTrue();
+    engine.process(new Message());
+    assertThat(reportHasBeenCalled.get()).isTrue();
   }
 }

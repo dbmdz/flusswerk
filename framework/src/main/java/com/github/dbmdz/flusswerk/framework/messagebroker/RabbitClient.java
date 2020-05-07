@@ -3,9 +3,8 @@ package com.github.dbmdz.flusswerk.framework.messagebroker;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
-import com.github.dbmdz.flusswerk.framework.jackson.DefaultMessageMixin;
+import com.github.dbmdz.flusswerk.framework.jackson.DefaultMixin;
 import com.github.dbmdz.flusswerk.framework.jackson.EnvelopeMixin;
-import com.github.dbmdz.flusswerk.framework.model.DefaultMessage;
 import com.github.dbmdz.flusswerk.framework.model.Envelope;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.rabbitmq.client.AMQP;
@@ -47,7 +46,7 @@ class RabbitClient {
     objectMapper.addMixIn(Envelope.class, EnvelopeMixin.class);
     objectMapper.registerModule(new JavaTimeModule());
     if (objectMapper.findMixInClassFor(Message.class) == null) {
-      objectMapper.addMixIn(DefaultMessage.class, DefaultMessageMixin.class);
+      objectMapper.addMixIn(Message.class, DefaultMixin.class);
     }
   }
 
@@ -115,7 +114,7 @@ class RabbitClient {
         message.getEnvelope().setSource(queueName);
         return message;
       } catch (Exception e) {
-        Message invalidMessage = new DefaultMessage();
+        Message invalidMessage = new Message();
         invalidMessage.getEnvelope().setBody(body);
         invalidMessage.getEnvelope().setDeliveryTag(response.getEnvelope().getDeliveryTag());
         invalidMessage.getEnvelope().setSource(queueName);
@@ -126,7 +125,6 @@ class RabbitClient {
   }
 
   public void provideExchange(String exchange) throws IOException {
-    GetResponse response;
     try {
       channel.exchangeDeclare(exchange, BuiltinExchangeType.TOPIC, DURABLE);
     } catch (Exception e) {

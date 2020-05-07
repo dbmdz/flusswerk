@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class Job<M, R, W> {
+public class Job<M extends Message, R, W> {
 
   private R dataRead;
 
@@ -49,9 +49,8 @@ public class Job<M, R, W> {
       return Collections.emptyList();
     }
     if (propagateFlowIds) {
-      FlowMessage flowMessage = (FlowMessage) message;
-      for (Message message : result) {
-        ((HasFlowId) message).setFlowId(flowMessage.getFlowId());
+      for (Message newMessage : result) {
+        newMessage.setTracingId(message.getTracingId());
       }
     }
     return result;

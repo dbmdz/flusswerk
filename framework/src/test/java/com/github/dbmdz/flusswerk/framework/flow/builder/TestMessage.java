@@ -2,25 +2,31 @@ package com.github.dbmdz.flusswerk.framework.flow.builder;
 
 import static java.util.Objects.requireNonNull;
 
-import com.github.dbmdz.flusswerk.framework.model.FlusswerkMessage;
+import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public class TestMessage extends FlusswerkMessage<String> {
+public class TestMessage extends Message {
+
+  private String id;
 
   private List<String> values;
 
   public TestMessage(String id) {
-    super(requireNonNull(id));
+    this.id = requireNonNull(id);
     this.values = Collections.emptyList();
   }
 
   public TestMessage(String id, String... values) {
-    super(requireNonNull(id));
+    this.id = requireNonNull(id);
     this.values = Arrays.asList(values);
+  }
+
+  public String getId() {
+    return id;
   }
 
   public List<String> getValues() {

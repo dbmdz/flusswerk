@@ -98,7 +98,7 @@ public class FlusswerkConfiguration {
    * @throws IOException If connection to RabbitMQ fails permanently.
    */
   @Bean
-  public <I, M extends Message<I>, R, W> Engine engine(
+  public <I, M extends Message, R, W> Engine engine(
       MessageBroker messageBroker,
       ObjectProvider<Flow<M, R, W>> flowProvider,
       FlusswerkProperties flusswerkProperties,

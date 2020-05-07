@@ -10,7 +10,7 @@
 
   <artifactId>framework</artifactId>
 
-  <name>Flusswerk - Engine</name>
+  <name>Flusswerk - Framework</name>
 
   <dependencies>
     <dependency>

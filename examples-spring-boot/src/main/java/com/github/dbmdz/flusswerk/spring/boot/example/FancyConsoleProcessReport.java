@@ -3,6 +3,7 @@ package com.github.dbmdz.flusswerk.spring.boot.example;
 import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
+import com.github.dbmdz.flusswerk.spring.boot.example.model.Greeting;
 
 public class FancyConsoleProcessReport implements ProcessReport {
 
@@ -27,11 +28,7 @@ public class FancyConsoleProcessReport implements ProcessReport {
   }
 
   private void print(String symbol, Message message, Exception e) {
-    String id = "";
-    if (message != null && message.getId() != null) {
-      id = message.getId().toString();
-    }
-    System.out.print("\uD83D\uDE45 " + id);
+    System.out.print("\uD83D\uDE45 " + ((Greeting) message).getId());
     if (e != null) {
       System.out.println(":");
       System.out.println(e.toString());

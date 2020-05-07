@@ -3,7 +3,6 @@ package com.github.dbmdz.flusswerk.framework.flow;
 import static java.util.Objects.requireNonNull;
 
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
-import com.github.dbmdz.flusswerk.framework.model.HasFlowId;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.util.Collection;
 import java.util.function.Consumer;
@@ -181,19 +180,6 @@ public class FlowBuilder<M extends Message, R, W> {
   }
 
   /**
-   * Copy flowIds from incoming messages to all outgoing messages. Requires both to implement {@link
-   * HasFlowId}.
-   *
-   * @param propagateFlowIds true to propagate flow ids (default: <code>false</code>)
-   * @return This {@link FlowBuilder} instance for further configuration or creation of the {@link
-   *     Flow}.
-   */
-  public FlowBuilder<M, R, W> propagateFlowIds(boolean propagateFlowIds) {
-    this.propagateFlowIds = propagateFlowIds;
-    return this;
-  }
-
-  /**
    * Sets cleanup runnable, which is executed after the message was processed.
    *
    * @param runnable The runnable to be executed after the message was processed
@@ -297,7 +283,7 @@ public class FlowBuilder<M extends Message, R, W> {
     return new FlowBuilder<>();
   }
 
-  public static <M extends Message<?>, R, W> Flow<M, R, W> createFlow(
+  public static <M extends Message, R, W> Flow<M, R, W> createFlow(
       Class<M> cls, Function<M, R> reader, Function<R, W> transformer, Consumer<W> writer) {
     return FlowBuilder.<M, R, W>receiving(cls)
         .read(reader)
@@ -306,12 +292,12 @@ public class FlowBuilder<M extends Message, R, W> {
         .build();
   }
 
-  public static <M extends Message<?>, R, W> Flow<M, R, W> createFlow(
+  public static <M extends Message, R, W> Flow<M, R, W> createFlow(
       Class<M> cls, Function<M, R> reader, Consumer<W> writer) {
     return FlowBuilder.<M, R, W>receiving(cls).read(reader).write(writer).build();
   }
 
-  public static <M extends Message<?>, R, W> Flow<M, R, W> createFlow(
+  public static <M extends Message, R, W> Flow<M, R, W> createFlow(
       Class<M> cls, Function<M, R> reader) {
     return FlowBuilder.<M, R, W>receiving(cls).read(reader).build();
   }
