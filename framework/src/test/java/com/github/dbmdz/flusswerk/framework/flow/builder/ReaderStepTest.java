@@ -6,13 +6,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("The SetReaderStep")
-class SetReaderStepTest {
+class ReaderStepTest {
 
   @DisplayName("should set a reader")
   @Test
   void shouldSetReader() {
     Model<TestMessage, String, String> model = new Model<>();
-    SetReaderStep<TestMessage, String, String> step = new SetReaderStep<>(model);
+    ReaderStep<TestMessage, String, String> step = new ReaderStep<>(model);
 
     step.reader(TestMessage::getId);
 

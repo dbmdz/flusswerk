@@ -3,8 +3,7 @@ package com.github.dbmdz.flusswerk.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
-import com.github.dbmdz.flusswerk.framework.flow.Flow;
-import com.github.dbmdz.flusswerk.framework.flow.FlowBuilder;
+import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.util.concurrent.ExecutorService;
@@ -13,7 +12,7 @@ import org.assertj.core.api.ObjectAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class SuccessFulProcessingTest {
+public class SuccessfulProcessingTest {
 
   private static final String QUEUE_IN = "test.in";
   private static final String QUEUE_OUT = "test.out";
@@ -30,11 +29,11 @@ public class SuccessFulProcessingTest {
   @Test
   public void successfulMessagesShouldGoToOutQueue() throws Exception {
     MessageBroker messageBroker = backend.getMessageBroker();
-    Flow flow =
-        new FlowBuilder<Message, Message, Message>()
-            .read(m -> m)
-            .transform(m -> m)
-            .writeAndSend((Message m) -> m)
+    var flow =
+        FlowBuilder.flow(Message.class, Message.class, Message.class)
+            .reader(m -> m)
+            .transformer(m -> m)
+            .writerSendingMessage((Message m) -> m)
             .build();
 
     Engine engine = new Engine(messageBroker, flow);

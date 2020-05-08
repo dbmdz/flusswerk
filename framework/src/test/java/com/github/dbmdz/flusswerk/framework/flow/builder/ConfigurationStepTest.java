@@ -11,15 +11,15 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 @DisplayName("The SetConfigurationStep")
-public class SetConfigurationStepTest {
+public class ConfigurationStepTest {
 
   private Model<TestMessage, String, String> model;
-  private SetConfigurationStep<TestMessage, String, String> step;
+  private ConfigurationStep<TestMessage, String, String> step;
 
   @BeforeEach
   void setUp() {
     model = new Model<>();
-    step = new SetConfigurationStep<>(model);
+    step = new ConfigurationStep<>(model);
   }
 
   @DisplayName("should set the cleanup task")

@@ -10,7 +10,7 @@ import static org.mockito.Mockito.when;
 import com.github.dbmdz.flusswerk.framework.exceptions.RetryProcessingException;
 import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
-import com.github.dbmdz.flusswerk.framework.flow.FlowBuilder;
+import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.reporting.ReportFunction;
@@ -40,10 +40,10 @@ class EngineTest {
   }
 
   private Flow<Message, String, String> flowWithTransformer(Function<String, String> transformer) {
-    return new FlowBuilder<Message, String, String>()
-        .read(Message::getTracingId)
-        .transform(transformer)
-        .writeAndSend((Function<String, Message>) Message::new)
+    return FlowBuilder.flow(Message.class, String.class, String.class)
+        .reader(Message::getTracingId)
+        .transformer(transformer)
+        .writerSendingMessage(Message::new)
         .build();
   }
 

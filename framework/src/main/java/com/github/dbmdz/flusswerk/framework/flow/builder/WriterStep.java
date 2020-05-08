@@ -14,11 +14,11 @@ import java.util.function.Function;
  * @param <R> Generic type for the reader output/transformer input
  * @param <W> Generic type for the transformer output/writer input
  */
-public class SetWriterStep<M extends Message, R, W> {
+public class WriterStep<M extends Message, R, W> {
 
   private final Model<M, R, W> model;
 
-  public SetWriterStep(Model<M, R, W> model) {
+  public WriterStep(Model<M, R, W> model) {
     this.model = model;
   }
 
@@ -29,13 +29,13 @@ public class SetWriterStep<M extends Message, R, W> {
    * @param w the writer to set
    * @return the next step (setting configuration or build the flow)
    */
-  public SetConfigurationStep<M, R, W> writerSendingNothing(Consumer<W> w) {
+  public ConfigurationStep<M, R, W> writerSendingNothing(Consumer<W> w) {
     model.setWriter(
         item -> {
           w.accept(item);
           return Collections.emptyList();
         });
-    return new SetConfigurationStep<>(model);
+    return new ConfigurationStep<>(model);
   }
 
   /**
@@ -45,7 +45,7 @@ public class SetWriterStep<M extends Message, R, W> {
    * @param w the writer to set
    * @return the next step (setting configuration or build the flow)
    */
-  public SetConfigurationStep<M, R, W> writerSendingMessage(Function<W, Message> w) {
+  public ConfigurationStep<M, R, W> writerSendingMessage(Function<W, Message> w) {
     model.setWriter(
         item -> {
           var result = w.apply(item);
@@ -55,7 +55,7 @@ public class SetWriterStep<M extends Message, R, W> {
             return List.of(result);
           }
         });
-    return new SetConfigurationStep<>(model);
+    return new ConfigurationStep<>(model);
   }
 
   /**
@@ -65,8 +65,8 @@ public class SetWriterStep<M extends Message, R, W> {
    * @param w the writer to set
    * @return the next step (setting configuration or build the flow)
    */
-  public SetConfigurationStep<M, R, W> writerSendingMessages(Function<W, Collection<Message>> w) {
+  public ConfigurationStep<M, R, W> writerSendingMessages(Function<W, Collection<Message>> w) {
     model.setWriter(w);
-    return new SetConfigurationStep<>(model);
+    return new ConfigurationStep<>(model);
   }
 }

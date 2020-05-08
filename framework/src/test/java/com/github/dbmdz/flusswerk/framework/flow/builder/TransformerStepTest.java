@@ -5,15 +5,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class SetTransformerStepTest {
+class TransformerStepTest {
 
   private Model<TestMessage, String, String> model;
-  private SetTransformerStep<TestMessage, String, String> step;
+  private TransformerStep<TestMessage, String, String> step;
 
   @BeforeEach
   void setUp() {
     model = new Model<>();
-    step = new SetTransformerStep<>(model);
+    step = new TransformerStep<>(model);
   }
 
   @Test

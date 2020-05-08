@@ -10,11 +10,11 @@ import java.util.function.Function;
  * @param <R> Generic type for the reader output/transformer input
  * @param <W> Generic type for the transformer output/writer input
  */
-public class SetTransformerStep<M extends Message, R, W> {
+public class TransformerStep<M extends Message, R, W> {
 
   private final Model<M, R, W> model;
 
-  public SetTransformerStep(Model<M, R, W> model) {
+  public TransformerStep(Model<M, R, W> model) {
     this.model = model;
   }
 
@@ -25,9 +25,9 @@ public class SetTransformerStep<M extends Message, R, W> {
    * @param t the transformer to set
    * @return the next step (setting a writer)
    */
-  public SetWriterStep<M, R, W> transformer(Function<R, W> t) {
+  public WriterStep<M, R, W> transformer(Function<R, W> t) {
     model.setTransformer(t);
-    return new SetWriterStep<>(model);
+    return new WriterStep<>(model);
   }
 
   /**
@@ -36,7 +36,7 @@ public class SetTransformerStep<M extends Message, R, W> {
    *
    * @return the next step (setting a writer)
    */
-  public SetWriterStep<M, R, W> noTransformer() {
-    return new SetWriterStep<>(model);
+  public WriterStep<M, R, W> noTransformer() {
+    return new WriterStep<>(model);
   }
 }

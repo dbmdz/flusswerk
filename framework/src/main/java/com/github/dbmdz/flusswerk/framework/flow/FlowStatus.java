@@ -1,11 +1,12 @@
 package com.github.dbmdz.flusswerk.framework.flow;
 
-import java.util.function.Consumer;
+import com.github.dbmdz.flusswerk.framework.flow.builder.ConfigurationStep;
 
 /**
  * Collect base metrics for a single flow - did the execution have errors and how long does it take?
  *
- * <p>Used for metrics handlers in {@link FlowBuilder#measure(Consumer)}
+ * @see com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder
+ * @see ConfigurationStep
  */
 public class FlowStatus {
 
