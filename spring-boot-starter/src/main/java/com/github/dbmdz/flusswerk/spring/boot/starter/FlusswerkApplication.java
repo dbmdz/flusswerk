@@ -11,7 +11,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 @EnableFlusswerk
 public class FlusswerkApplication implements CommandLineRunner {
 
-  protected Engine engine;
+  protected final Engine engine;
 
   public FlusswerkApplication(Engine engine) {
     this.engine = engine;

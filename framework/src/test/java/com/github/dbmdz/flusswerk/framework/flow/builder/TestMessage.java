@@ -11,9 +11,9 @@ import java.util.stream.Stream;
 
 public class TestMessage extends Message {
 
-  private String id;
+  private final String id;
 
-  private List<String> values;
+  private final List<String> values;
 
   public TestMessage(String id) {
     this.id = requireNonNull(id);

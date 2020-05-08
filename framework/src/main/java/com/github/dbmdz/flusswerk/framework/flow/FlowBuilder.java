@@ -28,7 +28,7 @@ public class FlowBuilder<M extends Message, R, W> {
 
   private Runnable cleanup;
 
-  private boolean propagateFlowIds;
+  private final boolean propagateFlowIds;
 
   private Consumer<FlowStatus> monitor;
 

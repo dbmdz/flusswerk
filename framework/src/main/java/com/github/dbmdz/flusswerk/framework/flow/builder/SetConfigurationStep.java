@@ -14,7 +14,7 @@ import java.util.function.Consumer;
  */
 public class SetConfigurationStep<M extends Message, R, W> {
 
-  private Model<M, R, W> model;
+  private final Model<M, R, W> model;
 
   SetConfigurationStep(Model<M, R, W> model) {
     this.model = model;

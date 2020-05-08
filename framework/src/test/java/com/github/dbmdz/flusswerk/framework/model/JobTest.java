@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -39,9 +38,6 @@ class JobTest {
   private Supplier<RuntimeException> exception(String message) {
     return () -> new RuntimeException(message);
   }
-
-  @BeforeEach
-  void setUp() {}
 
   @Test
   @DisplayName("Read should call the read function")

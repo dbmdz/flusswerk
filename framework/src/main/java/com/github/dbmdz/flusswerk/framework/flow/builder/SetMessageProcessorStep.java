@@ -12,7 +12,7 @@ import java.util.function.Function;
  */
 public class SetMessageProcessorStep<M extends Message> {
 
-  private Model<M, M, M> model;
+  private final Model<M, M, M> model;
 
   SetMessageProcessorStep(Model<M, M, M> model) {
     this.model = model;

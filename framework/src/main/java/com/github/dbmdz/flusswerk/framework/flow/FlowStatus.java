@@ -15,7 +15,7 @@ public class FlowStatus {
     ERROR_STOP
   }
 
-  private long startTime;
+  private final long startTime;
 
   private long endTime;
 

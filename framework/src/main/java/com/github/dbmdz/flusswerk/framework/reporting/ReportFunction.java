@@ -11,7 +11,7 @@ public interface ReportFunction extends ProcessReport {
     FAIL,
     FAIL_AFTER_MAX_RETRIES,
     REJECT
-  };
+  }
 
   void report(ReportType type, Message msg, Exception e);
 

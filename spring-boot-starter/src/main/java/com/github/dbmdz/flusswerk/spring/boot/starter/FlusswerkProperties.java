@@ -11,22 +11,22 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 @ConfigurationProperties(prefix = "flusswerk")
 public class FlusswerkProperties {
 
-  private Processing processing;
+  private final Processing processing;
 
-  private Connection connection;
+  private final Connection connection;
 
-  private Routing routing;
+  private final Routing routing;
 
-  private Monitoring monitoring;
+  private final Monitoring monitoring;
 
   /** Configuration related to the processing. */
   public static class Processing {
 
     @Min(0)
-    private Integer maxRetries;
+    private final Integer maxRetries;
 
     @Min(1)
-    private Integer threads;
+    private final Integer threads;
 
     public Processing(@Min(0) Integer maxRetries, @Min(1) Integer threads) {
       this.maxRetries = maxRetries;
@@ -55,13 +55,13 @@ public class FlusswerkProperties {
   /** Connection information for RabbitMQ. */
   public static class Connection {
 
-    @NotBlank private String connectTo;
+    @NotBlank private final String connectTo;
 
-    private String virtualHost;
+    private final String virtualHost;
 
-    @NotBlank private String username;
+    @NotBlank private final String username;
 
-    @NotBlank private String password;
+    @NotBlank private final String password;
 
     /**
      * @param connectTo The RabbitMQ connection String
@@ -114,11 +114,11 @@ public class FlusswerkProperties {
   /** AMQP/RabbitMQ routing information. */
   public static class Routing {
 
-    @NotBlank private String exchange;
+    @NotBlank private final String exchange;
 
-    private String[] readFrom;
+    private final String[] readFrom;
 
-    private String writeTo;
+    private final String writeTo;
 
     /**
      * @param exchange The exchange name to use (required).
@@ -159,7 +159,7 @@ public class FlusswerkProperties {
   /** Settings for monitoring endpoints. */
   public static class Monitoring {
 
-    private String prefix;
+    private final String prefix;
 
     public Monitoring(String prefix) {
       this.prefix = Objects.requireNonNullElse(prefix, "");

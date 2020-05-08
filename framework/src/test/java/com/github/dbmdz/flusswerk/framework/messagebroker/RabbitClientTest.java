@@ -22,14 +22,13 @@ import com.rabbitmq.client.GetResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.concurrent.TimeoutException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class RabbitClientTest {
 
-  private MessageBrokerConfigImpl config = new MessageBrokerConfigImpl();
+  private final MessageBrokerConfigImpl config = new MessageBrokerConfigImpl();
 
   private RabbitConnection connection;
 
@@ -38,7 +37,7 @@ class RabbitClientTest {
   private Message message;
 
   @BeforeEach
-  void setUp() throws IOException, TimeoutException {
+  void setUp() {
     connection = mock(RabbitConnection.class);
     channel = mock(Channel.class);
     when(connection.getChannel()).thenReturn(channel);
@@ -61,7 +60,7 @@ class RabbitClientTest {
   }
 
   @Test
-  void shouldWorkWithCustomMessageType() throws IOException, TimeoutException {
+  void shouldWorkWithCustomMessageType() throws IOException {
     config.addJacksonModule(new SingleClassModule(CustomMessage.class, CustomMessageMixin.class));
     config.setMessageClass(CustomMessage.class);
     RabbitClient rabbitClient = new RabbitClient(config, connection);
@@ -156,11 +155,7 @@ class RabbitClientTest {
     RabbitClient rabbitClient = new RabbitClient(config, connection);
 
     InvalidMessageException thrown =
-        assertThrows(
-            InvalidMessageException.class,
-            () -> {
-              rabbitClient.receive("test");
-            });
+        assertThrows(InvalidMessageException.class, () -> rabbitClient.receive("test"));
     assertThat(thrown.getMessage()).startsWith("Unrecognized token 'NoValidJson'");
   }
 }
