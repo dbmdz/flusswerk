@@ -9,15 +9,15 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class SetWriterStepTest {
+class WriterStepTest {
 
   private Model<TestMessage, String, String> model;
-  private SetWriterStep<TestMessage, String, String> step;
+  private WriterStep<TestMessage, String, String> step;
 
   @BeforeEach
   void setUp() {
     model = new Model<>();
-    step = new SetWriterStep<>(model);
+    step = new WriterStep<>(model);
   }
 
   @Test

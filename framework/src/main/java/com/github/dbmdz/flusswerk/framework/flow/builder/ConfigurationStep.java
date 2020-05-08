@@ -12,11 +12,11 @@ import java.util.function.Consumer;
  * @param <R> Generic type for the reader output/transformer input
  * @param <W> Generic type for the transformer output/writer input
  */
-public class SetConfigurationStep<M extends Message, R, W> {
+public class ConfigurationStep<M extends Message, R, W> {
 
   private final Model<M, R, W> model;
 
-  SetConfigurationStep(Model<M, R, W> model) {
+  ConfigurationStep(Model<M, R, W> model) {
     this.model = model;
   }
 
@@ -27,7 +27,7 @@ public class SetConfigurationStep<M extends Message, R, W> {
    * @param m the process metrics monitor
    * @return the next step (setting configuration or build the flow)
    */
-  public SetConfigurationStep<M, R, W> metrics(Consumer<FlowStatus> m) {
+  public ConfigurationStep<M, R, W> metrics(Consumer<FlowStatus> m) {
     model.setMetrics(m);
     return this;
   }
@@ -39,7 +39,7 @@ public class SetConfigurationStep<M extends Message, R, W> {
    * @param c the cleanup task
    * @return the next step (setting configuration or build the flow)
    */
-  public SetConfigurationStep<M, R, W> cleanup(Runnable c) {
+  public ConfigurationStep<M, R, W> cleanup(Runnable c) {
     model.setCleanup(c);
     return this;
   }
@@ -52,7 +52,7 @@ public class SetConfigurationStep<M extends Message, R, W> {
    * @param p true, if flow ids should be propagated
    * @return the next step (setting configuration or build the flow)
    */
-  public SetConfigurationStep<M, R, W> propagateFlowIds(boolean p) {
+  public ConfigurationStep<M, R, W> propagateFlowIds(boolean p) {
     model.setPropagateFlowIds(p);
     return this;
   }

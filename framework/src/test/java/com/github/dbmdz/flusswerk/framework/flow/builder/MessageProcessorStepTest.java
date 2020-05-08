@@ -8,15 +8,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("The SetMessageProcessorStep")
-class SetMessageProcessorStepTest {
+class MessageProcessorStepTest {
 
   private Model<TestMessage, TestMessage, TestMessage> model;
-  private SetMessageProcessorStep<TestMessage> step;
+  private MessageProcessorStep<TestMessage> step;
 
   @BeforeEach
   void setUp() {
     model = new Model<>();
-    step = new SetMessageProcessorStep<>(model);
+    step = new MessageProcessorStep<>(model);
   }
 
   @Test

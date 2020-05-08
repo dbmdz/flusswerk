@@ -1,10 +1,12 @@
 package com.github.dbmdz.flusswerk.framework.flow;
 
+import com.github.dbmdz.flusswerk.framework.flow.builder.ConfigurationStep;
+
 /**
  * Collect base metrics for a single flow - did the execution have errors and how long does it take?
  *
  * @see com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder
- * @see com.github.dbmdz.flusswerk.framework.flow.builder.SetConfigurationStep
+ * @see ConfigurationStep
  */
 public class FlowStatus {
 
