@@ -10,11 +10,11 @@ import java.util.function.Function;
  *
  * @param <M> The message class
  */
-public class SetMessageProcessorStep<M extends Message> {
+public class MessageProcessorStep<M extends Message> {
 
   private final Model<M, M, M> model;
 
-  SetMessageProcessorStep(Model<M, M, M> model) {
+  MessageProcessorStep(Model<M, M, M> model) {
     this.model = model;
   }
 
@@ -25,11 +25,11 @@ public class SetMessageProcessorStep<M extends Message> {
    * @param p the message processor to set
    * @return the next reader step
    */
-  public SetConfigurationStep<M, M, M> expand(Function<M, Collection<Message>> p) {
+  public ConfigurationStep<M, M, M> expand(Function<M, Collection<Message>> p) {
     model.setReader(m -> m);
     model.setTransformer(m -> m);
     model.setWriter(p);
-    return new SetConfigurationStep<>(model);
+    return new ConfigurationStep<>(model);
   }
 
   /**
@@ -39,10 +39,10 @@ public class SetMessageProcessorStep<M extends Message> {
    * @param p the message processor to set
    * @return the next reader step
    */
-  public SetConfigurationStep<M, M, M> process(Function<M, Message> p) {
+  public ConfigurationStep<M, M, M> process(Function<M, Message> p) {
     model.setReader(m -> m);
     model.setTransformer(m -> m);
     model.setWriter(p.andThen(List::of));
-    return new SetConfigurationStep<>(model);
+    return new ConfigurationStep<>(model);
   }
 }

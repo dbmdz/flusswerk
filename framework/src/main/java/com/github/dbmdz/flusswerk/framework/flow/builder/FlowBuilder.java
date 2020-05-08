@@ -21,9 +21,9 @@ public class FlowBuilder {
    * @param <W> Generic type for the transformer output/writer input
    * @return a new builder for a new flow
    */
-  public static <M extends Message, R, W> SetReaderStep<M, R, W> flow(
+  public static <M extends Message, R, W> ReaderStep<M, R, W> flow(
       Class<M> messageClass, Class<R> readerOut, Class<W> writerIn) {
-    return new SetReaderStep<>(new Model<>());
+    return new ReaderStep<>(new Model<>());
   }
 
   /**
@@ -36,9 +36,9 @@ public class FlowBuilder {
    * @param <T> Generic type for the reader output/writer input
    * @return a new builder for a new flow
    */
-  public static <M extends Message, T> SetReaderStep<M, T, T> flow(
+  public static <M extends Message, T> ReaderStep<M, T, T> flow(
       Class<M> messageClass, Class<T> modelType) {
-    return new SetReaderStep<>(new Model<>());
+    return new ReaderStep<>(new Model<>());
   }
 
   /**
@@ -53,9 +53,9 @@ public class FlowBuilder {
    * @param <W> Generic type for the transformer output/writer input
    * @return a new builder for a new flow
    */
-  public static <M extends Message, R, W> SetReaderStep<M, R, W> flow(
+  public static <M extends Message, R, W> ReaderStep<M, R, W> flow(
       Type<M> messageClass, Type<R> readerOut, Type<W> writerIn) {
-    return new SetReaderStep<>(new Model<>());
+    return new ReaderStep<>(new Model<>());
   }
 
   /**
@@ -68,9 +68,9 @@ public class FlowBuilder {
    * @param <T> Generic type for the reader output/writer input
    * @return a new builder for a new flow
    */
-  public static <M extends Message, T> SetReaderStep<M, T, T> flow(
+  public static <M extends Message, T> ReaderStep<M, T, T> flow(
       Type<M> messageClass, Type<T> modelType) {
-    return new SetReaderStep<>(new Model<>());
+    return new ReaderStep<>(new Model<>());
   }
 
   /**
@@ -81,9 +81,9 @@ public class FlowBuilder {
    * @param <M> The generic type for the message class to operate on
    * @return a new builder for a new flow
    */
-  public static <M extends Message> SetMessageProcessorStep<M> messageProcessor(
+  public static <M extends Message> MessageProcessorStep<M> messageProcessor(
       Class<M> messageClass) {
-    return new SetMessageProcessorStep<>(new Model<>());
+    return new MessageProcessorStep<>(new Model<>());
   }
 
   /**
@@ -94,8 +94,8 @@ public class FlowBuilder {
    * @param <M> The generic type for the message class to operate on
    * @return a new builder for a new flow
    */
-  public static <M extends Message> SetMessageProcessorStep<M> messageProcessor(
+  public static <M extends Message> MessageProcessorStep<M> messageProcessor(
       Type<M> messageType) {
-    return new SetMessageProcessorStep<>(new Model<>());
+    return new MessageProcessorStep<>(new Model<>());
   }
 }
