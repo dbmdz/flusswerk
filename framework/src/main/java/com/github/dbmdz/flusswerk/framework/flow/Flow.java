@@ -59,7 +59,7 @@ public class Flow<M extends Message, R, W> {
     FlowStatus flowStatus = new FlowStatus();
     Job<M, R, W> job = new Job<>(message, propagateFlowIds);
 
-    Collection<Message> result = null;
+    final Collection<Message> result;
 
     try {
       if (readerFactory != null) {
@@ -97,7 +97,6 @@ public class Flow<M extends Message, R, W> {
         monitor.accept(flowStatus); // record metrics only available from inside the framework
       }
     }
-
     return result;
   }
 
