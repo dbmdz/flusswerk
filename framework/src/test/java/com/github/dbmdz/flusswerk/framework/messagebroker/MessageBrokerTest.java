@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeoutException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -35,7 +34,7 @@ class MessageBrokerTest {
   private RoutingConfigImpl routingConfig;
 
   @BeforeEach
-  void setUp() throws IOException, TimeoutException {
+  void setUp() throws IOException {
     routingConfig = new RoutingConfigImpl();
     routingConfig.setReadFrom("some.input.queue");
     routingConfig.setWriteTo("some.output.queue");
@@ -137,7 +136,7 @@ class MessageBrokerTest {
 
   @Test
   @DisplayName("isConnectionOk should be true if channel and connection are ok")
-  void isConnectionOkShouldBeTrueIfChannelAndConnectionAreOk() throws IOException {
+  void isConnectionOkShouldBeTrueIfChannelAndConnectionAreOk() {
     when(rabbitClient.isChannelAvailable()).thenReturn(true);
     when(rabbitClient.isConnectionOk()).thenReturn(true);
     assertThat(messageBroker.isConnectionOk()).isTrue();
@@ -145,7 +144,7 @@ class MessageBrokerTest {
 
   @Test
   @DisplayName("isConnectionOk should be false if channel is not available")
-  void isConnectionOkShouldBeTrueIfChannelIsNotAvailable() throws IOException {
+  void isConnectionOkShouldBeTrueIfChannelIsNotAvailable() {
     when(rabbitClient.isChannelAvailable()).thenReturn(false);
     when(rabbitClient.isConnectionOk()).thenReturn(true);
     assertThat(messageBroker.isConnectionOk()).isFalse();
@@ -153,7 +152,7 @@ class MessageBrokerTest {
 
   @Test
   @DisplayName("isConnectionOk should be false if connection is not ok")
-  void isConnectionOkShouldBeTrueIfConnectionIsNotOk() throws IOException {
+  void isConnectionOkShouldBeTrueIfConnectionIsNotOk() {
     when(rabbitClient.isChannelAvailable()).thenReturn(true);
     when(rabbitClient.isConnectionOk()).thenReturn(false);
     assertThat(messageBroker.isConnectionOk()).isFalse();
@@ -162,7 +161,7 @@ class MessageBrokerTest {
   @Test
   @DisplayName(
       "isConnectionOk should be false if channel is not available and connection is not ok")
-  void isConnectionOkShouldBeTrueIfChannelIsNotAvailableAndConnectionIsNotOk() throws IOException {
+  void isConnectionOkShouldBeTrueIfChannelIsNotAvailableAndConnectionIsNotOk() {
     when(rabbitClient.isChannelAvailable()).thenReturn(false);
     when(rabbitClient.isConnectionOk()).thenReturn(false);
     assertThat(messageBroker.isConnectionOk()).isFalse();

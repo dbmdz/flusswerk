@@ -32,6 +32,7 @@ class MessageBrokerBuilderTest {
 
   private MessageBrokerBuilder messageBrokerBuilder;
 
+  @SuppressWarnings("unchecked")
   @BeforeEach
   void setUp() throws IOException, TimeoutException {
     connectionFactory = mock(ConnectionFactory.class);
@@ -81,7 +82,7 @@ class MessageBrokerBuilderTest {
 
   @Test
   @DisplayName("Password should be set")
-  void password() throws IOException, TimeoutException {
+  void password() throws IOException {
     messageBroker = messageBrokerBuilder.password("secretsecretsecret").build(rabbitConnection());
     verify(connectionFactory).setPassword("secretsecretsecret");
   }
@@ -103,7 +104,7 @@ class MessageBrokerBuilderTest {
 
   @Test
   @DisplayName("Should set username")
-  void username() throws IOException, TimeoutException {
+  void username() throws IOException {
     messageBroker =
         messageBrokerBuilder
             .username("Hackerman")
@@ -122,7 +123,7 @@ class MessageBrokerBuilderTest {
 
   @Test
   @DisplayName("Default virtualHost is RabbitMQ default")
-  void virtualHost() throws IOException, TimeoutException {
+  void virtualHost() throws IOException {
     messageBroker =
         messageBrokerBuilder
             .virtualHost("/special")

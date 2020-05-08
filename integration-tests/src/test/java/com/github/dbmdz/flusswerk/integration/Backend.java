@@ -17,7 +17,7 @@ public class Backend {
 
   public Backend(String readFrom, String writeTo) {
     String host = getEnvOrDefault("RABBIT_HOST", "localhost");
-    int port = Integer.valueOf(getEnvOrDefault("RABBIT_PORT", "5672"));
+    int port = Integer.parseInt(getEnvOrDefault("RABBIT_PORT", "5672"));
 
     long totalWait = 0;
     MessageBrokerBuilder messageBrokerBuilder =
