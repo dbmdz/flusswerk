@@ -23,8 +23,8 @@ public class MessageBrokerConfig<M extends Message> {
     this.messageClass = messageClass;
   }
 
-  public MessageBrokerConfig(int deadLetterWait, int maxRetries,
-      List<Module> jacksonModules, Class<M> messageClass) {
+  public MessageBrokerConfig(
+      int deadLetterWait, int maxRetries, List<Module> jacksonModules, Class<M> messageClass) {
     this.deadLetterWait = deadLetterWait;
     this.maxRetries = maxRetries;
     this.jacksonModules = jacksonModules;

@@ -40,8 +40,8 @@ public class SendToStep<M extends Message> {
 
   public SendToStep<M> waitBetweenRetries(int seconds) {
     if (seconds < 0) {
-      throw new IllegalArgumentException("Time between retries has to be a positive number but was "
-          + seconds);
+      throw new IllegalArgumentException(
+          "Time between retries has to be a positive number but was " + seconds);
     }
     messageBrokerConfig.setDeadLetterWait(seconds * 1000);
     return this;
@@ -51,5 +51,4 @@ public class SendToStep<M extends Message> {
     routingConfig.setWriteTo(topic);
     return new ViaStep<>(connectionConfig, messageBrokerConfig, routingConfig);
   }
-
 }

@@ -14,7 +14,8 @@ public class ViaStep<M extends Message> {
   private final MessageBrokerConfig<M> messageBrokerConfig;
   private final RoutingConfig routingConfig;
 
-  ViaStep(ConnectionConfig connectionConfig,
+  ViaStep(
+      ConnectionConfig connectionConfig,
       MessageBrokerConfig<M> messageBrokerConfig,
       RoutingConfig routingConfig) {
     this.connectionConfig = connectionConfig;
@@ -35,5 +36,4 @@ public class ViaStep<M extends Message> {
     connectionConfig.setVirtualHost(rabbitMQ.getVirtualHost());
     return new BuildStep<>(connectionConfig, messageBrokerConfig, routingConfig);
   }
-
 }

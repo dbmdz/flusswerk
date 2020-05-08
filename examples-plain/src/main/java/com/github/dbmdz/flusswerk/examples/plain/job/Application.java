@@ -16,15 +16,15 @@ public class Application {
   private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
   private void run() throws IOException {
-    MessageBroker<AppMessage> messageBroker = MessageBrokerBuilder
-        .read(AppMessage.class, "someInputQueue")
-        .sendTo("someOutputQueue")
-        .via(RabbitMQ
-            .host("localhost", 5672)
-            .auth("guest", "guest")
-            .exchange("workflow")
-        )
-        .build();
+    MessageBroker<AppMessage> messageBroker =
+        MessageBrokerBuilder.read(AppMessage.class)
+            .from("someInputQueue")
+            .sendTo("someOutputQueue")
+            .via(
+                RabbitMQ.host("localhost", 5672) // For multiple hosts use Address
+                    .auth("guest", "guest") // guest/guest is RabbitMQ default
+                    .exchange("workflow"))
+            .build();
 
     var flow =
         FlowBuilder.flow(AppMessage.class, String.class, String.class)

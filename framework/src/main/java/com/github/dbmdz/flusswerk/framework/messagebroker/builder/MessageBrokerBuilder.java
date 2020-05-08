@@ -1,17 +1,9 @@
 package com.github.dbmdz.flusswerk.framework.messagebroker.builder;
 
-import static java.util.Objects.requireNonNull;
-
-import com.github.dbmdz.flusswerk.framework.jackson.SingleClassModule;
 import com.github.dbmdz.flusswerk.framework.messagebroker.ConnectionConfig;
-import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBrokerConfig;
-import com.github.dbmdz.flusswerk.framework.messagebroker.RabbitClient;
-import com.github.dbmdz.flusswerk.framework.messagebroker.RabbitConnection;
 import com.github.dbmdz.flusswerk.framework.messagebroker.RoutingConfig;
 import com.github.dbmdz.flusswerk.framework.model.Message;
-import java.io.IOException;
-import java.util.List;
 
 public class MessageBrokerBuilder {
 
@@ -29,5 +21,4 @@ public class MessageBrokerBuilder {
     routingConfig.setWriteTo(topic);
     return new ViaStep<>(connectionConfig, messageBrokerConfig, routingConfig);
   }
-
 }

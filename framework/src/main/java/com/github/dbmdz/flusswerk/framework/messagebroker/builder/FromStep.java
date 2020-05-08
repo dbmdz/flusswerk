@@ -24,5 +24,4 @@ public class FromStep<M extends Message> {
     routingConfig.setReadFrom(queues);
     return new SendToStep<>(connectionConfig, messageBrokerConfig, routingConfig);
   }
-
 }

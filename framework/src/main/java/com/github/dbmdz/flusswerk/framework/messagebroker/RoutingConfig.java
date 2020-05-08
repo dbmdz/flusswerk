@@ -24,8 +24,6 @@ public class RoutingConfig {
     failurePolicies = new HashMap<>();
   }
 
-
-
   public void complete() {
     if (exchange == null) {
       exchange = "workflow";

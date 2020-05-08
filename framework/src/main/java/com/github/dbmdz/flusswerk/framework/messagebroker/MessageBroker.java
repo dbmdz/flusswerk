@@ -27,8 +27,8 @@ public class MessageBroker<M extends Message> {
 
   private final RabbitClient<M> rabbitClient;
 
-  public MessageBroker(MessageBrokerConfig<M> config, RoutingConfig routingConfig,
-      RabbitClient<M> rabbitClient)
+  public MessageBroker(
+      MessageBrokerConfig<M> config, RoutingConfig routingConfig, RabbitClient<M> rabbitClient)
       throws IOException {
     this.config = config;
     this.routingConfig = routingConfig;

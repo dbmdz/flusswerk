@@ -1,6 +1,5 @@
 package com.github.dbmdz.flusswerk.framework.messagebroker.builder;
 
-import com.github.dbmdz.flusswerk.framework.jackson.SingleClassModule;
 import com.github.dbmdz.flusswerk.framework.messagebroker.ConnectionConfig;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBrokerConfig;
@@ -9,7 +8,6 @@ import com.github.dbmdz.flusswerk.framework.messagebroker.RabbitConnection;
 import com.github.dbmdz.flusswerk.framework.messagebroker.RoutingConfig;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.io.IOException;
-import java.util.List;
 
 public class BuildStep<M extends Message> {
 
@@ -36,5 +34,4 @@ public class BuildStep<M extends Message> {
       throw new RuntimeException("Error initializing communications", e);
     }
   }
-
 }

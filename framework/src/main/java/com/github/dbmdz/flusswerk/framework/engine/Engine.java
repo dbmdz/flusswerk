@@ -61,7 +61,8 @@ public class Engine<M extends Message> {
    * @param concurrentWorkers the number of concurrent workers
    * @throws IOException if reading/writing to the message broker fails
    */
-  public Engine(MessageBroker<M> messageBroker, Flow<M, ?, ?> flow, int concurrentWorkers) throws IOException {
+  public Engine(MessageBroker<M> messageBroker, Flow<M, ?, ?> flow, int concurrentWorkers)
+      throws IOException {
     this(messageBroker, flow, concurrentWorkers, null);
   }
 
@@ -87,7 +88,10 @@ public class Engine<M extends Message> {
    * @param processReport Reporting implementation (or null, if DefaultProcessReport shall be used)
    */
   public Engine(
-      MessageBroker<M> messageBroker, Flow<M, ?, ?> flow, int concurrentWorkers, ProcessReport processReport) {
+      MessageBroker<M> messageBroker,
+      Flow<M, ?, ?> flow,
+      int concurrentWorkers,
+      ProcessReport processReport) {
     this.messageBroker = messageBroker;
     this.flow = flow;
     this.concurrentWorkers = concurrentWorkers;

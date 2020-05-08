@@ -21,7 +21,7 @@ public class MessageBrokerBuilderOld {
   private final RoutingConfig routingConfig;
 
   public MessageBrokerBuilderOld() {
-//    config = new MessageBrokerConfig();
+    //    config = new MessageBrokerConfig();
     config = null; // FIXME just to make it compile, cannot work!
     connectionConfig = new ConnectionConfig();
     routingConfig = new RoutingConfig();
