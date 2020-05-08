@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-class RabbitClient {
+public class RabbitClient<M extends Message> {
 
   private static final boolean DURABLE = true;
 
@@ -33,11 +33,11 @@ class RabbitClient {
 
   private final ObjectMapper objectMapper;
 
-  private final Class<? extends Message> messageClass;
+  private final Class<M> messageClass;
 
   private final RabbitConnection connection;
 
-  public RabbitClient(MessageBrokerConfig config, RabbitConnection connection) {
+  public RabbitClient(MessageBrokerConfig<M> config, RabbitConnection connection) {
     this.connection = connection;
     channel = connection.getChannel();
     objectMapper = new ObjectMapper();
@@ -70,7 +70,7 @@ class RabbitClient {
     }
   }
 
-  Message deserialize(String body) throws IOException {
+  M deserialize(String body) throws IOException {
     return objectMapper.readValue(body, messageClass);
   }
 
@@ -96,7 +96,7 @@ class RabbitClient {
     }
   }
 
-  public Message receive(String queueName) throws IOException, InvalidMessageException {
+  public M receive(String queueName) throws IOException, InvalidMessageException {
     GetResponse response;
     try {
       response = channel.basicGet(queueName, NO_AUTO_ACK);
@@ -104,24 +104,24 @@ class RabbitClient {
       tryToReconnect("Could not receive message from " + queueName);
       response = channel.basicGet(queueName, NO_AUTO_ACK);
     }
-    if (response != null) {
-      String body = new String(response.getBody(), StandardCharsets.UTF_8);
-
-      try {
-        Message message = deserialize(body);
-        message.getEnvelope().setBody(body);
-        message.getEnvelope().setDeliveryTag(response.getEnvelope().getDeliveryTag());
-        message.getEnvelope().setSource(queueName);
-        return message;
-      } catch (Exception e) {
-        Message invalidMessage = new Message();
-        invalidMessage.getEnvelope().setBody(body);
-        invalidMessage.getEnvelope().setDeliveryTag(response.getEnvelope().getDeliveryTag());
-        invalidMessage.getEnvelope().setSource(queueName);
-        throw new InvalidMessageException(invalidMessage, e.getMessage());
-      }
+    if (response == null) {
+      return null;
     }
-    return null;
+
+    String body = new String(response.getBody(), StandardCharsets.UTF_8);
+    try {
+      M message = deserialize(body);
+      message.getEnvelope().setBody(body);
+      message.getEnvelope().setDeliveryTag(response.getEnvelope().getDeliveryTag());
+      message.getEnvelope().setSource(queueName);
+      return message;
+    } catch (Exception e) {
+      Message invalidMessage = new Message();
+      invalidMessage.getEnvelope().setBody(body);
+      invalidMessage.getEnvelope().setDeliveryTag(response.getEnvelope().getDeliveryTag());
+      invalidMessage.getEnvelope().setSource(queueName);
+      throw new InvalidMessageException(invalidMessage, e.getMessage());
+    }
   }
 
   public void provideExchange(String exchange) throws IOException {

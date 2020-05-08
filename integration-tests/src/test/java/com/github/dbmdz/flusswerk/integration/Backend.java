@@ -2,7 +2,7 @@ package com.github.dbmdz.flusswerk.integration;
 
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
-import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBrokerBuilder;
+import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBrokerBuilderOld;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -20,8 +20,8 @@ public class Backend {
     int port = Integer.parseInt(getEnvOrDefault("RABBIT_PORT", "5672"));
 
     long totalWait = 0;
-    MessageBrokerBuilder messageBrokerBuilder =
-        new MessageBrokerBuilder()
+    MessageBrokerBuilderOld messageBrokerBuilder =
+        new MessageBrokerBuilderOld()
             .deadLetterWait(1) // no need to wait for tests
             .readFrom(readFrom)
             .writeTo(writeTo)

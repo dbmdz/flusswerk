@@ -11,7 +11,7 @@ import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class RabbitConnection {
+public class RabbitConnection {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RabbitConnection.class);
   private static final int RETRY_INTERVAL = 5;
@@ -22,7 +22,7 @@ class RabbitConnection {
 
   private final ConnectionConfig config;
 
-  RabbitConnection(ConnectionConfig config) throws IOException {
+  public RabbitConnection(ConnectionConfig config) throws IOException {
     this(config, new ConnectionFactory());
   }
 

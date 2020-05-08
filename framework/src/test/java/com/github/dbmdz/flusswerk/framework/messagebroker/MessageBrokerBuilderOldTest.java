@@ -22,7 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class MessageBrokerBuilderTest {
+class MessageBrokerBuilderOldTest {
 
   private ConnectionFactory connectionFactory;
 
@@ -30,7 +30,7 @@ class MessageBrokerBuilderTest {
 
   private MessageBroker messageBroker;
 
-  private MessageBrokerBuilder messageBrokerBuilder;
+  private MessageBrokerBuilderOld messageBrokerBuilder;
 
   @SuppressWarnings("unchecked")
   @BeforeEach
@@ -40,7 +40,7 @@ class MessageBrokerBuilderTest {
     when(connectionFactory.newConnection(any(List.class))).thenReturn(connection);
     channel = mock(Channel.class);
     when(connection.createChannel()).thenReturn(channel);
-    messageBrokerBuilder = new MessageBrokerBuilder().readFrom("default");
+    messageBrokerBuilder = new MessageBrokerBuilderOld().readFrom("default");
   }
 
   private RabbitConnection rabbitConnection() {

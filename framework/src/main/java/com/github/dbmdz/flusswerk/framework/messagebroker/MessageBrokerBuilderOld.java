@@ -12,18 +12,19 @@ import java.io.IOException;
  * Builder to create an instance of the {@link MessageBroker} which manages the connection to
  * RabbitMQ and all related configuration and setups like creating queues and exchanges.
  */
-public class MessageBrokerBuilder {
+public class MessageBrokerBuilderOld {
 
-  private final ConnectionConfigImpl connectionConfig;
+  private final ConnectionConfig connectionConfig;
 
-  private final MessageBrokerConfigImpl config;
+  private final MessageBrokerConfig config;
 
-  private final RoutingConfigImpl routingConfig;
+  private final RoutingConfig routingConfig;
 
-  public MessageBrokerBuilder() {
-    config = new MessageBrokerConfigImpl();
-    connectionConfig = new ConnectionConfigImpl();
-    routingConfig = new RoutingConfigImpl();
+  public MessageBrokerBuilderOld() {
+//    config = new MessageBrokerConfig();
+    config = null; // FIXME just to make it compile, cannot work!
+    connectionConfig = new ConnectionConfig();
+    routingConfig = new RoutingConfig();
   }
 
   /**
@@ -32,14 +33,14 @@ public class MessageBrokerBuilder {
    *
    * @param host The host to connect to.
    * @param port The port to use for this connection
-   * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
+   * @return This {@link MessageBrokerBuilderOld} instance to chain configuration calls.
    */
-  public MessageBrokerBuilder connectTo(String host, int port) {
+  public MessageBrokerBuilderOld connectTo(String host, int port) {
     connectionConfig.addAddress(host, port);
     return this;
   }
 
-  public MessageBrokerBuilder connectTo(String connectionStr) {
+  public MessageBrokerBuilderOld connectTo(String connectionStr) {
     if (connectionStr != null) {
       String[] connections = connectionStr.split(",|;");
       for (String connection : connections) {
@@ -58,9 +59,9 @@ public class MessageBrokerBuilder {
    * Sets the RabbitMQ password for authentication.
    *
    * @param password The password for authentication.
-   * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
+   * @return This {@link MessageBrokerBuilderOld} instance to chain configuration calls.
    */
-  public MessageBrokerBuilder password(String password) {
+  public MessageBrokerBuilderOld password(String password) {
     connectionConfig.setPassword(requireNonNull(password));
     return this;
   }
@@ -69,9 +70,9 @@ public class MessageBrokerBuilder {
    * Sets the RabbitMQ username for authentication.
    *
    * @param username The username for authentication.
-   * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
+   * @return This {@link MessageBrokerBuilderOld} instance to chain configuration calls.
    */
-  public MessageBrokerBuilder username(String username) {
+  public MessageBrokerBuilderOld username(String username) {
     connectionConfig.setUsername(requireNonNull(username));
     return this;
   }
@@ -80,9 +81,9 @@ public class MessageBrokerBuilder {
    * Sets the internal RabbitMQ virtualHost (default is "\").
    *
    * @param virtualHost The virtual host.
-   * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
+   * @return This {@link MessageBrokerBuilderOld} instance to chain configuration calls.
    */
-  public MessageBrokerBuilder virtualHost(String virtualHost) {
+  public MessageBrokerBuilderOld virtualHost(String virtualHost) {
     connectionConfig.setVirtualHost(requireNonNull(virtualHost));
     return this;
   }
@@ -91,9 +92,9 @@ public class MessageBrokerBuilder {
    * Registers Jackson Modules to use with the object mapper.
    *
    * @param modules The Jackson @{@link Module}s to register
-   * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
+   * @return This {@link MessageBrokerBuilderOld} instance to chain configuration calls.
    */
-  public MessageBrokerBuilder jacksonModules(Module... modules) {
+  public MessageBrokerBuilderOld jacksonModules(Module... modules) {
     for (Module module : modules) {
       config.addJacksonModule(module);
     }
@@ -104,9 +105,9 @@ public class MessageBrokerBuilder {
    * Sets the time to wait for dead-lettered messages before these are returned to the queue.
    *
    * @param milliseconds The waiting time.
-   * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
+   * @return This {@link MessageBrokerBuilderOld} instance to chain configuration calls.
    */
-  public MessageBrokerBuilder deadLetterWait(int milliseconds) {
+  public MessageBrokerBuilderOld deadLetterWait(int milliseconds) {
     config.setDeadLetterWait(milliseconds);
     return this;
   }
@@ -116,9 +117,9 @@ public class MessageBrokerBuilder {
    * dead letter queue.
    *
    * @param number The maximum number of attempts to process a message.
-   * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
+   * @return This {@link MessageBrokerBuilderOld} instance to chain configuration calls.
    */
-  public MessageBrokerBuilder maxRetries(int number) {
+  public MessageBrokerBuilderOld maxRetries(int number) {
     if (number < 0) {
       throw new IllegalArgumentException("Max number of retries must be at least 0.");
     }
@@ -130,9 +131,9 @@ public class MessageBrokerBuilder {
    * Registers a custom {@link Message} implementation.
    *
    * @param cls The custom message implementation you want to use.
-   * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
+   * @return This {@link MessageBrokerBuilderOld} instance to chain configuration calls.
    */
-  public MessageBrokerBuilder useMessageClass(Class<? extends Message> cls) {
+  public MessageBrokerBuilderOld useMessageClass(Class<? extends Message> cls) {
     return useMessageClass(cls, DefaultMixin.class);
   }
 
@@ -142,9 +143,9 @@ public class MessageBrokerBuilder {
    *
    * @param cls The custom message implementation you want to use.
    * @param mixin The Jackson mixin to use
-   * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
+   * @return This {@link MessageBrokerBuilderOld} instance to chain configuration calls.
    */
-  public MessageBrokerBuilder useMessageClass(Class<? extends Message> cls, Class<?> mixin) {
+  public MessageBrokerBuilderOld useMessageClass(Class<? extends Message> cls, Class<?> mixin) {
     config.addJacksonModule(new SingleClassModule(cls, mixin));
     config.setMessageClass(cls);
     return this;
@@ -155,9 +156,9 @@ public class MessageBrokerBuilder {
    * will be created.
    *
    * @param exchange The regular exchange.
-   * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
+   * @return This {@link MessageBrokerBuilderOld} instance to chain configuration calls.
    */
-  public MessageBrokerBuilder exchange(String exchange) {
+  public MessageBrokerBuilderOld exchange(String exchange) {
     routingConfig.setExchange(requireNonNull(exchange));
     return this;
   }
@@ -167,9 +168,9 @@ public class MessageBrokerBuilder {
    * not exist it will be created.
    *
    * @param deadLetterExchange The dead letter exchange.
-   * @return This {@link MessageBrokerBuilder} instance to chain configuration calls.
+   * @return This {@link MessageBrokerBuilderOld} instance to chain configuration calls.
    */
-  public MessageBrokerBuilder deadLetterExchange(String deadLetterExchange) {
+  public MessageBrokerBuilderOld deadLetterExchange(String deadLetterExchange) {
     if (deadLetterExchange == null || deadLetterExchange.isEmpty()) {
       throw new IllegalArgumentException("Dead letter exchange must not be null or empty");
     }
@@ -205,7 +206,7 @@ public class MessageBrokerBuilder {
    * @param inputQueues The queue names to read from.
    * @return This builder for a fluent interface.
    */
-  public MessageBrokerBuilder readFrom(String... inputQueues) {
+  public MessageBrokerBuilderOld readFrom(String... inputQueues) {
     if (inputQueues == null || inputQueues.length == 0) {
       throw new IllegalArgumentException("The input queue cannot be null or empty.");
     }
@@ -213,7 +214,7 @@ public class MessageBrokerBuilder {
     return this;
   }
 
-  public MessageBrokerBuilder addFailurePolicy(FailurePolicy failurePolicy) {
+  public MessageBrokerBuilderOld addFailurePolicy(FailurePolicy failurePolicy) {
     if (failurePolicy == null) {
       throw new IllegalArgumentException("A failure policy cannot be null");
     }
@@ -221,7 +222,7 @@ public class MessageBrokerBuilder {
     return this;
   }
 
-  public MessageBrokerBuilder writeTo(String outputRoutingKey) {
+  public MessageBrokerBuilderOld writeTo(String outputRoutingKey) {
     routingConfig.setWriteTo(outputRoutingKey);
     return this;
   }

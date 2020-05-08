@@ -3,7 +3,7 @@ package com.github.dbmdz.flusswerk.spring.boot.starter;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
-import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBrokerBuilder;
+import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBrokerBuilderOld;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import com.github.dbmdz.flusswerk.spring.boot.starter.monitoring.BaseMetrics;
@@ -31,7 +31,7 @@ public class FlusswerkConfiguration {
       ObjectProvider<MessageImplementation> messageImplementation) {
 
     var connection = flusswerkProperties.getConnection();
-    MessageBrokerBuilder builder = new MessageBrokerBuilder();
+    MessageBrokerBuilderOld builder = new MessageBrokerBuilderOld();
 
     if (connection == null || !isSet(connection.getConnectTo())) {
       throw new IllegalArgumentException("flusswerk.connection.connect-to is missing");

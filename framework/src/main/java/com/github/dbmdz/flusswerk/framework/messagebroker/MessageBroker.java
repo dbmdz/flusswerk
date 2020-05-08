@@ -15,19 +15,20 @@ import org.slf4j.LoggerFactory;
  * provides the framework engines logic for message operations like sending, retrieving or rejecting
  * for messages.
  */
-public class MessageBroker {
+public class MessageBroker<M extends Message> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MessageBroker.class);
   private static final String MESSAGE_TTL = "x-message-ttl";
   private static final String DEAD_LETTER_EXCHANGE = "x-dead-letter-exchange";
 
-  private final MessageBrokerConfig config;
+  private final MessageBrokerConfig<M> config;
 
   private final RoutingConfig routingConfig;
 
-  private final RabbitClient rabbitClient;
+  private final RabbitClient<M> rabbitClient;
 
-  MessageBroker(MessageBrokerConfig config, RoutingConfig routingConfig, RabbitClient rabbitClient)
+  public MessageBroker(MessageBrokerConfig<M> config, RoutingConfig routingConfig,
+      RabbitClient<M> rabbitClient)
       throws IOException {
     this.config = config;
     this.routingConfig = routingConfig;
@@ -91,7 +92,7 @@ public class MessageBroker {
    * @throws IOException if communication with RabbitMQ failed.
    * @throws InvalidMessageException if the message could not be read and deserialized
    */
-  public Message receive(String queueName) throws IOException, InvalidMessageException {
+  public M receive(String queueName) throws IOException, InvalidMessageException {
     return rabbitClient.receive(queueName);
   }
 
@@ -102,8 +103,8 @@ public class MessageBroker {
    * @return the received message.
    * @throws IOException if communication with RabbitMQ failed.
    */
-  public Message receive() throws IOException {
-    Message message = null;
+  public M receive() throws IOException {
+    M message = null;
     for (String inputQueue : routingConfig.getReadFrom()) {
       try {
         message = receive(inputQueue);

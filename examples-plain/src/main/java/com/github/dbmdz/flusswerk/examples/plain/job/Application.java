@@ -4,7 +4,8 @@ import com.github.dbmdz.flusswerk.examples.plain.AppMessage;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
-import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBrokerBuilder;
+import com.github.dbmdz.flusswerk.framework.messagebroker.builder.MessageBrokerBuilder;
+import com.github.dbmdz.flusswerk.framework.messagebroker.builder.RabbitMQ;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,16 +16,15 @@ public class Application {
   private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
   private void run() throws IOException {
-    MessageBroker messageBroker =
-        new MessageBrokerBuilder()
-            .connectTo("localhost", 5672)
-            .username("guest")
-            .password("guest")
+    MessageBroker<AppMessage> messageBroker = MessageBrokerBuilder
+        .read(AppMessage.class, "someInputQueue")
+        .sendTo("someOutputQueue")
+        .via(RabbitMQ
+            .host("localhost", 5672)
+            .auth("guest", "guest")
             .exchange("workflow")
-            .deadLetterExchange("workflow.dlx")
-            .readFrom("someInputQueue")
-            .writeTo("someOutputQueue")
-            .build();
+        )
+        .build();
 
     var flow =
         FlowBuilder.flow(AppMessage.class, String.class, String.class)
@@ -33,7 +33,7 @@ public class Application {
             .writerSendingMessage(AppMessage::new)
             .build();
 
-    Engine engine = new Engine(messageBroker, flow);
+    Engine<AppMessage> engine = new Engine<>(messageBroker, flow);
     messageBroker.send("someInputQueue", new AppMessage("lowercase-text"));
     engine.start();
   }

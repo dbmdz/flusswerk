@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  * Run flows {@link Flow} for every message from the {@link MessageBroker} - usually several in
  * parallel.
  */
-public class Engine {
+public class Engine<M extends Message> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Engine.class);
 
@@ -28,9 +28,9 @@ public class Engine {
 
   private final int concurrentWorkers;
 
-  private final MessageBroker messageBroker;
+  private final MessageBroker<M> messageBroker;
 
-  private final Flow flow;
+  private final Flow<M, ?, ?> flow;
 
   private final ExecutorService executorService;
 
@@ -49,7 +49,7 @@ public class Engine {
    * @param flow the flow to execute agains every message
    * @throws IOException if reading/writing to the message broker fails
    */
-  public Engine(MessageBroker messageBroker, Flow flow) throws IOException {
+  public Engine(MessageBroker<M> messageBroker, Flow<M, ?, ?> flow) throws IOException {
     this(messageBroker, flow, DEFAULT_CONCURRENT_WORKERS, null);
   }
 
@@ -61,7 +61,7 @@ public class Engine {
    * @param concurrentWorkers the number of concurrent workers
    * @throws IOException if reading/writing to the message broker fails
    */
-  public Engine(MessageBroker messageBroker, Flow flow, int concurrentWorkers) throws IOException {
+  public Engine(MessageBroker<M> messageBroker, Flow<M, ?, ?> flow, int concurrentWorkers) throws IOException {
     this(messageBroker, flow, concurrentWorkers, null);
   }
 
@@ -73,7 +73,7 @@ public class Engine {
    * @param processReport Reporting implementation
    * @throws IOException if reading/writing to the message broker fails
    */
-  public Engine(MessageBroker messageBroker, Flow flow, ProcessReport processReport)
+  public Engine(MessageBroker<M> messageBroker, Flow<M, ?, ?> flow, ProcessReport processReport)
       throws IOException {
     this(messageBroker, flow, DEFAULT_CONCURRENT_WORKERS, null);
   }
@@ -87,7 +87,7 @@ public class Engine {
    * @param processReport Reporting implementation (or null, if DefaultProcessReport shall be used)
    */
   public Engine(
-      MessageBroker messageBroker, Flow flow, int concurrentWorkers, ProcessReport processReport) {
+      MessageBroker<M> messageBroker, Flow<M, ?, ?> flow, int concurrentWorkers, ProcessReport processReport) {
     this.messageBroker = messageBroker;
     this.flow = flow;
     this.concurrentWorkers = concurrentWorkers;
@@ -110,7 +110,7 @@ public class Engine {
       try {
         semaphore.acquire();
 
-        Message message = messageBroker.receive();
+        M message = messageBroker.receive();
 
         if (message == null) {
           LOGGER.debug(
@@ -142,8 +142,7 @@ public class Engine {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  void process(Message receivedMessage) {
+  void process(M receivedMessage) {
     try {
       Collection<? extends Message> messagesToSend = flow.process(receivedMessage);
       if (flow.hasMessagesToSend()) {
