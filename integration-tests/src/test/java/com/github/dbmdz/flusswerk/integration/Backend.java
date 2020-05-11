@@ -2,7 +2,9 @@ package com.github.dbmdz.flusswerk.integration;
 
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
-import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBrokerBuilderOld;
+import com.github.dbmdz.flusswerk.framework.messagebroker.builder.BuildStep;
+import com.github.dbmdz.flusswerk.framework.messagebroker.builder.MessageBrokerBuilder;
+import com.github.dbmdz.flusswerk.framework.messagebroker.builder.RabbitMQ;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -13,24 +15,24 @@ public class Backend {
 
   private static final long INTERVAL = 100;
 
-  private MessageBroker messageBroker;
+  private MessageBroker<Message> messageBroker;
 
   public Backend(String readFrom, String writeTo) {
     String host = getEnvOrDefault("RABBIT_HOST", "localhost");
     int port = Integer.parseInt(getEnvOrDefault("RABBIT_PORT", "5672"));
 
     long totalWait = 0;
-    MessageBrokerBuilderOld messageBrokerBuilder =
-        new MessageBrokerBuilderOld()
-            .deadLetterWait(1) // no need to wait for tests
-            .readFrom(readFrom)
-            .writeTo(writeTo)
-            .connectTo(host, port);
+    BuildStep<Message> buildStep =
+        MessageBrokerBuilder.read(Message.class)
+            .from(readFrom)
+            .waitBetweenRetries(1) // no need to wait for tests
+            .sendTo(writeTo)
+            .via(RabbitMQ.host(host, port));
 
     messageBroker = null;
     while (messageBroker == null) {
       try {
-        messageBroker = messageBrokerBuilder.build();
+        messageBroker = buildStep.build();
       } catch (RuntimeException e) {
         try {
           TimeUnit.MILLISECONDS.sleep(INTERVAL);

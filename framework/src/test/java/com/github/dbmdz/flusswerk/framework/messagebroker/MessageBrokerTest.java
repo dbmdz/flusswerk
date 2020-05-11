@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,16 +19,23 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class MessageBrokerTest {
 
-  private final MessageBrokerConfig config = new MessageBrokerConfigImpl();
+  private final MessageBrokerConfig<Message> config = new MessageBrokerConfig<>(Message.class);
 
-  private MessageBroker messageBroker;
+  private MessageBroker<Message> messageBroker;
 
   private Message message;
 
-  private RabbitClient rabbitClient;
+  @Mock(lenient = true)
+  private RabbitClient<Message> rabbitClient;
 
   private RoutingConfig routingConfig;
 
@@ -42,8 +48,7 @@ class MessageBrokerTest {
     routingConfig.addFailurePolicy(failurePolicy);
     routingConfig.complete();
 
-    rabbitClient = mock(RabbitClient.class);
-    messageBroker = new MessageBroker(config, routingConfig, rabbitClient);
+    messageBroker = new MessageBroker<>(config, routingConfig, rabbitClient);
     message = new Message("Hey");
     message.getEnvelope().setSource("some.input.queue");
   }
@@ -130,41 +135,23 @@ class MessageBrokerTest {
       when(rabbitClient.getMessageCount(queue)).thenReturn(expected.get(queue));
     }
 
-    messageBroker = new MessageBroker(config, routingConfig, rabbitClient);
+    messageBroker = new MessageBroker<>(config, routingConfig, rabbitClient);
     assertThat(messageBroker.getMessageCounts()).isEqualTo(expected);
   }
 
-  @Test
-  @DisplayName("isConnectionOk should be true if channel and connection are ok")
-  void isConnectionOkShouldBeTrueIfChannelAndConnectionAreOk() {
-    when(rabbitClient.isChannelAvailable()).thenReturn(true);
-    when(rabbitClient.isConnectionOk()).thenReturn(true);
-    assertThat(messageBroker.isConnectionOk()).isTrue();
-  }
-
-  @Test
-  @DisplayName("isConnectionOk should be false if channel is not available")
-  void isConnectionOkShouldBeTrueIfChannelIsNotAvailable() {
-    when(rabbitClient.isChannelAvailable()).thenReturn(false);
-    when(rabbitClient.isConnectionOk()).thenReturn(true);
-    assertThat(messageBroker.isConnectionOk()).isFalse();
-  }
-
-  @Test
-  @DisplayName("isConnectionOk should be false if connection is not ok")
-  void isConnectionOkShouldBeTrueIfConnectionIsNotOk() {
-    when(rabbitClient.isChannelAvailable()).thenReturn(true);
-    when(rabbitClient.isConnectionOk()).thenReturn(false);
-    assertThat(messageBroker.isConnectionOk()).isFalse();
-  }
-
-  @Test
-  @DisplayName(
-      "isConnectionOk should be false if channel is not available and connection is not ok")
-  void isConnectionOkShouldBeTrueIfChannelIsNotAvailableAndConnectionIsNotOk() {
-    when(rabbitClient.isChannelAvailable()).thenReturn(false);
-    when(rabbitClient.isConnectionOk()).thenReturn(false);
-    assertThat(messageBroker.isConnectionOk()).isFalse();
+  @DisplayName("isConnectionOk should report on connection status")
+  @ParameterizedTest(name = "{3}")
+  @CsvSource({
+    "true,true,true,channel available and conection is ok",
+    "true,false,false,channel available and conection is not ok",
+    "false,true,false,channel not available but conection is ok",
+    "false,false,false,channel not available and conection is not ok",
+  })
+  void isConnectionOk(
+      boolean channelAvailable, boolean connectionOk, boolean expected, String description) {
+    when(rabbitClient.isChannelAvailable()).thenReturn(channelAvailable);
+    when(rabbitClient.isConnectionOk()).thenReturn(connectionOk);
+    assertThat(messageBroker.isConnectionOk()).isEqualTo(expected);
   }
 
   @Test

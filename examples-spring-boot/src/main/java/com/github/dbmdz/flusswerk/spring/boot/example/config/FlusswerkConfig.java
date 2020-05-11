@@ -15,8 +15,8 @@ import org.springframework.context.annotation.Configuration;
 public class FlusswerkConfig {
 
   @Bean
-  MessageImplementation messageImplementation() {
-    return new MessageImplementation(Greeting.class);
+  MessageImplementation<Greeting> messageImplementation() {
+    return new MessageImplementation<>(Greeting.class);
   }
 
   @Bean

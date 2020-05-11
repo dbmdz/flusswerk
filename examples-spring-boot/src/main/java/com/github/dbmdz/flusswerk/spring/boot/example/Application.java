@@ -1,6 +1,7 @@
 package com.github.dbmdz.flusswerk.spring.boot.example;
 
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
+import com.github.dbmdz.flusswerk.spring.boot.example.model.Greeting;
 import com.github.dbmdz.flusswerk.spring.boot.starter.EnableFlusswerk;
 import com.github.dbmdz.flusswerk.spring.boot.starter.FlusswerkApplication;
 import com.github.dbmdz.flusswerk.spring.boot.starter.FlusswerkProperties;
@@ -12,14 +13,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 /** Example workflow job using Spring boot. */
 @SpringBootApplication
 @EnableFlusswerk
-public class Application extends FlusswerkApplication {
+public class Application extends FlusswerkApplication<Greeting> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
   private FlusswerkProperties flusswerkProperties;
 
   @Autowired
-  public Application(FlusswerkProperties flusswerkProperties, Engine engine) {
+  public Application(FlusswerkProperties flusswerkProperties, Engine<Greeting> engine) {
     super(engine);
     LOGGER.info(
         "Creating Flusswerk application for {}",

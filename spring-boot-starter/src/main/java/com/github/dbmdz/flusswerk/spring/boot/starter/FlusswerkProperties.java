@@ -85,6 +85,20 @@ public class FlusswerkProperties {
       return connectTo;
     }
 
+    public String getHost() {
+      if (connectTo.contains(":")) {
+        return connectTo.split(":")[0];
+      }
+      return connectTo;
+    }
+
+    public int getPort() {
+      if (connectTo.contains(":")) {
+        return Integer.parseInt(connectTo.split(":")[1]);
+      }
+      return 5672; // RabbitMQ default port
+    }
+
     /** @return The RabbitMQ/AMQP virtual host. <em>Can be null.</em> */
     public String getVirtualHost() {
       return virtualHost;

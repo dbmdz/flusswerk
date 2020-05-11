@@ -21,4 +21,11 @@ public class MessageBrokerBuilder {
     routingConfig.setWriteTo(topic);
     return new ViaStep<>(connectionConfig, messageBrokerConfig, routingConfig);
   }
+
+  public static ViaStep<Message> sendAnywhere() {
+    var connectionConfig = new ConnectionConfig();
+    var messageBrokerConfig = new MessageBrokerConfig<>(Message.class);
+    var routingConfig = new RoutingConfig();
+    return new ViaStep<>(connectionConfig, messageBrokerConfig, routingConfig);
+  }
 }

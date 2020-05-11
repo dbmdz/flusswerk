@@ -1,6 +1,8 @@
 package com.github.dbmdz.flusswerk.spring.boot.starter;
 
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
+import com.github.dbmdz.flusswerk.framework.model.Message;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,11 +11,11 @@ import org.springframework.context.ConfigurableApplicationContext;
 /** Common base class for application main class to remove boilerplate. */
 @SpringBootApplication
 @EnableFlusswerk
-public class FlusswerkApplication implements CommandLineRunner {
+public class FlusswerkApplication<M extends Message> implements CommandLineRunner {
 
-  protected final Engine engine;
+  protected final Engine<M> engine;
 
-  public FlusswerkApplication(Engine engine) {
+  public FlusswerkApplication(@Qualifier("engine") Engine<M> engine) {
     this.engine = engine;
   }
 

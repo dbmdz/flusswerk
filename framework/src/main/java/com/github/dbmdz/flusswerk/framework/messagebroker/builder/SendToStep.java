@@ -51,4 +51,8 @@ public class SendToStep<M extends Message> {
     routingConfig.setWriteTo(topic);
     return new ViaStep<>(connectionConfig, messageBrokerConfig, routingConfig);
   }
+
+  public ViaStep<M> sendNothing() {
+    return new ViaStep<>(connectionConfig, messageBrokerConfig, routingConfig);
+  }
 }
