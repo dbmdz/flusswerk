@@ -94,8 +94,7 @@ public class FlowBuilder {
    * @param <M> The generic type for the message class to operate on
    * @return a new builder for a new flow
    */
-  public static <M extends Message> MessageProcessorStep<M> messageProcessor(
-      Type<M> messageType) {
+  public static <M extends Message> MessageProcessorStep<M> messageProcessor(Type<M> messageType) {
     return new MessageProcessorStep<>(new Model<>());
   }
 }

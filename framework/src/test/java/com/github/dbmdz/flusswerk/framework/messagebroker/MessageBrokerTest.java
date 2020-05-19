@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 
 class MessageBrokerTest {
 
-  private final MessageBrokerConfig config = new MessageBrokerConfigImpl();
+  private final MessageBrokerConfig config = new MessageBrokerConfig();
 
   private MessageBroker messageBroker;
 
@@ -31,11 +31,11 @@ class MessageBrokerTest {
 
   private RabbitClient rabbitClient;
 
-  private RoutingConfigImpl routingConfig;
+  private RoutingConfig routingConfig;
 
   @BeforeEach
   void setUp() throws IOException {
-    routingConfig = new RoutingConfigImpl();
+    routingConfig = new RoutingConfig();
     routingConfig.setReadFrom("some.input.queue");
     routingConfig.setWriteTo("some.output.queue");
     FailurePolicy failurePolicy = new FailurePolicy("some.input.queue");
@@ -118,7 +118,7 @@ class MessageBrokerTest {
   @Test
   @DisplayName("getMessageCount should return all message counts")
   void getMessageCountsShouldGetAllMessageCounts() throws IOException {
-    RoutingConfigImpl routingConfig = new RoutingConfigImpl();
+    RoutingConfig routingConfig = new RoutingConfig();
     routingConfig.setReadFrom("input1", "input2");
     routingConfig.complete();
 
