@@ -14,16 +14,16 @@ import java.io.IOException;
  */
 public class MessageBrokerBuilder {
 
-  private final ConnectionConfigImpl connectionConfig;
+  private final ConnectionConfig connectionConfig;
 
-  private final MessageBrokerConfigImpl config;
+  private final MessageBrokerConfig config;
 
-  private final RoutingConfigImpl routingConfig;
+  private final RoutingConfig routingConfig;
 
   public MessageBrokerBuilder() {
-    config = new MessageBrokerConfigImpl();
-    connectionConfig = new ConnectionConfigImpl();
-    routingConfig = new RoutingConfigImpl();
+    config = new MessageBrokerConfig();
+    connectionConfig = new ConnectionConfig();
+    routingConfig = new RoutingConfig();
   }
 
   /**

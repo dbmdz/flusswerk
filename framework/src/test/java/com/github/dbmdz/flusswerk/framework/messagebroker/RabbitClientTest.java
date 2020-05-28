@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 
 class RabbitClientTest {
 
-  private final MessageBrokerConfigImpl config = new MessageBrokerConfigImpl();
+  private final MessageBrokerConfig config = new MessageBrokerConfig();
 
   private RabbitConnection connection;
 
