@@ -42,6 +42,9 @@ public class Job<M extends Message, R, W> {
       return Collections.emptyList();
     }
     for (Message newMessage : result) {
+      if (newMessage == null || newMessage.getTracingId() != null) {
+        continue; // Do not update the tracing id if the user set one by hand
+      }
       newMessage.setTracingId(message.getTracingId());
     }
     return result;
