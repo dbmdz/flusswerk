@@ -16,8 +16,6 @@ public class Application extends FlusswerkApplication {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
-  private FlusswerkProperties flusswerkProperties;
-
   @Autowired
   public Application(FlusswerkProperties flusswerkProperties, Engine engine) {
     super(engine);

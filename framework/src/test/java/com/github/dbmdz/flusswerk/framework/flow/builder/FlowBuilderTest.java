@@ -28,7 +28,7 @@ class FlowBuilderTest {
   @DisplayName("should build a regular flow (using types)")
   void shouldBuildRegularFlowUsingTypes() {
     Flow<Message, String, String> flow =
-        FlowBuilder.flow(new Type<Message>() {}, new Type<String>() {}, new Type<String>() {})
+        FlowBuilder.flow(new Type<>() {}, new Type<String>() {}, new Type<String>() {})
             .reader(Message::getTracingId)
             .transformer(String::toUpperCase)
             .writerSendingMessage(Message::new)
@@ -50,7 +50,7 @@ class FlowBuilderTest {
   @DisplayName("should build a message processing flow sending a single message (using types)")
   void shouldBuildMessageProcessingFlowReturningSingleMessageUsingTypes() {
     Flow<Message, Message, Message> flow =
-        FlowBuilder.messageProcessor(new Type<Message>() {})
+        FlowBuilder.messageProcessor(new Type<>() {})
             .process(message -> new Message(message.getTracingId()))
             .build();
     assertThat(flow).isNotNull(); // Lame test, just a API demo for now
@@ -70,7 +70,7 @@ class FlowBuilderTest {
   @DisplayName("should build a message processing flow sending a multiple messages (using types)")
   void shouldBuildMessageProcessingFlowReturningManyMessagesUsingTypes() {
     Flow<Message, Message, Message> flow =
-        FlowBuilder.messageProcessor(new Type<Message>() {})
+        FlowBuilder.messageProcessor(new Type<>() {})
             .expand(message -> List.of(message, message, message))
             .build();
     assertThat(flow).isNotNull(); // Lame test, just a API demo for now

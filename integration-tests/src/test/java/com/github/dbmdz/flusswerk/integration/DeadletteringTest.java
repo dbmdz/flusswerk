@@ -43,7 +43,7 @@ public class DeadletteringTest {
                 s -> {
                   throw new RuntimeException("Fail!");
                 })
-            .writerSendingMessage(s -> new Message(s))
+            .writerSendingMessage(Message::new)
             .build();
 
     Engine engine = new Engine(messageBroker, flow);
@@ -63,6 +63,6 @@ public class DeadletteringTest {
   }
 
   private ObjectAssert<? extends Message> assertThatMessageFrom(String name) throws Exception {
-    return assertThat(backend.waitForMessageFrom(QUEUE_FAILED, 1000));
+    return assertThat(backend.waitForMessageFrom(name, 1000));
   }
 }

@@ -8,7 +8,6 @@ class ExceptionSupplierTest {
 
   @Test
   void shoudlSupplyExceptionWithOnlyMessage() {
-    var args = new String[] {};
     var supplier = new ExceptionSupplier<>(RetryProcessingException.class, "Hallo Welt", null);
     assertThat(supplier.get())
         .isInstanceOf(RetryProcessingException.class)
@@ -17,14 +16,12 @@ class ExceptionSupplierTest {
 
   @Test
   void shoudlSupplyStopProcessingExceptionWithOnlyMessage() {
-    var args = new String[] {};
     var supplier = new ExceptionSupplier<>(StopProcessingException.class, "Hallo Welt", null);
     assertThat(supplier.get()).isInstanceOf(StopProcessingException.class).hasMessage("Hallo Welt");
   }
 
   @Test
   void shoudlSupplyExceptionWithMessageAndCause() {
-    var args = new String[] {};
     var supplier =
         new ExceptionSupplier<>(RetryProcessingException.class, "Hallo Welt", null)
             .causedBy(new RuntimeException("THE CAUSE"));
@@ -35,7 +32,6 @@ class ExceptionSupplierTest {
 
   @Test
   void shoudlSupplyStopProcessingExceptionWithMessageAndCause() {
-    var args = new String[] {};
     var supplier =
         new ExceptionSupplier<>(StopProcessingException.class, "Hallo Welt", null)
             .causedBy(new RuntimeException("THE CAUSE"));

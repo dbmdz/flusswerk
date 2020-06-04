@@ -8,8 +8,6 @@ import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Recipe for the data processing. Every message will be processed by the readerFactory, then the
@@ -21,8 +19,6 @@ import org.slf4j.LoggerFactory;
  * @param <W> The data type consumed by the writer. Output data type of the transformer.
  */
 public class Flow<M extends Message, R, W> {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(Flow.class);
 
   private final Supplier<Function<M, R>> readerFactory;
 

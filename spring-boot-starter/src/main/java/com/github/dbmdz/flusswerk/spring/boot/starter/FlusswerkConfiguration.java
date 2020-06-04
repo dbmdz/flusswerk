@@ -8,7 +8,6 @@ import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import com.github.dbmdz.flusswerk.spring.boot.starter.monitoring.BaseMetrics;
 import com.github.dbmdz.flusswerk.spring.boot.starter.monitoring.MeterFactory;
-import java.io.IOException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -95,15 +94,13 @@ public class FlusswerkConfiguration {
    * @param <R> The type of the reader implementation
    * @param <W> The type of the writer implementation
    * @return The {@link Engine} used for this job.
-   * @throws IOException If connection to RabbitMQ fails permanently.
    */
   @Bean
   public <I, M extends Message, R, W> Engine engine(
       MessageBroker messageBroker,
       ObjectProvider<Flow<M, R, W>> flowProvider,
       FlusswerkProperties flusswerkProperties,
-      ObjectProvider<ProcessReport> processReportProvider)
-      throws IOException {
+      ObjectProvider<ProcessReport> processReportProvider) {
     Flow<M, R, W> flow = flowProvider.getIfAvailable();
     if (flow == null) {
       throw new RuntimeException("Missing flow definition. Please create a Flow bean.");

@@ -108,7 +108,7 @@ public class MessageBroker {
       try {
         message = receive(inputQueue);
       } catch (InvalidMessageException e) {
-        failInvalidMessage(inputQueue, e);
+        failInvalidMessage(e);
         return null;
       }
 
@@ -119,7 +119,7 @@ public class MessageBroker {
     return message;
   }
 
-  private void failInvalidMessage(String inputQueue, InvalidMessageException e) throws IOException {
+  private void failInvalidMessage(InvalidMessageException e) throws IOException {
     Message message = e.getInvalidMessage();
     LOGGER.warn("Invalid message detected. Will be shifted into 'failed' queue: " + e.getMessage());
     failRawWithAck(message);
