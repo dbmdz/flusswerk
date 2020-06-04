@@ -265,8 +265,4 @@ public class MessageBroker {
     }
     return result;
   }
-
-  public boolean isConnectionOk() {
-    return rabbitClient.isChannelAvailable() && rabbitClient.isConnectionOk();
-  }
 }
