@@ -135,39 +135,6 @@ class MessageBrokerTest {
   }
 
   @Test
-  @DisplayName("isConnectionOk should be true if channel and connection are ok")
-  void isConnectionOkShouldBeTrueIfChannelAndConnectionAreOk() {
-    when(rabbitClient.isChannelAvailable()).thenReturn(true);
-    when(rabbitClient.isConnectionOk()).thenReturn(true);
-    assertThat(messageBroker.isConnectionOk()).isTrue();
-  }
-
-  @Test
-  @DisplayName("isConnectionOk should be false if channel is not available")
-  void isConnectionOkShouldBeTrueIfChannelIsNotAvailable() {
-    when(rabbitClient.isChannelAvailable()).thenReturn(false);
-    when(rabbitClient.isConnectionOk()).thenReturn(true);
-    assertThat(messageBroker.isConnectionOk()).isFalse();
-  }
-
-  @Test
-  @DisplayName("isConnectionOk should be false if connection is not ok")
-  void isConnectionOkShouldBeTrueIfConnectionIsNotOk() {
-    when(rabbitClient.isChannelAvailable()).thenReturn(true);
-    when(rabbitClient.isConnectionOk()).thenReturn(false);
-    assertThat(messageBroker.isConnectionOk()).isFalse();
-  }
-
-  @Test
-  @DisplayName(
-      "isConnectionOk should be false if channel is not available and connection is not ok")
-  void isConnectionOkShouldBeTrueIfChannelIsNotAvailableAndConnectionIsNotOk() {
-    when(rabbitClient.isChannelAvailable()).thenReturn(false);
-    when(rabbitClient.isConnectionOk()).thenReturn(false);
-    assertThat(messageBroker.isConnectionOk()).isFalse();
-  }
-
-  @Test
   @DisplayName("invalidMessage should be ACKed and shifted into fqiled queue")
   void handleInvalidMessage() throws IOException, InvalidMessageException {
     String invalidMessageBody = "invalid";

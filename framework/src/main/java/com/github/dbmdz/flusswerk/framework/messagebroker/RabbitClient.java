@@ -162,10 +162,6 @@ class RabbitClient {
     return channel.messageCount(queue);
   }
 
-  public boolean isConnectionOk() {
-    return connection.isOk();
-  }
-
   public boolean isChannelAvailable() {
     return channel.isOpen();
   }

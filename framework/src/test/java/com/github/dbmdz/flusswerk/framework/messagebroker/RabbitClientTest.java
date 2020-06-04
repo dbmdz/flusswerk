@@ -121,15 +121,6 @@ class RabbitClientTest {
   }
 
   @Test
-  @DisplayName("isConnectionOk should return if connection is ok")
-  void isConnectionOk() {
-    when(connection.isOk()).thenReturn(true, false);
-    RabbitClient rabbitClient = new RabbitClient(config, connection);
-    assertThat(rabbitClient.isConnectionOk()).isTrue();
-    assertThat(rabbitClient.isConnectionOk()).isFalse();
-  }
-
-  @Test
   @DisplayName("isChannelAvailable should return if channel is available")
   void isChannelAvailable() {
     when(channel.isOpen()).thenReturn(true, false);
