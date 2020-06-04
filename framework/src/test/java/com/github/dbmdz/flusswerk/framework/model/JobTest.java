@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +17,8 @@ class JobTest {
 
   private static final Function<String, String> DO_NOTHING = Function.identity();
 
-  private static final Function<String, Collection<Message>> CREATE_EMPTY_MESSAGE = s -> List.of(new Message());
+  private static final Function<String, Collection<Message>> CREATE_EMPTY_MESSAGE =
+      s -> List.of(new Message());
 
   static class CheckIfCalled<R, W> implements Function<R, W> {
 
@@ -94,7 +94,6 @@ class JobTest {
     var actual = unbox(job.getResult());
     assertThat(actual.getTracingId()).isEqualTo(incomingMessage.getTracingId());
   }
-
 
   @Test
   @DisplayName("should not overwrite manually set flow ids")
