@@ -1,6 +1,6 @@
 package com.github.dbmdz.flusswerk.spring.boot.starter.monitoring;
 
-import com.github.dbmdz.flusswerk.framework.flow.FlowStatus.Status;
+import com.github.dbmdz.flusswerk.framework.flow.FlowMetrics.Status;
 import com.github.dbmdz.flusswerk.spring.boot.starter.FlusswerkProperties;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;

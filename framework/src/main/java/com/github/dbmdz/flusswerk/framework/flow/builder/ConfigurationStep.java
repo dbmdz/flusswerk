@@ -1,7 +1,7 @@
 package com.github.dbmdz.flusswerk.framework.flow.builder;
 
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
-import com.github.dbmdz.flusswerk.framework.flow.FlowStatus;
+import com.github.dbmdz.flusswerk.framework.flow.FlowMetrics;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.util.function.Consumer;
 
@@ -21,19 +21,19 @@ public class ConfigurationStep<M extends Message, R, W> {
   }
 
   /**
-   * Sets a process metrics monitor that consumes a {@link FlowStatus} instance every time a message
-   * has been processed. builder step.
+   * Sets a process metrics monitor that consumes a {@link FlowMetrics} instance every time a
+   * message has been processed. builder step.
    *
    * @param m the process metrics monitor
    * @return the next step (setting configuration or build the flow)
    */
-  public ConfigurationStep<M, R, W> metrics(Consumer<FlowStatus> m) {
+  public ConfigurationStep<M, R, W> metrics(Consumer<FlowMetrics> m) {
     model.setMetrics(m);
     return this;
   }
 
   /**
-   * Sets a cleanup task process monitor that consumes a {@link FlowStatus} instance every time a
+   * Sets a cleanup task process monitor that consumes a {@link FlowMetrics} instance every time a
    * message has been processed. builder step.
    *
    * @param c the cleanup task
@@ -53,9 +53,9 @@ public class ConfigurationStep<M extends Message, R, W> {
     // Suppliers are due to the Flow constructor interface. Suppliers are likely to be dropped in
     // Flusswerk 4.
     return new Flow<>(
-        model::getReader,
-        model::getTransformer,
-        model::getWriter,
+        model.getReader(),
+        model.getTransformer(),
+        model.getWriter(),
         model.getCleanup(),
         model.getMetrics());
   }

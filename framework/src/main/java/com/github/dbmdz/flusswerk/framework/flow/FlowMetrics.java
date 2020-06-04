@@ -1,5 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.flow;
 
+import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.builder.ConfigurationStep;
 
 /**
@@ -8,7 +9,7 @@ import com.github.dbmdz.flusswerk.framework.flow.builder.ConfigurationStep;
  * @see com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder
  * @see ConfigurationStep
  */
-public class FlowStatus {
+public class FlowMetrics {
 
   public enum Status {
     SUCCESS,
@@ -22,7 +23,7 @@ public class FlowStatus {
 
   private Status status;
 
-  public FlowStatus() {
+  public FlowMetrics() {
     this.startTime = System.currentTimeMillis();
     this.status = Status.SUCCESS;
   }
@@ -37,6 +38,14 @@ public class FlowStatus {
 
   void setStatus(Status status) {
     this.status = status;
+  }
+
+  void setStatusFrom(Exception e) {
+    if (e instanceof StopProcessingException) {
+      status = Status.ERROR_STOP;
+    } else {
+      status = Status.ERROR_RETRY;
+    }
   }
 
   public long duration() {

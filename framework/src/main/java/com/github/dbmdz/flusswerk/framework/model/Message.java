@@ -26,7 +26,7 @@ public class Message {
     return envelope;
   }
 
-  void setTracingId(String tracingId) {
+  public void setTracingId(String tracingId) {
     this.tracingId = tracingId;
   }
 

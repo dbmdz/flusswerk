@@ -1,13 +1,13 @@
 package com.github.dbmdz.flusswerk.framework.flow;
 
-import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
-import com.github.dbmdz.flusswerk.framework.flow.FlowStatus.Status;
-import com.github.dbmdz.flusswerk.framework.model.Job;
+import static java.util.Objects.requireNonNull;
+import static java.util.Objects.requireNonNullElse;
+
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * Recipe for the data processing. Every message will be processed by the readerFactory, then the
@@ -20,71 +20,58 @@ import java.util.function.Supplier;
  */
 public class Flow<M extends Message, R, W> {
 
-  private final Supplier<Function<M, R>> readerFactory;
+  private final Function<M, R> reader;
 
-  private final Supplier<Function<R, W>> transformerFactory;
+  private final Function<R, W> transformer;
 
-  private final Supplier<Function<W, Collection<Message>>> writerFactory;
+  private final Function<W, Collection<Message>> writer;
 
   private final Runnable cleanup;
 
-  private final Consumer<FlowStatus> monitor;
+  private final Consumer<FlowMetrics> monitor;
 
   public Flow(
-      Supplier<Function<M, R>> readerFactory,
-      Supplier<Function<R, W>> transformerFactory,
-      Supplier<Function<W, Collection<Message>>> writerFactory,
+      Function<M, R> reader,
+      Function<R, W> transformer,
+      Function<W, Collection<Message>> writer,
       Runnable cleanup,
-      Consumer<FlowStatus> monitor) {
-    this.readerFactory = readerFactory;
-    this.transformerFactory = transformerFactory;
-    this.writerFactory = writerFactory;
-    this.cleanup = cleanup;
-    this.monitor = monitor;
+      Consumer<FlowMetrics> monitor) {
+    this.reader = requireNonNull(reader);
+    this.transformer = requireNonNull(transformer);
+    this.writer = requireNonNull(writer);
+    this.cleanup = requireNonNullElse(cleanup, () -> {});
+    this.monitor = requireNonNullElse(monitor, metrics -> {});
   }
 
   public Collection<Message> process(M message) {
-    FlowStatus flowStatus = new FlowStatus();
-    Job<M, R, W> job = new Job<>(message);
-
-    final Collection<Message> result;
+    FlowMetrics metrics = new FlowMetrics();
+    Collection<Message> result;
 
     try {
-      if (readerFactory != null) {
-        job.read(readerFactory.get());
-      }
-      if (transformerFactory != null) {
-        job.transform(transformerFactory.get());
-      }
-      if (writerFactory != null) {
-        job.write(writerFactory.get());
-      }
+      var r = reader.apply(message);
+      var t = transformer.apply(r);
+      result = writer.apply(t);
     } catch (RuntimeException e) {
-      if (e instanceof StopProcessingException) {
-        flowStatus.setStatus(Status.ERROR_STOP);
-      } else {
-        flowStatus.setStatus(Status.ERROR_RETRY);
-      }
+      metrics.setStatusFrom(e);
       throw e; // Throw exception again after inspecting for ensure control flow in engine
     } finally {
-      result = job.getResult();
-
-      // If in the cleanup stage, a garbage collection is forced,
-      // then it helps to clean up before.
-      job = null;
-
-      if (cleanup != null) {
-        cleanup.run();
+      cleanup.run();
+      metrics.stop();
+      monitor.accept(metrics); // record metrics only available from inside the framework
+    }
+    if (result == null) {
+      return Collections.emptyList();
+    }
+    for (Message newMessage : result) {
+      if (newMessage == null || newMessage.getTracingId() != null) {
+        continue; // Do not update the tracing id if the user set one by hand
       }
-      flowStatus.stop();
-      if (monitor != null) {
-        monitor.accept(flowStatus); // record metrics only available from inside the framework
-      }
+      newMessage.setTracingId(message.getTracingId());
     }
     return result;
   }
 
   public boolean hasMessagesToSend() {
-    return writerFactory != null;
+    return writer != null;
   }
 }
