@@ -30,8 +30,6 @@ public class Flow<M extends Message, R, W> {
 
   private final Supplier<Function<W, Collection<Message>>> writerFactory;
 
-  private final Supplier<Consumer<W>> consumingWriterFactory;
-
   private final Runnable cleanup;
 
   private final Consumer<FlowStatus> monitor;
@@ -40,13 +38,11 @@ public class Flow<M extends Message, R, W> {
       Supplier<Function<M, R>> readerFactory,
       Supplier<Function<R, W>> transformerFactory,
       Supplier<Function<W, Collection<Message>>> writerFactory,
-      Supplier<Consumer<W>> consumingWriterFactory,
       Runnable cleanup,
       Consumer<FlowStatus> monitor) {
     this.readerFactory = readerFactory;
     this.transformerFactory = transformerFactory;
     this.writerFactory = writerFactory;
-    this.consumingWriterFactory = consumingWriterFactory;
     this.cleanup = cleanup;
     this.monitor = monitor;
   }
@@ -67,10 +63,6 @@ public class Flow<M extends Message, R, W> {
       if (writerFactory != null) {
         job.write(writerFactory.get());
       }
-      if (consumingWriterFactory != null) {
-        job.write(consumingWriterFactory.get());
-      }
-
     } catch (RuntimeException e) {
       if (e instanceof StopProcessingException) {
         flowStatus.setStatus(Status.ERROR_STOP);
