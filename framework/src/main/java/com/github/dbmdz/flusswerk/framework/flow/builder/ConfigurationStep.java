@@ -56,8 +56,6 @@ public class ConfigurationStep<M extends Message, R, W> {
         model::getReader,
         model::getTransformer,
         model::getWriter,
-        null, // for cleaner implementation, adapting different writer types is completely done in
-        // the builder
         model.getCleanup(),
         model.getMetrics());
   }

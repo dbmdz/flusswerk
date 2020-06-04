@@ -33,10 +33,6 @@ public class Job<M extends Message, R, W> {
     result = writer.apply(dataTransformed);
   }
 
-  public void write(Consumer<W> writer) {
-    writer.accept(dataTransformed);
-  }
-
   public Collection<Message> getResult() {
     if (result == null) {
       return Collections.emptyList();
