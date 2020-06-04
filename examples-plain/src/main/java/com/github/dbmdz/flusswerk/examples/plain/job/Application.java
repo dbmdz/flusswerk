@@ -6,13 +6,9 @@ import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBrokerBuilder;
 import java.io.IOException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** Example for a typical workflow job. */
 public class Application {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
   private void run() throws IOException {
     MessageBroker messageBroker =

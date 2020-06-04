@@ -157,7 +157,7 @@ class EngineTest {
 
   @Test
   @DisplayName("should use functional reporter")
-  void testFunctionalReporter() throws IOException {
+  void testFunctionalReporter() {
     final AtomicBoolean reportHasBeenCalled = new AtomicBoolean(false);
     ReportFunction reportFn = (r, msg, e) -> reportHasBeenCalled.set(true);
     Engine engine =

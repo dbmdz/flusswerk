@@ -53,6 +53,6 @@ public class SuccessfulProcessingTest {
   }
 
   private ObjectAssert<? extends Message> assertThatMessageFrom(String name) throws Exception {
-    return assertThat(backend.waitForMessageFrom(QUEUE_FAILED, 1000));
+    return assertThat(backend.waitForMessageFrom(name, 1000));
   }
 }

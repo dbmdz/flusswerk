@@ -47,9 +47,8 @@ public class Engine {
    *
    * @param messageBroker the message broker to get messages from or send messages to
    * @param flow the flow to execute agains every message
-   * @throws IOException if reading/writing to the message broker fails
    */
-  public Engine(MessageBroker messageBroker, Flow flow) throws IOException {
+  public Engine(MessageBroker messageBroker, Flow flow) {
     this(messageBroker, flow, DEFAULT_CONCURRENT_WORKERS, null);
   }
 
@@ -59,9 +58,8 @@ public class Engine {
    * @param messageBroker the message broker to get messages from or send messages to
    * @param flow the flow to execute agains every message
    * @param concurrentWorkers the number of concurrent workers
-   * @throws IOException if reading/writing to the message broker fails
    */
-  public Engine(MessageBroker messageBroker, Flow flow, int concurrentWorkers) throws IOException {
+  public Engine(MessageBroker messageBroker, Flow flow, int concurrentWorkers) {
     this(messageBroker, flow, concurrentWorkers, null);
   }
 
@@ -71,11 +69,9 @@ public class Engine {
    * @param messageBroker the message broker to get messages from or send messages to
    * @param flow the flow to execute agains every message
    * @param processReport Reporting implementation
-   * @throws IOException if reading/writing to the message broker fails
    */
-  public Engine(MessageBroker messageBroker, Flow flow, ProcessReport processReport)
-      throws IOException {
-    this(messageBroker, flow, DEFAULT_CONCURRENT_WORKERS, null);
+  public Engine(MessageBroker messageBroker, Flow flow, ProcessReport processReport) {
+    this(messageBroker, flow, DEFAULT_CONCURRENT_WORKERS, processReport);
   }
 
   /**

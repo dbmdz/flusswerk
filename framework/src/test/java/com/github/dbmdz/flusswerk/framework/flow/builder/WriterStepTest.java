@@ -4,7 +4,6 @@ import static com.github.dbmdz.flusswerk.framework.flow.builder.InvocationProbe.
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,9 +45,5 @@ class WriterStepTest {
 
     var actual = model.getWriter().apply("123");
     Assertions.assertThat(actual).containsExactly(expected);
-  }
-
-  TestMessage[] messagesForIds(String... id) {
-    return Stream.of(id).map(TestMessage::new).toArray(TestMessage[]::new);
   }
 }
