@@ -12,7 +12,6 @@ class Model<M extends Message, R, W> {
   private Function<W, Collection<Message>> writer = null;
   private Consumer<FlowStatus> metrics = null;
   private Runnable cleanup = null;
-  private boolean propagateFlowIds = false;
 
   public Function<M, R> getReader() {
     return reader;
@@ -54,11 +53,4 @@ class Model<M extends Message, R, W> {
     this.cleanup = cleanup;
   }
 
-  public boolean isPropagateFlowIds() {
-    return propagateFlowIds;
-  }
-
-  public void setPropagateFlowIds(boolean propagateFlowIds) {
-    this.propagateFlowIds = propagateFlowIds;
-  }
 }

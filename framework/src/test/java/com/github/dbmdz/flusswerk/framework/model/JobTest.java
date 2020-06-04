@@ -82,7 +82,7 @@ class JobTest {
   @DisplayName("Should propagate flow ids")
   void propagateTracingIds() {
     Message incomingMessage = new Message("12345");
-    Job<Message, String, String> job = new Job<>(incomingMessage, true);
+    Job<Message, String, String> job = new Job<>(incomingMessage);
     job.read(m -> "");
     job.transform(Function.identity());
     job.write((Function<String, Collection<Message>>) s -> List.of(new Message()));

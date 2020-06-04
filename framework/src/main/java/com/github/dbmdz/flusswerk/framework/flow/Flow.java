@@ -34,8 +34,6 @@ public class Flow<M extends Message, R, W> {
 
   private final Runnable cleanup;
 
-  private final boolean propagateFlowIds;
-
   private final Consumer<FlowStatus> monitor;
 
   public Flow(
@@ -44,20 +42,18 @@ public class Flow<M extends Message, R, W> {
       Supplier<Function<W, Collection<Message>>> writerFactory,
       Supplier<Consumer<W>> consumingWriterFactory,
       Runnable cleanup,
-      boolean propagateFlowIds,
       Consumer<FlowStatus> monitor) {
     this.readerFactory = readerFactory;
     this.transformerFactory = transformerFactory;
     this.writerFactory = writerFactory;
     this.consumingWriterFactory = consumingWriterFactory;
     this.cleanup = cleanup;
-    this.propagateFlowIds = propagateFlowIds;
     this.monitor = monitor;
   }
 
   public Collection<Message> process(M message) {
     FlowStatus flowStatus = new FlowStatus();
-    Job<M, R, W> job = new Job<>(message, propagateFlowIds);
+    Job<M, R, W> job = new Job<>(message);
 
     final Collection<Message> result;
 
