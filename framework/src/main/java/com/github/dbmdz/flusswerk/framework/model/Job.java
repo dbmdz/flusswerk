@@ -2,7 +2,6 @@ package com.github.dbmdz.flusswerk.framework.model;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Job<M extends Message, R, W> {
