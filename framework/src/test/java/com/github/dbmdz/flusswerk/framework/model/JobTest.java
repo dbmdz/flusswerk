@@ -42,10 +42,6 @@ class JobTest {
     }
   }
 
-  private Supplier<RuntimeException> exception(String message) {
-    return () -> new RuntimeException(message);
-  }
-
   @Test
   @DisplayName("should call the reader")
   void read() {
@@ -80,8 +76,7 @@ class JobTest {
     Job<TestMessage, String, String> job = new Job<>(message);
     job.read(TestMessage::getId);
     job.transform(String::toUpperCase);
-    job.write(
-        (Function<String, Collection<Message>>) id -> Collections.singleton(new TestMessage(id)));
+    job.write(id -> Collections.singleton(new TestMessage(id)));
 
     var actual = (TestMessage) unbox(job.getResult());
     assertThat(actual.getId()).isEqualTo(message.getId().toUpperCase());
