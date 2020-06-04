@@ -25,6 +25,9 @@ public class UppercaseTransformer implements Function<String, String> {
     if (transformationShouldBeSlow) {
       sleepSomeTime();
     }
+    if (s == null) {
+      return null;
+    }
     return s.toUpperCase();
   }
 

@@ -52,5 +52,4 @@ class Model<M extends Message, R, W> {
   public void setCleanup(Runnable cleanup) {
     this.cleanup = cleanup;
   }
-
 }
