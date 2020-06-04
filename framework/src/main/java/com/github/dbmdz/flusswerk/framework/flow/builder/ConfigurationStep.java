@@ -45,19 +45,6 @@ public class ConfigurationStep<M extends Message, R, W> {
   }
 
   /**
-   * Sets if flow ids should be propagated from input to output messages. This will be replaced by a
-   * more automatic process in the next Flusswerk version and is here for compatibility reasons
-   * only.
-   *
-   * @param p true, if flow ids should be propagated
-   * @return the next step (setting configuration or build the flow)
-   */
-  public ConfigurationStep<M, R, W> propagateFlowIds(boolean p) {
-    model.setPropagateFlowIds(p);
-    return this;
-  }
-
-  /**
    * Build the new flow.
    *
    * @return the new flow
@@ -66,13 +53,12 @@ public class ConfigurationStep<M extends Message, R, W> {
     // Suppliers are due to the Flow constructor interface. Suppliers are likely to be dropped in
     // Flusswerk 4.
     return new Flow<>(
-        () -> model.getReader(),
-        () -> model.getTransformer(),
-        () -> model.getWriter(),
+        model::getReader,
+        model::getTransformer,
+        model::getWriter,
         null, // for cleaner implementation, adapting different writer types is completely done in
         // the builder
         model.getCleanup(),
-        model.isPropagateFlowIds(),
         model.getMetrics());
   }
 }

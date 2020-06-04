@@ -40,11 +40,4 @@ public class ConfigurationStepTest {
     assertThat(metricsTask).has(beenInvoked());
   }
 
-  @DisplayName("should propagate flow ids")
-  @ValueSource(booleans = {true, false})
-  @ParameterizedTest
-  void shouldSetMetricsTask(boolean value) {
-    step.propagateFlowIds(value);
-    assertThat(model.isPropagateFlowIds()).isEqualTo(value);
-  }
 }

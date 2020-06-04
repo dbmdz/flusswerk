@@ -15,17 +15,10 @@ public class Job<M extends Message, R, W> {
 
   private Collection<Message> result;
 
-  private boolean propagateFlowIds;
-
   public Job(M message) {
     this.message = message;
     this.dataRead = null;
     this.dataTransformed = null;
-  }
-
-  public Job(M message, boolean propagateFlowIds) {
-    this(message);
-    this.propagateFlowIds = propagateFlowIds;
   }
 
   public void read(Function<M, R> reader) {
@@ -48,10 +41,8 @@ public class Job<M extends Message, R, W> {
     if (result == null) {
       return Collections.emptyList();
     }
-    if (propagateFlowIds) {
-      for (Message newMessage : result) {
-        newMessage.setTracingId(message.getTracingId());
-      }
+    for (Message newMessage : result) {
+      newMessage.setTracingId(message.getTracingId());
     }
     return result;
   }
