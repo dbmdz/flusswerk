@@ -8,7 +8,6 @@ import com.github.dbmdz.flusswerk.framework.reporting.DefaultProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
