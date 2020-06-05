@@ -171,7 +171,7 @@ public class Engine {
       } else {
         processReport.reportFailAfterMaxRetries(receivedMessage, e);
       }
-    } catch (IOException fatalExecption) {
+    } catch (IOException fatalException) {
       var body = receivedMessage.getEnvelope().getBody();
       LOGGER.error("Could not reject message" + body, fatalExecption);
     }
