@@ -1,8 +1,11 @@
-package com.github.dbmdz.flusswerk.framework.flow.builder;
+package com.github.dbmdz.flusswerk.framework;
 
 import static java.util.Objects.requireNonNull;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.dbmdz.flusswerk.framework.model.Message;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -20,9 +23,14 @@ public class TestMessage extends Message {
     this.values = Collections.emptyList();
   }
 
-  public TestMessage(String id, String... values) {
+  @JsonCreator
+  public TestMessage(@JsonProperty("id") String id, @JsonProperty("values") String... values) {
     this.id = requireNonNull(id);
-    this.values = Arrays.asList(values);
+    if (values == null) {
+      this.values = new ArrayList<>();
+    } else {
+      this.values = Arrays.asList(values);
+    }
   }
 
   public String getId() {

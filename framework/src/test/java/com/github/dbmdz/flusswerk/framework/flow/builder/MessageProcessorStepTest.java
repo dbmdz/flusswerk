@@ -1,5 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.flow.builder;
 
+import com.github.dbmdz.flusswerk.framework.TestMessage;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;

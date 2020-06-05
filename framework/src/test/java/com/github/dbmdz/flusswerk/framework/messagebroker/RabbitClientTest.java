@@ -10,8 +10,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.github.dbmdz.flusswerk.framework.CustomMessage;
-import com.github.dbmdz.flusswerk.framework.CustomMessageMixin;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.github.dbmdz.flusswerk.framework.TestMessage;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.jackson.SingleClassModule;
 import com.github.dbmdz.flusswerk.framework.model.Envelope;
@@ -22,6 +22,7 @@ import com.rabbitmq.client.GetResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -59,17 +60,24 @@ class RabbitClientTest {
     verify(channel).basicPublish(anyString(), eq("there"), any(), any(byte[].class));
   }
 
+  interface TestMessageMixin {
+    @JsonIgnore
+    List<String> getValues();
+  }
+
   @Test
   void shouldWorkWithCustomMessageType() throws IOException {
-    config.addJacksonModule(new SingleClassModule(CustomMessage.class, CustomMessageMixin.class));
-    config.setMessageClass(CustomMessage.class);
-    RabbitClient rabbitClient = new RabbitClient(config, connection);
-    CustomMessage message = new CustomMessage();
-    message.setCustomField("Blah!");
-    Message recreated =
-        rabbitClient.deserialize(
-            new String(rabbitClient.serialize(message), StandardCharsets.UTF_8));
-    assertThat(message.getCustomField()).isEqualTo(((CustomMessage) recreated).getCustomField());
+    config.addJacksonModule(new SingleClassModule(TestMessage.class, TestMessageMixin.class));
+    config.setMessageClass(TestMessage.class);
+    RabbitClient client = new RabbitClient(config, connection);
+
+    TestMessage message = new TestMessage("abc123", "should be ignored");
+    byte[] serialized = client.serialize(message);
+
+    TestMessage expected = new TestMessage("abc123");
+    Message actual = client.deserialize(new String(serialized));
+
+    assertThat(actual).isEqualTo(expected);
   }
 
   @Test
@@ -133,8 +141,6 @@ class RabbitClientTest {
   @DisplayName("Invalid JSON message throws an InvalidMessageException")
   void shiftInvalidMessageToFailedQueue() throws IOException {
     final String queueName = "test";
-    final String failedQueueName = queueName + ".failed";
-    final String retryQueueName = queueName + ".retry";
 
     GetResponse getResponse = mock(GetResponse.class);
     when(getResponse.getBody()).thenReturn("NoValidJson".getBytes());
