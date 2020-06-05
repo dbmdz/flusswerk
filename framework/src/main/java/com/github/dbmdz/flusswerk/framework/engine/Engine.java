@@ -141,7 +141,7 @@ public class Engine {
 
   @SuppressWarnings("unchecked")
   void process(Message message) {
-    Collection<? extends Message> messagesToSend = Collections.emptyList();
+    Collection<? extends Message> messagesToSend;
     try {
       messagesToSend = flow.process(message);
     } catch (StopProcessingException e) {
