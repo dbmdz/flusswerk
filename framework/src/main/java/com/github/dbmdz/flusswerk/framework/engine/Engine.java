@@ -173,7 +173,7 @@ public class Engine {
       }
     } catch (IOException fatalException) {
       var body = receivedMessage.getEnvelope().getBody();
-      LOGGER.error("Could not reject message" + body, fatalExecption);
+      LOGGER.error("Could not reject message" + body, fatalException);
     }
   }
 
@@ -181,9 +181,9 @@ public class Engine {
     try {
       processReport.reportFail(message, e);
       messageBroker.fail(message);
-    } catch (IOException fatalExecption) {
+    } catch (IOException fatalException) {
       var body = message.getEnvelope().getBody();
-      LOGGER.error("Could not fail message" + body, fatalExecption);
+      LOGGER.error("Could not fail message" + body, fatalException);
     }
   }
 
