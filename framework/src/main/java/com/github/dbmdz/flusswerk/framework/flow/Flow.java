@@ -71,7 +71,4 @@ public class Flow<M extends Message, R, W> {
     return result;
   }
 
-  public boolean hasMessagesToSend() {
-    return writer != null;
-  }
 }
