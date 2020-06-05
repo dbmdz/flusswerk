@@ -1,7 +1,8 @@
 package com.github.dbmdz.flusswerk.framework.engine;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -30,13 +31,16 @@ class EngineTest {
 
   private MessageBroker messageBroker;
 
+  private Message message;
+
   @BeforeEach
   void setUp() {
     messageBroker = mock(MessageBroker.class);
+    message = new Message();
   }
 
-  private Flow<Message, String, String> flowSendingMessage() {
-    return flowWithTransformer(Function.identity());
+  private Flow<Message, Message, Message> passthroughFlow() {
+    return FlowBuilder.messageProcessor(Message.class).process(m -> m).build();
   }
 
   private Flow<Message, String, String> flowWithTransformer(Function<String, String> transformer) {
@@ -108,7 +112,6 @@ class EngineTest {
     var flow = flowWithTransformer(transformerWithException);
 
     Engine engine = new Engine(messageBroker, flow);
-    Message message = new Message();
 
     engine.process(message);
 
@@ -119,8 +122,7 @@ class EngineTest {
   @Test
   @DisplayName("should accept a message processed without failure")
   void processShouldAcceptMessageWithoutFailure() throws IOException {
-    Engine engine = new Engine(messageBroker, flowSendingMessage());
-    Message message = new Message();
+    Engine engine = new Engine(messageBroker, passthroughFlow());
     engine.process(message);
 
     verify(messageBroker).ack(message);
@@ -130,16 +132,15 @@ class EngineTest {
   @Test
   @DisplayName("should send a message")
   void processShouldSendMessage() throws IOException {
-    Engine engine = new Engine(messageBroker, flowSendingMessage());
+    Engine engine = new Engine(messageBroker, passthroughFlow());
     engine.process(new Message());
-    verify(messageBroker).send(any(Message.class));
+    verify(messageBroker).send(anyCollection());
   }
 
   @Test
   @DisplayName("should stop with retry for RetriableProcessException")
   void retryProcessExceptionShouldRejectTemporarily() throws IOException {
     Engine engine = new Engine(messageBroker, flowThrowing(RetryProcessingException.class));
-    Message message = new Message();
     engine.process(message);
 
     verify(messageBroker).reject(message);
@@ -147,9 +148,8 @@ class EngineTest {
 
   @Test
   @DisplayName("should stop processing for good for StopProcessingException")
-  void shoudlFailMessageForStopProcessingException() throws IOException {
+  void shouldFailMessageForStopProcessingException() throws IOException {
     Engine engine = new Engine(messageBroker, flowThrowing(StopProcessingException.class));
-    Message message = new Message();
     engine.process(message);
 
     verify(messageBroker).fail(message);
@@ -161,8 +161,17 @@ class EngineTest {
     final AtomicBoolean reportHasBeenCalled = new AtomicBoolean(false);
     ReportFunction reportFn = (r, msg, e) -> reportHasBeenCalled.set(true);
     Engine engine =
-        new Engine(messageBroker, flowThrowing(StopProcessingException.class), 4, reportFn);
+        new Engine(messageBroker, flowThrowing(StopProcessingException.class), reportFn);
     engine.process(new Message());
     assertThat(reportHasBeenCalled.get()).isTrue();
+  }
+
+  @Test
+  @DisplayName("should stop processing for good when sending messages fails")
+  void shouldStopProcessingWhenSendingFails() throws IOException {
+    doThrow(RuntimeException.class).when(messageBroker).send(anyCollection());
+    Engine engine = new Engine(messageBroker, passthroughFlow());
+    engine.process(message);
+    verify(messageBroker).fail(message);
   }
 }

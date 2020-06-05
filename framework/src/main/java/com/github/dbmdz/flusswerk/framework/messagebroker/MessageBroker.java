@@ -51,6 +51,16 @@ public class MessageBroker {
   }
 
   /**
+   * Sends messages to the default output queue as JSON document.
+   *
+   * @param messages the message to send.
+   * @throws IOException if sending the message fails.
+   */
+  public void send(Collection<? extends Message> messages) throws IOException {
+    send(routingConfig.getWriteTo(), messages);
+  }
+
+  /**
    * Sends a message to a certain queue as JSON document.
    *
    * @param routingKey the routing key for the queue to send the message to (usually the queue
@@ -71,7 +81,7 @@ public class MessageBroker {
    * @param messages the messages to send.
    * @throws IOException if sending a message fails.
    */
-  public void send(String routingKey, Collection<Message> messages) throws IOException {
+  public void send(String routingKey, Collection<? extends Message> messages) throws IOException {
     for (Message message : messages) {
       send(routingKey, message);
     }

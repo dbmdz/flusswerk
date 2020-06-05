@@ -8,6 +8,7 @@ import com.github.dbmdz.flusswerk.framework.reporting.DefaultProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
@@ -139,34 +140,51 @@ public class Engine {
   }
 
   @SuppressWarnings("unchecked")
-  void process(Message receivedMessage) {
+  void process(Message message) {
+    Collection<? extends Message> messagesToSend = Collections.emptyList();
     try {
-      Collection<? extends Message> messagesToSend = flow.process(receivedMessage);
-      if (flow.hasMessagesToSend()) {
-        for (Message messageToSend : messagesToSend) {
-          messageBroker.send(messageToSend);
-        }
-      }
-      messageBroker.ack(receivedMessage);
-      processReport.reportSuccess(receivedMessage);
+      messagesToSend = flow.process(message);
     } catch (StopProcessingException e) {
-      try {
-        processReport.reportFail(receivedMessage, e);
-        messageBroker.fail(receivedMessage);
-      } catch (IOException e1) {
-        LOGGER.error("Could not fail message" + receivedMessage.getEnvelope().getBody(), e1);
+      fail(message, e);
+      return; // processing was not successful → stop here
+    } catch (RuntimeException e) {
+      retryOrFail(message, e);
+      return; // processing was not successful → stop here
+    }
+
+    // Data processing was successful, now handle the messaging
+    try {
+      messageBroker.send(messagesToSend);
+      messageBroker.ack(message);
+      processReport.reportSuccess(message);
+    } catch (Exception e) {
+      var stopProcessingException =
+          new StopProcessingException("Could not finish message handling").causedBy(e);
+      fail(message, stopProcessingException);
+    }
+  }
+
+  private void retryOrFail(Message receivedMessage, RuntimeException e) {
+    try {
+      boolean isRejected = messageBroker.reject(receivedMessage);
+      if (isRejected) {
+        processReport.reportReject(receivedMessage, e);
+      } else {
+        processReport.reportFailAfterMaxRetries(receivedMessage, e);
       }
-    } catch (RuntimeException | IOException e) {
-      try {
-        boolean isRejected = messageBroker.reject(receivedMessage);
-        if (isRejected) {
-          processReport.reportReject(receivedMessage, e);
-        } else {
-          processReport.reportFailAfterMaxRetries(receivedMessage, e);
-        }
-      } catch (IOException e1) {
-        LOGGER.error("Could not reject message" + receivedMessage.getEnvelope().getBody(), e1);
-      }
+    } catch (IOException fatalExecption) {
+      var body = receivedMessage.getEnvelope().getBody();
+      LOGGER.error("Could not reject message" + body, fatalExecption);
+    }
+  }
+
+  private void fail(Message message, StopProcessingException e) {
+    try {
+      processReport.reportFail(message, e);
+      messageBroker.fail(message);
+    } catch (IOException fatalExecption) {
+      var body = message.getEnvelope().getBody();
+      LOGGER.error("Could not fail message" + body, fatalExecption);
     }
   }
 
