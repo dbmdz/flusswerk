@@ -13,27 +13,23 @@ import java.util.function.Function;
  * Recipe for the data processing. Every message will be processed by the readerFactory, then the
  * transformerFactory and finally the writerFactory. The transformerFactory can be omitted if <code>
  * R</code> and <code>W</code> are the same.
- *
- * @param <M> The data type of the message.
- * @param <R> The data type produced by the reader. Input data type of the transformer.
- * @param <W> The data type consumed by the writer. Output data type of the transformer.
  */
-public class Flow<M extends Message, R, W> {
+public class Flow {
 
-  private final Function<M, R> reader;
+  private final Function<Message, ?> reader;
 
-  private final Function<R, W> transformer;
+  private final Function<Object, Object> transformer;
 
-  private final Function<W, Collection<Message>> writer;
+  private final Function<Object, Collection<Message>> writer;
 
   private final Runnable cleanup;
 
   private final Consumer<FlowMetrics> monitor;
 
   public Flow(
-      Function<M, R> reader,
-      Function<R, W> transformer,
-      Function<W, Collection<Message>> writer,
+      Function<Message, Object> reader,
+      Function<Object, Object> transformer,
+      Function<Object, Collection<Message>> writer,
       Runnable cleanup,
       Consumer<FlowMetrics> monitor) {
     this.reader = requireNonNull(reader);
@@ -43,7 +39,7 @@ public class Flow<M extends Message, R, W> {
     this.monitor = requireNonNullElse(monitor, metrics -> {});
   }
 
-  public Collection<Message> process(M message) {
+  public Collection<Message> process(Message message) {
     FlowMetrics metrics = new FlowMetrics();
     Collection<Message> result;
 
@@ -70,5 +66,4 @@ public class Flow<M extends Message, R, W> {
     }
     return result;
   }
-
 }

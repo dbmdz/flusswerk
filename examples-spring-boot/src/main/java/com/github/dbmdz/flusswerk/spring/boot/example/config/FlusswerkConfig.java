@@ -20,7 +20,7 @@ public class FlusswerkConfig {
   }
 
   @Bean
-  public Flow<Greeting, String, String> flow(BaseMetrics metrics) {
+  public Flow flow(BaseMetrics metrics) {
     return FlowBuilder.flow(Greeting.class, String.class, String.class)
         .reader(Greeting::getText)
         .transformer(new ComposePerfectGreeting())

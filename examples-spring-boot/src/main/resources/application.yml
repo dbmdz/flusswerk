@@ -1,3 +1,7 @@
+spring:
+  application:
+    name: flusswerk.demo
+
 flusswerk:
   processing:
     maxRetries: 5
@@ -10,3 +14,5 @@ flusswerk:
     exchange: my.exchange
     readFrom: queue.to.read.from
     writeTo: defalt.queue.to.write.to
+  monitoring:
+    prefix: workflow

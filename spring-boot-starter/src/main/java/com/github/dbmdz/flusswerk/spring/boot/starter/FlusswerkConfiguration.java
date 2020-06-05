@@ -89,19 +89,15 @@ public class FlusswerkConfiguration {
    * @param flowProvider The flow to use (optional).
    * @param flusswerkProperties The external configuration from <code>application.yml</code>.
    * @param processReportProvider A custom process report provider (optional).
-   * @param <I> The message's identifier type.
-   * @param <M> The used {@link Message} type
-   * @param <R> The type of the reader implementation
-   * @param <W> The type of the writer implementation
    * @return The {@link Engine} used for this job.
    */
   @Bean
-  public <I, M extends Message, R, W> Engine engine(
+  public Engine engine(
       MessageBroker messageBroker,
-      ObjectProvider<Flow<M, R, W>> flowProvider,
+      ObjectProvider<Flow> flowProvider,
       FlusswerkProperties flusswerkProperties,
       ObjectProvider<ProcessReport> processReportProvider) {
-    Flow<M, R, W> flow = flowProvider.getIfAvailable();
+    Flow flow = flowProvider.getIfAvailable();
     if (flow == null) {
       throw new RuntimeException("Missing flow definition. Please create a Flow bean.");
     }

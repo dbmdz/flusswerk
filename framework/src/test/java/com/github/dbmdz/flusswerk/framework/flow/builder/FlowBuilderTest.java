@@ -15,7 +15,7 @@ class FlowBuilderTest {
   @Test
   @DisplayName("should build a regular flow (using classes)")
   void shouldBuildRegularFlowUsingClasses() {
-    Flow<Message, String, String> flow =
+    Flow flow =
         FlowBuilder.flow(Message.class, String.class, String.class)
             .reader(Message::getTracingId)
             .transformer(String::toUpperCase)
@@ -27,7 +27,7 @@ class FlowBuilderTest {
   @Test
   @DisplayName("should build a regular flow (using types)")
   void shouldBuildRegularFlowUsingTypes() {
-    Flow<Message, String, String> flow =
+    Flow flow =
         FlowBuilder.flow(new Type<>() {}, new Type<String>() {}, new Type<String>() {})
             .reader(Message::getTracingId)
             .transformer(String::toUpperCase)
@@ -39,7 +39,7 @@ class FlowBuilderTest {
   @Test
   @DisplayName("should build a message processing flow sending a single message (using class)")
   void shouldBuildMessageProcessingFlowReturningSingleMessage() {
-    Flow<Message, Message, Message> flow =
+    Flow flow =
         FlowBuilder.messageProcessor(Message.class)
             .process(message -> new Message(message.getTracingId()))
             .build();
@@ -49,7 +49,7 @@ class FlowBuilderTest {
   @Test
   @DisplayName("should build a message processing flow sending a single message (using types)")
   void shouldBuildMessageProcessingFlowReturningSingleMessageUsingTypes() {
-    Flow<Message, Message, Message> flow =
+    Flow flow =
         FlowBuilder.messageProcessor(new Type<>() {})
             .process(message -> new Message(message.getTracingId()))
             .build();
@@ -59,7 +59,7 @@ class FlowBuilderTest {
   @Test
   @DisplayName("should build a message processing flow sending a multiple messages (using class)")
   void shouldBuildMessageProcessingFlowReturningManyMessages() {
-    Flow<Message, Message, Message> flow =
+    Flow flow =
         FlowBuilder.messageProcessor(Message.class)
             .expand(message -> List.of(message, message, message))
             .build();
@@ -69,7 +69,7 @@ class FlowBuilderTest {
   @Test
   @DisplayName("should build a message processing flow sending a multiple messages (using types)")
   void shouldBuildMessageProcessingFlowReturningManyMessagesUsingTypes() {
-    Flow<Message, Message, Message> flow =
+    Flow flow =
         FlowBuilder.messageProcessor(new Type<>() {})
             .expand(message -> List.of(message, message, message))
             .build();

@@ -39,11 +39,11 @@ class EngineTest {
     message = new Message();
   }
 
-  private Flow<Message, Message, Message> passthroughFlow() {
+  private Flow passthroughFlow() {
     return FlowBuilder.messageProcessor(Message.class).process(m -> m).build();
   }
 
-  private Flow<Message, String, String> flowWithTransformer(Function<String, String> transformer) {
+  private Flow flowWithTransformer(Function<String, String> transformer) {
     return FlowBuilder.flow(Message.class, String.class, String.class)
         .reader(Message::getTracingId)
         .transformer(transformer)
@@ -51,7 +51,7 @@ class EngineTest {
         .build();
   }
 
-  private Flow<Message, String, String> flowThrowing(Class<? extends RuntimeException> cls) {
+  private Flow flowThrowing(Class<? extends RuntimeException> cls) {
     var message = String.format("Generated %s for unit test", cls.getSimpleName());
     final RuntimeException exception;
     try {

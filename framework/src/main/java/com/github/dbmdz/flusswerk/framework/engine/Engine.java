@@ -138,7 +138,6 @@ public class Engine {
     }
   }
 
-  @SuppressWarnings("unchecked")
   void process(Message message) {
     Collection<? extends Message> messagesToSend;
     try {
