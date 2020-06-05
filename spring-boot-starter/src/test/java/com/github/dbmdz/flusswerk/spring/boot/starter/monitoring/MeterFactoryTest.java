@@ -15,14 +15,14 @@ class MeterFactoryTest {
 
   @Test
   void shouldUseMonitoringPrefix() {
-    var monitoringPrefix = "testprefix";
-    var monitoringMetric = "testmetric";
+    var monitoringPrefix = "test.prefix";
+    var monitoringMetric = "test.metric";
 
     FlusswerkProperties flusswerkProperties = mock(FlusswerkProperties.class);
     when(flusswerkProperties.getMonitoring()).thenReturn(new Monitoring(monitoringPrefix));
 
     SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
-    MeterFactory meterFactory = new MeterFactory(flusswerkProperties, "testapp", meterRegistry);
+    MeterFactory meterFactory = new MeterFactory(flusswerkProperties, "test_app", meterRegistry);
 
     Counter counter = meterFactory.counter(monitoringMetric);
     Search search = meterRegistry.find(monitoringPrefix + "." + monitoringMetric);

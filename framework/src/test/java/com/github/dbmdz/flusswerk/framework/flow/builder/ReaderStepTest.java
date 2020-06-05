@@ -2,6 +2,7 @@ package com.github.dbmdz.flusswerk.framework.flow.builder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.github.dbmdz.flusswerk.framework.TestMessage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

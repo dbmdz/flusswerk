@@ -3,6 +3,7 @@ package com.github.dbmdz.flusswerk.framework.flow.builder;
 import static com.github.dbmdz.flusswerk.framework.flow.builder.InvocationProbe.beenInvoked;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.github.dbmdz.flusswerk.framework.TestMessage;
 import com.github.dbmdz.flusswerk.framework.flow.FlowMetrics;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
