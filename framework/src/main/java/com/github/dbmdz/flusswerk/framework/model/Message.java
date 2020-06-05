@@ -38,4 +38,9 @@ public class Message {
   public String getTracingId() {
     return tracingId;
   }
+
+  @Override
+  public String toString() {
+    return String.format("Message{hashcode=%s, tracingId=%s", hashCode(), tracingId);
+  }
 }
