@@ -36,7 +36,7 @@ public class SuccessfulProcessingTest {
             .writerSendingMessage((Message m) -> m)
             .build();
 
-    Engine engine = new Engine(messageBroker, flow);
+    Engine engine = new Engine("app", messageBroker, flow);
 
     ExecutorService executorService = Executors.newSingleThreadExecutor();
     executorService.submit(engine::start);
