@@ -12,7 +12,8 @@ public class Flows {
     return FlowBuilder.messageProcessor(Message.class).process(m -> m).build();
   }
 
-  private static Flow<Message, String, String> flowWithTransformer(Function<String, String> transformer) {
+  private static Flow<Message, String, String> flowWithTransformer(
+      Function<String, String> transformer) {
     return FlowBuilder.flow(Message.class, String.class, String.class)
         .reader(Message::getTracingId)
         .transformer(transformer)
@@ -41,5 +42,4 @@ public class Flows {
   public static Flow<Message, String, String> flowBlockingAllThreads() {
     return flowWithTransformer(new ThreadBlockingTransformer<>());
   }
-
 }
