@@ -76,6 +76,7 @@ class EngineTest {
 
     Engine engine =
         new Engine(
+            "app",
             messageBroker,
             flowWithTransformer(
                 new ThreadBlockingTransformer<>()) // Force engine to use all worker threads
@@ -111,7 +112,7 @@ class EngineTest {
 
     var flow = flowWithTransformer(transformerWithException);
 
-    Engine engine = new Engine(messageBroker, flow);
+    Engine engine = new Engine("app", messageBroker, flow);
 
     engine.process(message);
 
@@ -122,7 +123,7 @@ class EngineTest {
   @Test
   @DisplayName("should accept a message processed without failure")
   void processShouldAcceptMessageWithoutFailure() throws IOException {
-    Engine engine = new Engine(messageBroker, passthroughFlow());
+    Engine engine = new Engine("app", messageBroker, passthroughFlow());
     engine.process(message);
 
     verify(messageBroker).ack(message);
@@ -132,7 +133,7 @@ class EngineTest {
   @Test
   @DisplayName("should send a message")
   void processShouldSendMessage() throws IOException {
-    Engine engine = new Engine(messageBroker, passthroughFlow());
+    Engine engine = new Engine("app", messageBroker, passthroughFlow());
     engine.process(new Message());
     verify(messageBroker).send(anyCollection());
   }
@@ -140,7 +141,7 @@ class EngineTest {
   @Test
   @DisplayName("should stop with retry for RetriableProcessException")
   void retryProcessExceptionShouldRejectTemporarily() throws IOException {
-    Engine engine = new Engine(messageBroker, flowThrowing(RetryProcessingException.class));
+    Engine engine = new Engine("app", messageBroker, flowThrowing(RetryProcessingException.class));
     engine.process(message);
 
     verify(messageBroker).reject(message);
@@ -149,7 +150,7 @@ class EngineTest {
   @Test
   @DisplayName("should stop processing for good for StopProcessingException")
   void shouldFailMessageForStopProcessingException() throws IOException {
-    Engine engine = new Engine(messageBroker, flowThrowing(StopProcessingException.class));
+    Engine engine = new Engine("app", messageBroker, flowThrowing(StopProcessingException.class));
     engine.process(message);
 
     verify(messageBroker).fail(message);
@@ -161,7 +162,7 @@ class EngineTest {
     final AtomicBoolean reportHasBeenCalled = new AtomicBoolean(false);
     ReportFunction reportFn = (r, msg, e) -> reportHasBeenCalled.set(true);
     Engine engine =
-        new Engine(messageBroker, flowThrowing(StopProcessingException.class), reportFn);
+        new Engine("app", messageBroker, flowThrowing(StopProcessingException.class), reportFn);
     engine.process(new Message());
     assertThat(reportHasBeenCalled.get()).isTrue();
   }
@@ -170,7 +171,7 @@ class EngineTest {
   @DisplayName("should stop processing for good when sending messages fails")
   void shouldStopProcessingWhenSendingFails() throws IOException {
     doThrow(RuntimeException.class).when(messageBroker).send(anyCollection());
-    Engine engine = new Engine(messageBroker, passthroughFlow());
+    Engine engine = new Engine("app", messageBroker, passthroughFlow());
     engine.process(message);
     verify(messageBroker).fail(message);
   }

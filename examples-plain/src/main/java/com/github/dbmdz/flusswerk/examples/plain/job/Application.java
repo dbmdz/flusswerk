@@ -29,7 +29,7 @@ public class Application {
             .writerSendingMessage(AppMessage::new)
             .build();
 
-    Engine engine = new Engine(messageBroker, flow);
+    Engine engine = new Engine("demo", messageBroker, flow);
     messageBroker.send("someInputQueue", new AppMessage("lowercase-text"));
     engine.start();
   }

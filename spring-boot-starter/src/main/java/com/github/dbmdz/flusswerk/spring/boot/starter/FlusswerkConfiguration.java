@@ -9,6 +9,7 @@ import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import com.github.dbmdz.flusswerk.spring.boot.starter.monitoring.BaseMetrics;
 import com.github.dbmdz.flusswerk.spring.boot.starter.monitoring.MeterFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -97,6 +98,7 @@ public class FlusswerkConfiguration {
    */
   @Bean
   public <I, M extends Message, R, W> Engine engine(
+      @Value("spring.application.name") String name,
       MessageBroker messageBroker,
       ObjectProvider<Flow<M, R, W>> flowProvider,
       FlusswerkProperties flusswerkProperties,
@@ -115,7 +117,7 @@ public class FlusswerkConfiguration {
     }
 
     ProcessReport processReport = processReportProvider.getIfAvailable();
-    return new Engine(messageBroker, flow, threads, processReport);
+    return new Engine(name, messageBroker, flow, threads, processReport);
   }
 
   @Bean
