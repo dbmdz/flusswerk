@@ -6,6 +6,7 @@ import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.model.Message;
+import com.github.dbmdz.flusswerk.framework.reporting.SilentProcessReport;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.assertj.core.api.ObjectAssert;
@@ -46,7 +47,7 @@ public class DeadletteringTest {
             .writerSendingMessage(Message::new)
             .build();
 
-    Engine engine = new Engine("app", messageBroker, flow);
+    Engine engine = new Engine("app", messageBroker, flow, new SilentProcessReport());
 
     ExecutorService executorService = Executors.newSingleThreadExecutor();
     executorService.submit(engine::start);
