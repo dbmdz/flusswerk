@@ -48,7 +48,7 @@ public class Engine {
    * Creates a new Engine instance with {@value DEFAULT_CONCURRENT_WORKERS} concurrent workers.
    *
    * @param messageBroker the message broker to get messages from or send messages to
-   * @param flow the flow to execute agains every message
+   * @param flow the flow to execute for every message
    */
   public Engine(String appName, MessageBroker messageBroker, Flow flow) {
     this(appName, messageBroker, flow, DEFAULT_CONCURRENT_WORKERS, null);
@@ -58,7 +58,7 @@ public class Engine {
    * Creates a new Engine instance with a fixed number of concurrent workers.
    *
    * @param messageBroker the message broker to get messages from or send messages to
-   * @param flow the flow to execute agains every message
+   * @param flow the flow to execute for every message
    * @param concurrentWorkers the number of concurrent workers
    */
   public Engine(String appName, MessageBroker messageBroker, Flow flow, int concurrentWorkers) {
@@ -81,7 +81,7 @@ public class Engine {
    * Creates a new Engine instance with a fixed number of concurrent workers.
    *
    * @param messageBroker the message broker to get messages from or send messages to
-   * @param flow the flow to execute agains every message
+   * @param flow the flow to execute for every message
    * @param concurrentWorkers the number of concurrent workers
    * @param processReport Reporting implementation (or null, if DefaultProcessReport shall be used)
    */
