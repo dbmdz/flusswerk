@@ -3,6 +3,7 @@ package com.github.dbmdz.flusswerk.framework.flow;
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 
+import com.github.dbmdz.flusswerk.framework.locking.LockManager;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,6 +31,8 @@ public class Flow<M extends Message, R, W> {
 
   private final Consumer<FlowMetrics> monitor;
 
+  private final LockManager lockManager = null; // TODO
+
   public Flow(
       Function<M, R> reader,
       Function<R, W> transformer,
@@ -37,8 +40,17 @@ public class Flow<M extends Message, R, W> {
       Runnable cleanup,
       Consumer<FlowMetrics> monitor) {
     this.reader = requireNonNull(reader);
+    if (reader instanceof LockingFunction) {
+      ((LockingFunction<M, R>) reader).setLockManager(lockManager);
+    }
     this.transformer = requireNonNull(transformer);
+    if (transformer instanceof LockingFunction) {
+      ((LockingFunction<R, W>) transformer).setLockManager(lockManager);
+    }
     this.writer = requireNonNull(writer);
+    if (writer instanceof LockingFunction) {
+      ((LockingFunction<W, Collection<Message>>) writer).setLockManager(lockManager);
+    }
     this.cleanup = requireNonNullElse(cleanup, () -> {});
     this.monitor = requireNonNullElse(monitor, metrics -> {});
   }
@@ -58,7 +70,9 @@ public class Flow<M extends Message, R, W> {
       cleanup.run();
       metrics.stop();
       monitor.accept(metrics); // record metrics only available from inside the framework
+      lockManager.release();
     }
+
     if (result == null) {
       return Collections.emptyList();
     }

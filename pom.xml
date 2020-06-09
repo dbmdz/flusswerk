@@ -85,6 +85,7 @@
     <version.maven-surefire-plugin>3.0.0-M4</version.maven-surefire-plugin>
     <version.maven-source-plugin>3.2.1</version.maven-source-plugin>
     <version.nexus-staging-maven-plugin>1.6.8</version.nexus-staging-maven-plugin>
+    <version.redisson>3.13.0</version.redisson>
   </properties>
 
   <dependencyManagement>
@@ -152,6 +153,11 @@
         <artifactId>mockito-core</artifactId>
         <version>${version.mockito}</version>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.redisson</groupId>
+        <artifactId>redisson</artifactId>
+        <version>${version.redisson}</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
