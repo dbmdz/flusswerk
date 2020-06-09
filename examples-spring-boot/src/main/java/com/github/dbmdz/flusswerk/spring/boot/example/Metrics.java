@@ -2,7 +2,7 @@ package com.github.dbmdz.flusswerk.spring.boot.example;
 
 import com.github.dbmdz.flusswerk.framework.flow.FlowMetrics;
 import com.github.dbmdz.flusswerk.framework.flow.FlowMetrics.Status;
-import com.github.dbmdz.flusswerk.spring.boot.starter.monitoring.MeterFactory;
+import com.github.dbmdz.flusswerk.framework.spring.monitoring.MeterFactory;
 import io.micrometer.core.instrument.Counter;
 import java.util.EnumMap;
 import java.util.Map;

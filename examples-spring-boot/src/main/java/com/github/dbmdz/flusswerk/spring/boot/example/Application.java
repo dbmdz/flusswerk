@@ -1,9 +1,9 @@
 package com.github.dbmdz.flusswerk.spring.boot.example;
 
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
-import com.github.dbmdz.flusswerk.spring.boot.starter.EnableFlusswerk;
-import com.github.dbmdz.flusswerk.spring.boot.starter.FlusswerkApplication;
-import com.github.dbmdz.flusswerk.spring.boot.starter.FlusswerkProperties;
+import com.github.dbmdz.flusswerk.framework.spring.EnableFlusswerk;
+import com.github.dbmdz.flusswerk.framework.spring.FlusswerkApplication;
+import com.github.dbmdz.flusswerk.framework.spring.FlusswerkProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

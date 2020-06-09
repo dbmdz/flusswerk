@@ -3,11 +3,11 @@ package com.github.dbmdz.flusswerk.spring.boot.example.config;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
+import com.github.dbmdz.flusswerk.framework.spring.MessageImplementation;
+import com.github.dbmdz.flusswerk.framework.spring.monitoring.BaseMetrics;
 import com.github.dbmdz.flusswerk.spring.boot.example.ComposePerfectGreeting;
 import com.github.dbmdz.flusswerk.spring.boot.example.FancyConsoleProcessReport;
 import com.github.dbmdz.flusswerk.spring.boot.example.model.Greeting;
-import com.github.dbmdz.flusswerk.spring.boot.starter.MessageImplementation;
-import com.github.dbmdz.flusswerk.spring.boot.starter.monitoring.BaseMetrics;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

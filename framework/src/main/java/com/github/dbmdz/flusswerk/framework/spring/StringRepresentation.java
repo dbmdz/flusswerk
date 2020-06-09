@@ -1,4 +1,4 @@
-package com.github.dbmdz.flusswerk.spring.boot.starter;
+package com.github.dbmdz.flusswerk.framework.spring;
 
 /** Creates a nice string representation for hierarchical data structures. */
 class StringRepresentation {

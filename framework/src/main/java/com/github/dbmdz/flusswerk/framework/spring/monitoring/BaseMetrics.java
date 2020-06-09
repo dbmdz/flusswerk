@@ -1,4 +1,4 @@
-package com.github.dbmdz.flusswerk.spring.boot.starter.monitoring;
+package com.github.dbmdz.flusswerk.framework.spring.monitoring;
 
 import com.github.dbmdz.flusswerk.framework.flow.FlowMetrics;
 import com.github.dbmdz.flusswerk.framework.flow.FlowMetrics.Status;
