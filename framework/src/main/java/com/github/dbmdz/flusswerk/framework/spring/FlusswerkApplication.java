@@ -1,4 +1,4 @@
-package com.github.dbmdz.flusswerk.spring.boot.starter;
+package com.github.dbmdz.flusswerk.framework.spring;
 
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import org.springframework.boot.CommandLineRunner;

@@ -1,4 +1,4 @@
-package com.github.dbmdz.flusswerk.spring.boot.starter;
+package com.github.dbmdz.flusswerk.framework.spring;
 
 import java.util.Objects;
 import javax.validation.constraints.Min;

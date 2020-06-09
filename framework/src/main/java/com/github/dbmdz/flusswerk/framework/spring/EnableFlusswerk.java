@@ -1,4 +1,4 @@
-package com.github.dbmdz.flusswerk.spring.boot.starter;
+package com.github.dbmdz.flusswerk.framework.spring;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

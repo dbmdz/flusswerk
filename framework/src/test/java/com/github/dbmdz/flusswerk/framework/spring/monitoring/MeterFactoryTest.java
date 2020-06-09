@@ -1,11 +1,11 @@
-package com.github.dbmdz.flusswerk.spring.boot.starter.monitoring;
+package com.github.dbmdz.flusswerk.framework.spring.monitoring;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.github.dbmdz.flusswerk.spring.boot.starter.FlusswerkProperties;
-import com.github.dbmdz.flusswerk.spring.boot.starter.FlusswerkProperties.Monitoring;
+import com.github.dbmdz.flusswerk.framework.spring.FlusswerkProperties;
+import com.github.dbmdz.flusswerk.framework.spring.FlusswerkProperties.Monitoring;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.search.Search;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;

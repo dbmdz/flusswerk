@@ -3,6 +3,7 @@ package com.github.dbmdz.flusswerk.framework.flow;
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 
+import com.github.dbmdz.flusswerk.framework.locking.LockManager;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,18 +31,14 @@ public class Flow<M extends Message, R, W> {
 
   private final Consumer<FlowMetrics> monitor;
 
-  public Flow(
-      Function<M, R> reader,
-      Function<R, W> transformer,
-      Function<W, Collection<Message>> writer,
-      Runnable cleanup,
-      Consumer<FlowMetrics> monitor) {
-    this.reader = requireNonNull(reader);
-    this.transformer = requireNonNull(transformer);
-    this.writer = requireNonNull(writer);
-    this.cleanup = requireNonNullElse(cleanup, () -> {});
-    this.monitor = requireNonNullElse(monitor, metrics -> {});
+  public Flow(FlowSpec<M, R, W> flowSpec, LockManager lockManager) {
+    this.reader = requireNonNull(flowSpec.getReader());
+    this.transformer = requireNonNull(flowSpec.getTransformer());
+    this.writer = requireNonNull(flowSpec.getWriter());
+    this.cleanup = requireNonNullElse(flowSpec.getCleanup(), () -> {});
+    this.monitor = requireNonNullElse(flowSpec.getMonitor(), metrics -> {});
   }
+
 
   public Collection<Message> process(M message) {
     FlowMetrics metrics = new FlowMetrics();

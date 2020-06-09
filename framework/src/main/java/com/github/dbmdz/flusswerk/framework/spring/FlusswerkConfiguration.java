@@ -1,4 +1,4 @@
-package com.github.dbmdz.flusswerk.spring.boot.starter;
+package com.github.dbmdz.flusswerk.framework.spring;
 
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
@@ -6,8 +6,8 @@ import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBrokerBuilder;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
-import com.github.dbmdz.flusswerk.spring.boot.starter.monitoring.BaseMetrics;
-import com.github.dbmdz.flusswerk.spring.boot.starter.monitoring.MeterFactory;
+import com.github.dbmdz.flusswerk.framework.spring.monitoring.BaseMetrics;
+import com.github.dbmdz.flusswerk.framework.spring.monitoring.MeterFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

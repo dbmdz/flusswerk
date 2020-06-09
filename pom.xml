@@ -56,7 +56,6 @@
     <module>examples-plain</module>
     <module>examples-spring-boot</module>
     <module>integration-tests</module>
-    <module>spring-boot-starter</module>
   </modules>
 
   <properties>
