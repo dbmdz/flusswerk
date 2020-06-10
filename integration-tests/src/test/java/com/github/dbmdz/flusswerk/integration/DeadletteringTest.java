@@ -3,7 +3,9 @@ package com.github.dbmdz.flusswerk.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
+import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
+import com.github.dbmdz.flusswerk.framework.locking.NoOpLockManager;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.reporting.SilentProcessReport;
@@ -37,7 +39,7 @@ public class DeadletteringTest {
   @Test
   public void failingMessagesShouldEndInFailedQueue() throws Exception {
     MessageBroker messageBroker = backend.getMessageBroker();
-    var flow =
+    var flowSpec =
         FlowBuilder.flow(Message.class, String.class, String.class)
             .reader(Message::toString)
             .transformer(
@@ -47,6 +49,7 @@ public class DeadletteringTest {
             .writerSendingMessage(Message::new)
             .build();
 
+    var flow = new Flow<>(flowSpec, new NoOpLockManager());
     Engine engine = new Engine("app", messageBroker, flow, new SilentProcessReport());
 
     ExecutorService executorService = Executors.newSingleThreadExecutor();

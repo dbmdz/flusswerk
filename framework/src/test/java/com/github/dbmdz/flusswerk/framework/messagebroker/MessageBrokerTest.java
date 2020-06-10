@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.github.dbmdz.flusswerk.framework.config.properties.Routing;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.io.IOException;
@@ -31,19 +32,19 @@ class MessageBrokerTest {
 
   private RabbitClient rabbitClient;
 
-  private RoutingConfig routingConfig;
+  private Routing routing;
 
   @BeforeEach
   void setUp() throws IOException {
-    routingConfig = new RoutingConfig();
-    routingConfig.setReadFrom("some.input.queue");
-    routingConfig.setWriteTo("some.output.queue");
-    FailurePolicy failurePolicy = new FailurePolicy("some.input.queue");
-    routingConfig.addFailurePolicy(failurePolicy);
-    routingConfig.complete();
+    routing =
+        new Routing(
+            "some.exchange",
+            new String[] {"some.input.queue"},
+            "some.output.queue",
+            List.of(new FailurePolicy("some.input.queue")));
 
     rabbitClient = mock(RabbitClient.class);
-    messageBroker = new MessageBroker(config, routingConfig, rabbitClient);
+    messageBroker = new MessageBroker(config, routing, rabbitClient);
     message = new Message("Hey");
     message.getEnvelope().setSource("some.input.queue");
   }
@@ -79,7 +80,7 @@ class MessageBrokerTest {
     for (int i = 0; i < numberOfRejections; i++) {
       messageBroker.reject(message);
     }
-    FailurePolicy failurePolicy = routingConfig.getFailurePolicy(message);
+    FailurePolicy failurePolicy = routing.getFailurePolicy(message);
     verify(rabbitClient).send(anyString(), eq(failurePolicy.getFailedRoutingKey()), eq(message));
   }
 
@@ -87,7 +88,7 @@ class MessageBrokerTest {
   @DisplayName("Should send a message to the output queue")
   void sendShouldRouteMessageToOutputQueue() throws IOException {
     messageBroker.send(new Message("test"));
-    verify(rabbitClient).send(any(), eq(routingConfig.getWriteTo()), any());
+    verify(rabbitClient).send(any(), eq(routing.getWriteTo().orElseThrow()), any());
   }
 
   @Test
@@ -112,7 +113,7 @@ class MessageBrokerTest {
   @DisplayName("Default receive should pull from the input queue")
   void defaultReceiveShouldPullTheInputQueue() throws IOException, InvalidMessageException {
     messageBroker.receive();
-    verify(rabbitClient).receive(routingConfig.getReadFrom()[0]);
+    verify(rabbitClient).receive(routing.getReadFrom()[0]);
   }
 
   @Test
@@ -130,7 +131,7 @@ class MessageBrokerTest {
       when(rabbitClient.getMessageCount(queue)).thenReturn(expected.get(queue));
     }
 
-    messageBroker = new MessageBroker(config, routingConfig, rabbitClient);
+    messageBroker = new MessageBroker(config, routing, rabbitClient);
     assertThat(messageBroker.getMessageCounts()).isEqualTo(expected);
   }
 

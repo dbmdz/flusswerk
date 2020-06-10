@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.github.dbmdz.flusswerk.framework.spring.FlusswerkProperties;
-import com.github.dbmdz.flusswerk.framework.spring.FlusswerkProperties.Monitoring;
+import com.github.dbmdz.flusswerk.framework.config.properties.FlusswerkProperties;
+import com.github.dbmdz.flusswerk.framework.config.properties.Monitoring;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.search.Search;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;

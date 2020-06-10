@@ -1,5 +1,7 @@
 package com.github.dbmdz.flusswerk.framework.messagebroker;
 
+import static java.util.Objects.requireNonNullElse;
+
 public class FailurePolicy {
 
   private final String inputQueue;
@@ -15,15 +17,15 @@ public class FailurePolicy {
   }
 
   public FailurePolicy(String inputQueue, int maxRetries) {
-    this(inputQueue, inputQueue + ".retry", inputQueue + ".failed", maxRetries);
+    this(inputQueue, null, null, maxRetries);
   }
 
   public FailurePolicy(
-      String inputQueue, String retryRoutingKey, String failedRoutingKey, int maxRetries) {
+      String inputQueue, String retryRoutingKey, String failedRoutingKey, Integer maxRetries) {
     this.inputQueue = inputQueue;
-    this.retryRoutingKey = retryRoutingKey;
-    this.failedRoutingKey = failedRoutingKey;
-    this.maxRetries = maxRetries;
+    this.retryRoutingKey = requireNonNullElse(retryRoutingKey, inputQueue + ".retry");
+    this.failedRoutingKey = requireNonNullElse(failedRoutingKey, inputQueue + ".failed");
+    this.maxRetries = requireNonNullElse(maxRetries, 5);
   }
 
   public String getInputQueue() {

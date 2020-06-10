@@ -1,5 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.messagebroker;
 
+import com.github.dbmdz.flusswerk.framework.config.properties.Routing;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.model.Envelope;
 import com.github.dbmdz.flusswerk.framework.model.Message;
@@ -23,20 +24,20 @@ public class MessageBroker {
 
   private final MessageBrokerConfig config;
 
-  private final RoutingConfig routingConfig;
+  private final Routing routingConfig;
 
   private final RabbitClient rabbitClient;
 
   // TODO merge config and properties
-  MessageBroker(MessageBrokerConfig config, RoutingConfig routingConfig, RabbitClient rabbitClient)
+  public MessageBroker(MessageBrokerConfig config, Routing routing, RabbitClient rabbitClient)
       throws IOException {
     this.config = config;
-    this.routingConfig = routingConfig;
+    this.routingConfig = routing;
     this.rabbitClient = rabbitClient;
 
     provideExchanges();
     provideInputQueues();
-    if (routingConfig.hasWriteTo()) {
+    if (routingConfig.getWriteTo().isPresent()) {
       provideOutputQueue();
     }
   }
@@ -48,7 +49,7 @@ public class MessageBroker {
    * @throws IOException if sending the message fails.
    */
   public void send(Message message) throws IOException {
-    send(routingConfig.getWriteTo(), message);
+    send(routingConfig.getWriteTo().orElseThrow(), message);
   }
 
   /**
@@ -58,7 +59,7 @@ public class MessageBroker {
    * @throws IOException if sending the message fails.
    */
   public void send(Collection<? extends Message> messages) throws IOException {
-    send(routingConfig.getWriteTo(), messages);
+    send(routingConfig.getWriteTo().orElseThrow(), messages);
   }
 
   /**
@@ -162,10 +163,11 @@ public class MessageBroker {
   }
 
   private void provideOutputQueue() throws IOException {
+    var topic = routingConfig.getWriteTo().orElseThrow();
     rabbitClient.declareQueue(
-        routingConfig.getWriteTo(),
+        topic,
         routingConfig.getExchange(),
-        routingConfig.getWriteTo(),
+        topic,
         Map.of(DEAD_LETTER_EXCHANGE, routingConfig.getDeadLetterExchange()));
   }
 

@@ -1,7 +1,7 @@
 package com.github.dbmdz.flusswerk.framework.flow.builder;
 
-import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.flow.FlowMetrics;
+import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.util.function.Consumer;
 
@@ -49,10 +49,8 @@ public class ConfigurationStep<M extends Message, R, W> {
    *
    * @return the new flow
    */
-  public Flow<M, R, W> build() {
-    // Suppliers are due to the Flow constructor interface. Suppliers are likely to be dropped in
-    // Flusswerk 4.
-    return new Flow<>(
+  public FlowSpec<M, R, W> build() {
+    return new FlowSpec<>(
         model.getReader(),
         model.getTransformer(),
         model.getWriter(),

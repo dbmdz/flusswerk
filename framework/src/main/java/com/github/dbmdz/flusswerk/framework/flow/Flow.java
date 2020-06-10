@@ -39,7 +39,6 @@ public class Flow<M extends Message, R, W> {
     this.monitor = requireNonNullElse(flowSpec.getMonitor(), metrics -> {});
   }
 
-
   public Collection<Message> process(M message) {
     FlowMetrics metrics = new FlowMetrics();
     Collection<Message> result;

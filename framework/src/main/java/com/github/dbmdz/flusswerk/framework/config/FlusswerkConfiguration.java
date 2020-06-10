@@ -1,9 +1,9 @@
-package com.github.dbmdz.flusswerk.framework.spring;
+package com.github.dbmdz.flusswerk.framework.config;
 
+import com.github.dbmdz.flusswerk.framework.config.properties.FlusswerkProperties;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
-import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBrokerBuilder;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import com.github.dbmdz.flusswerk.framework.spring.monitoring.BaseMetrics;
@@ -20,70 +20,70 @@ import org.springframework.context.annotation.Import;
 @Import(FlusswerkPropertiesConfiguration.class)
 public class FlusswerkConfiguration {
 
-  /**
-   * @param flusswerkProperties The external configuration from <code>application.yml</code>
-   * @param messageImplementation A custom {@link Message} implementation to use.
-   * @return The message broker for this job.
-   */
-  @Bean
-  public MessageBroker messageBroker(
-      FlusswerkProperties flusswerkProperties,
-      ObjectProvider<MessageImplementation> messageImplementation) {
-
-    var connection = flusswerkProperties.getConnection();
-    MessageBrokerBuilder builder = new MessageBrokerBuilder();
-
-    if (connection == null || !isSet(connection.getConnectTo())) {
-      throw new IllegalArgumentException("flusswerk.connection.connect-to is missing");
-    }
-
-    builder.connectTo(connection.getConnectTo());
-
-    if (isSet(connection.getUsername())) {
-      builder.username(connection.getUsername());
-    }
-
-    if (isSet(connection.getPassword())) {
-      builder.password(connection.getPassword());
-    }
-
-    if (isSet(connection.getVirtualHost())) {
-      builder.virtualHost(connection.getVirtualHost());
-    }
-
-    var processing = flusswerkProperties.getProcessing();
-    if (processing != null && isSet(processing.getMaxRetries())) {
-      builder.maxRetries(processing.getMaxRetries());
-    }
-
-    var routing = flusswerkProperties.getRouting();
-    if (routing != null && isSet(routing.getExchange())) {
-      builder.exchange(routing.getExchange());
-    }
-
-    if (routing != null && isSet(routing.getReadFrom())) {
-      builder.readFrom(routing.getReadFrom());
-    }
-
-    if (routing != null && isSet(routing.getWriteTo())) {
-      builder.writeTo(routing.getWriteTo());
-    }
-
-    if (connection.getVirtualHost() != null) {
-      builder.virtualHost(connection.getVirtualHost());
-    }
-
-    messageImplementation.ifAvailable(
-        impl -> {
-          if (impl.hasMixin()) {
-            builder.useMessageClass(impl.getMessageClass(), impl.getMixin());
-          } else {
-            builder.useMessageClass(impl.getMessageClass());
-          }
-        });
-
-    return builder.build();
-  }
+  //  /**
+  //   * @param flusswerkProperties The external configuration from <code>application.yml</code>
+  //   * @param messageImplementation A custom {@link Message} implementation to use.
+  //   * @return The message broker for this job.
+  //   */
+  //  @Bean
+  //  public MessageBroker messageBroker(
+  //      FlusswerkProperties flusswerkProperties,
+  //      ObjectProvider<MessageImplementation> messageImplementation) {
+  //
+  //    var connection = flusswerkProperties.getConnection();
+  //    MessageBrokerBuilder builder = new MessageBrokerBuilder();
+  //
+  //    if (connection == null || !isSet(connection.getConnectTo())) {
+  //      throw new IllegalArgumentException("flusswerk.connection.connect-to is missing");
+  //    }
+  //
+  //    builder.connectTo(connection.getConnectTo());
+  //
+  //    if (isSet(connection.getUsername())) {
+  //      builder.username(connection.getUsername());
+  //    }
+  //
+  //    if (isSet(connection.getPassword())) {
+  //      builder.password(connection.getPassword());
+  //    }
+  //
+  //    if (isSet(connection.getVirtualHost())) {
+  //      builder.virtualHost(connection.getVirtualHost());
+  //    }
+  //
+  //    var processing = flusswerkProperties.getProcessing();
+  //    if (processing != null && isSet(processing.getMaxRetries())) {
+  //      builder.maxRetries(processing.getMaxRetries());
+  //    }
+  //
+  //    var routing = flusswerkProperties.getRouting();
+  //    if (routing != null && isSet(routing.getExchange())) {
+  //      builder.exchange(routing.getExchange());
+  //    }
+  //
+  //    if (routing != null && isSet(routing.getReadFrom())) {
+  //      builder.readFrom(routing.getReadFrom());
+  //    }
+  //
+  //    if (routing != null) {
+  //      routing.getWriteTo().ifPresent(builder::writeTo);
+  //    }
+  //
+  //    if (connection.getVirtualHost() != null) {
+  //      builder.virtualHost(connection.getVirtualHost());
+  //    }
+  //
+  //    messageImplementation.ifAvailable(
+  //        impl -> {
+  //          if (impl.hasMixin()) {
+  //            builder.useMessageClass(impl.getMessageClass(), impl.getMixin());
+  //          } else {
+  //            builder.useMessageClass(impl.getMessageClass());
+  //          }
+  //        });
+  //
+  //    return builder.build();
+  //  }
 
   /**
    * @param messageBroker The messageBroker to use.

@@ -36,5 +36,4 @@ public class NoOpLockManager implements LockManager {
   public Optional<String> getLockedIdForThread() {
     return Optional.empty();
   }
-
 }
