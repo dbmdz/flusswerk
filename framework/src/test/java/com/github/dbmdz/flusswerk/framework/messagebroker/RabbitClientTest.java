@@ -13,9 +13,9 @@ import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.dbmdz.flusswerk.framework.TestMessage;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
-import com.github.dbmdz.flusswerk.framework.jackson.SingleClassModule;
 import com.github.dbmdz.flusswerk.framework.model.Envelope;
 import com.github.dbmdz.flusswerk.framework.model.Message;
+import com.github.dbmdz.flusswerk.framework.spring.MessageImplementation;
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.GetResponse;
@@ -28,8 +28,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class RabbitClientTest {
-
-  private final MessageBrokerConfig config = new MessageBrokerConfig();
 
   private RabbitConnection connection;
 
@@ -47,7 +45,7 @@ class RabbitClientTest {
 
   @Test
   void ack() throws IOException {
-    RabbitClient rabbitClient = new RabbitClient(config, connection);
+    RabbitClient rabbitClient = new RabbitClient(connection);
     message.getEnvelope().setDeliveryTag(123123123);
     rabbitClient.ack(message);
     verify(channel).basicAck(eq(message.getEnvelope().getDeliveryTag()), eq(false));
@@ -55,7 +53,7 @@ class RabbitClientTest {
 
   @Test
   void sendShouldUseCorrectRoutingKey() throws IOException {
-    RabbitClient rabbitClient = new RabbitClient(config, connection);
+    RabbitClient rabbitClient = new RabbitClient(connection);
     rabbitClient.send("workflow", "there", message);
     verify(channel).basicPublish(anyString(), eq("there"), any(), any(byte[].class));
   }
@@ -67,9 +65,8 @@ class RabbitClientTest {
 
   @Test
   void shouldWorkWithCustomMessageType() throws IOException {
-    config.addJacksonModule(new SingleClassModule(TestMessage.class, TestMessageMixin.class));
-    config.setMessageClass(TestMessage.class);
-    RabbitClient client = new RabbitClient(config, connection);
+    var messageImplementation = new MessageImplementation(TestMessage.class, TestMessageMixin.class);
+    RabbitClient client = new RabbitClient(messageImplementation, connection);
 
     TestMessage message = new TestMessage("abc123", "should be ignored");
     byte[] serialized = client.serialize(message);
@@ -82,7 +79,7 @@ class RabbitClientTest {
 
   @Test
   void receiveShouldPullTheInputQueue() throws IOException, InvalidMessageException {
-    RabbitClient rabbitClient = new RabbitClient(config, connection);
+    RabbitClient rabbitClient = new RabbitClient(connection);
 
     long deliveryTag = 476253;
     String tracingId = "123123123";
@@ -124,7 +121,7 @@ class RabbitClientTest {
   @DisplayName("getMessageCount should return message count for queue")
   void getMessageCountShouldReturnMessageCount() throws IOException {
     when(channel.messageCount("test")).thenReturn(123L);
-    RabbitClient rabbitClient = new RabbitClient(config, connection);
+    RabbitClient rabbitClient = new RabbitClient(connection);
     assertThat(rabbitClient.getMessageCount("test")).isEqualTo(123L);
   }
 
@@ -132,7 +129,7 @@ class RabbitClientTest {
   @DisplayName("isChannelAvailable should return if channel is available")
   void isChannelAvailable() {
     when(channel.isOpen()).thenReturn(true, false);
-    RabbitClient rabbitClient = new RabbitClient(config, connection);
+    RabbitClient rabbitClient = new RabbitClient(connection);
     assertThat(rabbitClient.isChannelAvailable()).isTrue();
     assertThat(rabbitClient.isChannelAvailable()).isFalse();
   }
@@ -149,7 +146,7 @@ class RabbitClientTest {
     when(getResponse.getEnvelope()).thenReturn(envelope);
     when(channel.basicGet(queueName, false)).thenReturn(getResponse);
 
-    RabbitClient rabbitClient = new RabbitClient(config, connection);
+    RabbitClient rabbitClient = new RabbitClient(connection);
 
     InvalidMessageException thrown =
         assertThrows(InvalidMessageException.class, () -> rabbitClient.receive("test"));

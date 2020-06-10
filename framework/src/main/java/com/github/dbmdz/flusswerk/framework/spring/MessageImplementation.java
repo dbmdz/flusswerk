@@ -11,6 +11,11 @@ public class MessageImplementation {
 
   private Class<?> mixin;
 
+  /** Use Message for incoming messages. */
+  public MessageImplementation() {
+    this(Message.class);
+  }
+
   /**
    * Provide a custom {@link Message} implmentation with default serialization and deserialization
    * settings.
@@ -28,7 +33,7 @@ public class MessageImplementation {
    * @param cls custom {@link Message} implementation
    * @param mixin custom Jackson mixin for specific serialization and deserialization settings
    */
-  public MessageImplementation(Class<Message> cls, Class<?> mixin) {
+  public MessageImplementation(Class<? extends Message> cls, Class<?> mixin) {
     this.messageClass = requireNonNull(cls);
     this.mixin = requireNonNull(mixin);
   }

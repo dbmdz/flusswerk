@@ -17,13 +17,20 @@ public class FlusswerkProperties {
 
   @NestedConfigurationProperty private final Monitoring monitoring;
 
+  @NestedConfigurationProperty private final Redis redis;
+
   @ConstructorBinding
   public FlusswerkProperties(
-      Processing processing, Connection connection, Routing routing, Monitoring monitoring) {
+      Processing processing,
+      Connection connection,
+      Routing routing,
+      Monitoring monitoring,
+      Redis redis) {
     this.processing = processing;
     this.connection = connection;
     this.routing = routing;
     this.monitoring = monitoring;
+    this.redis = redis;
   }
 
   public Processing getProcessing() {
@@ -40,6 +47,10 @@ public class FlusswerkProperties {
 
   public Monitoring getMonitoring() {
     return monitoring;
+  }
+
+  public Redis getRedis() {
+    return redis;
   }
 
   @Override

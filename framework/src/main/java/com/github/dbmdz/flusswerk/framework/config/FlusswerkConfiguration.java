@@ -3,11 +3,18 @@ package com.github.dbmdz.flusswerk.framework.config;
 import com.github.dbmdz.flusswerk.framework.config.properties.FlusswerkProperties;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
+import com.github.dbmdz.flusswerk.framework.locking.LockManager;
+import com.github.dbmdz.flusswerk.framework.locking.NoOpLockManager;
+import com.github.dbmdz.flusswerk.framework.locking.RedisLockManager;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
+import com.github.dbmdz.flusswerk.framework.messagebroker.RabbitClient;
+import com.github.dbmdz.flusswerk.framework.messagebroker.RabbitConnection;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
+import com.github.dbmdz.flusswerk.framework.spring.MessageImplementation;
 import com.github.dbmdz.flusswerk.framework.spring.monitoring.BaseMetrics;
 import com.github.dbmdz.flusswerk.framework.spring.monitoring.MeterFactory;
+import java.io.IOException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -20,84 +27,18 @@ import org.springframework.context.annotation.Import;
 @Import(FlusswerkPropertiesConfiguration.class)
 public class FlusswerkConfiguration {
 
-  //  /**
-  //   * @param flusswerkProperties The external configuration from <code>application.yml</code>
-  //   * @param messageImplementation A custom {@link Message} implementation to use.
-  //   * @return The message broker for this job.
-  //   */
-  //  @Bean
-  //  public MessageBroker messageBroker(
-  //      FlusswerkProperties flusswerkProperties,
-  //      ObjectProvider<MessageImplementation> messageImplementation) {
-  //
-  //    var connection = flusswerkProperties.getConnection();
-  //    MessageBrokerBuilder builder = new MessageBrokerBuilder();
-  //
-  //    if (connection == null || !isSet(connection.getConnectTo())) {
-  //      throw new IllegalArgumentException("flusswerk.connection.connect-to is missing");
-  //    }
-  //
-  //    builder.connectTo(connection.getConnectTo());
-  //
-  //    if (isSet(connection.getUsername())) {
-  //      builder.username(connection.getUsername());
-  //    }
-  //
-  //    if (isSet(connection.getPassword())) {
-  //      builder.password(connection.getPassword());
-  //    }
-  //
-  //    if (isSet(connection.getVirtualHost())) {
-  //      builder.virtualHost(connection.getVirtualHost());
-  //    }
-  //
-  //    var processing = flusswerkProperties.getProcessing();
-  //    if (processing != null && isSet(processing.getMaxRetries())) {
-  //      builder.maxRetries(processing.getMaxRetries());
-  //    }
-  //
-  //    var routing = flusswerkProperties.getRouting();
-  //    if (routing != null && isSet(routing.getExchange())) {
-  //      builder.exchange(routing.getExchange());
-  //    }
-  //
-  //    if (routing != null && isSet(routing.getReadFrom())) {
-  //      builder.readFrom(routing.getReadFrom());
-  //    }
-  //
-  //    if (routing != null) {
-  //      routing.getWriteTo().ifPresent(builder::writeTo);
-  //    }
-  //
-  //    if (connection.getVirtualHost() != null) {
-  //      builder.virtualHost(connection.getVirtualHost());
-  //    }
-  //
-  //    messageImplementation.ifAvailable(
-  //        impl -> {
-  //          if (impl.hasMixin()) {
-  //            builder.useMessageClass(impl.getMessageClass(), impl.getMixin());
-  //          } else {
-  //            builder.useMessageClass(impl.getMessageClass());
-  //          }
-  //        });
-  //
-  //    return builder.build();
-  //  }
-
   /**
    * @param messageBroker The messageBroker to use.
    * @param flowProvider The flow to use (optional).
    * @param flusswerkProperties The external configuration from <code>application.yml</code>.
    * @param processReportProvider A custom process report provider (optional).
-   * @param <I> The message's identifier type.
    * @param <M> The used {@link Message} type
    * @param <R> The type of the reader implementation
    * @param <W> The type of the writer implementation
    * @return The {@link Engine} used for this job.
    */
   @Bean
-  public <I, M extends Message, R, W> Engine engine(
+  public <M extends Message, R, W> Engine engine(
       @Value("spring.application.name") String name,
       MessageBroker messageBroker,
       ObjectProvider<Flow<M, R, W>> flowProvider,
@@ -124,6 +65,27 @@ public class FlusswerkConfiguration {
   @ConditionalOnMissingBean
   public BaseMetrics metrics(MeterFactory meterFactory) {
     return new BaseMetrics(meterFactory);
+  }
+
+  @Bean
+  public MessageBroker messageBroker(
+      ObjectProvider<MessageImplementation> messageImplementation,
+      FlusswerkProperties flusswerkProperties)
+      throws IOException {
+    RabbitConnection rabbitConnection = new RabbitConnection(flusswerkProperties.getConnection());
+    RabbitClient client =
+        new RabbitClient(
+            messageImplementation.getIfAvailable(MessageImplementation::new), rabbitConnection);
+    return new MessageBroker(flusswerkProperties.getRouting(), client);
+  }
+
+  @Bean
+  public LockManager lockManager(FlusswerkProperties flusswerkProperties) {
+    if (flusswerkProperties.getRedis() == null) {
+      return new NoOpLockManager();
+    } else {
+      return new RedisLockManager();
+    }
   }
 
   public static boolean isSet(Object value) {

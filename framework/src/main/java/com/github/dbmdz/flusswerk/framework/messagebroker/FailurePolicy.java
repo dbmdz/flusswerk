@@ -2,11 +2,15 @@ package com.github.dbmdz.flusswerk.framework.messagebroker;
 
 import static java.util.Objects.requireNonNullElse;
 
+import java.time.Duration;
+
 public class FailurePolicy {
 
   private final String inputQueue;
 
   private final int maxRetries;
+
+  private final Duration deadLetterWait;
 
   private final String failedRoutingKey;
 
@@ -17,15 +21,20 @@ public class FailurePolicy {
   }
 
   public FailurePolicy(String inputQueue, int maxRetries) {
-    this(inputQueue, null, null, maxRetries);
+    this(inputQueue, null, null, maxRetries, null);
   }
 
   public FailurePolicy(
-      String inputQueue, String retryRoutingKey, String failedRoutingKey, Integer maxRetries) {
+      String inputQueue,
+      String retryRoutingKey,
+      String failedRoutingKey,
+      Integer maxRetries,
+      Integer duration) {
     this.inputQueue = inputQueue;
     this.retryRoutingKey = requireNonNullElse(retryRoutingKey, inputQueue + ".retry");
     this.failedRoutingKey = requireNonNullElse(failedRoutingKey, inputQueue + ".failed");
     this.maxRetries = requireNonNullElse(maxRetries, 5);
+    this.deadLetterWait = Duration.ofSeconds(requireNonNullElse(duration, 30));
   }
 
   public String getInputQueue() {
@@ -42,5 +51,9 @@ public class FailurePolicy {
 
   public String getRetryRoutingKey() {
     return retryRoutingKey;
+  }
+
+  public Duration getDeadLetterWait() {
+    return deadLetterWait;
   }
 }
