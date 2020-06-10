@@ -12,7 +12,7 @@ flusswerk:
     readFrom:
       - first
       - second
-    writeTo: defalt.queue.to.write.to
+    writeTo: default.queue.to.write.to
     failure policies:
       first:
           retry queue: first.custom.retry

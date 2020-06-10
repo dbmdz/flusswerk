@@ -3,6 +3,8 @@ package com.github.dbmdz.flusswerk.framework.config.properties;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.dbmdz.flusswerk.framework.config.FlusswerkPropertiesConfiguration;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +40,7 @@ public class FlusswerkPropertiesTest {
   public void valuesOfRouting() {
     assertThat(properties.getRouting())
         .hasFieldOrPropertyWithValue("exchange", "my.exchange")
-        .hasFieldOrPropertyWithValue("readFrom", new String[] {"first", "second"})
-        .hasFieldOrPropertyWithValue("writeTo", "defalt.queue.to.write.to");
+        .hasFieldOrPropertyWithValue("readFrom", List.of("first", "second"))
+        .hasFieldOrPropertyWithValue("writeTo", Optional.of("default.queue.to.write.to"));
   }
 }

@@ -14,6 +14,7 @@ import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,8 +25,6 @@ import org.junit.jupiter.api.Test;
 
 class MessageBrokerTest {
 
-  private final MessageBrokerConfig config = new MessageBrokerConfig();
-
   private MessageBroker messageBroker;
 
   private Message message;
@@ -34,17 +33,20 @@ class MessageBrokerTest {
 
   private Routing routing;
 
+  private FailurePolicy failurePolicy;
+
   @BeforeEach
   void setUp() throws IOException {
+    failurePolicy = new FailurePolicy("some.input.queue");
     routing =
         new Routing(
             "some.exchange",
-            new String[] {"some.input.queue"},
+            List.of("some.input.queue"),
             "some.output.queue",
-            List.of(new FailurePolicy("some.input.queue")));
+            Collections.emptyMap());
 
     rabbitClient = mock(RabbitClient.class);
-    messageBroker = new MessageBroker(config, routing, rabbitClient);
+    messageBroker = new MessageBroker(routing, rabbitClient);
     message = new Message("Hey");
     message.getEnvelope().setSource("some.input.queue");
   }
@@ -76,7 +78,7 @@ class MessageBrokerTest {
   @Test
   @DisplayName("Should route a message to the failed queue if it has been rejected to often")
   void rejectShouldRouteToFailedQueueIfMessageIsRejectedTooOften() throws IOException {
-    int numberOfRejections = config.getMaxRetries() + 1;
+    int numberOfRejections = failurePolicy.getMaxRetries() + 1;
     for (int i = 0; i < numberOfRejections; i++) {
       messageBroker.reject(message);
     }
@@ -113,15 +115,18 @@ class MessageBrokerTest {
   @DisplayName("Default receive should pull from the input queue")
   void defaultReceiveShouldPullTheInputQueue() throws IOException, InvalidMessageException {
     messageBroker.receive();
-    verify(rabbitClient).receive(routing.getReadFrom()[0]);
+    verify(rabbitClient).receive(routing.getReadFrom().get(0));
   }
 
   @Test
   @DisplayName("getMessageCount should return all message counts")
   void getMessageCountsShouldGetAllMessageCounts() throws IOException {
-    RoutingConfig routingConfig = new RoutingConfig();
-    routingConfig.setReadFrom("input1", "input2");
-    routingConfig.complete();
+    Routing routing = new Routing(
+        "test.exchange",
+        List.of("input1", "input2"),
+        null,
+        Collections.emptyMap()
+    );
 
     Map<String, Long> expected = new HashMap<>();
     expected.put("input1", 100L);
@@ -131,7 +136,7 @@ class MessageBrokerTest {
       when(rabbitClient.getMessageCount(queue)).thenReturn(expected.get(queue));
     }
 
-    messageBroker = new MessageBroker(config, routing, rabbitClient);
+    messageBroker = new MessageBroker(routing, rabbitClient);
     assertThat(messageBroker.getMessageCounts()).isEqualTo(expected);
   }
 

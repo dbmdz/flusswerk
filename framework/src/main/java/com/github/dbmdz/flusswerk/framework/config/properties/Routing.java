@@ -1,14 +1,14 @@
 package com.github.dbmdz.flusswerk.framework.config.properties;
 
+import static java.util.Objects.requireNonNullElseGet;
+
 import com.github.dbmdz.flusswerk.framework.messagebroker.FailurePolicy;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.validation.constraints.NotBlank;
 
 /** AMQP/RabbitMQ routing information. */
@@ -16,54 +16,37 @@ public class Routing {
 
   @NotBlank private final String exchange;
   private final String deadLetterExchange;
-  private final String[] readFrom;
+  private final List<String> readFrom;
   private final String writeTo;
-  private Map<String, FailurePolicy> failurePolicies;
+  private final Map<String, FailurePolicy> failurePolicies;
 
   /**
    * @param exchange The exchange name to use (required).
    * @param readFrom The queue to read from (optional).
    * @param writeTo The topic to send to per default (optional).
    */
+
   public Routing(
       @NotBlank String exchange,
-      String[] readFrom,
+      List<String> readFrom,
       String writeTo,
       Map<String, FailurePolicyProperties> failurePolicies) {
     this.exchange = exchange;
     this.deadLetterExchange = exchange + ".dlx";
-    this.readFrom = Objects.requireNonNullElse(readFrom, new String[] {});
+    this.readFrom = requireNonNullElseGet(readFrom, Collections::emptyList);
     this.writeTo = writeTo;
-    if (failurePolicies == null) {
-      this.failurePolicies = Collections.emptyMap();
-    } else {
-      this.failurePolicies = createFailurePolicies(readFrom, failurePolicies);
-    }
-  }
 
-  public Routing(
-      @NotBlank String exchange,
-      String[] readFrom,
-      String writeTo,
-      List<FailurePolicy> failurePolicies) {
-    this.exchange = exchange;
-    this.deadLetterExchange = exchange + ".dlx";
-    this.readFrom = Objects.requireNonNullElse(readFrom, new String[] {});
-    this.writeTo = writeTo;
-    this.failurePolicies =
-        failurePolicies.stream()
-            .collect(
-                Collectors.toMap(FailurePolicy::getInputQueue, failurePolicy -> failurePolicy));
+    this.failurePolicies = createFailurePolicies(readFrom, requireNonNullElseGet(failurePolicies, Collections::emptyMap));
   }
 
   private static Map<String, FailurePolicy> createFailurePolicies(
-      String[] readFrom, Map<String, FailurePolicyProperties> failurePolicies) {
+      List<String> readFrom, Map<String, FailurePolicyProperties> failurePolicies) {
     var result = new HashMap<String, FailurePolicy>();
     for (String input : failurePolicies.keySet()) {
       var spec = failurePolicies.get(input);
       var failurePolicy =
           new FailurePolicy(
-              input, spec.getRetryRoutingKey(), spec.getFailedRoutingKey(), spec.getRetries());
+              input, spec.getRetryRoutingKey(), spec.getFailedRoutingKey(), spec.getRetries(), spec.getDeadLetterWait());
       result.put(input, failurePolicy);
     }
     for (String input : readFrom) {
@@ -81,7 +64,7 @@ public class Routing {
   }
 
   /** @return The queue to read from (optional). */
-  public String[] getReadFrom() {
+  public List<String> getReadFrom() {
     return readFrom;
   }
 
@@ -111,17 +94,19 @@ public class Routing {
     return getFailurePolicy(message.getEnvelope().getSource());
   }
 
-  private static class FailurePolicyProperties {
+  public static class FailurePolicyProperties {
 
     private final Integer retries;
     private final String retryRoutingKey;
     private final String failedRoutingKey;
+    private Integer deadLetterWait;
 
     public FailurePolicyProperties(
-        Integer retries, String retryRoutingKey, String failedRoutingKey) {
+        Integer retries, String retryRoutingKey, String failedRoutingKey, Integer deadLetterWait) {
       this.retries = retries;
       this.retryRoutingKey = retryRoutingKey;
       this.failedRoutingKey = failedRoutingKey;
+      this.deadLetterWait = deadLetterWait;
     }
 
     public int getRetries() {
@@ -134,6 +119,10 @@ public class Routing {
 
     public String getFailedRoutingKey() {
       return failedRoutingKey;
+    }
+
+    public Integer getDeadLetterWait() {
+      return deadLetterWait;
     }
   }
 }

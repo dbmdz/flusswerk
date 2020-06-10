@@ -1,8 +1,8 @@
 package com.github.dbmdz.flusswerk.framework.messagebroker;
 
+import com.github.dbmdz.flusswerk.framework.config.properties.Connection;
 import com.rabbitmq.client.Address;
 import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import java.io.IOException;
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class RabbitConnection {
+public class RabbitConnection {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RabbitConnection.class);
   private static final int RETRY_INTERVAL = 5;
@@ -20,18 +20,18 @@ class RabbitConnection {
 
   private Channel channel;
 
-  private final ConnectionConfig config;
+  private final Connection connection;
 
-  RabbitConnection(ConnectionConfig config) throws IOException {
-    this(config, new ConnectionFactory());
+  public RabbitConnection(Connection connection) throws IOException {
+    this(connection, new ConnectionFactory());
   }
 
-  RabbitConnection(ConnectionConfig config, ConnectionFactory factory) throws IOException {
-    this.config = config;
+  RabbitConnection(Connection connection, ConnectionFactory factory) throws IOException {
+    this.connection = connection;
     this.factory = factory;
-    factory.setUsername(config.getUsername());
-    factory.setPassword(config.getPassword());
-    factory.setVirtualHost(config.getVirtualHost());
+    factory.setUsername(connection.getUsername());
+    factory.setPassword(connection.getPassword());
+    factory.setVirtualHost(connection.getVirtualHost());
 
     waitForConnection();
   }
@@ -43,10 +43,10 @@ class RabbitConnection {
   final void waitForConnection() throws IOException {
     boolean connectionIsFailing = true;
     while (connectionIsFailing) {
-      List<Address> addresses = config.getAddresses();
+      List<Address> addresses = List.of(new Address(connection.getConnectTo()));
       try {
         LOGGER.debug("Waiting for connection to {} ...", addresses);
-        Connection connection = factory.newConnection(addresses);
+        com.rabbitmq.client.Connection connection = factory.newConnection(addresses);
         channel = connection.createChannel();
         channel.basicRecover(true);
         connectionIsFailing = false;

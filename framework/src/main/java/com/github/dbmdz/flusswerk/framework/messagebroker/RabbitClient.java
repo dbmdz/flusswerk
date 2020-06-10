@@ -7,6 +7,7 @@ import com.github.dbmdz.flusswerk.framework.jackson.DefaultMixin;
 import com.github.dbmdz.flusswerk.framework.jackson.EnvelopeMixin;
 import com.github.dbmdz.flusswerk.framework.model.Envelope;
 import com.github.dbmdz.flusswerk.framework.model.Message;
+import com.github.dbmdz.flusswerk.framework.spring.MessageImplementation;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
@@ -15,7 +16,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-class RabbitClient {
+public class RabbitClient {
 
   private static final boolean DURABLE = true;
 
@@ -37,17 +38,23 @@ class RabbitClient {
 
   private final RabbitConnection connection;
 
-  public RabbitClient(MessageBrokerConfig config, RabbitConnection connection) {
+  RabbitClient(RabbitConnection rabbitConnection) {
+    this(new MessageImplementation(), rabbitConnection);
+  }
+
+  public RabbitClient(MessageImplementation messageImplementation, RabbitConnection connection) {
     this.connection = connection;
     channel = connection.getChannel();
     objectMapper = new ObjectMapper();
-    messageClass = config.getMessageClass();
-    objectMapper.registerModules(config.getJacksonModules());
-    objectMapper.addMixIn(Envelope.class, EnvelopeMixin.class);
-    objectMapper.registerModule(new JavaTimeModule());
-    if (objectMapper.findMixInClassFor(Message.class) == null) {
+    messageClass = messageImplementation.getMessageClass();
+    if (messageImplementation.hasMixin()) {
+      objectMapper.addMixIn(
+          messageImplementation.getMessageClass(), messageImplementation.getMixin());
+    } else {
       objectMapper.addMixIn(Message.class, DefaultMixin.class);
     }
+    objectMapper.addMixIn(Envelope.class, EnvelopeMixin.class);
+    objectMapper.registerModule(new JavaTimeModule());
   }
 
   void send(String exchange, String routingKey, Message message) throws IOException {

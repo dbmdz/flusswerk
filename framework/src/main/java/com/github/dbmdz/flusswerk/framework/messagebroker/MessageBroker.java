@@ -22,16 +22,12 @@ public class MessageBroker {
   private static final String MESSAGE_TTL = "x-message-ttl";
   private static final String DEAD_LETTER_EXCHANGE = "x-dead-letter-exchange";
 
-  private final MessageBrokerConfig config;
-
   private final Routing routingConfig;
 
   private final RabbitClient rabbitClient;
 
   // TODO merge config and properties
-  public MessageBroker(MessageBrokerConfig config, Routing routing, RabbitClient rabbitClient)
-      throws IOException {
-    this.config = config;
+  public MessageBroker(Routing routing, RabbitClient rabbitClient) throws IOException {
     this.routingConfig = routing;
     this.rabbitClient = rabbitClient;
 
@@ -150,7 +146,11 @@ public class MessageBroker {
             failurePolicy.getRetryRoutingKey(),
             deadLetterExchange,
             inputQueue,
-            Map.of(MESSAGE_TTL, config.getDeadLetterWait(), DEAD_LETTER_EXCHANGE, exchange));
+            Map.of(
+                MESSAGE_TTL,
+                failurePolicy.getDeadLetterWait().toMillis(),
+                DEAD_LETTER_EXCHANGE,
+                exchange));
       }
       if (failurePolicy.getFailedRoutingKey() != null) {
         rabbitClient.declareQueue(
@@ -191,8 +191,9 @@ public class MessageBroker {
    */
   public boolean reject(Message message) throws IOException {
     final Envelope envelope = message.getEnvelope();
+    final long maxRetries = routingConfig.getFailurePolicy(message).getMaxRetries();
     ack(message);
-    if (envelope.getRetries() < config.getMaxRetries()) {
+    if (envelope.getRetries() < maxRetries) {
       envelope.setRetries(envelope.getRetries() + 1);
       retry(message);
       return true;
@@ -241,10 +242,6 @@ public class MessageBroker {
   private void provideExchanges() throws IOException {
     rabbitClient.provideExchange(routingConfig.getExchange());
     rabbitClient.provideExchange(routingConfig.getDeadLetterExchange());
-  }
-
-  public MessageBrokerConfig getConfig() {
-    return config;
   }
 
   public Map<String, Long> getMessageCounts() throws IOException {

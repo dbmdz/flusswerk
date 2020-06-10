@@ -31,7 +31,7 @@ public class Backend {
     messageBroker = null;
     while (messageBroker == null) {
       try {
-        messageBroker = new MessageBroker(null, null, null);
+        messageBroker = new MessageBroker(null, null);
       } catch (IOException e) {
         try {
           TimeUnit.MILLISECONDS.sleep(INTERVAL);
