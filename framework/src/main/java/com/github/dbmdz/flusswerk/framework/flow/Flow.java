@@ -30,6 +30,7 @@ public class Flow<M extends Message, R, W> {
   private final Runnable cleanup;
 
   private final Consumer<FlowMetrics> monitor;
+  private final LockManager lockManager;
 
   public Flow(FlowSpec<M, R, W> flowSpec, LockManager lockManager) {
     this.reader = requireNonNull(flowSpec.getReader());
@@ -37,6 +38,7 @@ public class Flow<M extends Message, R, W> {
     this.writer = requireNonNull(flowSpec.getWriter());
     this.cleanup = requireNonNullElse(flowSpec.getCleanup(), () -> {});
     this.monitor = requireNonNullElse(flowSpec.getMonitor(), metrics -> {});
+    this.lockManager = lockManager;
   }
 
   public Collection<Message> process(M message) {
@@ -54,6 +56,7 @@ public class Flow<M extends Message, R, W> {
       cleanup.run();
       metrics.stop();
       monitor.accept(metrics); // record metrics only available from inside the framework
+      lockManager.release(); // make sure any lock has been released
     }
     if (result == null) {
       return Collections.emptyList();
