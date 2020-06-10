@@ -2,6 +2,7 @@ package com.github.dbmdz.flusswerk.framework.fixtures;
 
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
+import com.github.dbmdz.flusswerk.framework.locking.NoOpLockManager;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.Function;
@@ -9,16 +10,19 @@ import java.util.function.Function;
 public class Flows {
 
   public static Flow<Message, Message, Message> passthroughFlow() {
-    return FlowBuilder.messageProcessor(Message.class).process(m -> m).build();
+    var spec = FlowBuilder.messageProcessor(Message.class).process(m -> m).build();
+    return new Flow<>(spec, new NoOpLockManager());
   }
 
   private static Flow<Message, String, String> flowWithTransformer(
       Function<String, String> transformer) {
-    return FlowBuilder.flow(Message.class, String.class, String.class)
-        .reader(Message::getTracingId)
-        .transformer(transformer)
-        .writerSendingMessage(Message::new)
-        .build();
+    var spec =
+        FlowBuilder.flow(Message.class, String.class, String.class)
+            .reader(Message::getTracingId)
+            .transformer(transformer)
+            .writerSendingMessage(Message::new)
+            .build();
+    return new Flow<>(spec, new NoOpLockManager());
   }
 
   public static Flow<Message, String, String> flowThrowing(Class<? extends RuntimeException> cls) {

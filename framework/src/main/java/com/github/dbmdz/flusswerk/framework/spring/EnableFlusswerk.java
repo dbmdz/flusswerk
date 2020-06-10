@@ -1,5 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.spring;
 
+import com.github.dbmdz.flusswerk.framework.config.FlusswerkConfiguration;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,7 +1,8 @@
-package com.github.dbmdz.flusswerk.framework.spring;
+package com.github.dbmdz.flusswerk.framework.config.properties;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.github.dbmdz.flusswerk.framework.config.FlusswerkPropertiesConfiguration;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

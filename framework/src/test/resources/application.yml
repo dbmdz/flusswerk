@@ -13,3 +13,8 @@ flusswerk:
       - first
       - second
     writeTo: defalt.queue.to.write.to
+    failure policies:
+      first:
+          retry queue: first.custom.retry
+          failed queue: first.custom.failed
+          retries: 5

@@ -1,4 +1,4 @@
-package com.github.dbmdz.flusswerk.framework.spring;
+package com.github.dbmdz.flusswerk.framework.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

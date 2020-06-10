@@ -15,7 +15,7 @@
   <dependencies>
     <dependency>
       <groupId>com.github.dbmdz.flusswerk</groupId>
-      <artifactId>spring-boot-starter</artifactId>
+      <artifactId>framework</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
