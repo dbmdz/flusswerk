@@ -99,7 +99,7 @@ public class Routing {
     private final Integer retries;
     private final String retryRoutingKey;
     private final String failedRoutingKey;
-    private Integer deadLetterWait;
+    private final Integer deadLetterWait;
 
     public FailurePolicyProperties(
         Integer retries, String retryRoutingKey, String failedRoutingKey, Integer deadLetterWait) {
