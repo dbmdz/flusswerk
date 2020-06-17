@@ -1,17 +1,15 @@
-package com.github.dbmdz.flusswerk.framework.spring.monitoring;
+package com.github.dbmdz.flusswerk.framework.monitoring;
 
 import com.github.dbmdz.flusswerk.framework.config.properties.FlusswerkProperties;
-import com.github.dbmdz.flusswerk.framework.flow.FlowMetrics.Status;
+import com.github.dbmdz.flusswerk.framework.flow.FlowInfo.Status;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 /** Convenience factory to simplify the creation of {@link Counter} meters. */
-@Component
 public class MeterFactory {
   private final String basename;
   private final String app;
@@ -41,6 +39,10 @@ public class MeterFactory {
   }
 
   public Counter counter(String metric, Status status, String... tags) {
-    return counter(metric, "status", status.toString().toLowerCase());
+    List<String> allTags = new ArrayList<>(Arrays.asList(tags));
+    allTags.add("status");
+    allTags.add(status.toString().toLowerCase());
+    return counter(metric, allTags.toArray(new String[]{}));
   }
+
 }

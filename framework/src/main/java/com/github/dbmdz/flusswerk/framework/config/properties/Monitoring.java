@@ -8,7 +8,7 @@ public class Monitoring {
   private final String prefix;
 
   public Monitoring(String prefix) {
-    this.prefix = Objects.requireNonNullElse(prefix, "");
+    this.prefix = Objects.requireNonNullElse(prefix, "flusswerk");
   }
 
   public String getPrefix() {

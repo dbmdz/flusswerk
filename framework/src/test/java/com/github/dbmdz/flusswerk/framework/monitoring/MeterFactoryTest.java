@@ -1,4 +1,4 @@
-package com.github.dbmdz.flusswerk.framework.spring.monitoring;
+package com.github.dbmdz.flusswerk.framework.monitoring;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;

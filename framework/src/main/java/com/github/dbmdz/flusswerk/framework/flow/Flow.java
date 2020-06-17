@@ -5,9 +5,11 @@ import static java.util.Objects.requireNonNullElse;
 
 import com.github.dbmdz.flusswerk.framework.locking.LockManager;
 import com.github.dbmdz.flusswerk.framework.model.Message;
+import com.github.dbmdz.flusswerk.framework.monitoring.FlowMetrics;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.function.Consumer;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -22,14 +24,10 @@ import java.util.function.Function;
 public class Flow<M extends Message, R, W> {
 
   private final Function<M, R> reader;
-
   private final Function<R, W> transformer;
-
   private final Function<W, Collection<Message>> writer;
-
   private final Runnable cleanup;
-
-  private final Consumer<FlowMetrics> monitor;
+  private final Set<FlowMetrics> flowMetrics;
   private final LockManager lockManager;
 
   public Flow(FlowSpec<M, R, W> flowSpec, LockManager lockManager) {
@@ -37,12 +35,16 @@ public class Flow<M extends Message, R, W> {
     this.transformer = requireNonNull(flowSpec.getTransformer());
     this.writer = requireNonNull(flowSpec.getWriter());
     this.cleanup = requireNonNullElse(flowSpec.getCleanup(), () -> {});
-    this.monitor = requireNonNullElse(flowSpec.getMonitor(), metrics -> {});
+    this.flowMetrics = new HashSet<>();
     this.lockManager = lockManager;
   }
 
+  public void registerFlowMetrics(Set<FlowMetrics> flowMetrics) {
+    this.flowMetrics.addAll(flowMetrics);
+  }
+
   public Collection<Message> process(M message) {
-    FlowMetrics metrics = new FlowMetrics();
+    FlowInfo info = new FlowInfo();
     Collection<Message> result;
 
     try {
@@ -50,12 +52,12 @@ public class Flow<M extends Message, R, W> {
       var t = transformer.apply(r);
       result = writer.apply(t);
     } catch (RuntimeException e) {
-      metrics.setStatusFrom(e);
+      info.setStatusFrom(e);
       throw e; // Throw exception again after inspecting for ensure control flow in engine
     } finally {
       cleanup.run();
-      metrics.stop();
-      monitor.accept(metrics); // record metrics only available from inside the framework
+      info.stop();
+      flowMetrics.forEach(metric -> metric.accept(info)); // record metrics only available from inside the framework
       lockManager.release(); // make sure any lock has been released
     }
     if (result == null) {

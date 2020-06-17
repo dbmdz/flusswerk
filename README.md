@@ -337,7 +337,7 @@ To implement your own Metrics Bean, either use
 ```java
 class Metrics implements Consumer<FlowStatus> {
 
-  public void accept(FlowStatus flowMetrics) {
+  public void accept(FlowStatus flowInfo) {
     // ...
   }
 
@@ -360,10 +360,10 @@ public class Metrics extends BaseMetrics {
   }
 
   @Override
-  public void accept(FlowStatus flowMetrics) {
-    super.accept(flowMetrics);
-    // do something with flowMetrics (you don't have to
-    // override this method if you don't need flowMetrics)
+  public void accept(FlowStatus flowInfo) {
+    super.accept(flowInfo);
+    // do something with flowInfo (you don't have to
+    // override this method if you don't need flowInfo)
     // ...
   }
 

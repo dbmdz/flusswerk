@@ -16,5 +16,4 @@ class RoutingTest {
     Routing routing = new Routing("test.exchange", List.of("in"), "out", Collections.emptyMap());
     assertThat(routing.getFailurePolicy("in")).isNotNull();
   }
-
 }

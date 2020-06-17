@@ -31,8 +31,7 @@ public class RabbitConnection {
     this.factory = factory;
     factory.setUsername(connection.getUsername());
     factory.setPassword(connection.getPassword());
-    factory.setVirtualHost(connection.getVirtualHost());
-
+    connection.getVirtualHost().ifPresent(factory::setVirtualHost);
     waitForConnection();
   }
 
@@ -43,7 +42,7 @@ public class RabbitConnection {
   final void waitForConnection() throws IOException {
     boolean connectionIsFailing = true;
     while (connectionIsFailing) {
-      List<Address> addresses = List.of(new Address(connection.getConnectTo()));
+      List<Address> addresses = List.of(new Address(connection.getHost(), connection.getPort()));
       try {
         LOGGER.debug("Waiting for connection to {} ...", addresses);
         com.rabbitmq.client.Connection connection = factory.newConnection(addresses);

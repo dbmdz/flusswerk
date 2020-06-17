@@ -65,7 +65,8 @@ class RabbitClientTest {
 
   @Test
   void shouldWorkWithCustomMessageType() throws IOException {
-    var messageImplementation = new MessageImplementation(TestMessage.class, TestMessageMixin.class);
+    var messageImplementation =
+        new MessageImplementation(TestMessage.class, TestMessageMixin.class);
     RabbitClient client = new RabbitClient(messageImplementation, connection);
 
     TestMessage message = new TestMessage("abc123", "should be ignored");

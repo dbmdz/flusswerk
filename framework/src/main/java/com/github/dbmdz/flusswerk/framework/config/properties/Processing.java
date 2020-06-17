@@ -1,8 +1,10 @@
 package com.github.dbmdz.flusswerk.framework.config.properties;
 
 import javax.validation.constraints.Min;
+import org.springframework.boot.context.properties.ConstructorBinding;
 
 /** Configuration related to the processing. */
+@ConstructorBinding
 public class Processing {
 
   @Min(0)
