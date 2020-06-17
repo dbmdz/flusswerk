@@ -5,7 +5,7 @@ import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.locking.NoOpLockManager;
 import com.github.dbmdz.flusswerk.framework.monitoring.BaseMetrics;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
-import com.github.dbmdz.flusswerk.framework.spring.MessageImplementation;
+import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.spring.boot.example.ComposePerfectGreeting;
 import com.github.dbmdz.flusswerk.spring.boot.example.FancyConsoleProcessReport;
 import com.github.dbmdz.flusswerk.spring.boot.example.model.Greeting;
@@ -16,8 +16,8 @@ import org.springframework.context.annotation.Configuration;
 public class FlusswerkConfig {
 
   @Bean
-  MessageImplementation messageImplementation() {
-    return new MessageImplementation(Greeting.class);
+  IncomingMessageType incomingMessageType() {
+    return new IncomingMessageType(Greeting.class);
   }
 
   @Bean

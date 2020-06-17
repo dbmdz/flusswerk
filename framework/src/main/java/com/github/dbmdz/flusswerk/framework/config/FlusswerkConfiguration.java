@@ -14,7 +14,7 @@ import com.github.dbmdz.flusswerk.framework.monitoring.BaseMetrics;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlowMetrics;
 import com.github.dbmdz.flusswerk.framework.monitoring.MeterFactory;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
-import com.github.dbmdz.flusswerk.framework.spring.MessageImplementation;
+import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.io.IOException;
 import java.util.Set;
@@ -79,13 +79,13 @@ public class FlusswerkConfiguration {
 
   @Bean
   public MessageBroker messageBroker(
-      ObjectProvider<MessageImplementation> messageImplementation,
+      ObjectProvider<IncomingMessageType> messageImplementation,
       FlusswerkProperties flusswerkProperties)
       throws IOException {
     RabbitConnection rabbitConnection = new RabbitConnection(flusswerkProperties.getConnection());
     RabbitClient client =
         new RabbitClient(
-            messageImplementation.getIfAvailable(MessageImplementation::new), rabbitConnection);
+            messageImplementation.getIfAvailable(IncomingMessageType::new), rabbitConnection);
     return new MessageBroker(flusswerkProperties.getRouting(), client);
   }
 

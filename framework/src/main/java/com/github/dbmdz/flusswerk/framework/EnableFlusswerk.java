@@ -1,4 +1,4 @@
-package com.github.dbmdz.flusswerk.framework.spring;
+package com.github.dbmdz.flusswerk.framework;
 
 import com.github.dbmdz.flusswerk.framework.config.FlusswerkConfiguration;
 import java.lang.annotation.Documented;

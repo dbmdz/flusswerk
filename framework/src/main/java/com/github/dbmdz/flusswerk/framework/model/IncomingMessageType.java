@@ -1,18 +1,16 @@
-package com.github.dbmdz.flusswerk.framework.spring;
+package com.github.dbmdz.flusswerk.framework.model;
 
 import static java.util.Objects.requireNonNull;
 
-import com.github.dbmdz.flusswerk.framework.model.Message;
-
 /** Register a custom message implementation via Spring. */
-public class MessageImplementation {
+public class IncomingMessageType {
 
   private final Class<? extends Message> messageClass;
 
   private Class<?> mixin;
 
   /** Use Message for incoming messages. */
-  public MessageImplementation() {
+  public IncomingMessageType() {
     this(Message.class);
   }
 
@@ -22,7 +20,7 @@ public class MessageImplementation {
    *
    * @param cls the custom {@link Message} implementation
    */
-  public MessageImplementation(Class<? extends Message> cls) {
+  public IncomingMessageType(Class<? extends Message> cls) {
     this.messageClass = requireNonNull(cls);
   }
 
@@ -33,7 +31,7 @@ public class MessageImplementation {
    * @param cls custom {@link Message} implementation
    * @param mixin custom Jackson mixin for specific serialization and deserialization settings
    */
-  public MessageImplementation(Class<? extends Message> cls, Class<?> mixin) {
+  public IncomingMessageType(Class<? extends Message> cls, Class<?> mixin) {
     this.messageClass = requireNonNull(cls);
     this.mixin = requireNonNull(mixin);
   }
