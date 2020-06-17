@@ -9,12 +9,12 @@ import com.github.dbmdz.flusswerk.framework.locking.RedisLockManager;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.messagebroker.RabbitClient;
 import com.github.dbmdz.flusswerk.framework.messagebroker.RabbitConnection;
+import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.monitoring.BaseMetrics;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlowMetrics;
 import com.github.dbmdz.flusswerk.framework.monitoring.MeterFactory;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
-import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.io.IOException;
 import java.util.Set;
@@ -24,21 +24,19 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-/**
- * Spring configuration to provide beans for{@link MessageBroker} and {@link Engine}.
- */
+/** Spring configuration to provide beans for{@link MessageBroker} and {@link Engine}. */
 @Configuration
 @Import(FlusswerkPropertiesConfiguration.class)
 public class FlusswerkConfiguration {
 
   /**
-   * @param messageBroker         The messageBroker to use.
-   * @param flowProvider          The flow to use (optional).
-   * @param flusswerkProperties   The external configuration from <code>application.yml</code>.
+   * @param messageBroker The messageBroker to use.
+   * @param flowProvider The flow to use (optional).
+   * @param flusswerkProperties The external configuration from <code>application.yml</code>.
    * @param processReportProvider A custom process report provider (optional).
-   * @param <M>                   The used {@link Message} type
-   * @param <R>                   The type of the reader implementation
-   * @param <W>                   The type of the writer implementation
+   * @param <M> The used {@link Message} type
+   * @param <R> The type of the reader implementation
+   * @param <W> The type of the writer implementation
    * @return The {@link Engine} used for this job.
    */
   @Bean
@@ -73,7 +71,10 @@ public class FlusswerkConfiguration {
   }
 
   @Bean
-  public MeterFactory meterFactory(FlusswerkProperties flusswerkProperties, @Value("spring.application.name") String name, MeterRegistry meterRegistry) {
+  public MeterFactory meterFactory(
+      FlusswerkProperties flusswerkProperties,
+      @Value("spring.application.name") String name,
+      MeterRegistry meterRegistry) {
     return new MeterFactory(flusswerkProperties, name, meterRegistry);
   }
 

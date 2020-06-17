@@ -57,7 +57,8 @@ public class Flow<M extends Message, R, W> {
     } finally {
       cleanup.run();
       info.stop();
-      flowMetrics.forEach(metric -> metric.accept(info)); // record metrics only available from inside the framework
+      flowMetrics.forEach(
+          metric -> metric.accept(info)); // record metrics only available from inside the framework
       lockManager.release(); // make sure any lock has been released
     }
     if (result == null) {

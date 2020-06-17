@@ -21,8 +21,8 @@ public class ConfigurationStep<M extends Message, R, W> {
   }
 
   /**
-   * Sets a process metrics monitor that consumes a {@link FlowInfo} instance every time a
-   * message has been processed. builder step.
+   * Sets a process metrics monitor that consumes a {@link FlowInfo} instance every time a message
+   * has been processed. builder step.
    *
    * @param m the process metrics monitor
    * @return the next step (setting configuration or build the flow)
