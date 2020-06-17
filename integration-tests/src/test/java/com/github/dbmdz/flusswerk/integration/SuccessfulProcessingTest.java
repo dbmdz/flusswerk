@@ -9,6 +9,7 @@ import com.github.dbmdz.flusswerk.framework.locking.NoOpLockManager;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.reporting.SilentProcessReport;
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.assertj.core.api.ObjectAssert;
@@ -25,7 +26,7 @@ public class SuccessfulProcessingTest {
   private Backend backend;
 
   @BeforeEach
-  public void setUp() {
+  public void setUp() throws IOException {
     backend = new Backend(QUEUE_IN, QUEUE_OUT);
   }
 
