@@ -1,14 +1,13 @@
-package com.github.dbmdz.flusswerk.framework.spring.monitoring;
+package com.github.dbmdz.flusswerk.framework.monitoring;
 
-import com.github.dbmdz.flusswerk.framework.flow.FlowMetrics;
-import com.github.dbmdz.flusswerk.framework.flow.FlowMetrics.Status;
+import com.github.dbmdz.flusswerk.framework.flow.FlowInfo;
+import com.github.dbmdz.flusswerk.framework.flow.FlowInfo.Status;
 import io.micrometer.core.instrument.Counter;
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.function.Consumer;
 
 /** Collect metrics on flow execution. */
-public class BaseMetrics implements Consumer<FlowMetrics> {
+public class BaseMetrics implements FlowMetrics {
 
   private final Map<Status, Counter> executionTime;
   private final Map<Status, Counter> processedItems;
@@ -23,9 +22,9 @@ public class BaseMetrics implements Consumer<FlowMetrics> {
     }
   }
 
-  public void accept(FlowMetrics flowMetrics) {
-    var status = flowMetrics.getStatus();
+  public void accept(FlowInfo flowInfo) {
+    var status = flowInfo.getStatus();
     processedItems.get(status).increment();
-    executionTime.get(status).increment(flowMetrics.duration());
+    executionTime.get(status).increment(flowInfo.duration());
   }
 }

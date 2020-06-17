@@ -1,6 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.flow.builder;
 
-import com.github.dbmdz.flusswerk.framework.flow.FlowMetrics;
+import com.github.dbmdz.flusswerk.framework.flow.FlowInfo;
 import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.util.function.Consumer;
@@ -21,19 +21,19 @@ public class ConfigurationStep<M extends Message, R, W> {
   }
 
   /**
-   * Sets a process metrics monitor that consumes a {@link FlowMetrics} instance every time a
+   * Sets a process metrics monitor that consumes a {@link FlowInfo} instance every time a
    * message has been processed. builder step.
    *
    * @param m the process metrics monitor
    * @return the next step (setting configuration or build the flow)
    */
-  public ConfigurationStep<M, R, W> metrics(Consumer<FlowMetrics> m) {
+  public ConfigurationStep<M, R, W> metrics(Consumer<FlowInfo> m) {
     model.setMetrics(m);
     return this;
   }
 
   /**
-   * Sets a cleanup task process monitor that consumes a {@link FlowMetrics} instance every time a
+   * Sets a cleanup task process monitor that consumes a {@link FlowInfo} instance every time a
    * message has been processed. builder step.
    *
    * @param c the cleanup task

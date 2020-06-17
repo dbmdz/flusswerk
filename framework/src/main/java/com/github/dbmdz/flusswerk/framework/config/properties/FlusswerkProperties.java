@@ -1,5 +1,7 @@
 package com.github.dbmdz.flusswerk.framework.config.properties;
 
+import static java.util.Objects.requireNonNullElseGet;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
@@ -29,7 +31,7 @@ public class FlusswerkProperties {
     this.processing = processing;
     this.connection = connection;
     this.routing = routing;
-    this.monitoring = monitoring;
+    this.monitoring = requireNonNullElseGet(monitoring, () -> new Monitoring("flusswerk"));
     this.redis = redis;
   }
 

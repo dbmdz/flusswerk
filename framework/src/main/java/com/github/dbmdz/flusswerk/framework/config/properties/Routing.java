@@ -10,8 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.validation.constraints.NotBlank;
+import org.springframework.boot.context.properties.ConstructorBinding;
 
 /** AMQP/RabbitMQ routing information. */
+@ConstructorBinding
 public class Routing {
 
   @NotBlank private final String exchange;
@@ -25,7 +27,6 @@ public class Routing {
    * @param readFrom The queue to read from (optional).
    * @param writeTo The topic to send to per default (optional).
    */
-
   public Routing(
       @NotBlank String exchange,
       List<String> readFrom,
@@ -36,7 +37,9 @@ public class Routing {
     this.readFrom = requireNonNullElseGet(readFrom, Collections::emptyList);
     this.writeTo = writeTo;
 
-    this.failurePolicies = createFailurePolicies(readFrom, requireNonNullElseGet(failurePolicies, Collections::emptyMap));
+    this.failurePolicies =
+        createFailurePolicies(
+            readFrom, requireNonNullElseGet(failurePolicies, Collections::emptyMap));
   }
 
   private static Map<String, FailurePolicy> createFailurePolicies(
@@ -46,7 +49,11 @@ public class Routing {
       var spec = failurePolicies.get(input);
       var failurePolicy =
           new FailurePolicy(
-              input, spec.getRetryRoutingKey(), spec.getFailedRoutingKey(), spec.getRetries(), spec.getDeadLetterWait());
+              input,
+              spec.getRetryRoutingKey(),
+              spec.getFailedRoutingKey(),
+              spec.getRetries(),
+              spec.getDeadLetterWait());
       result.put(input, failurePolicy);
     }
     for (String input : readFrom) {

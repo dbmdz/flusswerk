@@ -4,7 +4,7 @@ import static com.github.dbmdz.flusswerk.framework.flow.builder.InvocationProbe.
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.dbmdz.flusswerk.framework.TestMessage;
-import com.github.dbmdz.flusswerk.framework.flow.FlowMetrics;
+import com.github.dbmdz.flusswerk.framework.flow.FlowInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ public class ConfigurationStepTest {
   @DisplayName("should set the metrics task")
   @Test
   void shouldSetMetricsTask() {
-    var metricsTask = new InvocationProbe<FlowMetrics>();
+    var metricsTask = new InvocationProbe<FlowInfo>();
     step.metrics(metricsTask);
     model.getMetrics().accept(null);
     assertThat(metricsTask).has(beenInvoked());

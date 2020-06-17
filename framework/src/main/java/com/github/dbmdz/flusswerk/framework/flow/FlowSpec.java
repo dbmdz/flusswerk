@@ -18,14 +18,14 @@ public class FlowSpec<M, R, W> {
 
   private final Runnable cleanup;
 
-  private final Consumer<FlowMetrics> monitor;
+  private final Consumer<FlowInfo> monitor;
 
   public FlowSpec(
       Function<M, R> reader,
       Function<R, W> transformer,
       Function<W, Collection<Message>> writer,
       Runnable cleanup,
-      Consumer<FlowMetrics> monitor) {
+      Consumer<FlowInfo> monitor) {
     this.reader = requireNonNull(reader);
     this.transformer = requireNonNull(transformer);
     this.writer = requireNonNull(writer);
@@ -49,7 +49,7 @@ public class FlowSpec<M, R, W> {
     return cleanup;
   }
 
-  public Consumer<FlowMetrics> getMonitor() {
+  public Consumer<FlowInfo> getMonitor() {
     return monitor;
   }
 }

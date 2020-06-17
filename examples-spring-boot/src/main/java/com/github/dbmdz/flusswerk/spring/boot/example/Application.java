@@ -19,9 +19,10 @@ public class Application extends FlusswerkApplication {
   @Autowired
   public Application(FlusswerkProperties flusswerkProperties, Engine engine) {
     super(engine);
+    var connection = flusswerkProperties.getConnection();
     LOGGER.info(
-        "Creating Flusswerk application for {}",
-        flusswerkProperties.getConnection().getConnectTo());
+        "Creating Flusswerk application for {}:{}",
+        connection.getHost(), connection.getPort());
   }
 
   public static void main(String[] args) {

@@ -3,7 +3,8 @@ flusswerk:
     maxRetries: 5
     threads: 5
   connection:
-    connectTo: localhost:5672
+    host: 127.0.0.1
+    port: 5672
     username: guest
     password: guest
   routing:

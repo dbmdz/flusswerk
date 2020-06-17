@@ -9,7 +9,7 @@ import com.github.dbmdz.flusswerk.framework.flow.builder.ConfigurationStep;
  * @see com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder
  * @see ConfigurationStep
  */
-public class FlowMetrics {
+public class FlowInfo {
 
   public enum Status {
     SUCCESS,
@@ -23,7 +23,7 @@ public class FlowMetrics {
 
   private Status status;
 
-  public FlowMetrics() {
+  public FlowInfo() {
     this.startTime = System.currentTimeMillis();
     this.status = Status.SUCCESS;
   }

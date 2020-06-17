@@ -1,6 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.flow.builder;
 
-import com.github.dbmdz.flusswerk.framework.flow.FlowMetrics;
+import com.github.dbmdz.flusswerk.framework.flow.FlowInfo;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.util.Collection;
 import java.util.function.Consumer;
@@ -10,7 +10,7 @@ class Model<M extends Message, R, W> {
   private Function<M, R> reader = null;
   private Function<R, W> transformer = null;
   private Function<W, Collection<Message>> writer = null;
-  private Consumer<FlowMetrics> metrics = null;
+  private Consumer<FlowInfo> metrics = null;
   private Runnable cleanup = null;
 
   public Function<M, R> getReader() {
@@ -37,11 +37,11 @@ class Model<M extends Message, R, W> {
     this.writer = writer;
   }
 
-  public Consumer<FlowMetrics> getMetrics() {
+  public Consumer<FlowInfo> getMetrics() {
     return metrics;
   }
 
-  public void setMetrics(Consumer<FlowMetrics> monitor) {
+  public void setMetrics(Consumer<FlowInfo> monitor) {
     this.metrics = monitor;
   }
 

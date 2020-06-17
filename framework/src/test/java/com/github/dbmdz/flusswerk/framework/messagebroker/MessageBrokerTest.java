@@ -121,12 +121,8 @@ class MessageBrokerTest {
   @Test
   @DisplayName("getMessageCount should return all message counts")
   void getMessageCountsShouldGetAllMessageCounts() throws IOException {
-    Routing routing = new Routing(
-        "test.exchange",
-        List.of("input1", "input2"),
-        null,
-        Collections.emptyMap()
-    );
+    Routing routing =
+        new Routing("test.exchange", List.of("input1", "input2"), null, Collections.emptyMap());
 
     Map<String, Long> expected = new HashMap<>();
     expected.put("input1", 100L);
