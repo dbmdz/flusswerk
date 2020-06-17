@@ -1,9 +1,15 @@
 package com.github.dbmdz.flusswerk.integration;
 
+import com.github.dbmdz.flusswerk.framework.config.properties.Connection;
+import com.github.dbmdz.flusswerk.framework.config.properties.Routing;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
+import com.github.dbmdz.flusswerk.framework.messagebroker.RabbitClient;
+import com.github.dbmdz.flusswerk.framework.messagebroker.RabbitConnection;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class Backend {
@@ -14,7 +20,7 @@ public class Backend {
 
   private MessageBroker messageBroker;
 
-  public Backend(String readFrom, String writeTo) {
+  public Backend(String readFrom, String writeTo) throws IOException {
     String host = getEnvOrDefault("RABBIT_HOST", "localhost");
     int port = Integer.parseInt(getEnvOrDefault("RABBIT_PORT", "5672"));
 
@@ -25,13 +31,25 @@ public class Backend {
     //            .readFrom(readFrom)
     //            .writeTo(writeTo)
     //            .connectTo(host, port);
+    //  @Autowired
+    //  public Application(FlusswerkProperties flusswerkProperties, Engine engine) {
+    //    super(engine);
+    //  }
+
+    Routing routing =
+        new Routing("test.exchange", List.of(readFrom), writeTo, Collections.emptyMap());
+
+    Connection connection = new Connection(host, port, null, "guest", "guest");
+
+    var rabbitConnection = new RabbitConnection(connection);
+    var rabbitClient = new RabbitClient(rabbitConnection);
 
     MessageBroker messageBroker;
 
     messageBroker = null;
     while (messageBroker == null) {
       try {
-        messageBroker = new MessageBroker(null, null);
+        messageBroker = new MessageBroker(routing, rabbitClient);
       } catch (IOException e) {
         try {
           TimeUnit.MILLISECONDS.sleep(INTERVAL);

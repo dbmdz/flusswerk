@@ -42,7 +42,6 @@ public class MeterFactory {
     List<String> allTags = new ArrayList<>(Arrays.asList(tags));
     allTags.add("status");
     allTags.add(status.toString().toLowerCase());
-    return counter(metric, allTags.toArray(new String[]{}));
+    return counter(metric, allTags.toArray(new String[] {}));
   }
-
 }

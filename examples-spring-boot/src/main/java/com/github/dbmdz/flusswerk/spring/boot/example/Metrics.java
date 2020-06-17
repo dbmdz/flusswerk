@@ -9,5 +9,4 @@ public class Metrics {
   public Metrics(MeterFactory meterFactory) {
     // TODO add meaningful example
   }
-
 }

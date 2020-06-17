@@ -26,7 +26,6 @@ public class MessageBroker {
 
   private final RabbitClient rabbitClient;
 
-  // TODO merge config and properties
   public MessageBroker(Routing routing, RabbitClient rabbitClient) throws IOException {
     this.routingConfig = routing;
     this.rabbitClient = rabbitClient;

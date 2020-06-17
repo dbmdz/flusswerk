@@ -6,8 +6,8 @@ import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.jackson.DefaultMixin;
 import com.github.dbmdz.flusswerk.framework.jackson.EnvelopeMixin;
 import com.github.dbmdz.flusswerk.framework.model.Envelope;
-import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
+import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
@@ -38,7 +38,7 @@ public class RabbitClient {
 
   private final RabbitConnection connection;
 
-  RabbitClient(RabbitConnection rabbitConnection) {
+  public RabbitClient(RabbitConnection rabbitConnection) {
     this(new IncomingMessageType(), rabbitConnection);
   }
 
@@ -48,8 +48,7 @@ public class RabbitClient {
     objectMapper = new ObjectMapper();
     messageClass = incomingMessageType.getMessageClass();
     if (incomingMessageType.hasMixin()) {
-      objectMapper.addMixIn(
-          incomingMessageType.getMessageClass(), incomingMessageType.getMixin());
+      objectMapper.addMixIn(incomingMessageType.getMessageClass(), incomingMessageType.getMixin());
     } else {
       objectMapper.addMixIn(Message.class, DefaultMixin.class);
     }

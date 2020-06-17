@@ -14,8 +14,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.dbmdz.flusswerk.framework.TestMessage;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.model.Envelope;
-import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
+import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.GetResponse;
@@ -65,8 +65,7 @@ class RabbitClientTest {
 
   @Test
   void shouldWorkWithCustomMessageType() throws IOException {
-    var messageImplementation =
-        new IncomingMessageType(TestMessage.class, TestMessageMixin.class);
+    var messageImplementation = new IncomingMessageType(TestMessage.class, TestMessageMixin.class);
     RabbitClient client = new RabbitClient(messageImplementation, connection);
 
     TestMessage message = new TestMessage("abc123", "should be ignored");
