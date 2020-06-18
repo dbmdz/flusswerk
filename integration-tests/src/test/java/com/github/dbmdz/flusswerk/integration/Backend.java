@@ -25,16 +25,6 @@ public class Backend {
     int port = Integer.parseInt(getEnvOrDefault("RABBIT_PORT", "5672"));
 
     long totalWait = 0;
-    //    MessageBrokerBuilder messageBrokerBuilder =
-    //        new MessageBrokerBuilder()
-    //            .deadLetterWait(1) // no need to wait for tests
-    //            .readFrom(readFrom)
-    //            .writeTo(writeTo)
-    //            .connectTo(host, port);
-    //  @Autowired
-    //  public Application(FlusswerkProperties flusswerkProperties, Engine engine) {
-    //    super(engine);
-    //  }
 
     Routing routing =
         new Routing("test.exchange", List.of(readFrom), writeTo, Collections.emptyMap());
@@ -43,8 +33,6 @@ public class Backend {
 
     var rabbitConnection = new RabbitConnection(connection);
     var rabbitClient = new RabbitClient(rabbitConnection);
-
-    MessageBroker messageBroker;
 
     messageBroker = null;
     while (messageBroker == null) {
