@@ -17,6 +17,7 @@ import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.monitoring.BaseMetrics;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlowMetrics;
 import com.github.dbmdz.flusswerk.framework.monitoring.MeterFactory;
+import com.github.dbmdz.flusswerk.framework.reporting.DefaultProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.io.IOException;
@@ -74,8 +75,8 @@ public class FlusswerkConfiguration {
       threads = 5;
     }
 
-    ProcessReport processReport = processReportProvider.getIfAvailable();
-    return new Engine(name, messageBroker, flow, threads, processReport);
+    ProcessReport processReport = processReportProvider.getIfAvailable(() -> new DefaultProcessReport(name));
+    return new Engine(messageBroker, flow, threads, processReport);
   }
 
   @Bean
