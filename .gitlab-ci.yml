@@ -19,7 +19,7 @@ variables:
   script:
     - docker-compose up -d
     - mvn clean install
-    - mvn -B --projects integration-tests -Pintegration -Dspring.profiles.active=$MAVEN_ACTIVE_PROFILE surefire:test
+    - mvn -B --projects integration-tests -Pintegration -Dspring.profiles.active=ci surefire:test
   stage: test
   variables:
     RABBIT_HOST: docker
