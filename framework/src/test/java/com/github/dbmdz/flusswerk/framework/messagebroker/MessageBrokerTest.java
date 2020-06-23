@@ -137,7 +137,7 @@ class MessageBrokerTest {
   }
 
   @Test
-  @DisplayName("invalidMessage should be ACKed and shifted into fqiled queue")
+  @DisplayName("invalidMessage should be ACKed and shifted into failed queue")
   void handleInvalidMessage() throws IOException, InvalidMessageException {
     String invalidMessageBody = "invalid";
 
