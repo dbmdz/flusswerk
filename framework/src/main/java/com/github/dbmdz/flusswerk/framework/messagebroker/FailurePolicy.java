@@ -3,12 +3,14 @@ package com.github.dbmdz.flusswerk.framework.messagebroker;
 import static java.util.Objects.requireNonNullElse;
 
 import java.time.Duration;
+import org.springframework.boot.context.properties.ConstructorBinding;
 
+@ConstructorBinding
 public class FailurePolicy {
 
   private final String inputQueue;
 
-  private final int maxRetries;
+  private final int retries;
 
   private final Duration backoff;
 
@@ -20,29 +22,29 @@ public class FailurePolicy {
     this(inputQueue, 5);
   }
 
-  public FailurePolicy(String inputQueue, int maxRetries) {
-    this(inputQueue, null, null, maxRetries, null);
+  public FailurePolicy(String inputQueue, int retries) {
+    this(inputQueue, null, null, retries, null);
   }
 
   public FailurePolicy(
       String inputQueue,
       String retryRoutingKey,
       String failedRoutingKey,
-      Integer maxRetries,
-      Integer durationMs) {
+      Integer retries,
+      Duration backoff) {
     this.inputQueue = inputQueue;
     this.retryRoutingKey = requireNonNullElse(retryRoutingKey, inputQueue + ".retry");
     this.failedRoutingKey = requireNonNullElse(failedRoutingKey, inputQueue + ".failed");
-    this.maxRetries = requireNonNullElse(maxRetries, 5);
-    this.backoff = Duration.ofMillis(requireNonNullElse(durationMs, 30_000));
+    this.retries = requireNonNullElse(retries, 5);
+    this.backoff = requireNonNullElse(backoff, Duration.ofSeconds(30));
   }
 
   public String getInputQueue() {
     return inputQueue;
   }
 
-  public int getMaxRetries() {
-    return maxRetries;
+  public int getRetries() {
+    return retries;
   }
 
   public String getFailedRoutingKey() {

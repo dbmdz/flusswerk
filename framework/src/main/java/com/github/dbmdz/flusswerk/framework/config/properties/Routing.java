@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNullElseGet;
 
 import com.github.dbmdz.flusswerk.framework.messagebroker.FailurePolicy;
 import com.github.dbmdz.flusswerk.framework.model.Message;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -54,7 +55,7 @@ public class Routing {
               spec.getRetryRoutingKey(),
               spec.getFailedRoutingKey(),
               spec.getRetries(),
-              spec.getBackoffMs());
+              spec.getBackoff());
       result.put(input, failurePolicy);
     }
     for (String input : readFrom) {
@@ -111,14 +112,14 @@ public class Routing {
     private final Integer retries;
     private final String retryRoutingKey;
     private final String failedRoutingKey;
-    private final Integer backoffMs;
+    private final Duration backoff;
 
     public FailurePolicyProperties(
-        Integer retries, String retryRoutingKey, String failedRoutingKey, Integer backoffMs) {
+        Integer retries, String retryRoutingKey, String failedRoutingKey, Duration backoff) {
       this.retries = retries;
       this.retryRoutingKey = retryRoutingKey;
       this.failedRoutingKey = failedRoutingKey;
-      this.backoffMs = backoffMs;
+      this.backoff = backoff;
     }
 
     public int getRetries() {
@@ -133,8 +134,8 @@ public class Routing {
       return failedRoutingKey;
     }
 
-    public Integer getBackoffMs() {
-      return backoffMs;
+    public Duration getBackoff() {
+      return backoff;
     }
   }
 }

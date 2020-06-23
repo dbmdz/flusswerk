@@ -140,6 +140,6 @@ public class RetryTest {
           queues.messageCount(failurePolicy.getRetryRoutingKey()));
     }
     assertThat(received.getTracingId()).isEqualTo(message.getTracingId());
-    assertThat(received.getEnvelope().getRetries()).isEqualTo(failurePolicy.getMaxRetries());
+    assertThat(received.getEnvelope().getRetries()).isEqualTo(failurePolicy.getRetries());
   }
 }

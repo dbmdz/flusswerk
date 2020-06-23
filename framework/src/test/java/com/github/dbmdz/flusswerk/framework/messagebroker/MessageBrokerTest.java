@@ -78,7 +78,7 @@ class MessageBrokerTest {
   @Test
   @DisplayName("Should route a message to the failed queue if it has been rejected to often")
   void rejectShouldRouteToFailedQueueIfMessageIsRejectedTooOften() throws IOException {
-    int numberOfRejections = failurePolicy.getMaxRetries() + 1;
+    int numberOfRejections = failurePolicy.getRetries() + 1;
     for (int i = 0; i < numberOfRejections; i++) {
       messageBroker.reject(message);
     }
