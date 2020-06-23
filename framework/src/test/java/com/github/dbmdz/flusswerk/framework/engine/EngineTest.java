@@ -39,7 +39,7 @@ class EngineTest {
   }
 
   private Engine createEngine(Flow<?, ?, ?> flow) {
-    return new Engine("app", messageBroker, flow, new SilentProcessReport());
+    return new Engine(messageBroker, flow, 5, new SilentProcessReport());
   }
 
   @Test

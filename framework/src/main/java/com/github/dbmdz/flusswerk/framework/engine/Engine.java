@@ -1,12 +1,9 @@
 package com.github.dbmdz.flusswerk.framework.engine;
 
-import static java.util.Objects.requireNonNullElseGet;
-
 import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.model.Message;
-import com.github.dbmdz.flusswerk.framework.reporting.DefaultProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import java.io.IOException;
 import java.util.Collection;
@@ -48,39 +45,6 @@ public class Engine {
   private boolean running;
 
   /**
-   * Creates a new Engine instance with {@value DEFAULT_CONCURRENT_WORKERS} concurrent workers.
-   *
-   * @param messageBroker the message broker to get messages from or send messages to
-   * @param flow the flow to execute for every message
-   */
-  public Engine(String appName, MessageBroker messageBroker, Flow flow) {
-    this(appName, messageBroker, flow, DEFAULT_CONCURRENT_WORKERS, null);
-  }
-
-  /**
-   * Creates a new Engine instance with a fixed number of concurrent workers.
-   *
-   * @param messageBroker the message broker to get messages from or send messages to
-   * @param flow the flow to execute for every message
-   * @param concurrentWorkers the number of concurrent workers
-   */
-  public Engine(String appName, MessageBroker messageBroker, Flow flow, int concurrentWorkers) {
-    this(appName, messageBroker, flow, concurrentWorkers, null);
-  }
-
-  /**
-   * Creates a new Engine instance with a customized process report.
-   *
-   * @param messageBroker the message broker to get messages from or send messages to
-   * @param flow the flow to execute agains every message
-   * @param processReport Reporting implementation
-   */
-  public Engine(
-      String appName, MessageBroker messageBroker, Flow flow, ProcessReport processReport) {
-    this(appName, messageBroker, flow, DEFAULT_CONCURRENT_WORKERS, processReport);
-  }
-
-  /**
    * Creates a new Engine instance with a fixed number of concurrent workers.
    *
    * @param messageBroker the message broker to get messages from or send messages to
@@ -89,7 +53,6 @@ public class Engine {
    * @param processReport Reporting implementation (or null, if DefaultProcessReport shall be used)
    */
   public Engine(
-      String appName,
       MessageBroker messageBroker,
       Flow flow,
       int concurrentWorkers,
@@ -100,8 +63,7 @@ public class Engine {
     this.executorService = Executors.newFixedThreadPool(concurrentWorkers);
     this.semaphore = new Semaphore(concurrentWorkers);
     this.activeWorkers = new AtomicInteger();
-    this.processReport =
-        requireNonNullElseGet(processReport, () -> new DefaultProcessReport(appName));
+    this.processReport = processReport;
     engineStarted = new ReentrantLock();
     running = false;
   }
