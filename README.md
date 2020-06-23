@@ -376,7 +376,7 @@ public class Metrics extends BaseMetrics {
 
 ## MessageBrokerBuilder properties
 
-### RabbitMQ rabbitMQ
+### RabbitMQ
 
 | Property                          | Meaning                                       |
 | --------------------------------- | --------------------------------------------- | 
