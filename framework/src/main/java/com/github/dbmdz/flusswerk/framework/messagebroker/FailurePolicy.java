@@ -10,7 +10,7 @@ public class FailurePolicy {
 
   private final int maxRetries;
 
-  private final Duration deadLetterWait;
+  private final Duration backoff;
 
   private final String failedRoutingKey;
 
@@ -29,12 +29,12 @@ public class FailurePolicy {
       String retryRoutingKey,
       String failedRoutingKey,
       Integer maxRetries,
-      Integer duration) {
+      Integer durationMs) {
     this.inputQueue = inputQueue;
     this.retryRoutingKey = requireNonNullElse(retryRoutingKey, inputQueue + ".retry");
     this.failedRoutingKey = requireNonNullElse(failedRoutingKey, inputQueue + ".failed");
     this.maxRetries = requireNonNullElse(maxRetries, 5);
-    this.deadLetterWait = Duration.ofSeconds(requireNonNullElse(duration, 30));
+    this.backoff = Duration.ofMillis(requireNonNullElse(durationMs, 30_000));
   }
 
   public String getInputQueue() {
@@ -53,7 +53,7 @@ public class FailurePolicy {
     return retryRoutingKey;
   }
 
-  public Duration getDeadLetterWait() {
-    return deadLetterWait;
+  public Duration getBackoff() {
+    return backoff;
   }
 }

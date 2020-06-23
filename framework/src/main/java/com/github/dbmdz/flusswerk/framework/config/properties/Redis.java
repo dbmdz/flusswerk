@@ -4,25 +4,19 @@ import static java.util.Objects.requireNonNullElse;
 
 public class Redis {
 
-  private final String host;
-  private final int port;
-  private final String secret;
+  private final String address;
+  private final String password;
 
-  public Redis(String host, Integer port, String secret) {
-    this.host = host;
-    this.port = requireNonNullElse(port, 6379);
-    this.secret = secret;
+  public Redis(String address, String password) {
+    this.address = requireNonNullElse(address, "redis://127.0.0.1:6379");
+    this.password = password; // might be null if no authentication is used
   }
 
-  public String getHost() {
-    return host;
+  public String getAddress() {
+    return address;
   }
 
-  public int getPort() {
-    return port;
-  }
-
-  public String getSecret() {
-    return secret;
+  public String getPassword() {
+    return password;
   }
 }

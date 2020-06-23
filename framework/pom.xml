@@ -32,6 +32,11 @@
       <artifactId>amqp-client</artifactId>
     </dependency>
     <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-core</artifactId>
+      <version>${version.micrometer}</version>
+    </dependency>
+    <dependency>
       <groupId>javax.annotation</groupId>
       <artifactId>javax.annotation-api</artifactId>
     </dependency>
@@ -55,6 +60,10 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.redisson</groupId>
+      <artifactId>redisson</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
@@ -72,11 +81,6 @@
       <scope>test</scope>
       <version>${version.spring-boot}</version>
     </dependency>
-    <dependency>
-      <groupId>io.micrometer</groupId>
-      <artifactId>micrometer-core</artifactId>
-      <version>${version.micrometer}</version>
-    </dependency>
   </dependencies>
 
   <build>
@@ -88,6 +92,11 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <properties>
+            <excludeTags>Integration</excludeTags>
+          </properties>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>

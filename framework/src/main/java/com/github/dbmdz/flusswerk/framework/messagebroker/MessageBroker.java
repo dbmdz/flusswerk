@@ -147,7 +147,7 @@ public class MessageBroker {
             inputQueue,
             Map.of(
                 MESSAGE_TTL,
-                failurePolicy.getDeadLetterWait().toMillis(),
+                failurePolicy.getBackoff().toMillis(),
                 DEAD_LETTER_EXCHANGE,
                 exchange));
       }
