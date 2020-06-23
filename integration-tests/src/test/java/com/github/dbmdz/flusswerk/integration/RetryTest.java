@@ -105,21 +105,6 @@ public class RetryTest {
   void stopEngine() throws IOException {
     engine.stop();
     rabbitMQ.purgeQueues();
-
-    //    // Cleanup leftover messages to not pollute other tests
-    //    var readFrom = routing.getReadFrom();
-    //    for (String queue : readFrom) {
-    //      purge(queue);
-    //      var failurePolicy = routing.getFailurePolicy(queue);
-    //      purge(failurePolicy.getFailedRoutingKey()); // here routing key == queue name
-    //      purge(failurePolicy.getRetryRoutingKey()); // here routing key == queue name
-    //    }
-    //
-    //    // TODO really necessary?
-    //    var writeTo = routing.getWriteTo();
-    //    if (writeTo.isPresent()) {
-    //      purge(writeTo.get());
-    //    }
   }
 
   private void purge(String queue) throws IOException {
