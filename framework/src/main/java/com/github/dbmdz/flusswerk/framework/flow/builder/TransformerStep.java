@@ -32,7 +32,7 @@ public class TransformerStep<M extends Message, R, W> {
 
   /**
    * Declares that the flow does not have a transformer and the output of the reader should go
-   * directly into the writer, then moves you to the next builder step (seting a writer).
+   * directly into the writer, then moves you to the next builder step (setting a writer).
    *
    * @return the next step (setting a writer)
    */

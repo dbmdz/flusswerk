@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Transformer that blocks the current thread by trying to acquire a drained semaphor.
+ * Transformer that blocks the current thread by trying to acquire a drained semaphore.
  *
  * @param <T> The data type to operate on.
  */
