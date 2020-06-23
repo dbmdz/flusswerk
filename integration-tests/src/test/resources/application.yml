@@ -16,3 +16,12 @@ flusswerk:
       first:
           retries: 5
           backoffMs: 500
+
+
+---
+spring:
+  profiles: ci
+
+flusswerk:
+  rabbitmq:
+    host: docker
