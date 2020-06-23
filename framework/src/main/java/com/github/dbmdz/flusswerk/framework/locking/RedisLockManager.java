@@ -1,8 +1,17 @@
 package com.github.dbmdz.flusswerk.framework.locking;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Optional;
+import org.redisson.api.RedissonClient;
 
 public class RedisLockManager implements LockManager {
+
+  private final RedissonClient client;
+
+  public RedisLockManager(RedissonClient client) {
+    this.client = requireNonNull(client);
+  }
 
   @Override
   public void acquire(String id) throws InterruptedException {

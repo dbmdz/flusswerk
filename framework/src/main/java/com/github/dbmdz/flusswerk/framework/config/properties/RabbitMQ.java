@@ -3,22 +3,21 @@ package com.github.dbmdz.flusswerk.framework.config.properties;
 import static java.util.Objects.requireNonNullElse;
 
 import java.util.Optional;
-import javax.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
 /** Connection information for RabbitMQ. */
 @ConstructorBinding
-public class Connection {
+public class RabbitMQ {
 
-  @NotBlank private final String host;
+  private final String host;
 
   private final int port;
 
   private final String virtualHost;
 
-  @NotBlank private final String username;
+  private final String username;
 
-  @NotBlank private final String password;
+  private final String password;
 
   /**
    * @param host The RabbitMQ host name
@@ -27,17 +26,12 @@ public class Connection {
    * @param username The username for RabbitMQ login
    * @param password The password for RabbitMQ login
    */
-  public Connection(
-      @NotBlank String host,
-      Integer port,
-      String virtualHost,
-      @NotBlank String username,
-      @NotBlank String password) {
-    this.host = host;
+  public RabbitMQ(String host, Integer port, String virtualHost, String username, String password) {
+    this.host = requireNonNullElse(host, "localhost");
     this.port = requireNonNullElse(port, 5672);
-    this.virtualHost = virtualHost;
-    this.username = username;
-    this.password = password;
+    this.virtualHost = virtualHost; // can actually be null
+    this.username = requireNonNullElse(username, "guest");
+    this.password = requireNonNullElse(password, "guest");
   }
 
   /** @return RabbitMQ host name to connect to. */
@@ -67,12 +61,17 @@ public class Connection {
 
   @Override
   public String toString() {
-    return StringRepresentation.of(Connection.class)
+    return StringRepresentation.of(RabbitMQ.class)
         .property("host", host)
         .property("port", port)
         .property("virtualHost", virtualHost)
         .property("username", username)
         .maskedProperty("password", password)
         .toString();
+  }
+
+  public static RabbitMQ defaults() {
+    // use null values so constructor sets defaults
+    return new RabbitMQ(null, null, null, null, null);
   }
 }

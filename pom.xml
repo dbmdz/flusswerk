@@ -71,6 +71,7 @@
     <version.logstash>6.4</version.logstash>
     <version.micrometer>1.5.1</version.micrometer>
     <version.mockito>3.3.3</version.mockito>
+    <version.redisson>3.13.1</version.redisson>
     <version.slf4j>1.7.30</version.slf4j>
     <version.spring-boot>2.3.1.RELEASE</version.spring-boot>
     <version.validation-api>2.0.1.Final</version.validation-api>
@@ -150,6 +151,11 @@
         <artifactId>mockito-core</artifactId>
         <version>${version.mockito}</version>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.redisson</groupId>
+        <artifactId>redisson</artifactId>
+        <version>${version.redisson}</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>

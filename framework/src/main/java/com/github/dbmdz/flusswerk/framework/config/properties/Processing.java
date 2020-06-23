@@ -1,5 +1,7 @@
 package com.github.dbmdz.flusswerk.framework.config.properties;
 
+import static java.util.Objects.requireNonNullElse;
+
 import javax.validation.constraints.Min;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
@@ -7,20 +9,11 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 @ConstructorBinding
 public class Processing {
 
-  @Min(0)
-  private final Integer maxRetries;
-
   @Min(1)
   private final Integer threads;
 
-  public Processing(@Min(0) Integer maxRetries, @Min(1) Integer threads) {
-    this.maxRetries = maxRetries;
-    this.threads = threads;
-  }
-
-  /** @return the maximum number of retries before a message ends up in the failed queue. */
-  public Integer getMaxRetries() {
-    return maxRetries;
+  public Processing(@Min(1) Integer threads) {
+    this.threads = requireNonNullElse(threads, 5);
   }
 
   /** @return The number of concurrent processing threads in one job instance. */
@@ -30,9 +23,10 @@ public class Processing {
 
   @Override
   public String toString() {
-    return StringRepresentation.of(Processing.class)
-        .property("maxRetries", maxRetries)
-        .property("threads", threads)
-        .toString();
+    return StringRepresentation.of(Processing.class).property("threads", threads).toString();
+  }
+
+  public static Processing defaults() {
+    return new Processing(null); // use null so constructor sets default values
   }
 }

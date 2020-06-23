@@ -19,4 +19,8 @@ public class Monitoring {
   public String toString() {
     return StringRepresentation.of(Monitoring.class).property("prefix", prefix).toString();
   }
+
+  public static Monitoring defaults() {
+    return new Monitoring(null); // use null because constructor sets defaults
+  }
 }

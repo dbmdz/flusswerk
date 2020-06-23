@@ -20,15 +20,13 @@ public class FlusswerkPropertiesTest {
   @Test
   @DisplayName("Values of FlusswerkProperties.Processing are all set")
   public void valuesOfProcessing() {
-    assertThat(properties.getProcessing())
-        .hasFieldOrPropertyWithValue("maxRetries", 5)
-        .hasFieldOrPropertyWithValue("threads", 5);
+    assertThat(properties.getProcessing()).hasFieldOrPropertyWithValue("threads", 5);
   }
 
   @Test
   @DisplayName("Values of FlusswerkProperties.Connection are all set")
   public void valuesOfConnection() {
-    assertThat(properties.getConnection())
+    assertThat(properties.getRabbitMQ())
         .hasFieldOrPropertyWithValue("host", "my.rabbit.example.com")
         .hasFieldOrPropertyWithValue("port", 5672)
         .hasFieldOrPropertyWithValue("virtualHost", Optional.of("vh1"))

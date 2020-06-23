@@ -1,6 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.messagebroker;
 
-import com.github.dbmdz.flusswerk.framework.config.properties.Connection;
+import com.github.dbmdz.flusswerk.framework.config.properties.RabbitMQ;
 import com.rabbitmq.client.Address;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
@@ -20,29 +20,36 @@ public class RabbitConnection {
 
   private Channel channel;
 
-  private final Connection connection;
+  private final RabbitMQ rabbitMQ;
 
-  public RabbitConnection(Connection connection) throws IOException {
-    this(connection, new ConnectionFactory());
+  public RabbitConnection(RabbitMQ rabbitMQ) throws IOException {
+    this(rabbitMQ, new ConnectionFactory());
   }
 
-  RabbitConnection(Connection connection, ConnectionFactory factory) throws IOException {
-    this.connection = connection;
+  RabbitConnection(RabbitMQ rabbitMQ, ConnectionFactory factory) throws IOException {
+    this.rabbitMQ = rabbitMQ;
     this.factory = factory;
-    factory.setUsername(connection.getUsername());
-    factory.setPassword(connection.getPassword());
-    connection.getVirtualHost().ifPresent(factory::setVirtualHost);
+    factory.setUsername(rabbitMQ.getUsername());
+    factory.setPassword(rabbitMQ.getPassword());
+    rabbitMQ.getVirtualHost().ifPresent(factory::setVirtualHost);
     waitForConnection();
   }
 
-  public Channel getChannel() {
+  /**
+   * Access to the low-level RabbitMQ {@link com.rabbitmq.client.Channel}. This is package protected
+   * because users should always use the managed actions via {@link MessageBroker} or {@link
+   * Queues}.
+   *
+   * @return the low-level RabbitMQ channel.
+   */
+  Channel getChannel() {
     return channel;
   }
 
   final void waitForConnection() throws IOException {
     boolean connectionIsFailing = true;
     while (connectionIsFailing) {
-      List<Address> addresses = List.of(new Address(connection.getHost(), connection.getPort()));
+      List<Address> addresses = List.of(new Address(rabbitMQ.getHost(), rabbitMQ.getPort()));
       try {
         LOGGER.debug("Waiting for connection to {} ...", addresses);
         com.rabbitmq.client.Connection connection = factory.newConnection(addresses);

@@ -2,7 +2,7 @@ flusswerk:
   processing:
     maxRetries: 5
     threads: 5
-  connection:
+  rabbitmq:
     host: my.rabbit.example.com
     port: 5672
     virtualHost: vh1

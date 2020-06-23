@@ -15,6 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,11 +39,13 @@ public class Engine {
 
   private final Semaphore semaphore;
 
-  private boolean running;
-
   private final AtomicInteger activeWorkers;
 
   private final ProcessReport processReport;
+
+  private final ReentrantLock engineStarted;
+
+  private boolean running;
 
   /**
    * Creates a new Engine instance with {@value DEFAULT_CONCURRENT_WORKERS} concurrent workers.
@@ -99,6 +102,8 @@ public class Engine {
     this.activeWorkers = new AtomicInteger();
     this.processReport =
         requireNonNullElseGet(processReport, () -> new DefaultProcessReport(appName));
+    engineStarted = new ReentrantLock();
+    running = false;
   }
 
   /**
@@ -106,6 +111,15 @@ public class Engine {
    * the input queue, the engine waits for new messages to arrive.
    */
   public void start() {
+    boolean couldLock;
+    try {
+      couldLock = engineStarted.tryLock(1, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      throw new RuntimeException("Could not start engine, locking failed", e);
+    }
+    if (!couldLock) {
+      throw new IllegalStateException("Engine has already be started");
+    }
     LOGGER.debug("Starting engine...");
     running = true;
     while (running) {
@@ -142,6 +156,7 @@ public class Engine {
         LOGGER.error("Got some error: " + e, e);
       }
     }
+    engineStarted.unlock(); // Engine successfully stopped, could now be started again
   }
 
   @SuppressWarnings("unchecked")

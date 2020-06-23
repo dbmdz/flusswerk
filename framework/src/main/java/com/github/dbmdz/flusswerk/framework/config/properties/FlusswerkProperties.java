@@ -2,6 +2,7 @@ package com.github.dbmdz.flusswerk.framework.config.properties;
 
 import static java.util.Objects.requireNonNullElseGet;
 
+import java.util.Optional;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
@@ -13,7 +14,7 @@ public class FlusswerkProperties {
 
   @NestedConfigurationProperty private final Processing processing;
 
-  @NestedConfigurationProperty private final Connection connection;
+  @NestedConfigurationProperty private final RabbitMQ rabbitMQ;
 
   @NestedConfigurationProperty private final Routing routing;
 
@@ -24,23 +25,23 @@ public class FlusswerkProperties {
   @ConstructorBinding
   public FlusswerkProperties(
       Processing processing,
-      Connection connection,
+      RabbitMQ rabbitMQ,
       Routing routing,
       Monitoring monitoring,
       Redis redis) {
-    this.processing = processing;
-    this.connection = connection;
-    this.routing = routing;
-    this.monitoring = requireNonNullElseGet(monitoring, () -> new Monitoring("flusswerk"));
-    this.redis = redis;
+    this.processing = requireNonNullElseGet(processing, Processing::defaults);
+    this.rabbitMQ = requireNonNullElseGet(rabbitMQ, RabbitMQ::defaults);
+    this.routing = requireNonNullElseGet(routing, Routing::defaults);
+    this.monitoring = requireNonNullElseGet(monitoring, Monitoring::defaults);
+    this.redis = redis; // might actually be null, then centralized locking will be disabled
   }
 
   public Processing getProcessing() {
     return processing;
   }
 
-  public Connection getConnection() {
-    return connection;
+  public RabbitMQ getRabbitMQ() {
+    return rabbitMQ;
   }
 
   public Routing getRouting() {
@@ -51,8 +52,8 @@ public class FlusswerkProperties {
     return monitoring;
   }
 
-  public Redis getRedis() {
-    return redis;
+  public Optional<Redis> getRedis() {
+    return Optional.ofNullable(redis);
   }
 
   @Override
@@ -60,7 +61,7 @@ public class FlusswerkProperties {
     return StringRepresentation.of(FlusswerkProperties.class)
         .property("processing", processing.toString())
         .property("routing", routing.toString())
-        .property("connection", connection.toString())
+        .property("connection", rabbitMQ.toString())
         .property("monitoring", monitoring.toString())
         .toString();
   }

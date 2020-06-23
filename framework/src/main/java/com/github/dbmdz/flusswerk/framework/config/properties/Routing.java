@@ -1,5 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.config.properties;
 
+import static java.util.Objects.requireNonNullElse;
 import static java.util.Objects.requireNonNullElseGet;
 
 import com.github.dbmdz.flusswerk.framework.messagebroker.FailurePolicy;
@@ -32,10 +33,10 @@ public class Routing {
       List<String> readFrom,
       String writeTo,
       Map<String, FailurePolicyProperties> failurePolicies) {
-    this.exchange = exchange;
-    this.deadLetterExchange = exchange + ".dlx";
+    this.exchange = requireNonNullElse(exchange, "flusswerk_default");
+    this.deadLetterExchange = this.exchange + ".dlx";
     this.readFrom = requireNonNullElseGet(readFrom, Collections::emptyList);
-    this.writeTo = writeTo;
+    this.writeTo = writeTo; // might be null
 
     this.failurePolicies =
         createFailurePolicies(
@@ -53,7 +54,7 @@ public class Routing {
               spec.getRetryRoutingKey(),
               spec.getFailedRoutingKey(),
               spec.getRetries(),
-              spec.getDeadLetterWait());
+              spec.getBackoffMs());
       result.put(input, failurePolicy);
     }
     for (String input : readFrom) {
@@ -101,19 +102,23 @@ public class Routing {
     return getFailurePolicy(message.getEnvelope().getSource());
   }
 
+  public static Routing defaults() {
+    return new Routing(null, null, null, null);
+  }
+
   public static class FailurePolicyProperties {
 
     private final Integer retries;
     private final String retryRoutingKey;
     private final String failedRoutingKey;
-    private final Integer deadLetterWait;
+    private final Integer backoffMs;
 
     public FailurePolicyProperties(
-        Integer retries, String retryRoutingKey, String failedRoutingKey, Integer deadLetterWait) {
+        Integer retries, String retryRoutingKey, String failedRoutingKey, Integer backoffMs) {
       this.retries = retries;
       this.retryRoutingKey = retryRoutingKey;
       this.failedRoutingKey = failedRoutingKey;
-      this.deadLetterWait = deadLetterWait;
+      this.backoffMs = backoffMs;
     }
 
     public int getRetries() {
@@ -128,8 +133,8 @@ public class Routing {
       return failedRoutingKey;
     }
 
-    public Integer getDeadLetterWait() {
-      return deadLetterWait;
+    public Integer getBackoffMs() {
+      return backoffMs;
     }
   }
 }
