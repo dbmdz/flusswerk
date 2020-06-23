@@ -3,6 +3,7 @@ package com.github.dbmdz.flusswerk.framework.config.properties;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.dbmdz.flusswerk.framework.config.FlusswerkPropertiesConfiguration;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -37,9 +38,16 @@ public class FlusswerkPropertiesTest {
   @Test
   @DisplayName("Values of FlusswerkProperties.Routing are all set")
   public void valuesOfRouting() {
-    assertThat(properties.getRouting())
+    Routing routing = properties.getRouting();
+    assertThat(routing)
         .hasFieldOrPropertyWithValue("exchange", "my.exchange")
         .hasFieldOrPropertyWithValue("readFrom", List.of("first", "second"))
         .hasFieldOrPropertyWithValue("writeTo", Optional.of("default.queue.to.write.to"));
+
+    assertThat(routing.getFailurePolicy("first"))
+        .hasFieldOrPropertyWithValue("backoff", Duration.ofSeconds(15))
+        .hasFieldOrPropertyWithValue("retries", 77)
+        .hasFieldOrPropertyWithValue("retryRoutingKey", "first.custom.retry")
+        .hasFieldOrPropertyWithValue("failedRoutingKey", "first.custom.failed");
   }
 }

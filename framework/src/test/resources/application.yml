@@ -16,6 +16,7 @@ flusswerk:
     writeTo: default.queue.to.write.to
     failure policies:
       first:
-          retry queue: first.custom.retry
-          failed queue: first.custom.failed
-          retries: 5
+          retry routing key: first.custom.retry
+          failed routing key: first.custom.failed
+          retries: 77
+          backoff: 15s
