@@ -5,14 +5,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.github.dbmdz.flusswerk.framework.config.FlusswerkConfiguration;
 import com.github.dbmdz.flusswerk.framework.config.FlusswerkPropertiesConfiguration;
 import com.github.dbmdz.flusswerk.framework.config.properties.FlusswerkProperties;
-import com.github.dbmdz.flusswerk.framework.config.properties.Routing;
+import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.exceptions.RetryProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
-import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
-import com.github.dbmdz.flusswerk.framework.messagebroker.Queues;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.Queues;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.integration.RetryTest.FlowConfiguration;
 import java.io.IOException;
@@ -57,7 +57,7 @@ public class RetryTest {
 
   private final Queues queues;
 
-  private final Routing routing;
+  private final RoutingProperties routing;
 
   private final ExecutorService executorService;
 

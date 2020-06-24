@@ -1,17 +1,17 @@
 package com.github.dbmdz.flusswerk.framework.config;
 
 import com.github.dbmdz.flusswerk.framework.config.properties.FlusswerkProperties;
-import com.github.dbmdz.flusswerk.framework.config.properties.Redis;
+import com.github.dbmdz.flusswerk.framework.config.properties.RedisProperties;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.locking.LockManager;
 import com.github.dbmdz.flusswerk.framework.locking.NoOpLockManager;
 import com.github.dbmdz.flusswerk.framework.locking.RedisLockManager;
-import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
-import com.github.dbmdz.flusswerk.framework.messagebroker.Queues;
-import com.github.dbmdz.flusswerk.framework.messagebroker.RabbitClient;
-import com.github.dbmdz.flusswerk.framework.messagebroker.RabbitConnection;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.Queues;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitClient;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitConnection;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.monitoring.BaseMetrics;
@@ -117,7 +117,7 @@ public class FlusswerkConfiguration {
 
   @Bean
   public LockManager lockManager(FlusswerkProperties flusswerkProperties) {
-    Optional<Redis> redis = flusswerkProperties.getRedis();
+    Optional<RedisProperties> redis = flusswerkProperties.getRedis();
     if (redis.isPresent()) {
       Config config = createRedisConfig(redis.get());
       RedissonClient client = Redisson.create(config);
@@ -127,7 +127,7 @@ public class FlusswerkConfiguration {
     }
   }
 
-  private Config createRedisConfig(Redis redis) {
+  private Config createRedisConfig(RedisProperties redis) {
     Config config = new Config();
     config.useSingleServer().setAddress(redis.getAddress()).setPassword(redis.getPassword());
     return config;

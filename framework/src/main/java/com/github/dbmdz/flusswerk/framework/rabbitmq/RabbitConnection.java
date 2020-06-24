@@ -1,6 +1,6 @@
-package com.github.dbmdz.flusswerk.framework.messagebroker;
+package com.github.dbmdz.flusswerk.framework.rabbitmq;
 
-import com.github.dbmdz.flusswerk.framework.config.properties.RabbitMQ;
+import com.github.dbmdz.flusswerk.framework.config.properties.RabbitMQProperties;
 import com.rabbitmq.client.Address;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
@@ -20,13 +20,13 @@ public class RabbitConnection {
 
   private Channel channel;
 
-  private final RabbitMQ rabbitMQ;
+  private final RabbitMQProperties rabbitMQ;
 
-  public RabbitConnection(RabbitMQ rabbitMQ) throws IOException {
+  public RabbitConnection(RabbitMQProperties rabbitMQ) throws IOException {
     this(rabbitMQ, new ConnectionFactory());
   }
 
-  RabbitConnection(RabbitMQ rabbitMQ, ConnectionFactory factory) throws IOException {
+  RabbitConnection(RabbitMQProperties rabbitMQ, ConnectionFactory factory) throws IOException {
     this.rabbitMQ = rabbitMQ;
     this.factory = factory;
     factory.setUsername(rabbitMQ.getUsername());

@@ -3,7 +3,7 @@ package com.github.dbmdz.flusswerk.framework.config.properties;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.Objects.requireNonNullElseGet;
 
-import com.github.dbmdz.flusswerk.framework.messagebroker.FailurePolicy;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.FailurePolicy;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.time.Duration;
 import java.util.Collections;
@@ -16,7 +16,7 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 
 /** AMQP/RabbitMQ routing information. */
 @ConstructorBinding
-public class Routing {
+public class RoutingProperties {
 
   @NotBlank private final String exchange;
   private final String deadLetterExchange;
@@ -29,7 +29,7 @@ public class Routing {
    * @param readFrom The queue to read from (optional).
    * @param writeTo The topic to send to per default (optional).
    */
-  public Routing(
+  public RoutingProperties(
       @NotBlank String exchange,
       List<String> readFrom,
       String writeTo,
@@ -92,7 +92,7 @@ public class Routing {
 
   @Override
   public String toString() {
-    return StringRepresentation.of(Routing.class)
+    return StringRepresentation.of(RoutingProperties.class)
         .property("exchange", exchange)
         .property("readFrom", String.join(",", readFrom))
         .property("writeTo", writeTo)
@@ -103,8 +103,8 @@ public class Routing {
     return getFailurePolicy(message.getEnvelope().getSource());
   }
 
-  public static Routing defaults() {
-    return new Routing(null, null, null, null);
+  public static RoutingProperties defaults() {
+    return new RoutingProperties(null, null, null, null);
   }
 
   public static class FailurePolicyProperties {

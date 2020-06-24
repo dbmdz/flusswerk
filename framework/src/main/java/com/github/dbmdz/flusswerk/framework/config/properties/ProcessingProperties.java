@@ -7,12 +7,12 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 
 /** Configuration related to the processing. */
 @ConstructorBinding
-public class Processing {
+public class ProcessingProperties {
 
   @Min(1)
   private final Integer threads;
 
-  public Processing(@Min(1) Integer threads) {
+  public ProcessingProperties(@Min(1) Integer threads) {
     this.threads = requireNonNullElse(threads, 5);
   }
 
@@ -23,10 +23,10 @@ public class Processing {
 
   @Override
   public String toString() {
-    return StringRepresentation.of(Processing.class).property("threads", threads).toString();
+    return StringRepresentation.of(ProcessingProperties.class).property("threads", threads).toString();
   }
 
-  public static Processing defaults() {
-    return new Processing(null); // use null so constructor sets default values
+  public static ProcessingProperties defaults() {
+    return new ProcessingProperties(null); // use null so constructor sets default values
   }
 }

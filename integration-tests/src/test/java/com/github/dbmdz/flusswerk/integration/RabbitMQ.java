@@ -1,10 +1,10 @@
 package com.github.dbmdz.flusswerk.integration;
 
-import com.github.dbmdz.flusswerk.framework.config.properties.Routing;
+import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
-import com.github.dbmdz.flusswerk.framework.messagebroker.FailurePolicy;
-import com.github.dbmdz.flusswerk.framework.messagebroker.MessageBroker;
-import com.github.dbmdz.flusswerk.framework.messagebroker.Queues;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.FailurePolicy;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.Queues;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.io.IOException;
 import org.junit.Assert;
@@ -19,9 +19,9 @@ public class RabbitMQ {
 
   private final Queues queues;
 
-  private final Routing routing;
+  private final RoutingProperties routing;
 
-  public RabbitMQ(MessageBroker messageBroker, Queues queues, Routing routing) {
+  public RabbitMQ(MessageBroker messageBroker, Queues queues, RoutingProperties routing) {
     this.messageBroker = messageBroker;
     this.queues = queues;
     this.routing = routing;

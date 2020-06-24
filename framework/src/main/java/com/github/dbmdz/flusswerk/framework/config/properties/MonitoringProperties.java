@@ -3,11 +3,11 @@ package com.github.dbmdz.flusswerk.framework.config.properties;
 import java.util.Objects;
 
 /** Settings for monitoring endpoints. */
-public class Monitoring {
+public class MonitoringProperties {
 
   private final String prefix;
 
-  public Monitoring(String prefix) {
+  public MonitoringProperties(String prefix) {
     this.prefix = Objects.requireNonNullElse(prefix, "flusswerk");
   }
 
@@ -17,10 +17,10 @@ public class Monitoring {
 
   @Override
   public String toString() {
-    return StringRepresentation.of(Monitoring.class).property("prefix", prefix).toString();
+    return StringRepresentation.of(MonitoringProperties.class).property("prefix", prefix).toString();
   }
 
-  public static Monitoring defaults() {
-    return new Monitoring(null); // use null because constructor sets defaults
+  public static MonitoringProperties defaults() {
+    return new MonitoringProperties(null); // use null because constructor sets defaults
   }
 }
