@@ -1,4 +1,4 @@
-package com.github.dbmdz.flusswerk.framework.messagebroker;
+package com.github.dbmdz.flusswerk.framework.rabbitmq;
 
 import com.rabbitmq.client.Channel;
 import java.io.IOException;

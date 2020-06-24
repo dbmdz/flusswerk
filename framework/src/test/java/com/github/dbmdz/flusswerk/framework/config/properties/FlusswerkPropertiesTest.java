@@ -38,7 +38,7 @@ public class FlusswerkPropertiesTest {
   @Test
   @DisplayName("Values of FlusswerkProperties.Routing are all set")
   public void valuesOfRouting() {
-    Routing routing = properties.getRouting();
+    RoutingProperties routing = properties.getRouting();
     assertThat(routing)
         .hasFieldOrPropertyWithValue("exchange", "my.exchange")
         .hasFieldOrPropertyWithValue("readFrom", List.of("first", "second"))

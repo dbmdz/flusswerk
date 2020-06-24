@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 
 /** Connection information for RabbitMQ. */
 @ConstructorBinding
-public class RabbitMQ {
+public class RabbitMQProperties {
 
   private final String host;
 
@@ -26,7 +26,7 @@ public class RabbitMQ {
    * @param username The username for RabbitMQ login
    * @param password The password for RabbitMQ login
    */
-  public RabbitMQ(String host, Integer port, String virtualHost, String username, String password) {
+  public RabbitMQProperties(String host, Integer port, String virtualHost, String username, String password) {
     this.host = requireNonNullElse(host, "localhost");
     this.port = requireNonNullElse(port, 5672);
     this.virtualHost = virtualHost; // can actually be null
@@ -61,7 +61,7 @@ public class RabbitMQ {
 
   @Override
   public String toString() {
-    return StringRepresentation.of(RabbitMQ.class)
+    return StringRepresentation.of(RabbitMQProperties.class)
         .property("host", host)
         .property("port", port)
         .property("virtualHost", virtualHost)
@@ -70,8 +70,8 @@ public class RabbitMQ {
         .toString();
   }
 
-  public static RabbitMQ defaults() {
+  public static RabbitMQProperties defaults() {
     // use null values so constructor sets defaults
-    return new RabbitMQ(null, null, null, null, null);
+    return new RabbitMQProperties(null, null, null, null, null);
   }
 }

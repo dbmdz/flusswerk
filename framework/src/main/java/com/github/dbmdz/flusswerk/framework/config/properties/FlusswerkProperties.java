@@ -12,47 +12,47 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 @ConfigurationProperties(prefix = "flusswerk")
 public class FlusswerkProperties {
 
-  @NestedConfigurationProperty private final Processing processing;
+  @NestedConfigurationProperty private final ProcessingProperties processing;
 
-  @NestedConfigurationProperty private final RabbitMQ rabbitMQ;
+  @NestedConfigurationProperty private final RabbitMQProperties rabbitMQ;
 
-  @NestedConfigurationProperty private final Routing routing;
+  @NestedConfigurationProperty private final RoutingProperties routing;
 
-  @NestedConfigurationProperty private final Monitoring monitoring;
+  @NestedConfigurationProperty private final MonitoringProperties monitoring;
 
-  @NestedConfigurationProperty private final Redis redis;
+  @NestedConfigurationProperty private final RedisProperties redis;
 
   @ConstructorBinding
   public FlusswerkProperties(
-      Processing processing,
-      RabbitMQ rabbitMQ,
-      Routing routing,
-      Monitoring monitoring,
-      Redis redis) {
-    this.processing = requireNonNullElseGet(processing, Processing::defaults);
-    this.rabbitMQ = requireNonNullElseGet(rabbitMQ, RabbitMQ::defaults);
-    this.routing = requireNonNullElseGet(routing, Routing::defaults);
-    this.monitoring = requireNonNullElseGet(monitoring, Monitoring::defaults);
+      ProcessingProperties processing,
+      RabbitMQProperties rabbitMQ,
+      RoutingProperties routing,
+      MonitoringProperties monitoring,
+      RedisProperties redis) {
+    this.processing = requireNonNullElseGet(processing, ProcessingProperties::defaults);
+    this.rabbitMQ = requireNonNullElseGet(rabbitMQ, RabbitMQProperties::defaults);
+    this.routing = requireNonNullElseGet(routing, RoutingProperties::defaults);
+    this.monitoring = requireNonNullElseGet(monitoring, MonitoringProperties::defaults);
     this.redis = redis; // might actually be null, then centralized locking will be disabled
   }
 
-  public Processing getProcessing() {
+  public ProcessingProperties getProcessing() {
     return processing;
   }
 
-  public RabbitMQ getRabbitMQ() {
+  public RabbitMQProperties getRabbitMQ() {
     return rabbitMQ;
   }
 
-  public Routing getRouting() {
+  public RoutingProperties getRouting() {
     return routing;
   }
 
-  public Monitoring getMonitoring() {
+  public MonitoringProperties getMonitoring() {
     return monitoring;
   }
 
-  public Optional<Redis> getRedis() {
+  public Optional<RedisProperties> getRedis() {
     return Optional.ofNullable(redis);
   }
 

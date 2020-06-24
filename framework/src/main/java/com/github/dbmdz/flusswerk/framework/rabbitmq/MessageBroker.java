@@ -1,6 +1,6 @@
-package com.github.dbmdz.flusswerk.framework.messagebroker;
+package com.github.dbmdz.flusswerk.framework.rabbitmq;
 
-import com.github.dbmdz.flusswerk.framework.config.properties.Routing;
+import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.model.Envelope;
 import com.github.dbmdz.flusswerk.framework.model.Message;
@@ -22,11 +22,11 @@ public class MessageBroker {
   private static final String MESSAGE_TTL = "x-message-ttl";
   private static final String DEAD_LETTER_EXCHANGE = "x-dead-letter-exchange";
 
-  private final Routing routingConfig;
+  private final RoutingProperties routingConfig;
 
   private final RabbitClient rabbitClient;
 
-  public MessageBroker(Routing routing, RabbitClient rabbitClient) throws IOException {
+  public MessageBroker(RoutingProperties routing, RabbitClient rabbitClient) throws IOException {
     this.routingConfig = routing;
     this.rabbitClient = rabbitClient;
 

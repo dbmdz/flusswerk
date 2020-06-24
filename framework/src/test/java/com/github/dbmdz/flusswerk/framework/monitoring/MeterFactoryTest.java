@@ -5,7 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.github.dbmdz.flusswerk.framework.config.properties.FlusswerkProperties;
-import com.github.dbmdz.flusswerk.framework.config.properties.Monitoring;
+import com.github.dbmdz.flusswerk.framework.config.properties.MonitoringProperties;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.search.Search;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -19,7 +19,7 @@ class MeterFactoryTest {
     var monitoringMetric = "test.metric";
 
     FlusswerkProperties flusswerkProperties = mock(FlusswerkProperties.class);
-    when(flusswerkProperties.getMonitoring()).thenReturn(new Monitoring(monitoringPrefix));
+    when(flusswerkProperties.getMonitoring()).thenReturn(new MonitoringProperties(monitoringPrefix));
 
     SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
     MeterFactory meterFactory = new MeterFactory(flusswerkProperties, "test_app", meterRegistry);

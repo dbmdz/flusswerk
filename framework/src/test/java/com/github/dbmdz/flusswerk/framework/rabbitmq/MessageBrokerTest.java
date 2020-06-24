@@ -1,4 +1,4 @@
-package com.github.dbmdz.flusswerk.framework.messagebroker;
+package com.github.dbmdz.flusswerk.framework.rabbitmq;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -9,7 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.github.dbmdz.flusswerk.framework.config.properties.Routing;
+import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.io.IOException;
@@ -31,7 +31,7 @@ class MessageBrokerTest {
 
   private RabbitClient rabbitClient;
 
-  private Routing routing;
+  private RoutingProperties routing;
 
   private FailurePolicy failurePolicy;
 
@@ -39,7 +39,7 @@ class MessageBrokerTest {
   void setUp() throws IOException {
     failurePolicy = new FailurePolicy("some.input.queue");
     routing =
-        new Routing(
+        new RoutingProperties(
             "some.exchange",
             List.of("some.input.queue"),
             "some.output.queue",
@@ -121,8 +121,8 @@ class MessageBrokerTest {
   @Test
   @DisplayName("getMessageCount should return all message counts")
   void getMessageCountsShouldGetAllMessageCounts() throws IOException {
-    Routing routing =
-        new Routing("test.exchange", List.of("input1", "input2"), null, Collections.emptyMap());
+    RoutingProperties routing =
+        new RoutingProperties("test.exchange", List.of("input1", "input2"), null, Collections.emptyMap());
 
     Map<String, Long> expected = new HashMap<>();
     expected.put("input1", 100L);
