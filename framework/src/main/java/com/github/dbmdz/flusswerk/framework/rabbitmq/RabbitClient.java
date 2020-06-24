@@ -84,12 +84,12 @@ public class RabbitClient {
     return objectMapper.writeValueAsBytes(message);
   }
 
-  public void ack(Message message) throws IOException {
+  public void ack(Envelope envelope) throws IOException {
     try {
-      channel.basicAck(message.getEnvelope().getDeliveryTag(), SINGLE_MESSAGE);
+      channel.basicAck(envelope.getDeliveryTag(), SINGLE_MESSAGE);
     } catch (Exception e) {
       tryToReconnect("Could not ack message");
-      channel.basicAck(message.getEnvelope().getDeliveryTag(), SINGLE_MESSAGE);
+      channel.basicAck(envelope.getDeliveryTag(), SINGLE_MESSAGE);
     }
   }
 
@@ -120,11 +120,11 @@ public class RabbitClient {
         message.getEnvelope().setSource(queueName);
         return message;
       } catch (Exception e) {
-        Message invalidMessage = new Message();
-        invalidMessage.getEnvelope().setBody(body);
-        invalidMessage.getEnvelope().setDeliveryTag(response.getEnvelope().getDeliveryTag());
-        invalidMessage.getEnvelope().setSource(queueName);
-        throw new InvalidMessageException(invalidMessage, e.getMessage());
+        Envelope envelope = new Envelope();
+        envelope.setBody(body);
+        envelope.setDeliveryTag(response.getEnvelope().getDeliveryTag());
+        envelope.setSource(queueName);
+        throw new InvalidMessageException(envelope, e.getMessage(), e);
       }
     }
     return null;

@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
+import com.github.dbmdz.flusswerk.framework.model.Envelope;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.io.IOException;
 import java.util.Arrays;
@@ -42,7 +43,7 @@ class MessageBrokerTest {
         new RoutingProperties(
             "some.exchange",
             List.of("some.input.queue"),
-            "some.output.queue",
+            Map.of("default", "some.output.queue"),
             Collections.emptyMap());
 
     rabbitClient = mock(RabbitClient.class);
@@ -62,7 +63,7 @@ class MessageBrokerTest {
   @DisplayName("Ack should acknowledge messages")
   void ack() throws IOException {
     messageBroker.ack(message);
-    verify(rabbitClient).ack(message);
+    verify(rabbitClient).ack(message.getEnvelope());
   }
 
   @Test
@@ -90,7 +91,7 @@ class MessageBrokerTest {
   @DisplayName("Should send a message to the output queue")
   void sendShouldRouteMessageToOutputQueue() throws IOException {
     messageBroker.send(new Message("test"));
-    verify(rabbitClient).send(any(), eq(routing.getWriteTo().orElseThrow()), any());
+    verify(rabbitClient).send(any(), eq(routing.getOutgoing().get("default")), any());
   }
 
   @Test
@@ -115,7 +116,7 @@ class MessageBrokerTest {
   @DisplayName("Default receive should pull from the input queue")
   void defaultReceiveShouldPullTheInputQueue() throws IOException, InvalidMessageException {
     messageBroker.receive();
-    verify(rabbitClient).receive(routing.getReadFrom().get(0));
+    verify(rabbitClient).receive(routing.getIncoming().get(0));
   }
 
   @Test
@@ -141,16 +142,16 @@ class MessageBrokerTest {
   void handleInvalidMessage() throws IOException, InvalidMessageException {
     String invalidMessageBody = "invalid";
 
-    Message invalidMessage = new Message();
-    invalidMessage.getEnvelope().setDeliveryTag(1);
-    invalidMessage.getEnvelope().setBody(invalidMessageBody);
-    invalidMessage.getEnvelope().setSource("some.input.queue");
+    Envelope envelope = new Envelope();
+    envelope.setDeliveryTag(1);
+    envelope.setBody(invalidMessageBody);
+    envelope.setSource("some.input.queue");
     when(rabbitClient.receive(eq("some.input.queue")))
-        .thenThrow(new InvalidMessageException(invalidMessage, "Invalid message"));
+        .thenThrow(new InvalidMessageException(envelope, "Invalid message"));
 
     Assertions.assertThat(messageBroker.receive()).isNull();
 
-    verify(rabbitClient, times(1)).ack(any(Message.class));
+    verify(rabbitClient, times(1)).ack(envelope);
     verify(rabbitClient, times(1))
         .sendRaw(anyString(), eq("some.input.queue.failed"), eq(invalidMessageBody.getBytes()));
   }

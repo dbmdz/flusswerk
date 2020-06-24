@@ -1,5 +1,7 @@
 package com.github.dbmdz.flusswerk.framework.config.properties;
 
+import java.util.Map;
+
 /** Creates a nice string representation for hierarchical data structures. */
 class StringRepresentation {
 
@@ -48,7 +50,20 @@ class StringRepresentation {
     return this;
   }
 
-  private void indent() {
+  public StringRepresentation property(String name, Map<String, String> values) {
+    if (values == null) {
+      property(name, "null");
+    }
+    text(name);
+        text(":");
+    for (String key : values.keySet()) {
+      indent();
+      property(key, values.get(key));
+    }
+    return this;
+  }
+
+    private void indent() {
     stringBuilder.append("\t");
   }
 

@@ -38,7 +38,7 @@ public class RabbitConnection {
   /**
    * Access to the low-level RabbitMQ {@link com.rabbitmq.client.Channel}. This is package protected
    * because users should always use the managed actions via {@link MessageBroker} or {@link
-   * Queues}.
+   * RabbitMQ}.
    *
    * @return the low-level RabbitMQ channel.
    */

@@ -1,3 +1,9 @@
+spring:
+  application:
+    name: integration-tests
+  profiles:
+    active: local
+
 flusswerk:
   processing:
     threads: 1
@@ -8,15 +14,24 @@ flusswerk:
     password: guest
   routing:
     exchange: my.exchange
-    readFrom:
+    incoming:
       - first
       - second
-    writeTo: target.queue
+    outgoing:
+      default: target.queue
     failure policies:
       first:
           retries: 5
-          backoffMs: 500
+          backoff: 500ms
 
+---
+
+spring:
+  profiles: local
+
+flusswerk:
+  rabbitmq:
+    host: localhost
 
 ---
 spring:
