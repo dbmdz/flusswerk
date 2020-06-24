@@ -1,6 +1,5 @@
 flusswerk:
   processing:
-    maxRetries: 5
     threads: 5
   rabbitmq:
     host: my.rabbit.example.com
@@ -10,10 +9,11 @@ flusswerk:
     password: guest
   routing:
     exchange: my.exchange
-    readFrom:
+    incoming:
       - first
       - second
-    writeTo: default.queue.to.write.to
+    outgoing:
+      default: default.queue.to.write.to
     failure policies:
       first:
           retry routing key: first.custom.retry

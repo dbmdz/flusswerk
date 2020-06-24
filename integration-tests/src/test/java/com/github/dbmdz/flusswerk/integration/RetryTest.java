@@ -11,9 +11,9 @@ import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.exceptions.RetryProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
-import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
-import com.github.dbmdz.flusswerk.framework.rabbitmq.Queues;
 import com.github.dbmdz.flusswerk.framework.model.Message;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import com.github.dbmdz.flusswerk.integration.RetryTest.FlowConfiguration;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -55,11 +55,11 @@ public class RetryTest {
 
   private final MessageBroker messageBroker;
 
-  private final Queues queues;
-
   private final RoutingProperties routing;
 
   private final ExecutorService executorService;
+
+  private final RabbitUtil rabbitUtil;
 
   private final RabbitMQ rabbitMQ;
 
@@ -67,14 +67,14 @@ public class RetryTest {
   public RetryTest(
       Engine engine,
       MessageBroker messageBroker,
-      Queues queues,
+      RabbitMQ rabbitMQ,
       FlusswerkProperties flusswerkProperties) {
     this.engine = engine;
     this.messageBroker = messageBroker;
-    this.queues = queues;
+    this.rabbitMQ = rabbitMQ;
     this.routing = flusswerkProperties.getRouting();
     executorService = Executors.newSingleThreadExecutor();
-    rabbitMQ = new RabbitMQ(messageBroker, queues, routing);
+    rabbitUtil = new RabbitUtil(messageBroker, rabbitMQ, routing);
   }
 
   static class CountFailures implements UnaryOperator<Message> {
@@ -104,11 +104,11 @@ public class RetryTest {
   @AfterEach
   void stopEngine() throws IOException {
     engine.stop();
-    rabbitMQ.purgeQueues();
+    rabbitUtil.purgeQueues();
   }
 
   private void purge(String queue) throws IOException {
-    var deletedMessages = queues.purge(queue);
+    var deletedMessages = rabbitMQ.queue(queue).purge();
     if (deletedMessages != 0) {
       LOGGER.error("Purged {} and found {} messages.", queue, deletedMessages);
     }
@@ -119,7 +119,7 @@ public class RetryTest {
   void shouldRetryMessage() throws IOException, InvalidMessageException, InterruptedException {
     var message = new Message("12345");
 
-    var inputQueue = routing.getReadFrom().get(0);
+    var inputQueue = routing.getIncoming().get(0);
     var failurePolicy = routing.getFailurePolicy(inputQueue);
 
     messageBroker.send(inputQueue, message);
@@ -136,8 +136,9 @@ public class RetryTest {
           "Receive message attempt {}, got {} ({} messages in failed, {} messages in retry)",
           attempts,
           received != null ? "message" : "nothing",
-          queues.messageCount(failurePolicy.getFailedRoutingKey()),
-          queues.messageCount(failurePolicy.getRetryRoutingKey()));
+          rabbitMQ.queue(failurePolicy.getFailedRoutingKey()).messageCount(),
+          rabbitMQ.queue(failurePolicy.getRetryRoutingKey()).messageCount()
+      );
     }
     assertThat(received.getTracingId()).isEqualTo(message.getTracingId());
     assertThat(received.getEnvelope().getRetries()).isEqualTo(failurePolicy.getRetries());

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.github.dbmdz.flusswerk.framework.config.FlusswerkPropertiesConfiguration;
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,8 +42,8 @@ public class FlusswerkPropertiesTest {
     RoutingProperties routing = properties.getRouting();
     assertThat(routing)
         .hasFieldOrPropertyWithValue("exchange", "my.exchange")
-        .hasFieldOrPropertyWithValue("readFrom", List.of("first", "second"))
-        .hasFieldOrPropertyWithValue("writeTo", Optional.of("default.queue.to.write.to"));
+        .hasFieldOrPropertyWithValue("incoming", List.of("first", "second"))
+        .hasFieldOrPropertyWithValue("outgoing", Map.of("default", "default.queue.to.write.to"));
 
     assertThat(routing.getFailurePolicy("first"))
         .hasFieldOrPropertyWithValue("backoff", Duration.ofSeconds(15))

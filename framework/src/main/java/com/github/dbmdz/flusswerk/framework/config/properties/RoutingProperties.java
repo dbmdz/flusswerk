@@ -3,14 +3,13 @@ package com.github.dbmdz.flusswerk.framework.config.properties;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.Objects.requireNonNullElseGet;
 
-import com.github.dbmdz.flusswerk.framework.rabbitmq.FailurePolicy;
 import com.github.dbmdz.flusswerk.framework.model.Message;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.FailurePolicy;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import javax.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
@@ -20,28 +19,28 @@ public class RoutingProperties {
 
   @NotBlank private final String exchange;
   private final String deadLetterExchange;
-  private final List<String> readFrom;
-  private final String writeTo;
+  private final List<String> incoming;
+  private final Map<String, String> outgoing;
   private final Map<String, FailurePolicy> failurePolicies;
 
   /**
    * @param exchange The exchange name to use (required).
-   * @param readFrom The queue to read from (optional).
-   * @param writeTo The topic to send to per default (optional).
+   * @param incoming The queue to read from (optional).
+   * @param outgoing The topic to send to per default (optional).
    */
   public RoutingProperties(
       @NotBlank String exchange,
-      List<String> readFrom,
-      String writeTo,
+      List<String> incoming,
+      Map<String, String> outgoing,
       Map<String, FailurePolicyProperties> failurePolicies) {
     this.exchange = requireNonNullElse(exchange, "flusswerk_default");
     this.deadLetterExchange = this.exchange + ".dlx";
-    this.readFrom = requireNonNullElseGet(readFrom, Collections::emptyList);
-    this.writeTo = writeTo; // might be null
+    this.incoming = requireNonNullElseGet(incoming, Collections::emptyList);
+    this.outgoing = requireNonNullElseGet(outgoing, Collections::emptyMap); // might be null
 
     this.failurePolicies =
         createFailurePolicies(
-            readFrom, requireNonNullElseGet(failurePolicies, Collections::emptyMap));
+            incoming, requireNonNullElseGet(failurePolicies, Collections::emptyMap));
   }
 
   private static Map<String, FailurePolicy> createFailurePolicies(
@@ -73,13 +72,13 @@ public class RoutingProperties {
   }
 
   /** @return The queue to read from (optional). */
-  public List<String> getReadFrom() {
-    return readFrom;
+  public List<String> getIncoming() {
+    return incoming;
   }
 
   /** @return The topic to send to per default (optional). */
-  public Optional<String> getWriteTo() {
-    return Optional.ofNullable(writeTo);
+  public Map<String, String> getOutgoing() {
+    return outgoing;
   }
 
   public FailurePolicy getFailurePolicy(String queue) {
@@ -94,8 +93,8 @@ public class RoutingProperties {
   public String toString() {
     return StringRepresentation.of(RoutingProperties.class)
         .property("exchange", exchange)
-        .property("readFrom", String.join(",", readFrom))
-        .property("writeTo", writeTo)
+        .property("readFrom", String.join(",", incoming))
+        .property("writeTo", outgoing)
         .toString();
   }
 

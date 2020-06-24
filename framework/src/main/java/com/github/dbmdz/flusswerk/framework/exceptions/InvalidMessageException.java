@@ -1,22 +1,22 @@
 package com.github.dbmdz.flusswerk.framework.exceptions;
 
-import com.github.dbmdz.flusswerk.framework.model.Message;
+import com.github.dbmdz.flusswerk.framework.model.Envelope;
 
 public class InvalidMessageException extends Exception {
 
-  private final Message message;
+  private final Envelope envelope;
 
-  public InvalidMessageException(Message message, String msg) {
+  public InvalidMessageException(Envelope envelope, String msg) {
     super(msg);
-    this.message = message;
+    this.envelope = envelope;
   }
 
-  public InvalidMessageException(Message message, String msg, Throwable cause) {
+  public InvalidMessageException(Envelope envelope, String msg, Throwable cause) {
     super(msg, cause);
-    this.message = message;
+    this.envelope = envelope;
   }
 
-  public Message getInvalidMessage() {
-    return message;
+  public Envelope getEnvelope() {
+    return envelope;
   }
 }

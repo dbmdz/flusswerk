@@ -47,7 +47,7 @@ class RabbitClientTest {
   void ack() throws IOException {
     RabbitClient rabbitClient = new RabbitClient(connection);
     message.getEnvelope().setDeliveryTag(123123123);
-    rabbitClient.ack(message);
+    rabbitClient.ack(message.getEnvelope());
     verify(channel).basicAck(eq(message.getEnvelope().getDeliveryTag()), eq(false));
   }
 

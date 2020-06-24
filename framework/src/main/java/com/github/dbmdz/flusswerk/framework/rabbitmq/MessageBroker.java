@@ -32,9 +32,7 @@ public class MessageBroker {
 
     provideExchanges();
     provideInputQueues();
-    if (routingConfig.getWriteTo().isPresent()) {
-      provideOutputQueue();
-    }
+    provideOutputQueues();
   }
 
   /**
@@ -43,8 +41,13 @@ public class MessageBroker {
    * @param message the message to send.
    * @throws IOException if sending the message fails.
    */
+  @Deprecated
   public void send(Message message) throws IOException {
-    send(routingConfig.getWriteTo().orElseThrow(), message);
+    var topic = routingConfig.getOutgoing().get("default");
+    if (topic == null) {
+      throw new RuntimeException("Cannot send message, no default queue specified");
+    }
+    send(topic, message);
   }
 
   /**
@@ -53,8 +56,13 @@ public class MessageBroker {
    * @param messages the message to send.
    * @throws IOException if sending the message fails.
    */
+  @Deprecated
   public void send(Collection<? extends Message> messages) throws IOException {
-    send(routingConfig.getWriteTo().orElseThrow(), messages);
+    var topic = routingConfig.getOutgoing().get("default");
+    if (topic == null) {
+      throw new RuntimeException("Cannot send messages, no default queue specified");
+    }
+    send(topic, messages);
   }
 
   /**
@@ -84,11 +92,6 @@ public class MessageBroker {
     }
   }
 
-  public void sendRaw(String routingKey, Message message) throws IOException {
-    rabbitClient.sendRaw(
-        routingConfig.getExchange(), routingKey, message.getEnvelope().getBody().getBytes());
-  }
-
   /**
    * Gets one message from the queue but does not acknowledge it. To do so, use {@link
    * MessageBroker#ack(Message)}.
@@ -111,7 +114,7 @@ public class MessageBroker {
    */
   public Message receive() throws IOException {
     Message message = null;
-    for (String inputQueue : routingConfig.getReadFrom()) {
+    for (String inputQueue : routingConfig.getIncoming()) {
       try {
         message = receive(inputQueue);
       } catch (InvalidMessageException e) {
@@ -127,16 +130,22 @@ public class MessageBroker {
   }
 
   private void failInvalidMessage(InvalidMessageException e) throws IOException {
-    Message message = e.getInvalidMessage();
+    Envelope envelope = e.getEnvelope();
     LOGGER.warn("Invalid message detected. Will be shifted into 'failed' queue: " + e.getMessage());
-    failRawWithAck(message);
+    rabbitClient.ack(envelope);
+    FailurePolicy failurePolicy = routingConfig.getFailurePolicy(envelope.getSource());
+    String failedRoutingKey = failurePolicy.getFailedRoutingKey();
+    if (failedRoutingKey != null) {
+      rabbitClient.sendRaw(
+          routingConfig.getExchange(), failedRoutingKey, envelope.getBody().getBytes());
+    }
   }
 
   private void provideInputQueues() throws IOException {
     final String deadLetterExchange = routingConfig.getDeadLetterExchange();
     final String exchange = routingConfig.getExchange();
 
-    for (String inputQueue : routingConfig.getReadFrom()) {
+    for (String inputQueue : routingConfig.getIncoming()) {
       FailurePolicy failurePolicy = routingConfig.getFailurePolicy(inputQueue);
       rabbitClient.declareQueue(
           inputQueue, exchange, inputQueue, Map.of(DEAD_LETTER_EXCHANGE, deadLetterExchange));
@@ -161,13 +170,14 @@ public class MessageBroker {
     }
   }
 
-  private void provideOutputQueue() throws IOException {
-    var topic = routingConfig.getWriteTo().orElseThrow();
-    rabbitClient.declareQueue(
-        topic,
-        routingConfig.getExchange(),
-        topic,
-        Map.of(DEAD_LETTER_EXCHANGE, routingConfig.getDeadLetterExchange()));
+  private void provideOutputQueues() throws IOException {
+    for (String topic : routingConfig.getOutgoing().values()) {
+      rabbitClient.declareQueue(
+          topic,
+          routingConfig.getExchange(),
+          topic,
+          Map.of(DEAD_LETTER_EXCHANGE, routingConfig.getDeadLetterExchange()));
+    }
   }
 
   /**
@@ -177,7 +187,7 @@ public class MessageBroker {
    * @throws IOException if communication with RabbitMQ failed.
    */
   public void ack(Message message) throws IOException {
-    rabbitClient.ack(message);
+    rabbitClient.ack(message.getEnvelope());
   }
 
   /**
@@ -199,16 +209,6 @@ public class MessageBroker {
     } else {
       fail(message, false); // Avoid double ACKing the origin message
       return false;
-    }
-  }
-
-  public void failRawWithAck(Message message) throws IOException {
-    ack(message);
-    LOGGER.debug("Send message to failed queue: " + message);
-    FailurePolicy failurePolicy = routingConfig.getFailurePolicy(message);
-    String failedRoutingKey = failurePolicy.getFailedRoutingKey();
-    if (failedRoutingKey != null) {
-      sendRaw(failedRoutingKey, message);
     }
   }
 
@@ -245,7 +245,7 @@ public class MessageBroker {
 
   public Map<String, Long> getMessageCounts() throws IOException {
     Map<String, Long> result = new HashMap<>();
-    for (String queue : routingConfig.getReadFrom()) {
+    for (String queue : routingConfig.getIncoming()) {
       result.put(queue, rabbitClient.getMessageCount(queue));
     }
     return result;
@@ -253,7 +253,7 @@ public class MessageBroker {
 
   public Map<String, Long> getFailedMessageCounts() throws IOException {
     Map<String, Long> result = new HashMap<>();
-    for (String inputQueue : routingConfig.getReadFrom()) {
+    for (String inputQueue : routingConfig.getIncoming()) {
       FailurePolicy failurePolicy = routingConfig.getFailurePolicy(inputQueue);
       if (failurePolicy != null) {
         String queue = failurePolicy.getFailedRoutingKey();
@@ -265,7 +265,7 @@ public class MessageBroker {
 
   public Map<String, Long> getRetryMessageCounts() throws IOException {
     Map<String, Long> result = new HashMap<>();
-    for (String inputQueue : routingConfig.getReadFrom()) {
+    for (String inputQueue : routingConfig.getIncoming()) {
       FailurePolicy failurePolicy = routingConfig.getFailurePolicy(inputQueue);
       if (failurePolicy != null) {
         String queue = failurePolicy.getRetryRoutingKey();

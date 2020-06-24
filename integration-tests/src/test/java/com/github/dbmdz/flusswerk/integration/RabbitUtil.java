@@ -2,30 +2,31 @@ package com.github.dbmdz.flusswerk.integration;
 
 import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
+import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.FailurePolicy;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
-import com.github.dbmdz.flusswerk.framework.rabbitmq.Queues;
-import com.github.dbmdz.flusswerk.framework.model.Message;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import java.io.IOException;
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RabbitMQ {
+public class RabbitUtil {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQ.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(RabbitUtil.class);
 
   private final MessageBroker messageBroker;
 
-  private final Queues queues;
+  private final RabbitMQ rabbitMQ;
 
   private final RoutingProperties routing;
 
-  public RabbitMQ(MessageBroker messageBroker, Queues queues, RoutingProperties routing) {
+  public RabbitUtil(MessageBroker messageBroker, RabbitMQ rabbitMQ, RoutingProperties routing) {
     this.messageBroker = messageBroker;
-    this.queues = queues;
+    this.rabbitMQ = rabbitMQ;
     this.routing = routing;
   }
+
 
   public Message waitForMessage(String queue, FailurePolicy failurePolicy, String testName)
       throws InterruptedException, IOException, InvalidMessageException {
@@ -43,15 +44,16 @@ public class RabbitMQ {
           testName,
           attempts,
           received != null ? "message" : "nothing",
-          queues.messageCount(failurePolicy.getRetryRoutingKey()),
-          queues.messageCount(failurePolicy.getFailedRoutingKey()));
+          rabbitMQ.queue(failurePolicy.getRetryRoutingKey()).messageCount(),
+          rabbitMQ.queue(failurePolicy.getFailedRoutingKey()).messageCount()
+      );
     }
     return received;
   }
 
   public void purgeQueues() throws IOException {
     // Cleanup leftover messages to not pollute other tests
-    var readFrom = routing.getReadFrom();
+    var readFrom = routing.getIncoming();
     for (String queue : readFrom) {
       purge(queue);
       var failurePolicy = routing.getFailurePolicy(queue);
@@ -59,14 +61,14 @@ public class RabbitMQ {
       purge(failurePolicy.getRetryRoutingKey()); // here routing key == queue name
     }
 
-    var writeTo = routing.getWriteTo();
-    if (writeTo.isPresent()) {
-      purge(writeTo.get());
+    var writeTo = routing.getOutgoing();
+    for (String queue : writeTo.values()) {
+      purge(queue);
     }
   }
 
   private void purge(String queue) throws IOException {
-    var deletedMessages = queues.purge(queue);
+    var deletedMessages = rabbitMQ.queue(queue).purge();
     if (deletedMessages != 0) {
       LOGGER.error("Purged {} and found {} messages.", queue, deletedMessages);
     }

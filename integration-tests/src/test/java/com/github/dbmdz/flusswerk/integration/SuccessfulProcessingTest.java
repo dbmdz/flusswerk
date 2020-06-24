@@ -9,9 +9,9 @@ import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
-import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
-import com.github.dbmdz.flusswerk.framework.rabbitmq.Queues;
 import com.github.dbmdz.flusswerk.framework.model.Message;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import com.github.dbmdz.flusswerk.integration.SuccessfulProcessingTest.FlowConfiguration;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -45,11 +45,11 @@ public class SuccessfulProcessingTest {
 
   private final MessageBroker messageBroker;
 
-  private final Queues queues;
-
   private final RoutingProperties routing;
 
   private final ExecutorService executorService;
+
+  private final RabbitUtil rabbitUtil;
 
   private final RabbitMQ rabbitMQ;
 
@@ -57,14 +57,14 @@ public class SuccessfulProcessingTest {
   public SuccessfulProcessingTest(
       Engine engine,
       MessageBroker messageBroker,
-      Queues queues,
-      FlusswerkProperties flusswerkProperties) {
+      FlusswerkProperties flusswerkProperties,
+      RabbitMQ rabbitMQ) {
     this.engine = engine;
     this.messageBroker = messageBroker;
-    this.queues = queues;
     this.routing = flusswerkProperties.getRouting();
+    this.rabbitMQ = rabbitMQ;
     executorService = Executors.newSingleThreadExecutor();
-    rabbitMQ = new RabbitMQ(messageBroker, queues, routing);
+    rabbitUtil = new RabbitUtil(messageBroker, rabbitMQ, routing);
   }
 
   @TestConfiguration
@@ -83,25 +83,25 @@ public class SuccessfulProcessingTest {
   @AfterEach
   void stopEngine() throws IOException {
     engine.stop();
-    rabbitMQ.purgeQueues();
+    rabbitUtil.purgeQueues();
   }
 
   @Test
   public void successfulMessagesShouldGoToOutQueue() throws Exception {
-    var inputQueue = routing.getReadFrom().get(0);
-    var outputQueue = routing.getWriteTo().orElseThrow();
+    var inputQueue = routing.getIncoming().get(0);
+    var outputQueue = routing.getOutgoing().get("default");
     var failurePolicy = routing.getFailurePolicy(inputQueue);
 
     Message expected = new Message("123456");
     messageBroker.send(inputQueue, expected);
 
     var received =
-        rabbitMQ.waitForMessage(outputQueue, failurePolicy, this.getClass().getSimpleName());
+        rabbitUtil.waitForMessage(outputQueue, failurePolicy, this.getClass().getSimpleName());
     assertThat(received.getTracingId()).isEqualTo(expected.getTracingId());
 
-    assertThat(queues.messageCount(inputQueue)).isZero();
-    assertThat(queues.messageCount(outputQueue)).isZero();
-    assertThat(queues.messageCount(failurePolicy.getRetryRoutingKey())).isZero();
-    assertThat(queues.messageCount(failurePolicy.getFailedRoutingKey())).isZero();
+    assertThat(rabbitMQ.queue(inputQueue).messageCount()).isZero();
+    assertThat(rabbitMQ.queue(outputQueue).messageCount()).isZero();
+    assertThat(rabbitMQ.queue(failurePolicy.getRetryRoutingKey()).messageCount()).isZero();
+    assertThat(rabbitMQ.queue(failurePolicy.getFailedRoutingKey()).messageCount()).isZero();
   }
 }

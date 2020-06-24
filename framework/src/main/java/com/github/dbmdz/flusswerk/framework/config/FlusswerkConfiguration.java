@@ -8,15 +8,15 @@ import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.locking.LockManager;
 import com.github.dbmdz.flusswerk.framework.locking.NoOpLockManager;
 import com.github.dbmdz.flusswerk.framework.locking.RedisLockManager;
-import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
-import com.github.dbmdz.flusswerk.framework.rabbitmq.Queues;
-import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitClient;
-import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitConnection;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.monitoring.BaseMetrics;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlowMetrics;
 import com.github.dbmdz.flusswerk.framework.monitoring.MeterFactory;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitClient;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitConnection;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import com.github.dbmdz.flusswerk.framework.reporting.DefaultProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -99,6 +99,11 @@ public class FlusswerkConfiguration {
   }
 
   @Bean
+  public RabbitMQ rabbitMQ(FlusswerkProperties flusswerkProperties, RabbitConnection rabbitConnection, MessageBroker messageBroker) {
+    return new RabbitMQ(flusswerkProperties.getRouting(), rabbitConnection, messageBroker);
+  }
+
+  @Bean
   public MessageBroker messageBroker(
       ObjectProvider<IncomingMessageType> messageImplementation,
       FlusswerkProperties flusswerkProperties,
@@ -108,11 +113,6 @@ public class FlusswerkConfiguration {
         new RabbitClient(
             messageImplementation.getIfAvailable(IncomingMessageType::new), rabbitConnection);
     return new MessageBroker(flusswerkProperties.getRouting(), client);
-  }
-
-  @Bean
-  public Queues queues(RabbitConnection rabbitConnection) {
-    return new Queues(rabbitConnection);
   }
 
   @Bean
