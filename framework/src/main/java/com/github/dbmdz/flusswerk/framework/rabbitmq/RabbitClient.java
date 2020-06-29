@@ -171,4 +171,8 @@ public class RabbitClient {
   public boolean isChannelAvailable() {
     return channel.isOpen();
   }
+
+  Channel getChannel() {
+    return channel;
+  }
 }

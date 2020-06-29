@@ -1,0 +1,69 @@
+package com.github.dbmdz.flusswerk.framework.rabbitmq;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+import com.github.dbmdz.flusswerk.framework.model.Message;
+import java.io.IOException;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+@DisplayName("A Topic")
+class TopicTest {
+
+  private MessageBroker messageBroker;
+  private Topic topic;
+
+  @BeforeEach
+  void setUp() {
+    messageBroker = mock(MessageBroker.class);
+    topic = new Topic("test.topic", messageBroker);
+  }
+
+  @DisplayName("should send a single message")
+  @Test
+  void shouldSendOneMessage() throws IOException {
+    var message = new Message("123123");
+    topic.send(message);
+    verify(messageBroker).send(any(), eq(message));
+  }
+
+  @DisplayName("should send all messages")
+  @Test
+  void shouldSendManyMessages() throws IOException {
+    var messages = List.of(new Message("1"), new Message("2"));
+    topic.send(messages);
+    verify(messageBroker).send(any(), eq(messages));
+  }
+
+  @DisplayName("should be equal to another identical topic")
+  @Test
+  void testEquals() {
+    var expected = new Topic(topic.getName(), mock(MessageBroker.class));
+    assertThat(topic).isEqualTo(expected);
+  }
+
+  @DisplayName("should have the same hash code as identical topic")
+  @Test
+  void testHashCode() {
+    var expected = new Topic(topic.getName(), mock(MessageBroker.class));
+    assertThat(topic.hashCode()).isEqualTo(expected.hashCode());
+  }
+
+  @DisplayName("should have its name in String representation")
+  @Test
+  void testToString() {
+    assertThat(topic.toString()).contains(topic.getName());
+  }
+
+  @DisplayName("should return its name")
+  @Test
+  void shouldGetName() {
+    assertThat(topic.getName()).isEqualTo("test.topic");
+  }
+}

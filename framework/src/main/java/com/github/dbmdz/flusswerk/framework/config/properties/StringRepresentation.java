@@ -55,7 +55,7 @@ class StringRepresentation {
       property(name, "null");
     }
     text(name);
-        text(":");
+    text(":");
     for (String key : values.keySet()) {
       indent();
       property(key, values.get(key));
@@ -63,7 +63,7 @@ class StringRepresentation {
     return this;
   }
 
-    private void indent() {
+  private void indent() {
     stringBuilder.append("\t");
   }
 

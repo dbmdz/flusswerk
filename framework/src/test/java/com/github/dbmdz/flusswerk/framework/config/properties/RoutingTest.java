@@ -14,7 +14,9 @@ class RoutingTest {
   @Test
   @DisplayName("should be constructed with no FailurePolicyProperties")
   void shouldBeConstructedWithoutFailurePolicyProperties() {
-    RoutingProperties routing = new RoutingProperties("test.exchange", List.of("in"), Map.of("default", "out"), Collections.emptyMap());
+    RoutingProperties routing =
+        new RoutingProperties(
+            "test.exchange", List.of("in"), Map.of("default", "out"), Collections.emptyMap());
     assertThat(routing.getFailurePolicy("in")).isNotNull();
   }
 }

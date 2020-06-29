@@ -4,7 +4,6 @@ import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.FailurePolicy;
-import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import java.io.IOException;
 import org.junit.Assert;
@@ -15,40 +14,36 @@ public class RabbitUtil {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RabbitUtil.class);
 
-  private final MessageBroker messageBroker;
-
   private final RabbitMQ rabbitMQ;
 
   private final RoutingProperties routing;
 
-  public RabbitUtil(MessageBroker messageBroker, RabbitMQ rabbitMQ, RoutingProperties routing) {
-    this.messageBroker = messageBroker;
+  public RabbitUtil(RabbitMQ rabbitMQ, RoutingProperties routing) {
     this.rabbitMQ = rabbitMQ;
     this.routing = routing;
   }
 
-
-  public Message waitForMessage(String queue, FailurePolicy failurePolicy, String testName)
+  public Message waitForMessage(String queueName, FailurePolicy failurePolicy, String testName)
       throws InterruptedException, IOException, InvalidMessageException {
-    var received = messageBroker.receive(queue);
+    var queue = rabbitMQ.queue(queueName);
+    var received = queue.receive();
     var attempts = 0;
-    while (received == null) {
+    while (received.isEmpty()) {
       if (attempts > 50) {
         Assert.fail("To many attempts to receive message");
       }
       Thread.sleep(failurePolicy.getBackoff().toMillis()); // dead letter backoff time is 1s
-      received = messageBroker.receive(queue);
+      received = queue.receive();
       attempts++;
       LOGGER.info(
           "{}: Receive message attempt {}, got {} ({} retry, {} failed)",
           testName,
           attempts,
-          received != null ? "message" : "nothing",
+          received.isPresent() ? "message" : "nothing",
           rabbitMQ.queue(failurePolicy.getRetryRoutingKey()).messageCount(),
-          rabbitMQ.queue(failurePolicy.getFailedRoutingKey()).messageCount()
-      );
+          rabbitMQ.queue(failurePolicy.getFailedRoutingKey()).messageCount());
     }
-    return received;
+    return received.get();
   }
 
   public void purgeQueues() throws IOException {

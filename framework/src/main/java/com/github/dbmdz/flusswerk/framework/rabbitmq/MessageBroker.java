@@ -42,7 +42,7 @@ public class MessageBroker {
    * @throws IOException if sending the message fails.
    */
   @Deprecated
-  public void send(Message message) throws IOException {
+  void send(Message message) throws IOException {
     var topic = routingConfig.getOutgoing().get("default");
     if (topic == null) {
       throw new RuntimeException("Cannot send message, no default queue specified");
@@ -73,7 +73,7 @@ public class MessageBroker {
    * @param message the message to send.
    * @throws IOException if sending the message fails.
    */
-  public void send(String routingKey, Message message) throws IOException {
+  void send(String routingKey, Message message) throws IOException {
     rabbitClient.send(routingConfig.getExchange(), routingKey, message);
   }
 
@@ -86,7 +86,7 @@ public class MessageBroker {
    * @param messages the messages to send.
    * @throws IOException if sending a message fails.
    */
-  public void send(String routingKey, Collection<? extends Message> messages) throws IOException {
+  void send(String routingKey, Collection<? extends Message> messages) throws IOException {
     for (Message message : messages) {
       send(routingKey, message);
     }
@@ -212,7 +212,7 @@ public class MessageBroker {
     }
   }
 
-  public void fail(Message message, boolean ackMessage) throws IOException {
+  void fail(Message message, boolean ackMessage) throws IOException {
     if (ackMessage) {
       ack(message);
     }
@@ -243,7 +243,8 @@ public class MessageBroker {
     rabbitClient.provideExchange(routingConfig.getDeadLetterExchange());
   }
 
-  public Map<String, Long> getMessageCounts() throws IOException {
+  @Deprecated
+  Map<String, Long> getMessageCounts() throws IOException {
     Map<String, Long> result = new HashMap<>();
     for (String queue : routingConfig.getIncoming()) {
       result.put(queue, rabbitClient.getMessageCount(queue));
@@ -251,7 +252,7 @@ public class MessageBroker {
     return result;
   }
 
-  public Map<String, Long> getFailedMessageCounts() throws IOException {
+  Map<String, Long> getFailedMessageCounts() throws IOException {
     Map<String, Long> result = new HashMap<>();
     for (String inputQueue : routingConfig.getIncoming()) {
       FailurePolicy failurePolicy = routingConfig.getFailurePolicy(inputQueue);
