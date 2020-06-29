@@ -2,8 +2,8 @@ package com.github.dbmdz.flusswerk.framework.engine;
 
 import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
-import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.model.Message;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import java.io.IOException;
 import java.util.Collection;
@@ -53,10 +53,7 @@ public class Engine {
    * @param processReport Reporting implementation (or null, if DefaultProcessReport shall be used)
    */
   public Engine(
-      MessageBroker messageBroker,
-      Flow flow,
-      int concurrentWorkers,
-      ProcessReport processReport) {
+      MessageBroker messageBroker, Flow flow, int concurrentWorkers, ProcessReport processReport) {
     this.messageBroker = messageBroker;
     this.flow = flow;
     this.concurrentWorkers = concurrentWorkers;

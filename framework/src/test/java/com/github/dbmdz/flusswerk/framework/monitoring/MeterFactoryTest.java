@@ -19,7 +19,8 @@ class MeterFactoryTest {
     var monitoringMetric = "test.metric";
 
     FlusswerkProperties flusswerkProperties = mock(FlusswerkProperties.class);
-    when(flusswerkProperties.getMonitoring()).thenReturn(new MonitoringProperties(monitoringPrefix));
+    when(flusswerkProperties.getMonitoring())
+        .thenReturn(new MonitoringProperties(monitoringPrefix));
 
     SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
     MeterFactory meterFactory = new MeterFactory(flusswerkProperties, "test_app", meterRegistry);

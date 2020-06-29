@@ -26,7 +26,8 @@ public class RabbitMQProperties {
    * @param username The username for RabbitMQ login
    * @param password The password for RabbitMQ login
    */
-  public RabbitMQProperties(String host, Integer port, String virtualHost, String username, String password) {
+  public RabbitMQProperties(
+      String host, Integer port, String virtualHost, String username, String password) {
     this.host = requireNonNullElse(host, "localhost");
     this.port = requireNonNullElse(port, 5672);
     this.virtualHost = virtualHost; // can actually be null

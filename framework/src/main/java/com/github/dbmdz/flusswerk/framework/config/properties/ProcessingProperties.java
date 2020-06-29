@@ -23,7 +23,9 @@ public class ProcessingProperties {
 
   @Override
   public String toString() {
-    return StringRepresentation.of(ProcessingProperties.class).property("threads", threads).toString();
+    return StringRepresentation.of(ProcessingProperties.class)
+        .property("threads", threads)
+        .toString();
   }
 
   public static ProcessingProperties defaults() {

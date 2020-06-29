@@ -75,7 +75,8 @@ public class FlusswerkConfiguration {
       threads = 5;
     }
 
-    ProcessReport processReport = processReportProvider.getIfAvailable(() -> new DefaultProcessReport(name));
+    ProcessReport processReport =
+        processReportProvider.getIfAvailable(() -> new DefaultProcessReport(name));
     return new Engine(messageBroker, flow, threads, processReport);
   }
 
@@ -99,20 +100,24 @@ public class FlusswerkConfiguration {
   }
 
   @Bean
-  public RabbitMQ rabbitMQ(FlusswerkProperties flusswerkProperties, RabbitConnection rabbitConnection, MessageBroker messageBroker) {
-    return new RabbitMQ(flusswerkProperties.getRouting(), rabbitConnection, messageBroker);
+  public RabbitClient rabbitClient(
+      ObjectProvider<IncomingMessageType> incomingMessageType, RabbitConnection rabbitConnection) {
+    return new RabbitClient(
+        incomingMessageType.getIfAvailable(IncomingMessageType::new), rabbitConnection);
+  }
+
+  @Bean
+  public RabbitMQ rabbitMQ(
+      FlusswerkProperties flusswerkProperties,
+      RabbitClient rabbitClient,
+      MessageBroker messageBroker) {
+    return new RabbitMQ(flusswerkProperties.getRouting(), rabbitClient, messageBroker);
   }
 
   @Bean
   public MessageBroker messageBroker(
-      ObjectProvider<IncomingMessageType> messageImplementation,
-      FlusswerkProperties flusswerkProperties,
-      RabbitConnection rabbitConnection)
-      throws IOException {
-    RabbitClient client =
-        new RabbitClient(
-            messageImplementation.getIfAvailable(IncomingMessageType::new), rabbitConnection);
-    return new MessageBroker(flusswerkProperties.getRouting(), client);
+      FlusswerkProperties flusswerkProperties, RabbitClient rabbitClient) throws IOException {
+    return new MessageBroker(flusswerkProperties.getRouting(), rabbitClient);
   }
 
   @Bean

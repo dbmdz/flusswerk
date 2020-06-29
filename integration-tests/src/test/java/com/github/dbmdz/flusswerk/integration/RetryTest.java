@@ -20,7 +20,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.UnaryOperator;
-import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -53,8 +52,6 @@ public class RetryTest {
 
   private final Engine engine;
 
-  private final MessageBroker messageBroker;
-
   private final RoutingProperties routing;
 
   private final ExecutorService executorService;
@@ -70,11 +67,10 @@ public class RetryTest {
       RabbitMQ rabbitMQ,
       FlusswerkProperties flusswerkProperties) {
     this.engine = engine;
-    this.messageBroker = messageBroker;
     this.rabbitMQ = rabbitMQ;
     this.routing = flusswerkProperties.getRouting();
     executorService = Executors.newSingleThreadExecutor();
-    rabbitUtil = new RabbitUtil(messageBroker, rabbitMQ, routing);
+    rabbitUtil = new RabbitUtil(rabbitMQ, routing);
   }
 
   static class CountFailures implements UnaryOperator<Message> {
@@ -122,24 +118,13 @@ public class RetryTest {
     var inputQueue = routing.getIncoming().get(0);
     var failurePolicy = routing.getFailurePolicy(inputQueue);
 
-    messageBroker.send(inputQueue, message);
-    var received = messageBroker.receive(failurePolicy.getFailedRoutingKey());
-    var attempts = 0;
-    while (received == null) {
-      if (attempts > 50) {
-        Assert.fail("To many attempts to receive message");
-      }
-      Thread.sleep(failurePolicy.getBackoff().toMillis()); // dead letter backoff time is 1s
-      received = messageBroker.receive(failurePolicy.getFailedRoutingKey());
-      attempts++;
-      LOGGER.info(
-          "Receive message attempt {}, got {} ({} messages in failed, {} messages in retry)",
-          attempts,
-          received != null ? "message" : "nothing",
-          rabbitMQ.queue(failurePolicy.getFailedRoutingKey()).messageCount(),
-          rabbitMQ.queue(failurePolicy.getRetryRoutingKey()).messageCount()
-      );
-    }
+    rabbitMQ.topic(inputQueue).send(message);
+
+    var received =
+        rabbitUtil.waitForMessage(
+            failurePolicy.getFailedRoutingKey(), failurePolicy, this.getClass().getSimpleName());
+
+    rabbitMQ.ack(received);
     assertThat(received.getTracingId()).isEqualTo(message.getTracingId());
     assertThat(received.getEnvelope().getRetries()).isEqualTo(failurePolicy.getRetries());
   }
