@@ -30,7 +30,7 @@ public class RabbitUtil {
     var attempts = 0;
     while (received.isEmpty()) {
       if (attempts > 50) {
-        Assert.fail("To many attempts to receive message");
+        Assert.fail("Too many attempts to receive message");
       }
       Thread.sleep(failurePolicy.getBackoff().toMillis()); // dead letter backoff time is 1s
       received = queue.receive();
