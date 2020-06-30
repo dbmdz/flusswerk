@@ -40,6 +40,8 @@ public class MessageBroker {
    *
    * @param message the message to send.
    * @throws IOException if sending the message fails.
+   *
+   * @deprecated Use {@link Topic#send(Message)} instead
    */
   @Deprecated
   void send(Message message) throws IOException {
@@ -55,6 +57,8 @@ public class MessageBroker {
    *
    * @param messages the message to send.
    * @throws IOException if sending the message fails.
+   *
+   * @deprecated Use {@link Topic#send(Message)} instead
    */
   @Deprecated
   public void send(Collection<? extends Message> messages) throws IOException {
@@ -243,6 +247,13 @@ public class MessageBroker {
     rabbitClient.provideExchange(routingConfig.getDeadLetterExchange());
   }
 
+  /**
+   * Returns the number of messages in known queues
+   * @return the number of messages in known queues
+   * @throws IOException if communication with RabbitMQ fails
+   *
+   * @deprecated Use {@link Queue#messageCount()} instead.
+   */
   @Deprecated
   Map<String, Long> getMessageCounts() throws IOException {
     Map<String, Long> result = new HashMap<>();
