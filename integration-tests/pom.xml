@@ -24,12 +24,10 @@
     <dependency>
       <groupId>io.micrometer</groupId>
       <artifactId>micrometer-core</artifactId>
-      <version>${version.micrometer}</version>
     </dependency>
     <dependency>
       <groupId>io.micrometer</groupId>
       <artifactId>micrometer-registry-prometheus</artifactId>
-      <version>${version.micrometer}</version>
     </dependency>
     <dependency>
       <groupId>org.assertj</groupId>
@@ -43,12 +41,10 @@
     <dependency>
       <groupId>net.logstash.logback</groupId>
       <artifactId>logstash-logback-encoder</artifactId>
-      <version>${version.logstash}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
-      <version>${version.spring-boot}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -58,7 +54,6 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-actuator-autoconfigure</artifactId>
-      <version>${version.spring-boot}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
