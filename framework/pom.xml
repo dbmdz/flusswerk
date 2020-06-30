@@ -14,12 +14,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>net.logstash.logback</groupId>
-      <artifactId>logstash-logback-encoder</artifactId>
-      <version>${version.logstash}</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
     </dependency>
@@ -34,7 +28,6 @@
     <dependency>
       <groupId>io.micrometer</groupId>
       <artifactId>micrometer-core</artifactId>
-      <version>${version.micrometer}</version>
     </dependency>
     <dependency>
       <groupId>javax.annotation</groupId>
@@ -43,6 +36,11 @@
     <dependency>
       <groupId>javax.validation</groupId>
       <artifactId>validation-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>net.logstash.logback</groupId>
+      <artifactId>logstash-logback-encoder</artifactId>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.assertj</groupId>
@@ -79,7 +77,6 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
-      <version>${version.spring-boot}</version>
     </dependency>
   </dependencies>
 

@@ -63,18 +63,10 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- Dependency versions -->
     <version.amqp-client>5.6.0</version.amqp-client>
-    <version.assertj>3.16.1</version.assertj>
-    <version.jackson>2.11.1</version.jackson>
-    <version.javax.annotation-api>1.3.2</version.javax.annotation-api>
-    <version.junit>5.6.2</version.junit>
-    <version.logback>1.2.3</version.logback>
-    <version.logstash>6.4</version.logstash>
+    <version.logstash-encoder>6.4</version.logstash-encoder>
     <version.micrometer>1.5.1</version.micrometer>
-    <version.mockito>3.3.3</version.mockito>
     <version.redisson>3.13.1</version.redisson>
-    <version.slf4j>1.7.30</version.slf4j>
     <version.spring-boot>2.3.1.RELEASE</version.spring-boot>
-    <version.validation-api>2.0.1.Final</version.validation-api>
     <!-- Plugin versions -->
     <version.maven-checkstyle-plugin>3.1.0</version.maven-checkstyle-plugin>
     <version.maven-compiler-plugin>3.8.1</version.maven-compiler-plugin>
@@ -89,26 +81,6 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-classic</artifactId>
-        <version>${version.logback}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-annotations</artifactId>
-        <version>${version.jackson}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>${version.jackson}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.datatype</groupId>
-        <artifactId>jackson-datatype-jsr310</artifactId>
-        <version>${version.jackson}</version>
-      </dependency>
-      <dependency>
         <groupId>com.rabbitmq</groupId>
         <artifactId>amqp-client</artifactId>
         <version>${version.amqp-client}</version>
@@ -119,38 +91,9 @@
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.assertj</groupId>
-        <artifactId>assertj-core</artifactId>
-        <version>${version.assertj}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>javax.annotation</groupId>
-        <artifactId>javax.annotation-api</artifactId>
-        <version>${version.javax.annotation-api}</version>
-      </dependency>
-      <dependency>
-        <groupId>javax.validation</groupId>
-        <artifactId>validation-api</artifactId>
-        <version>${version.validation-api}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter</artifactId>
-        <version>${version.junit}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter-api</artifactId>
-        <version>${version.junit}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.mockito</groupId>
-        <artifactId>mockito-core</artifactId>
-        <version>${version.mockito}</version>
-        <scope>test</scope>
+        <groupId>net.logstash.logback</groupId>
+        <artifactId>logstash-logback-encoder</artifactId>
+        <version>${version.logstash-encoder}</version>
       </dependency>
       <dependency>
         <groupId>org.redisson</groupId>
@@ -158,19 +101,11 @@
         <version>${version.redisson}</version>
       </dependency>
       <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>${version.slf4j}</version>
-      </dependency>
-      <dependency>
         <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter</artifactId>
+        <artifactId>spring-boot-dependencies</artifactId>
         <version>${version.spring-boot}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-configuration-processor</artifactId>
-        <version>${version.spring-boot}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
