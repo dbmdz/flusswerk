@@ -14,7 +14,7 @@ public class FlusswerkProperties {
 
   @NestedConfigurationProperty private final ProcessingProperties processing;
 
-  @NestedConfigurationProperty private final RabbitMQProperties rabbitMQ;
+  @NestedConfigurationProperty private final RabbitMQProperties rabbitmq;
 
   @NestedConfigurationProperty private final RoutingProperties routing;
 
@@ -25,12 +25,12 @@ public class FlusswerkProperties {
   @ConstructorBinding
   public FlusswerkProperties(
       ProcessingProperties processing,
-      RabbitMQProperties rabbitMQ,
+      RabbitMQProperties rabbitmq,
       RoutingProperties routing,
       MonitoringProperties monitoring,
       RedisProperties redis) {
     this.processing = requireNonNullElseGet(processing, ProcessingProperties::defaults);
-    this.rabbitMQ = requireNonNullElseGet(rabbitMQ, RabbitMQProperties::defaults);
+    this.rabbitmq = requireNonNullElseGet(rabbitmq, RabbitMQProperties::defaults);
     this.routing = requireNonNullElseGet(routing, RoutingProperties::defaults);
     this.monitoring = requireNonNullElseGet(monitoring, MonitoringProperties::defaults);
     this.redis = redis; // might actually be null, then centralized locking will be disabled
@@ -41,7 +41,7 @@ public class FlusswerkProperties {
   }
 
   public RabbitMQProperties getRabbitMQ() {
-    return rabbitMQ;
+    return rabbitmq;
   }
 
   public RoutingProperties getRouting() {
@@ -61,7 +61,7 @@ public class FlusswerkProperties {
     return StringRepresentation.of(FlusswerkProperties.class)
         .property("processing", processing.toString())
         .property("routing", routing.toString())
-        .property("connection", rabbitMQ.toString())
+        .property("connection", rabbitmq.toString())
         .property("monitoring", monitoring.toString())
         .toString();
   }
