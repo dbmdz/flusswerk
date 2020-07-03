@@ -3,11 +3,9 @@ include: "https://raw.githubusercontent.com/dbmdz/development/master/ci/.gitlab-
 cache:
   key: "$CI_COMMIT_SHA"
   paths:
-    - engine/target/
-    - examples-plain/target/
     - examples-spring-boot/target/
-    - spring-boot-starter-flusswerk/target/
-    - integration-test/target/
+    - framework/target/
+    - integration-tests/target/
 
 services:
   - "$DIND_IMAGE"
