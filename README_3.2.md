@@ -7,7 +7,7 @@
 [![GitHub release](https://img.shields.io/github/release/dbmdz/flusswerk.svg)](https://github.com/dbmdz/flusswerk/releases)
 [![Maven Central](https://img.shields.io/maven-central/v/de.digitalcollections.flusswerk/dc-flusswerk-parent.svg)](https://search.maven.org/search?q=a:dc-flusswerk-parent)
 
-Flusswerk makes it easy to create multi threaded workers for read-transform-write chains (aka ETL jobs). Workflows are coordinated via RabbitMQ, so it's easy to create chains of independent workflow jobs (each a new Java application).
+Flusswerk makes it easy to create multithreaded workers for read-transform-write chains (aka ETL jobs). Workflows are coordinated via RabbitMQ, so it's easy to create chains of independent workflow jobs (each a new Java Application).
 
 Maven:
 
@@ -23,14 +23,38 @@ Gradle:
 
 ```groovy
 dependencies {
-    compile group: 'com.github.dbmdz.flusswerk', name: 'framework', version: '4.0.0'
+    compile group: 'de.digitalcollections.flusswerk', name: 'dc-flusswerk-engine', version: '2.2.1'
 }
 ``` 
  
- ## Getting started
+ 
+## Requirements
+ 
+Required libraries are Jackson and RabbitMQ Java API, the minimal Java version is 8 (will move to 9 in a few months). The Flusswerk engine itself *never requires Spring*, but there are examples how to integrate the engine in a Spring Boot Application. 
 
-To get started, clone or copy the example at TODO. The example has three mino
+## Migration from version 1.x to 2.x
 
+Starting with version 2.0.0, the interface for flows sending many messages has been simplified. The writer now can use the message class generics directly: 
+
+```java
+class Writer implements java.util.function.Function<T, Collection<? extends Message>> {
+  @Override
+  public Collection<? extends Message> apply(T value) {
+    // ...
+  } 
+}
+```
+
+gets now 
+ 
+```java
+class Writer implements java.util.function.Function<T, Collection<Message>> {
+  @Override
+  public Collection<Message> apply(T value) {
+    // ...
+  } 
+}
+```
 
 ## Basic setup
 
@@ -348,3 +372,35 @@ public class Metrics extends BaseMetrics {
   }
 }
 ```
+
+
+## MessageBrokerBuilder properties
+
+### RabbitMQ
+
+| Property                          | Meaning                                       |
+| --------------------------------- | --------------------------------------------- | 
+| `connectTo(String connectionStr)` | RabbitMQ host name and port, separated by a colon (default `localhost:5672`). Can also be a list, separated by comma |
+| `username(String username)`       | Username for authentication (default `guest`) |
+| `password(String password)`       | Password for authentication (default `guest`) |
+| `virtualHost(String virtualHost)` | RabbitMQ virtual host                         |
+
+### Message Routing
+
+Everything will be created if it does not exist:
+
+| Property                                        | default               | Meaning     |
+| ----------------------------------------------- | --------------------- | ------------------------------------------------------------------- | 
+| `readFrom(String inputQueue)`                   | -                     | Queue to read incoming messages from                                |
+| `writeTo(String outputRoutingKey)`              | -                     | Queue to write outgoing messages to                                 |
+| `addFailurePolicy(FailurePolicy policy)`        | behaviour as in section *Failure Policies*  | Policy for retrying messages                  |
+| `exchange(String exchange)`                     | `workflow`            | RabbitMQ exchange for routing messages                              |
+| `deadLetterExchange(String deadLetterExchange)` | `workflow.retry`      | RabbitMQ dead letter exchange to reroute failed messages            |
+| `maxRetries(int number)`                        | `5`                   | The number of retries until a message is routed to the failed queue |
+
+### Jackson Mapping
+
+| Property                                                                       | Meaning                                                   |
+| ------------------------------------------------------------------------------ | --------------------------------------------------------- |
+| `jacksonModules(Module... modules)`                                            | A list of Jackson Modules to configure arbitrary Mappings |
+| `messageMapping(Class<? extends Message> messageClass, Class<?> messageMixin)` | Set a custom message type and its Jackson Mapping         |

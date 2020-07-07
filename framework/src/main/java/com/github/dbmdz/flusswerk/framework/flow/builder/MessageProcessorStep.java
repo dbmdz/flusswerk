@@ -53,16 +53,17 @@ public class MessageProcessorStep<M extends Message> {
    * Set a message processor that receives a message of type <code>M</code> and does not return any
    * {@link Message} for Flusswerk to send.
    *
-   * @param p the message processor to set
+   * @param consumer the message processor to set
    * @return the next reader step
    */
   public ConfigurationStep<M, M, M> consume(Consumer<M> consumer) {
     model.setReader(m -> m);
     model.setTransformer(m -> m);
-    model.setWriter(m -> {
-      consumer.accept(m);
-      return emptyList();
-    });
+    model.setWriter(
+        m -> {
+          consumer.accept(m);
+          return emptyList();
+        });
     return new ConfigurationStep<>(model);
   }
 }
