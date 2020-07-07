@@ -38,7 +38,7 @@ class EngineTest {
     message = new Message();
   }
 
-  private Engine createEngine(Flow<?, ?, ?> flow) {
+  private Engine createEngine(Flow flow) {
     return new Engine(messageBroker, flow, 5, new SilentProcessReport());
   }
 

@@ -9,7 +9,6 @@ import com.github.dbmdz.flusswerk.framework.locking.LockManager;
 import com.github.dbmdz.flusswerk.framework.locking.NoOpLockManager;
 import com.github.dbmdz.flusswerk.framework.locking.RedisLockManager;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
-import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.monitoring.BaseMetrics;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlowMetrics;
 import com.github.dbmdz.flusswerk.framework.monitoring.MeterFactory;
@@ -38,13 +37,13 @@ import org.springframework.context.annotation.Import;
 public class FlusswerkConfiguration {
 
   @Bean
-  public <M extends Message, R, W> Flow<M, R, W> flow(
+  public Flow flow(
       ObjectProvider<FlowSpec> flowSpec, LockManager lockManager) {
     var spec = flowSpec.getIfAvailable();
     if (spec == null) {
       throw new RuntimeException("Missing flow definition. Please create a FlowSpec bean.");
     }
-    return new Flow<>(spec, lockManager);
+    return new Flow(spec, lockManager);
   }
 
   /**
@@ -52,16 +51,13 @@ public class FlusswerkConfiguration {
    * @param flow The flow to use (optional).
    * @param flusswerkProperties The external configuration from <code>application.yml</code>.
    * @param processReportProvider A custom process report provider (optional).
-   * @param <M> The used {@link Message} type
-   * @param <R> The type of the reader implementation
-   * @param <W> The type of the writer implementation
    * @return The {@link Engine} used for this job.
    */
   @Bean
-  public <M extends Message, R, W> Engine engine(
+  public Engine engine(
       @Value("spring.application.name") String name,
       MessageBroker messageBroker,
-      Flow<M, R, W> flow,
+      Flow flow,
       FlusswerkProperties flusswerkProperties,
       ObjectProvider<ProcessReport> processReportProvider,
       Set<FlowMetrics> flowMetrics) {

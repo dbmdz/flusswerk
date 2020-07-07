@@ -9,12 +9,12 @@ import java.util.function.Function;
 
 public class Flows {
 
-  public static Flow<Message, Message, Message> passthroughFlow() {
+  public static Flow passthroughFlow() {
     var spec = FlowBuilder.messageProcessor(Message.class).process(m -> m).build();
-    return new Flow<>(spec, new NoOpLockManager());
+    return new Flow(spec, new NoOpLockManager());
   }
 
-  private static Flow<Message, String, String> flowWithTransformer(
+  private static Flow flowWithTransformer(
       Function<String, String> transformer) {
     var spec =
         FlowBuilder.flow(Message.class, String.class, String.class)
@@ -22,10 +22,10 @@ public class Flows {
             .transformer(transformer)
             .writerSendingMessage(Message::new)
             .build();
-    return new Flow<>(spec, new NoOpLockManager());
+    return new Flow(spec, new NoOpLockManager());
   }
 
-  public static Flow<Message, String, String> flowThrowing(Class<? extends RuntimeException> cls) {
+  public static Flow flowThrowing(Class<? extends RuntimeException> cls) {
     var message = String.format("Generated %s for unit test", cls.getSimpleName());
     final RuntimeException exception;
     try {
@@ -43,7 +43,7 @@ public class Flows {
     return flowWithTransformer(transformerWithException);
   }
 
-  public static Flow<Message, String, String> flowBlockingAllThreads() {
+  public static Flow flowBlockingAllThreads() {
     return flowWithTransformer(new ThreadBlockingTransformer<>());
   }
 }

@@ -1,9 +1,7 @@
 package com.github.dbmdz.flusswerk.spring.boot.example.config;
 
-import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
-import com.github.dbmdz.flusswerk.framework.locking.NoOpLockManager;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.monitoring.BaseMetrics;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;

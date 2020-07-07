@@ -24,8 +24,6 @@ public class Engine {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Engine.class);
 
-  private static final int DEFAULT_CONCURRENT_WORKERS = 5;
-
   private final int concurrentWorkers;
 
   private final MessageBroker messageBroker;
@@ -118,7 +116,6 @@ public class Engine {
     engineStarted.unlock(); // Engine successfully stopped, could now be started again
   }
 
-  @SuppressWarnings("unchecked")
   void process(Message message) {
     Collection<? extends Message> messagesToSend;
     try {
