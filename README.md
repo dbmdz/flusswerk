@@ -13,7 +13,7 @@ Maven:
 
 ```xml
 <dependency>
-  <groupId>com.github.dbmdz</groupId>
+  <groupId>com.github.dbmdz.flusswerk</groupId>
   <artifactId>framework</artifactId>
   <version>4.0.0</version>
 </dependency>
