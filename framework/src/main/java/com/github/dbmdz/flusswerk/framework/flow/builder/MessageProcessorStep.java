@@ -1,8 +1,11 @@
 package com.github.dbmdz.flusswerk.framework.flow.builder;
 
+import static java.util.Collections.emptyList;
+
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -43,6 +46,20 @@ public class MessageProcessorStep<M extends Message> {
     model.setReader(m -> m);
     model.setTransformer(m -> m);
     model.setWriter(p.andThen(List::of));
+    return new ConfigurationStep<>(model);
+  }
+
+  /**
+   * Set a message processor that receives a message of type <code>M</code> and does not return any
+   * {@link Message} for Flusswerk to send.
+   *
+   * @param p the message processor to set
+   * @return the next reader step
+   */
+  public ConfigurationStep<M, M, M> consume(Consumer<M> p) {
+    model.setReader(m -> m);
+    model.setTransformer(m -> m);
+    model.setWriter(m -> emptyList());
     return new ConfigurationStep<>(model);
   }
 }

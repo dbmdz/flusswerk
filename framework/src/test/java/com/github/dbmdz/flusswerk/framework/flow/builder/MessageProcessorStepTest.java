@@ -1,6 +1,8 @@
 package com.github.dbmdz.flusswerk.framework.flow.builder;
 
 import com.github.dbmdz.flusswerk.framework.TestMessage;
+import com.github.dbmdz.flusswerk.framework.model.Message;
+import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
@@ -29,8 +31,7 @@ class MessageProcessorStepTest {
     TestMessage[] expected = {new TestMessage("a"), new TestMessage("b"), new TestMessage("c")};
 
     var message = new TestMessage("1", allIdsOf(expected));
-    var actual =
-        model.getReader().andThen(model.getTransformer()).andThen(model.getWriter()).apply(message);
+    var actual = evaluateFlow(message);
 
     Assertions.assertThat(actual).containsExactly(expected);
   }
@@ -42,13 +43,31 @@ class MessageProcessorStepTest {
 
     var expected = new TestMessage("a");
     var message = new TestMessage("1", expected.getId());
-    var actual =
-        model.getReader().andThen(model.getTransformer()).andThen(model.getWriter()).apply(message);
+    var actual = evaluateFlow(message);
 
     Assertions.assertThat(actual).containsExactly(expected);
   }
 
+  @Test
+  @DisplayName("should consume message")
+  void shouldConsumeMessage() {
+    step.consume(message -> {});
+
+    var message = new TestMessage("1");
+    var actual = evaluateFlow(message);
+
+    Assertions.assertThat(actual).isEmpty();
+  }
+
   String[] allIdsOf(TestMessage... messages) {
     return Stream.of(messages).map(TestMessage::getId).toArray(String[]::new);
+  }
+
+  private Collection<Message> evaluateFlow(TestMessage message) {
+    return model
+        .getReader()
+        .andThen(model.getTransformer())
+        .andThen(model.getWriter())
+        .apply(message);
   }
 }
