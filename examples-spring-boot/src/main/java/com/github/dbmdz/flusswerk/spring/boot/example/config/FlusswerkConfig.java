@@ -1,6 +1,7 @@
 package com.github.dbmdz.flusswerk.spring.boot.example.config;
 
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
+import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.locking.NoOpLockManager;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
@@ -21,15 +22,14 @@ public class FlusswerkConfig {
   }
 
   @Bean
-  public Flow<Greeting, String, String> flow(BaseMetrics metrics) {
-    var flowSpec =
+  public FlowSpec flow(BaseMetrics metrics) {
+    return
         FlowBuilder.flow(Greeting.class, String.class, String.class)
             .reader(Greeting::getText)
             .transformer(new ComposePerfectGreeting())
             .writerSendingNothing(System.out::println)
             .metrics(metrics)
             .build();
-    return new Flow<>(flowSpec, new NoOpLockManager());
   }
 
   @Bean

@@ -39,7 +39,7 @@ public class FlusswerkConfiguration {
 
   @Bean
   public <M extends Message, R, W> Flow<M, R, W> flow(
-      ObjectProvider<FlowSpec<M, R, W>> flowSpec, LockManager lockManager) {
+      ObjectProvider<FlowSpec> flowSpec, LockManager lockManager) {
     var spec = flowSpec.getIfAvailable();
     if (spec == null) {
       throw new RuntimeException("Missing flow definition. Please create a FlowSpec bean.");

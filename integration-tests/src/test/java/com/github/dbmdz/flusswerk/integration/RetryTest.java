@@ -87,7 +87,7 @@ public class RetryTest {
   static class FlowConfiguration {
 
     @Bean
-    public FlowSpec<Message, Message, Message> flowSpec() {
+    public FlowSpec flowSpec() {
       return FlowBuilder.messageProcessor(Message.class).process(new CountFailures()).build();
     }
   }
