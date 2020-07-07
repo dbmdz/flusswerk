@@ -17,15 +17,12 @@ import java.util.function.Function;
  * transformerFactory and finally the writerFactory. The transformerFactory can be omitted if <code>
  * R</code> and <code>W</code> are the same.
  *
- * @param <M> The data type of the message.
- * @param <R> The data type produced by the reader. Input data type of the transformer.
- * @param <W> The data type consumed by the writer. Output data type of the transformer.
  */
-public class Flow<M extends Message, R, W> {
+public class Flow {
 
-  private final Function<M, R> reader;
-  private final Function<R, W> transformer;
-  private final Function<W, Collection<Message>> writer;
+  private final Function<Message, Object> reader;
+  private final Function<Object, Object> transformer;
+  private final Function<Object, Collection<Message>> writer;
   private final Runnable cleanup;
   private final Set<FlowMetrics> flowMetrics;
   private final LockManager lockManager;
@@ -43,7 +40,7 @@ public class Flow<M extends Message, R, W> {
     this.flowMetrics.addAll(flowMetrics);
   }
 
-  public Collection<Message> process(M message) {
+  public Collection<Message> process(Message message) {
     FlowInfo info = new FlowInfo();
     Collection<Message> result;
 
