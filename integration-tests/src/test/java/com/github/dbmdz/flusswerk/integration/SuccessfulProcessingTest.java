@@ -63,7 +63,7 @@ public class SuccessfulProcessingTest {
   @TestConfiguration
   static class FlowConfiguration {
     @Bean
-    public FlowSpec<Message, Message, Message> flowSpec() {
+    public FlowSpec flowSpec() {
       return FlowBuilder.messageProcessor(Message.class).process(m -> m).build();
     }
   }

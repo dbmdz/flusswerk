@@ -3,27 +3,25 @@ package com.github.dbmdz.flusswerk.framework.flow;
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 
-import com.github.dbmdz.flusswerk.framework.model.Message;
-import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class FlowSpec<M, R, W> {
+public class FlowSpec {
 
-  private final Function<M, R> reader;
+  private final Function reader;
 
-  private final Function<R, W> transformer;
+  private final Function transformer;
 
-  private final Function<W, Collection<Message>> writer;
+  private final Function writer;
 
   private final Runnable cleanup;
 
   private final Consumer<FlowInfo> monitor;
 
   public FlowSpec(
-      Function<M, R> reader,
-      Function<R, W> transformer,
-      Function<W, Collection<Message>> writer,
+      Function reader,
+      Function transformer,
+      Function writer,
       Runnable cleanup,
       Consumer<FlowInfo> monitor) {
     this.reader = requireNonNull(reader);
@@ -33,15 +31,15 @@ public class FlowSpec<M, R, W> {
     this.monitor = requireNonNullElse(monitor, metrics -> {});
   }
 
-  public Function<M, R> getReader() {
+  public Function getReader() {
     return reader;
   }
 
-  public Function<R, W> getTransformer() {
+  public Function getTransformer() {
     return transformer;
   }
 
-  public Function<W, Collection<Message>> getWriter() {
+  public Function getWriter() {
     return writer;
   }
 

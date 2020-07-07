@@ -30,7 +30,7 @@ public class Flow<M extends Message, R, W> {
   private final Set<FlowMetrics> flowMetrics;
   private final LockManager lockManager;
 
-  public Flow(FlowSpec<M, R, W> flowSpec, LockManager lockManager) {
+  public Flow(FlowSpec flowSpec, LockManager lockManager) {
     this.reader = requireNonNull(flowSpec.getReader());
     this.transformer = requireNonNull(flowSpec.getTransformer());
     this.writer = requireNonNull(flowSpec.getWriter());

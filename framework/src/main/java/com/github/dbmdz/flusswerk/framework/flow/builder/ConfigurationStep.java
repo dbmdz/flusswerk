@@ -49,8 +49,8 @@ public class ConfigurationStep<M extends Message, R, W> {
    *
    * @return the new flow
    */
-  public FlowSpec<M, R, W> build() {
-    return new FlowSpec<>(
+  public FlowSpec build() {
+    return new FlowSpec(
         model.getReader(),
         model.getTransformer(),
         model.getWriter(),
