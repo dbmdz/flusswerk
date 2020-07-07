@@ -1,11 +1,12 @@
 package com.github.dbmdz.flusswerk.framework.flow.builder;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.github.dbmdz.flusswerk.framework.TestMessage;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,7 @@ class MessageProcessorStepTest {
     var message = new TestMessage("1", allIdsOf(expected));
     var actual = evaluateFlow(message);
 
-    Assertions.assertThat(actual).containsExactly(expected);
+    assertThat(actual).containsExactly(expected);
   }
 
   @Test
@@ -45,18 +46,20 @@ class MessageProcessorStepTest {
     var message = new TestMessage("1", expected.getId());
     var actual = evaluateFlow(message);
 
-    Assertions.assertThat(actual).containsExactly(expected);
+    assertThat(actual).containsExactly(expected);
   }
 
   @Test
   @DisplayName("should consume message")
   void shouldConsumeMessage() {
-    step.consume(message -> {});
+    var probe = new InvocationProbe<TestMessage>();
+    step.consume(probe);
 
     var message = new TestMessage("1");
     var actual = evaluateFlow(message);
 
-    Assertions.assertThat(actual).isEmpty();
+    assertThat(actual).isEmpty();
+    assertThat(probe.hasBeenInvoked()).isTrue();
   }
 
   String[] allIdsOf(TestMessage... messages) {
