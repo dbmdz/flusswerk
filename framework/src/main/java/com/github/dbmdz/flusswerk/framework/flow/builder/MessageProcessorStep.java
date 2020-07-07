@@ -56,10 +56,13 @@ public class MessageProcessorStep<M extends Message> {
    * @param p the message processor to set
    * @return the next reader step
    */
-  public ConfigurationStep<M, M, M> consume(Consumer<M> p) {
+  public ConfigurationStep<M, M, M> consume(Consumer<M> consumer) {
     model.setReader(m -> m);
     model.setTransformer(m -> m);
-    model.setWriter(m -> emptyList());
+    model.setWriter(m -> {
+      consumer.accept(m);
+      return emptyList();
+    });
     return new ConfigurationStep<>(model);
   }
 }
