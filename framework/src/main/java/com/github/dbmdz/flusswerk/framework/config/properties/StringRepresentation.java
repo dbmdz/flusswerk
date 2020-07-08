@@ -1,5 +1,8 @@
 package com.github.dbmdz.flusswerk.framework.config.properties;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /** Creates a nice string representation for hierarchical data structures. */
@@ -53,10 +56,15 @@ class StringRepresentation {
   public StringRepresentation property(String name, Map<String, String> values) {
     if (values == null) {
       property(name, "null");
+      return this;
     }
+    indent();
     text(name);
     text(":");
-    for (String key : values.keySet()) {
+    newline();
+    List<String> keys = new ArrayList<>(values.keySet());
+    Collections.sort(keys);
+    for (String key : keys) {
       indent();
       property(key, values.get(key));
     }
@@ -93,6 +101,25 @@ class StringRepresentation {
     stringBuilder.append(":\t");
     stringBuilder.append(value, 0, 1);
     stringBuilder.append("*".repeat(5)); // Fixed number of stars to hide real password length
+    return this;
+  }
+
+  public StringRepresentation property(String name, List<String> values) {
+    if (values == null) {
+      property(name, "null");
+      return this;
+    }
+    indent();
+    text(name);
+    text(":");
+    newline();
+    for (String value : values) {
+      indent();
+      indent();
+      text("- ");
+      text(value);
+      newline();
+    }
     return this;
   }
 }

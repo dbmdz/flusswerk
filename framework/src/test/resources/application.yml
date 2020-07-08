@@ -2,8 +2,8 @@ flusswerk:
   processing:
     threads: 5
   rabbitmq:
-    host: my.rabbit.example.com
-    port: 5672
+    hosts:
+      - my.rabbit.example.com
     virtualHost: vh1
     username: guest
     password: guest

@@ -29,8 +29,7 @@ public class FlusswerkPropertiesTest {
   @DisplayName("Values of FlusswerkProperties.Connection are all set")
   public void valuesOfConnection() {
     assertThat(properties.getRabbitMQ())
-        .hasFieldOrPropertyWithValue("host", "my.rabbit.example.com")
-        .hasFieldOrPropertyWithValue("port", 5672)
+        .hasFieldOrPropertyWithValue("hosts", List.of("my.rabbit.example.com"))
         .hasFieldOrPropertyWithValue("virtualHost", Optional.of("vh1"))
         .hasFieldOrPropertyWithValue("username", "guest")
         .hasFieldOrPropertyWithValue("password", "guest");
