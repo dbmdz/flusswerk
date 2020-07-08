@@ -14,8 +14,7 @@ public class Flows {
     return new Flow(spec, new NoOpLockManager());
   }
 
-  private static Flow flowWithTransformer(
-      Function<String, String> transformer) {
+  private static Flow flowWithTransformer(Function<String, String> transformer) {
     var spec =
         FlowBuilder.flow(Message.class, String.class, String.class)
             .reader(Message::getTracingId)

@@ -16,7 +16,6 @@ import java.util.function.Function;
  * Recipe for the data processing. Every message will be processed by the readerFactory, then the
  * transformerFactory and finally the writerFactory. The transformerFactory can be omitted if <code>
  * R</code> and <code>W</code> are the same.
- *
  */
 public class Flow {
 
