@@ -130,7 +130,9 @@ public class Engine {
 
     // Data processing was successful, now handle the messaging
     try {
-      messageBroker.send(messagesToSend);
+      if (messagesToSend.size() > 0) {
+        messageBroker.send(messagesToSend);
+      }
       messageBroker.ack(message);
       processReport.reportSuccess(message);
     } catch (Exception e) {

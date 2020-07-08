@@ -14,6 +14,11 @@ public class Flows {
     return new Flow(spec, new NoOpLockManager());
   }
 
+  public static Flow consumingFlow() {
+    var spec = FlowBuilder.messageProcessor(Message.class).consume(m -> {}).build();
+    return new Flow(spec, new NoOpLockManager());
+  }
+
   private static Flow flowWithTransformer(Function<String, String> transformer) {
     var spec =
         FlowBuilder.flow(Message.class, String.class, String.class)
