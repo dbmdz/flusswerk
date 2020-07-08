@@ -15,7 +15,7 @@ public class IncomingMessageType {
   }
 
   /**
-   * Provide a custom {@link Message} implmentation with default serialization and deserialization
+   * Provide a custom {@link Message} implementation with default serialization and deserialization
    * settings.
    *
    * @param cls the custom {@link Message} implementation
@@ -25,7 +25,7 @@ public class IncomingMessageType {
   }
 
   /**
-   * Provide a custom {@link Message} implmentation with custom serialization and deserialization
+   * Provide a custom {@link Message} implementation with custom serialization and deserialization
    * settings.
    *
    * @param cls custom {@link Message} implementation

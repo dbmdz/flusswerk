@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 class ExceptionSupplierTest {
 
   @Test
-  void shoudlSupplyExceptionWithOnlyMessage() {
+  void shouldSupplyExceptionWithOnlyMessage() {
     var supplier = new ExceptionSupplier<>(RetryProcessingException.class, "Hallo Welt", null);
     assertThat(supplier.get())
         .isInstanceOf(RetryProcessingException.class)
@@ -15,13 +15,13 @@ class ExceptionSupplierTest {
   }
 
   @Test
-  void shoudlSupplyStopProcessingExceptionWithOnlyMessage() {
+  void shouldSupplyStopProcessingExceptionWithOnlyMessage() {
     var supplier = new ExceptionSupplier<>(StopProcessingException.class, "Hallo Welt", null);
     assertThat(supplier.get()).isInstanceOf(StopProcessingException.class).hasMessage("Hallo Welt");
   }
 
   @Test
-  void shoudlSupplyExceptionWithMessageAndCause() {
+  void shouldSupplyExceptionWithMessageAndCause() {
     var supplier =
         new ExceptionSupplier<>(RetryProcessingException.class, "Hallo Welt", null)
             .causedBy(new RuntimeException("THE CAUSE"));
@@ -31,7 +31,7 @@ class ExceptionSupplierTest {
   }
 
   @Test
-  void shoudlSupplyStopProcessingExceptionWithMessageAndCause() {
+  void shouldSupplyStopProcessingExceptionWithMessageAndCause() {
     var supplier =
         new ExceptionSupplier<>(StopProcessingException.class, "Hallo Welt", null)
             .causedBy(new RuntimeException("THE CAUSE"));
