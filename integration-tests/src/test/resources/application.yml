@@ -31,7 +31,8 @@ spring:
 
 flusswerk:
   rabbitmq:
-    host: localhost
+    hosts:
+      - localhost
 
 ---
 spring:
@@ -39,4 +40,5 @@ spring:
 
 flusswerk:
   rabbitmq:
-    host: docker
+    hosts:
+      - docker
