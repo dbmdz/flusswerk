@@ -2,6 +2,8 @@ package com.github.dbmdz.flusswerk.framework.config.properties;
 
 import static java.util.Objects.requireNonNullElse;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
@@ -9,40 +11,29 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 @ConstructorBinding
 public class RabbitMQProperties {
 
-  private final String host;
-
-  private final int port;
-
+  private final List<String> hosts;
   private final String virtualHost;
-
   private final String username;
-
   private final String password;
 
   /**
-   * @param host The RabbitMQ host name
-   * @param port The RabbitMQ port
+   * @param hosts The RabbitMQ host names. May include a specific port separated by ":" (default:
+   *     5672).
    * @param virtualHost The RabbitMQ/AMQP virtual host. <em>Can be null.</em>
    * @param username The username for RabbitMQ login
    * @param password The password for RabbitMQ login
    */
   public RabbitMQProperties(
-      String host, Integer port, String virtualHost, String username, String password) {
-    this.host = requireNonNullElse(host, "localhost");
-    this.port = requireNonNullElse(port, 5672);
+      List<String> hosts, String virtualHost, String username, String password) {
+    this.hosts = requireNonNullElse(hosts, Collections.emptyList());
     this.virtualHost = virtualHost; // can actually be null
     this.username = requireNonNullElse(username, "guest");
     this.password = requireNonNullElse(password, "guest");
   }
 
-  /** @return RabbitMQ host name to connect to. */
-  public String getHost() {
-    return host;
-  }
-
-  /** @return RabbitMQ port to connect to (default: 5672). */
-  public int getPort() {
-    return port;
+  /** @return The connection hosts to RabbitMQ. May include a specific port separated by ":". */
+  public List<String> getHosts() {
+    return hosts;
   }
 
   /** @return The RabbitMQ/AMQP virtual host. <em>Can be null.</em> */
@@ -63,8 +54,7 @@ public class RabbitMQProperties {
   @Override
   public String toString() {
     return StringRepresentation.of(RabbitMQProperties.class)
-        .property("host", host)
-        .property("port", port)
+        .property("hosts", hosts)
         .property("virtualHost", virtualHost)
         .property("username", username)
         .maskedProperty("password", password)
@@ -73,6 +63,6 @@ public class RabbitMQProperties {
 
   public static RabbitMQProperties defaults() {
     // use null values so constructor sets defaults
-    return new RabbitMQProperties(null, null, null, null, null);
+    return new RabbitMQProperties(null, null, null, null);
   }
 }

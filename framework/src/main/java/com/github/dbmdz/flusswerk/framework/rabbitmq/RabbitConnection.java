@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,9 +48,10 @@ public class RabbitConnection {
   }
 
   final void waitForConnection() throws IOException {
+    List<Address> addresses =
+        rabbitMQ.getHosts().stream().map(Address::parseAddress).collect(Collectors.toList());
     boolean connectionIsFailing = true;
     while (connectionIsFailing) {
-      List<Address> addresses = List.of(new Address(rabbitMQ.getHost(), rabbitMQ.getPort()));
       try {
         LOGGER.debug("Waiting for connection to {} ...", addresses);
         com.rabbitmq.client.Connection connection = factory.newConnection(addresses);
