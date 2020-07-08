@@ -37,8 +37,7 @@ import org.springframework.context.annotation.Import;
 public class FlusswerkConfiguration {
 
   @Bean
-  public Flow flow(
-      ObjectProvider<FlowSpec> flowSpec, LockManager lockManager) {
+  public Flow flow(ObjectProvider<FlowSpec> flowSpec, LockManager lockManager) {
     var spec = flowSpec.getIfAvailable();
     if (spec == null) {
       throw new RuntimeException("Missing flow definition. Please create a FlowSpec bean.");

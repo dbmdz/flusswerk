@@ -21,13 +21,12 @@ public class FlusswerkConfig {
 
   @Bean
   public FlowSpec flow(BaseMetrics metrics) {
-    return
-        FlowBuilder.flow(Greeting.class, String.class, String.class)
-            .reader(Greeting::getText)
-            .transformer(new ComposePerfectGreeting())
-            .writerSendingNothing(System.out::println)
-            .metrics(metrics)
-            .build();
+    return FlowBuilder.flow(Greeting.class, String.class, String.class)
+        .reader(Greeting::getText)
+        .transformer(new ComposePerfectGreeting())
+        .writerSendingNothing(System.out::println)
+        .metrics(metrics)
+        .build();
   }
 
   @Bean
