@@ -34,7 +34,7 @@ public class RoutingProperties {
       Map<String, String> outgoing,
       Map<String, FailurePolicyProperties> failurePolicies) {
     this.exchange = requireNonNullElse(exchange, "flusswerk_default");
-    this.deadLetterExchange = this.exchange + ".dlx";
+    this.deadLetterExchange = this.exchange + ".retry";
     this.incoming = requireNonNullElseGet(incoming, Collections::emptyList);
     this.outgoing = requireNonNullElseGet(outgoing, Collections::emptyMap); // might be null
 
