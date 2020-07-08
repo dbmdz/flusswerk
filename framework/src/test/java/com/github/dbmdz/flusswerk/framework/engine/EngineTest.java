@@ -97,7 +97,7 @@ class EngineTest {
   }
 
   @Test
-  @DisplayName("should stop with retry for RetriableProcessException")
+  @DisplayName("should stop with retry for RetryProcessException")
   void retryProcessExceptionShouldRejectTemporarily() throws IOException {
     Engine engine = createEngine(flowThrowing(RetryProcessingException.class));
     engine.process(message);

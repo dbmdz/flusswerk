@@ -21,7 +21,7 @@ class StringRepresentation {
   }
 
   /**
-   * Add a property as key-value-pair with proper intendation.
+   * Add a property as key-value-pair with proper indentation.
    *
    * @param name The properties name.
    * @param value The properties value.
