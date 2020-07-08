@@ -1,8 +1,10 @@
 package com.github.dbmdz.flusswerk.framework.engine;
 
+import static com.github.dbmdz.flusswerk.framework.fixtures.Flows.consumingFlow;
 import static com.github.dbmdz.flusswerk.framework.fixtures.Flows.flowThrowing;
 import static com.github.dbmdz.flusswerk.framework.fixtures.Flows.passthroughFlow;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -86,6 +88,14 @@ class EngineTest {
 
     verify(messageBroker).ack(message);
     verify(messageBroker, never()).reject(message);
+  }
+
+  @Test
+  @DisplayName("should not try to send messages if the writer creates none")
+  void shouldNotTryToSendMessagesIfTheWriterCreatesNone() throws IOException {
+    Engine engine = createEngine(consumingFlow());
+    engine.process(new Message());
+    verify(messageBroker, never()).send(any());
   }
 
   @Test
