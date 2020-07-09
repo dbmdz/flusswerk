@@ -7,7 +7,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Value;
 
 /** Convenience factory to simplify the creation of {@link Counter} meters. */
 public class MeterFactory {
@@ -21,10 +20,7 @@ public class MeterFactory {
    * @param app The app name to add as a tag to all metrics
    * @param registry the Micrometer registry to create the counters
    */
-  public MeterFactory(
-      FlusswerkProperties flusswerkProperties,
-      @Value("${spring.application.name}") String app,
-      MeterRegistry registry) {
+  public MeterFactory(FlusswerkProperties flusswerkProperties, String app, MeterRegistry registry) {
     this.basename = flusswerkProperties.getMonitoring().getPrefix();
     this.app = app;
     this.registry = registry;
