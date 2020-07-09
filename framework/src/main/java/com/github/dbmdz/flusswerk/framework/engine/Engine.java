@@ -130,7 +130,7 @@ public class Engine {
 
     // Data processing was successful, now handle the messaging
     try {
-      if (messagesToSend.size() > 0) {
+      if (!messagesToSend.isEmpty()) {
         messageBroker.send(messagesToSend);
       }
       messageBroker.ack(message);
