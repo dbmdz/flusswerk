@@ -9,12 +9,14 @@ import com.github.dbmdz.flusswerk.framework.config.properties.RedisProperties;
 import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
-/**
- * Separate config class for reading configuration properties to enable automated testing.
- */
-@EnableConfigurationProperties({AppProperties.class, FlusswerkProperties.class, MonitoringProperties.class,
-    ProcessingProperties.class, RabbitMQProperties.class,
-    RedisProperties.class, RoutingProperties.class})
-public class FlusswerkPropertiesConfiguration {
-
-}
+/** Separate config class for reading configuration properties to enable automated testing. */
+@EnableConfigurationProperties({
+  AppProperties.class,
+  FlusswerkProperties.class,
+  MonitoringProperties.class,
+  ProcessingProperties.class,
+  RabbitMQProperties.class,
+  RedisProperties.class,
+  RoutingProperties.class
+})
+public class FlusswerkPropertiesConfiguration {}
