@@ -2,7 +2,6 @@ package com.github.dbmdz.flusswerk.framework.config.properties;
 
 import static java.util.Objects.requireNonNullElse;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.boot.context.properties.ConstructorBinding;
@@ -25,7 +24,7 @@ public class RabbitMQProperties {
    */
   public RabbitMQProperties(
       List<String> hosts, String virtualHost, String username, String password) {
-    this.hosts = requireNonNullElse(hosts, Collections.emptyList());
+    this.hosts = requireNotEmpty(hosts, List.of("localhost"));
     this.virtualHost = virtualHost; // can actually be null
     this.username = requireNonNullElse(username, "guest");
     this.password = requireNonNullElse(password, "guest");
@@ -64,5 +63,12 @@ public class RabbitMQProperties {
   public static RabbitMQProperties defaults() {
     // use null values so constructor sets defaults
     return new RabbitMQProperties(null, null, null, null);
+  }
+
+  private static <T> List<T> requireNotEmpty(List<T> list, List<T> defaultValues) {
+    if (list == null || list.isEmpty()) {
+      return defaultValues;
+    }
+    return list;
   }
 }
