@@ -40,7 +40,7 @@ public class RoutingProperties {
 
     this.failurePolicies =
         createFailurePolicies(
-            incoming, requireNonNullElseGet(failurePolicies, Collections::emptyMap));
+            this.incoming, requireNonNullElseGet(failurePolicies, Collections::emptyMap));
   }
 
   private static Map<String, FailurePolicy> createFailurePolicies(
