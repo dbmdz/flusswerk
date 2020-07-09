@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.dbmdz.flusswerk.framework.config.FlusswerkConfiguration;
 import com.github.dbmdz.flusswerk.framework.config.FlusswerkPropertiesConfiguration;
-import com.github.dbmdz.flusswerk.framework.config.properties.FlusswerkProperties;
 import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
@@ -52,9 +51,9 @@ public class SuccessfulProcessingTest {
 
   @Autowired
   public SuccessfulProcessingTest(
-      Engine engine, FlusswerkProperties flusswerkProperties, RabbitMQ rabbitMQ) {
+      Engine engine, RoutingProperties routingProperties, RabbitMQ rabbitMQ) {
     this.engine = engine;
-    this.routing = flusswerkProperties.getRouting();
+    this.routing = routingProperties;
     this.rabbitMQ = rabbitMQ;
     executorService = Executors.newSingleThreadExecutor();
     rabbitUtil = new RabbitUtil(rabbitMQ, routing);

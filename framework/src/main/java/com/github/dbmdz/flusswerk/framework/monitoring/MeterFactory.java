@@ -1,6 +1,5 @@
 package com.github.dbmdz.flusswerk.framework.monitoring;
 
-import com.github.dbmdz.flusswerk.framework.config.properties.FlusswerkProperties;
 import com.github.dbmdz.flusswerk.framework.flow.FlowInfo.Status;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -15,13 +14,12 @@ public class MeterFactory {
   private final MeterRegistry registry;
 
   /**
-   * @param flusswerkProperties The properties containing the prefix for the created metrics ("e.g.
-   *     workflow.job for workflow.job.items.total"
+   * @param basename The prefix for the created metrics ("e.g. flusswerk for flusswerk.items.total")
    * @param app The app name to add as a tag to all metrics
    * @param registry the Micrometer registry to create the counters
    */
-  public MeterFactory(FlusswerkProperties flusswerkProperties, String app, MeterRegistry registry) {
-    this.basename = flusswerkProperties.getMonitoring().getPrefix();
+  public MeterFactory(String basename, String app, MeterRegistry registry) {
+    this.basename = basename;
     this.app = app;
     this.registry = registry;
   }

@@ -1,8 +1,11 @@
 package com.github.dbmdz.flusswerk.framework.config;
 
 import com.github.dbmdz.flusswerk.framework.config.properties.AppProperties;
-import com.github.dbmdz.flusswerk.framework.config.properties.FlusswerkProperties;
+import com.github.dbmdz.flusswerk.framework.config.properties.MonitoringProperties;
+import com.github.dbmdz.flusswerk.framework.config.properties.ProcessingProperties;
+import com.github.dbmdz.flusswerk.framework.config.properties.RabbitMQProperties;
 import com.github.dbmdz.flusswerk.framework.config.properties.RedisProperties;
+import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
@@ -21,7 +24,6 @@ import com.github.dbmdz.flusswerk.framework.reporting.DefaultProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.Set;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
@@ -58,23 +60,16 @@ public class FlusswerkConfiguration {
       AppProperties appProperties,
       MessageBroker messageBroker,
       Flow flow,
-      FlusswerkProperties flusswerkProperties,
+      ProcessingProperties processingProperties,
       ObjectProvider<ProcessReport> processReportProvider,
       Set<FlowMetrics> flowMetrics) {
     flow.registerFlowMetrics(flowMetrics);
 
-    int threads;
-    var processing = flusswerkProperties.getProcessing();
-    if (processing != null && processing.getThreads() != null) {
-      threads = flusswerkProperties.getProcessing().getThreads();
-    } else {
-      threads = 5;
-    }
-
     ProcessReport processReport =
         processReportProvider.getIfAvailable(
             () -> new DefaultProcessReport(appProperties.getName()));
-    return new Engine(messageBroker, flow, threads, processReport);
+
+    return new Engine(messageBroker, flow, processingProperties.getThreads(), processReport);
   }
 
   @Bean
@@ -85,15 +80,15 @@ public class FlusswerkConfiguration {
   @Bean
   public MeterFactory meterFactory(
       AppProperties appProperties,
-      FlusswerkProperties flusswerkProperties,
+      MonitoringProperties monitoringProperties,
       MeterRegistry meterRegistry) {
-    return new MeterFactory(flusswerkProperties, appProperties.getName(), meterRegistry);
+    return new MeterFactory(monitoringProperties.getPrefix(), appProperties.getName(), meterRegistry);
   }
 
   @Bean
-  public RabbitConnection rabbitConnection(FlusswerkProperties flusswerkProperties)
+  public RabbitConnection rabbitConnection(RabbitMQProperties rabbitMQProperties)
       throws IOException {
-    return new RabbitConnection(flusswerkProperties.getRabbitMQ());
+    return new RabbitConnection(rabbitMQProperties);
   }
 
   @Bean
@@ -105,23 +100,22 @@ public class FlusswerkConfiguration {
 
   @Bean
   public RabbitMQ rabbitMQ(
-      FlusswerkProperties flusswerkProperties,
+      RoutingProperties routingProperties,
       RabbitClient rabbitClient,
       MessageBroker messageBroker) {
-    return new RabbitMQ(flusswerkProperties.getRouting(), rabbitClient, messageBroker);
+    return new RabbitMQ(routingProperties, rabbitClient, messageBroker);
   }
 
   @Bean
   public MessageBroker messageBroker(
-      FlusswerkProperties flusswerkProperties, RabbitClient rabbitClient) throws IOException {
-    return new MessageBroker(flusswerkProperties.getRouting(), rabbitClient);
+      RoutingProperties routingProperties, RabbitClient rabbitClient) throws IOException {
+    return new MessageBroker(routingProperties, rabbitClient);
   }
 
   @Bean
-  public LockManager lockManager(FlusswerkProperties flusswerkProperties) {
-    Optional<RedisProperties> redis = flusswerkProperties.getRedis();
-    if (redis.isPresent()) {
-      Config config = createRedisConfig(redis.get());
+  public LockManager lockManager(RedisProperties redisProperties) {
+    if (redisProperties.redisIsAvailable()) {
+      Config config = createRedisConfig(redisProperties);
       RedissonClient client = Redisson.create(config);
       return new RedisLockManager(client);
     } else {
