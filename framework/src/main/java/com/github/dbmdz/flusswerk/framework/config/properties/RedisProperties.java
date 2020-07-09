@@ -1,14 +1,22 @@
 package com.github.dbmdz.flusswerk.framework.config.properties;
 
-import static java.util.Objects.requireNonNullElse;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.ConstructorBinding;
+import org.springframework.util.StringUtils;
 
+@ConstructorBinding
+@ConfigurationProperties(prefix = "flusswerk.redis")
 public class RedisProperties {
 
   private final String address;
   private final String password;
 
   public RedisProperties(String address, String password) {
-    this.address = requireNonNullElse(address, "redis://127.0.0.1:6379");
+    if (StringUtils.hasText(address))  {
+      this.address = address.contains(":") ? address : address + ":6379";
+    } else {
+      this.address = null; // if Redis is not configured/used
+    }
     this.password = password; // might be null if no authentication is used
   }
 
@@ -18,5 +26,9 @@ public class RedisProperties {
 
   public String getPassword() {
     return password;
+  }
+
+  public boolean redisIsAvailable() {
+    return this.address != null;
   }
 }

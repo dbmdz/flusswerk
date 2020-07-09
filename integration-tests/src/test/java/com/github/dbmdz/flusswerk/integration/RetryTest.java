@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.dbmdz.flusswerk.framework.config.FlusswerkConfiguration;
 import com.github.dbmdz.flusswerk.framework.config.FlusswerkPropertiesConfiguration;
-import com.github.dbmdz.flusswerk.framework.config.properties.FlusswerkProperties;
 import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
@@ -12,7 +11,6 @@ import com.github.dbmdz.flusswerk.framework.exceptions.RetryProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.model.Message;
-import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import com.github.dbmdz.flusswerk.integration.RetryTest.FlowConfiguration;
 import java.io.IOException;
@@ -63,12 +61,11 @@ public class RetryTest {
   @Autowired
   public RetryTest(
       Engine engine,
-      MessageBroker messageBroker,
       RabbitMQ rabbitMQ,
-      FlusswerkProperties flusswerkProperties) {
+      RoutingProperties routingProperties) {
     this.engine = engine;
     this.rabbitMQ = rabbitMQ;
-    this.routing = flusswerkProperties.getRouting();
+    this.routing = routingProperties;
     executorService = Executors.newSingleThreadExecutor();
     rabbitUtil = new RabbitUtil(rabbitMQ, routing);
   }

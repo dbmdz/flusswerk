@@ -3,10 +3,12 @@ package com.github.dbmdz.flusswerk.framework.config.properties;
 import static java.util.Objects.requireNonNullElse;
 
 import javax.validation.constraints.Min;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
 /** Configuration related to the processing. */
 @ConstructorBinding
+@ConfigurationProperties(prefix = "flusswerk.processing")
 public class ProcessingProperties {
 
   @Min(1)

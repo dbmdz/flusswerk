@@ -4,10 +4,12 @@ import static java.util.Objects.requireNonNullElse;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
 /** Connection information for RabbitMQ. */
 @ConstructorBinding
+@ConfigurationProperties(prefix = "flusswerk.rabbitmq")
 public class RabbitMQProperties {
 
   private final List<String> hosts;

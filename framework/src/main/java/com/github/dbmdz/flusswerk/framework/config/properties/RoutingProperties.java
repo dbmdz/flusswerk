@@ -11,10 +11,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotBlank;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
 /** AMQP/RabbitMQ routing information. */
 @ConstructorBinding
+@ConfigurationProperties(prefix = "flusswerk.routing")
 public class RoutingProperties {
 
   @NotBlank private final String exchange;
