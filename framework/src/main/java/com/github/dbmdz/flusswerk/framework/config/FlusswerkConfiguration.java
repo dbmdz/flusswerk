@@ -82,7 +82,8 @@ public class FlusswerkConfiguration {
       AppProperties appProperties,
       MonitoringProperties monitoringProperties,
       MeterRegistry meterRegistry) {
-    return new MeterFactory(monitoringProperties.getPrefix(), appProperties.getName(), meterRegistry);
+    return new MeterFactory(
+        monitoringProperties.getPrefix(), appProperties.getName(), meterRegistry);
   }
 
   @Bean
@@ -100,15 +101,13 @@ public class FlusswerkConfiguration {
 
   @Bean
   public RabbitMQ rabbitMQ(
-      RoutingProperties routingProperties,
-      RabbitClient rabbitClient,
-      MessageBroker messageBroker) {
+      RoutingProperties routingProperties, RabbitClient rabbitClient, MessageBroker messageBroker) {
     return new RabbitMQ(routingProperties, rabbitClient, messageBroker);
   }
 
   @Bean
-  public MessageBroker messageBroker(
-      RoutingProperties routingProperties, RabbitClient rabbitClient) throws IOException {
+  public MessageBroker messageBroker(RoutingProperties routingProperties, RabbitClient rabbitClient)
+      throws IOException {
     return new MessageBroker(routingProperties, rabbitClient);
   }
 

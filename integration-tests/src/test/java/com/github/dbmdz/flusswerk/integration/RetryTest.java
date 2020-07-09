@@ -59,10 +59,7 @@ public class RetryTest {
   private final RabbitMQ rabbitMQ;
 
   @Autowired
-  public RetryTest(
-      Engine engine,
-      RabbitMQ rabbitMQ,
-      RoutingProperties routingProperties) {
+  public RetryTest(Engine engine, RabbitMQ rabbitMQ, RoutingProperties routingProperties) {
     this.engine = engine;
     this.rabbitMQ = rabbitMQ;
     this.routing = routingProperties;
