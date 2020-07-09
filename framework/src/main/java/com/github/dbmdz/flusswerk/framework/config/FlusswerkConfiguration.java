@@ -50,7 +50,7 @@ public class FlusswerkConfiguration {
   /**
    * @param messageBroker The messageBroker to use.
    * @param flow The flow to use (optional).
-   * @param flusswerkProperties The external configuration from <code>application.yml</code>.
+   * @param processingProperties The external configuration from <code>application.yml</code>.
    * @param processReportProvider A custom process report provider (optional).
    * @param flowMetrics The metrics collector.
    * @return The {@link Engine} used for this job.
