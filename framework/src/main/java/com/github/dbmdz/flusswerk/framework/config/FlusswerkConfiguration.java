@@ -1,5 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.config;
 
+import com.github.dbmdz.flusswerk.framework.config.properties.AppProperties;
 import com.github.dbmdz.flusswerk.framework.config.properties.FlusswerkProperties;
 import com.github.dbmdz.flusswerk.framework.config.properties.RedisProperties;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
@@ -26,7 +27,6 @@ import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -55,7 +55,7 @@ public class FlusswerkConfiguration {
    */
   @Bean
   public Engine engine(
-      @Value("spring.application.name") String name,
+      AppProperties appProperties,
       MessageBroker messageBroker,
       Flow flow,
       FlusswerkProperties flusswerkProperties,
@@ -72,7 +72,8 @@ public class FlusswerkConfiguration {
     }
 
     ProcessReport processReport =
-        processReportProvider.getIfAvailable(() -> new DefaultProcessReport(name));
+        processReportProvider.getIfAvailable(
+            () -> new DefaultProcessReport(appProperties.getName()));
     return new Engine(messageBroker, flow, threads, processReport);
   }
 
@@ -83,10 +84,10 @@ public class FlusswerkConfiguration {
 
   @Bean
   public MeterFactory meterFactory(
+      AppProperties appProperties,
       FlusswerkProperties flusswerkProperties,
-      @Value("spring.application.name") String name,
       MeterRegistry meterRegistry) {
-    return new MeterFactory(flusswerkProperties, name, meterRegistry);
+    return new MeterFactory(flusswerkProperties, appProperties.getName(), meterRegistry);
   }
 
   @Bean
