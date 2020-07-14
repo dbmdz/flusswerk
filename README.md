@@ -40,99 +40,193 @@ Starting with Flusswerk 4, there are two major changes:
     processing) and `IncomingMessage`.
  - The package names changed from `de.digitalcollections.flusswerk.engine` to `com.github.dbmdz.framework`.
 
-## Basic setup
+## The Big Picture
 
-If you have a local RabbitMQ instance with default configurations up and running, creating your first worker is as easy as
+A typical Flusswerk application has three parts:
+
+ - Messages
+ - the data processing flow (usually a `Reader`, a `Transformer` and a `Writer`)
+ - Some Spring Boot glue code
+ - Spring Boot `application.yml` to configure all the Flusswerk things
+
+Usually it is also useful to define your own data model classes, although that is not strictly required.
+
+ - Any Flusswerk application uses now Spring Boot and needs beans for `FlowSpec` (defining the
+    processing) and `IncomingMessage`.
+ - The package names changed from `de.digitalcollections.flusswerk.engine` to `com.github.dbmdz.framework`.
+Optional parts are
+
+ - Custom metrics collection
+ - Custom logging formats (aka `ProcessReport`)
+
+
+### Messages
+
+Message classes are for a sending and receiving data from RabbitMQ. All Message classes extend `Message`, which automatically forwards tracing ids from incoming to outgoing messages (if you set the tracing id by hand, it will not be overwritten).
 
 ```java
-class Application {
-  public static void main(String[] args) {
-    MessageBroker messageBroker = new MessageBrokerBuilder()
-        .readFrom("your.input.queue")
-        .writeTo("your.output.queue")
-        .build();
-    
-    Flow flow = new FlowBuilder<DefaultMessage, String, String>()
-        .read(message -> message.get("value"))
-        .transform(String::toUpperCase)
-        .writeAndSend(value -> new DefaultMessage("your.id").put("value", value))
-        .build();
-    
-    Engine engine = new Engine(messageBroker, flow);
-    engine.start();
+class IndexMessage implements Message {
+
+  private String documentId;
+
+  public IndexMessage(String documentId) {
+    this.documentId = requireNonNull(documentId);
   }
+
+  public String getId() { ... }
+
+  public boolean equals(Object other) { ... }
+
+  public int hashCode() { ... }
+
 }
 ```
 
-For more complex read, transform or write operations it is recommended to implement these as classes. Please keep in mind that these classes should not keep any state (or do so in a thread-safe way), as they are used from several worker threads at the same time:
+Register the type for the incoming message, so it gets automatically deserialized:
 
 ```java
-class Reader implements Function<DefaultMessage, String> {
-  String apply(DefaultMessage message) {
-    return message.get("value");
-  }
-}
-
-class Transformer implements Function<String, String> {
-  String apply(String input) {
-    return input.toUpperCase();
-  }  
-}
-
-class Writer implements Function<String, Message> { 
-    Message apply(String output) {
-      return new DefaultMessage("your.id").put("value", output);
-    }
- }
-
-class Application {
-  public static void main(String[] args) {
-    MessageBroker messageBroker = new MessageBrokerBuilder()
-        .readFrom("your.input.queue")
-        .writeTo("your.output.queue")
-        .build();
-    
-    Flow flow = new FlowBuilder<DefaultMessage, String, String>()
-        .read(new Reader())
-        .transform(new Transformer())
-        .writeAndSend(new Writer())
-        .build();
-    
-    Engine engine = new Engine(messageBroker, flow);
-    engine.start();
-  }
+@Bean
+public IncomingMessageType incomingMessageType() {
+  return new IncomingMessageType(IndexMessage.class);
 }
 ```
 
-Depending if you want to want to send one message, multiple messages or no message at all, the FlowBuilder has suitable API methods:
+
+### Configuration
+
+All configuraton magic happens in Spring's `application.yml`.
+
+A minimal configuration might look like:
+
+```yml
+# Default spring profile is local
+spring:
+  application:
+    name: flusswerk-example
+
+flusswerk:
+  routing:
+    incoming:
+      - search.index
+    outgoing:
+      default: search.publish
+```
+
+This defaults to connecting to RabbitMQ localhost:5672, with user and password `guest`, five threads and retrying a message five times. The only outgoing route defined is default, which is used by Flusswerk to automatically send messages. For most applications these are sensible defaults and works out of the box for local testing.
+
+The connection information can be overwritten for different environments using Spring Boot profiles:
+
+```yml
+---
+spring:
+  profiles: production
+flusswerk:
+  rabbitmq:
+    hosts:
+      - rabbitmq.stg
+    username: secret
+    password: secret
+```
+
+The sections of the `Flusswerk` configuration
+
+`processing` - control of processing
+
+| property  | default |                                                  |
+|-----------|---------|--------------------------------------------------| 
+| `threads` | 5       | Number of threads to use for parallel processing |
+
+`rabbitmq` - Connection to RabbitMQ:
+
+| property    | default     |                             |
+|-------------|-------------|-----------------------------| 
+| `hosts`     | `localhost` | list of hosts to connect to |
+| `username`  | `guest`     | RabbitMQ username           |
+| `passwords` | `guest`     | RabbitMQ password           |
 
 
- - `flowBuilder.write(Consumer<T>)` processes values of type `T`, but does not send messages returned by the writer.
- - `flowBuilder.writeAndSend(Function<T, Message>)` processes values of type `T`, and sends the message returned by the writer to the default output queue.
- - `flowBuilder.writeAndSendMany(Function<T, List<Message>>)` processes values of type `T`, and sends all messages in the list returned by the writer to the default output queue.
+`routing` - Messages in and out
 
-It is always possible to use `MessageBroker.send("some.queue", Message)` anywhere to manually [send messages to arbitrary queues](#sending-messages-to-arbitrary-queues).
+| property           | default   |                                                   |
+|--------------------|-----------|---------------------------------------------------| 
+| `incoming`         | `–`       | list of queues to read from in order              |
+| `outgoing`         | `–`       | routes to send messages to (format 'name: topic') |
+| `failure policies` | `default` | how to handle messages with processing errors     |
 
-## Sending messages to arbitrary queues
+`routing.failure policies` - how to handle messages with processing errors
 
-The Writer always sends a message to the defined output queue, which satisfies most use cases. For more complex workflows the `MessageBroker` can be used to send messages to any queue you like:
+| property           | default |                                                              |
+|--------------------|---------|--------------------------------------------------------------|
+| `retries`          | `5`     | how many times to retry                                      |
+| `retryRoutingKey`  | `–`     | where to send messages to retry later *(dead lettering)*     |
+| `failedRoutingKey` | `–`     | where to send messages to that should not be processed again |
+| `backoff`          | `–`     | how long to wait until retrying a message                    |
+
+`monitoring` - Prometheus settings
+
+| property | default     |                               |
+|----------|-------------|-------------------------------| 
+| `prefix` | `flusswerk` | prefix for prometheus metrics |
+
+### Data Processing
+
+To setup your data processing flow, define a Spring bean of type FlowSpec:
 
 ```java
-class Writer implements Function<String, Message> {
-  private final MessageBroker messageBroker;
-  public Writer(MessageBroker messageBroker) {
-    this.messageBroker = requireNonNull(messageBroker);
-  }
-  public Message apply(String value) {
-    // ...
-    // Notify other workflow jobs
-    messageBroker.send("ocr", new DefaultMessage("1000001"));
-    messageBroker.send("iiif", new DefaultMessage("1000001"));
-    messageBroker.send("import", new DefaultMessage("1000001"));
-    // ...
-  }
+@Bean
+public FlowSpec flowSpec(Reader reader, Transformer transformer, Writer writer) {
+  return FlowBuilder.flow(IndexMessage.class, Document.class, IndexDocument.class)
+      .reader(reader)
+      .transformer(transformer)
+      .writerSendingMessage(writer)
+      .build();
 }
 ```
+
+With the `Reader`, `Transformer` and `Writer` implementing the `Function` interface:
+
+|               |                                     |                                                                         |
+|---------------|-------------------------------------|-------------------------------------------------------------------------|
+| `Reader`      | `Function<IndexMessage, Document>`  | loads document from storage                                             |
+| `Transformer` | `Function<Document, IndexDocument>` | uses `Document` to build up the datastructure needed for indexing       |
+| `Writer`      | `Function<IndexDocument, Message>`  | sends indexes the data and returns a message for the next workflow step |
+
+
+
+
+## Best Practices
+
+### Stateless Processing
+
+All classes that do data processing (Reader, Transformer, Writer,...) should be stateless. This has two reasons:
+
+First, it makes your code threadsafe and multiprocessing easy without you having to even think about it. Just keep it stateless and fly!
+
+Second, it makes testing a breeze: You throw in data and check the data that comes out. Things can go wrong? Just check if the right exception is thrown. Wherever you need to interact with extrenal services, mock the behaviour and your good to go (the Flusswerk tests make heay use of Mockito, btw.).
+
+
+If you absolutely have to introduce state, make sure your code is threadsafe.
+
+
+### Immutable Data
+
+Wherever sesnsible, make your data classes immutable - set everything via constructor and avoid setters. Implement `equals()` and `hashCode()`. This leads usually to more readable code, and makes writing tests much easier. This applies to Message classes and to the classes you use to pass data around. 
+
+Your particular data processing needs to build your data over time and can't be immutable? Think again if that is the best way, but don't worry too much.
+
+
+
+## Manual Interaction with RabbitMQ
+
+For manual interaction with RabbitMQ there is a Spring component with the same class:
+
+| `RabbitMQ`       |                                                                         |
+|------------------|-------------------------------------------------------------------------|
+| `ack(Message)`   | acknowledges a `Message` received from a `Queue`                        |
+| `queue(String)`  | returns the `Queue` instance to interact with a queue of the given name |
+| `topic(Message)` | returns the `Topic` instance for the given name to send messages to     |
+| `route(Message)` | returns the `Topic` instance for the given route from `application.yml` |
+
 
 ## Cleanup
 
@@ -164,195 +258,18 @@ class Application {
 
 If incoming and outgoing message classes implement `HasFlowId`, automated propagation of flow ids is available. If the option `flowBuilder.propagateFlowId(true)` is set, Flusswerk copies flow ids from incoming to all outgoing messages.
 
-## Message Types
 
-It is recommended to implement your own message class to add type safety, expressiveness and easy to
-understand algorithms:
 
-```java
-public class ExampleMessage extends FlusswerkMessage<Integer> {
-
-  private int priority;
-
-  private String[] tags;
-
-  public PowerMessage(Integer id, int priority, String... tags) {
-    this.priority = priority;
-    this.tags = requireNonNullElseGet(tags, () -> new String[]{});
-  }
-
-  public int getPriority() {
-    return priority;
-  }
-
-  public String[] getTags() {
-    return tags;
-  }
-
-  @Override
-  public String toString() {
-    return String.format("ExampleMessage{%d, %d, %s}", id, priority, Arrays.toString(tags));
-  }
-}
-```
-
-The custom message implementation needs to be registered with the MessageBrokerBuilder:
-
-```java
-class Application {
-  public static void main(String[] args) {
-    MessageBroker messageBroker = new MessageBrokerBuilder()
-        .useMessageClass(ExampleMessage.class)
-        .build();
-    /* ... */
-  }
-}
-```
-
-For a more fine grained serialization control, a custom Jackson mixin is also possible:
-
-```java
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(Include.NON_EMPTY)
-public interface ExampleMessageMixin {}
-```
-
-```java
-class Application {
-  public static void main(String[] args) {
-    MessageBroker messageBroker = new MessageBrokerBuilder()
-        .useMessageClass(ExampleMessage.class, ExampleMessageMixin.class)
-        .build();
-    /* ... */
-  }
-}
-```
-
-## Use custom reporting
-
-By default, the message statuses (success, temporarily failed, finally failed) are just logged by the Logger of `DefaultProcessReport`. If you want to customize this (e.g. for writing structured logging messages with only specific information), you can provide a custom implementation of the `ProcessReport` interface and pass this to the Engine:
-
-```java
-class Application {
-  public static void main(String[] args) {
-    //...
-    Engine engine = new Engine(messageBroker, flow, new MyProcessReport());
-    engine.start();
-  }
-}
-```
 
 ## Failure Policies
 
-As default every input queue gets a retry and a failed queue with the same name as the input queue with suffixes `.failure` and `.retry`. Every message is retried 5 times and then moved to the failed queue.
-
-To customize this behaviour one can set `FailurePolicies`:
-
-```java
-class Application {
-  public static void main(String[] args) {
-    MessageBroker messageBroker = new MessageBrokerBuilder()
-        .failurePolicy(new FailurePolicies("inputQueue", "retryRoutingKey", "failureRoutingKey", 42))
-        .build();
-    /* ... */
-  }
-}
-``` 
-
-If messages should not be retried, set `retryRoutingKey` to `null`. If permanently failing messages should be discarded, set `failureRoutingKey` to `null`.
-
-### Failure control by exceptions
-
-If your read/transform/write implementations, you can control the failure handling by failing a message temporarily or finally.
-
-If a message shall fail finally, just throw an `FinallyFailedProcessException`; if you want to fail temporarily and schedule a retry, throw a `RetriableProcessException`.
+TODO
 
 
-## Multithreading
+## Collecting Metrics
 
-If you want to process more than one message at the same time, you can customize, how many threads the engine uses:
+TODO
 
-```java
-class Application {
-  public static void main(String[] args) {
-    int concurrentWorkers = 42;
-    
-    //...
-    Engine engine = new Engine(messageBroker, flow, concurrentWorkers);
-    engine.start();
-    //...
-  }
-}
-```
+## Customize Logging
 
-## Collect metrics
-
-To collect metrics for a flow, one can register a `Consumer<FlowStatus>` with the FlowBuilder:
-
-```java
-Flow flow = new FlowBuilder<DefaultMessage, String, String>()
-        // ...
-        .measure(metrics)
-        .build();
-``` 
-
-If you use Spring Boot, there is a complete support for Micrometer Metrics 
-
-```java
-@Configuration
-class FlusswerkConfig {
-
-  @Bean
-  public Flow<Message, String, String> flow(
-      Reader reader,
-      Transformer transformer,
-      Writer writer,
-      Metrics metrics) {
-    return FlowBuilder.with(Message.class, String.class, String.class)
-        // reader, transformer, writer,...
-        .measure(metrics)
-        .build();
-  }
-
-}
-``` 
-
-To implement your own Metrics Bean, either use
-```java
-class Metrics implements Consumer<FlowStatus> {
-
-  public void accept(FlowStatus flowInfo) {
-    // ...
-  }
-
-}
-``` 
-
-or subclass Flusswerk BaseMetrics-Bean:
-
-```java
-@Component
-public class Metrics extends BaseMetrics {
-
-  private final Counter buzz;
-
-  public Metrics(MeterFactory meterFactory) {
-    super(meterFactory);
-
-    // your definitions here
-    this.buzz = meterFactory.counter("buzz");
-  }
-
-  @Override
-  public void accept(FlowStatus flowInfo) {
-    super.accept(flowInfo);
-    // do something with flowInfo (you don't have to
-    // override this method if you don't need flowInfo)
-    // ...
-  }
-
-  public void buzz() {
-    this.buzz.increment();
-  }
-}
-```
+TODO
