@@ -27,7 +27,7 @@ dependencies {
  
  ## Getting started
 
-To get started, clone or copy the example at TODO. The example has three mino
+To get started, clone or copy the [Flusswerk Example](https://github.com/dbmdz/flusswerk-example) application.
 
  
 ## Migration to version 4
@@ -226,48 +226,31 @@ For manual interaction with RabbitMQ there is a Spring component with the same c
 | `route(Message)` | returns the `Topic` instance for the given route from `application.yml` |
 
 
-## Cleanup
+## Error Handling
 
-If you want to perform cleanups after processing of the message, e.g. for triggering a garbage collection, you can use the
-```cleanup()``` method of the FlowBuilder:
+Any data processing can go wrong. Flusswerk supports two error handling modes:
 
-```java
-class Application {
-  public static void main(String[] args) {
-    MessageBroker messageBroker = new MessageBrokerBuilder()
-        .readFrom("your.input.queue")
-        .writeTo("your.output.queue")
-        .build();
-    
-    Flow flow = new FlowBuilder<DefaultMessage, String, String>()
-        .read(new Reader())
-        .transform(new Transformer())
-        .writeAndSend(new Writer())
-        .cleanup(() -> Runtime.getRuntime().gc())
-        .build();
-    
-    Engine engine = new Engine(messageBroker, flow);
-    engine.start();
-  }
-}
-```
+ 1. stop processing for a message completely. This behaviour is triggered by a `StopProcessingException`.
+ 2. retry processing for a message later. This behaviour is triggered by a `RetryProcessingException` or any other `RuntimeException`.
 
-## Propagate FlowIds
+The default retry behaviour is to wait 30 seconds between retries and try up to 5 times. If processing a message still keeps failing, it is then treated like as if a StopProcessingException had been thrown and will be routed to a failed queue.
 
-If incoming and outgoing message classes implement `HasFlowId`, automated propagation of flow ids is available. If the option `flowBuilder.propagateFlowId(true)` is set, Flusswerk copies flow ids from incoming to all outgoing messages.
-
-
-
-
-## Failure Policies
-
-TODO
-
+For more finegrained control, see the configuration parameters for `flusswerk.routing.failure policies`.
 
 ## Collecting Metrics
 
-TODO
+Every Flusswerk application provides base metrics via as a `Prometheus` endpoint:
+
+|                             |                                                         |
+|-----------------------------|---------------------------------------------------------|
+| `flusswerk.processed.items` | total number of processed items since application start |
+| `flusswerk.execution.time`  | total amount of time spend on processing these items    |
+
+To include custom metrics, get counters via [MeterFactory](framework/src/main/java/com/github/dbmdz/flusswerk/framework/monitoring/MeterFactory.java). A bean of type `FlowMetrics` can also consume execution information of single flows (best to extend [BaseMetrics](framework/src/main/java/com/github/dbmdz/flusswerk/framework/monitoring/BaseMetrics.java) for that). 
+
+
+The prometheus endpoint is available at `/actuator/prometheus`.
 
 ## Customize Logging
 
-TODO
+To customize log messages, provide a bean of type [ProcessReport](framework/src/main/java/com/github/dbmdz/flusswerk/framework/reporting/ProcessReport.java).
