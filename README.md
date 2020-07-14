@@ -9,21 +9,21 @@
 
 Flusswerk makes it easy to create multi threaded workers for read-transform-write chains (aka ETL jobs). Workflows are coordinated via RabbitMQ, so it's easy to create chains of independent workflow jobs (each a new Java application).
 
-Maven:
+**Maven:**
 
 ```xml
 <dependency>
   <groupId>com.github.dbmdz.flusswerk</groupId>
   <artifactId>framework</artifactId>
-  <version>4.0.0</version>
+  <version>4.0.0-SNAPSHOT</version>
 </dependency>
 ```
 
-Gradle:
+**Gradle:**
 
 ```groovy
 dependencies {
-    compile group: 'com.github.dbmdz.flusswerk', name: 'framework', version: '4.0.0'
+    compile group: 'com.github.dbmdz.flusswerk', name: 'flusswerk', version: '4.0.0-SNAPSHOT'
 }
 ``` 
  
@@ -31,10 +31,18 @@ dependencies {
 
 To get started, clone or copy the example at TODO. The example has three mino
 
+ 
+## Migration to version 4
+
+Starting with Flusswerk 4, there are two major changes:
+
+ - Any Flusswerk application uses now Spring Boot and needs beans for `FlowSpec` (defining the
+    processing) and `IncomingMessage`.
+ - The package names changed from `de.digitalcollections.flusswerk.engine` to `com.github.dbmdz.framework`.
 
 ## Basic setup
 
-If you have an local RabbitMQ instance with default configurations up and running, creating your first worker is as easy as
+If you have a local RabbitMQ instance with default configurations up and running, creating your first worker is as easy as
 
 ```java
 class Application {
