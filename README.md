@@ -1,10 +1,8 @@
 # Flusswerk - Digital Collections Workflow Engine
 
 [![Javadocs](https://javadoc.io/badge/de.digitalcollections.flusswerk/dc-flusswerk-parent.svg)](https://javadoc.io/doc/de.digitalcollections.flusswerk/dc-flusswerk-parent)
-[![Build status](https://gitlab.com/dbmdz/flusswerk/badges/master/pipeline.svg)](https://gitlab.com/dbmdz/flusswerk/commits/master)
 [![Codecov](https://img.shields.io/codecov/c/github/dbmdz/flusswerk/master.svg)](https://codecov.io/gh/dbmdz/flusswerk)
 [![License](https://img.shields.io/github/license/dbmdz/flusswerk.svg)](LICENSE)
-[![GitHub release](https://img.shields.io/github/release/dbmdz/flusswerk.svg)](https://github.com/dbmdz/flusswerk/releases)
 [![Maven Central](https://img.shields.io/maven-central/v/de.digitalcollections.flusswerk/dc-flusswerk-parent.svg)](https://search.maven.org/search?q=a:dc-flusswerk-parent)
 
 Flusswerk makes it easy to create multi threaded workers for read-transform-write chains (aka ETL jobs). Workflows are coordinated via RabbitMQ, so it's easy to create chains of independent workflow jobs (each a new Java application).
