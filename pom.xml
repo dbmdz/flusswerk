@@ -61,7 +61,6 @@
 
   <modules>
     <module>framework</module>
-    <module>examples-spring-boot</module>
     <module>integration-tests</module>
   </modules>
 
