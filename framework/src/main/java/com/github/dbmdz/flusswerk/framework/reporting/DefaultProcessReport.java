@@ -46,7 +46,7 @@ public class DefaultProcessReport implements ProcessReport {
   @Override
   public void reportReject(Message message, Exception e) {
     LOGGER.warn(
-        "{}} rejected for retry ({}, {})",
+        "{} rejected for retry ({}, {})",
         name,
         keyValue("message", message),
         keyValue("exception", e.toString()));

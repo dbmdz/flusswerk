@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -23,7 +24,7 @@ public class Flow {
   private final Function<Object, Object> transformer;
   private final Function<Object, Collection<Message>> writer;
   private final Runnable cleanup;
-  private final Set<FlowMetrics> flowMetrics;
+  private final Set<Consumer<FlowInfo>> flowMetrics;
   private final LockManager lockManager;
 
   public Flow(FlowSpec flowSpec, LockManager lockManager) {
@@ -32,6 +33,9 @@ public class Flow {
     this.writer = requireNonNull(flowSpec.getWriter());
     this.cleanup = requireNonNullElse(flowSpec.getCleanup(), () -> {});
     this.flowMetrics = new HashSet<>();
+    if (flowSpec.getMonitor() != null) {
+      this.flowMetrics.add(flowSpec.getMonitor());
+    }
     this.lockManager = lockManager;
   }
 
