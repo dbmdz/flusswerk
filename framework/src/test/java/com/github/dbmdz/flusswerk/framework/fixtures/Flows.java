@@ -10,12 +10,12 @@ import java.util.function.Function;
 public class Flows {
 
   public static Flow passthroughFlow() {
-    var spec = FlowBuilder.messageProcessor(Message.class).process(m -> m).build();
-    return new Flow(spec, new NoOpLockManager());
+    return messageProcessor(m -> m);
   }
 
   public static Flow consumingFlow() {
-    var spec = FlowBuilder.messageProcessor(Message.class).consume(m -> {}).build();
+    var spec = FlowBuilder.messageProcessor(Message.class).consume(m -> {
+    }).build();
     return new Flow(spec, new NoOpLockManager());
   }
 
@@ -49,5 +49,10 @@ public class Flows {
 
   public static Flow flowBlockingAllThreads() {
     return flowWithTransformer(new ThreadBlockingTransformer<>());
+  }
+
+  public static Flow messageProcessor(Function<Message, Message> function) {
+    var spec = FlowBuilder.messageProcessor(Message.class).process(function).build();
+    return new Flow(spec, new NoOpLockManager());
   }
 }

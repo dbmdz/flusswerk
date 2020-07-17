@@ -45,7 +45,7 @@ public class MessageProcessorStep<M extends Message> {
   public ConfigurationStep<M, M, M> process(Function<M, Message> p) {
     model.setReader(m -> m);
     model.setTransformer(m -> m);
-    model.setWriter(p.andThen(List::of));
+    model.setWriter(p.andThen(m -> (m == null) ? emptyList() : List.of(m)));
     return new ConfigurationStep<>(model);
   }
 

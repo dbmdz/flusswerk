@@ -36,10 +36,6 @@ public class FlowInfo {
     return status;
   }
 
-  void setStatus(Status status) {
-    this.status = status;
-  }
-
   void setStatusFrom(Exception e) {
     if (e instanceof StopProcessingException) {
       status = Status.ERROR_STOP;

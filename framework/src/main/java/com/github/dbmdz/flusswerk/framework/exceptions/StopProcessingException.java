@@ -44,4 +44,14 @@ public class StopProcessingException extends RuntimeException {
   public static ExceptionSupplier<StopProcessingException> because(String message, Object... args) {
     return new ExceptionSupplier<>(StopProcessingException.class, message, args);
   }
+
+  @Override
+  public String toString() {
+    String message = getLocalizedMessage();
+    if (message == null) {
+      return "StopProcessingException";
+    } else {
+      return  "StopProcessingException: " + message;
+    }
+  }
 }
