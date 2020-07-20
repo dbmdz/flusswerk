@@ -14,7 +14,6 @@ import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-
 @DisplayName("The Flow")
 class FlowTest {
 
@@ -38,11 +37,12 @@ class FlowTest {
   @DisplayName("should never return null for writer")
   @Test
   void shouldNeverReturnNullForWriter() {
-    FlowSpec flowSpec = FlowBuilder.flow(Message.class, Message.class, Message.class)
-        .reader(m -> m)
-        .transformer(m -> m)
-        .writerSendingMessage(m -> null)
-        .build();
+    FlowSpec flowSpec =
+        FlowBuilder.flow(Message.class, Message.class, Message.class)
+            .reader(m -> m)
+            .transformer(m -> m)
+            .writerSendingMessage(m -> null)
+            .build();
     Flow flow = new Flow(flowSpec, new NoOpLockManager());
     var actual = flow.process(new Message("123"));
     assertThat(actual).isEmpty();
@@ -52,10 +52,8 @@ class FlowTest {
   @Test
   void shouldCollectMetricsWithCollectorFromBuilder() {
     FlowMetrics metrics = mock(FlowMetrics.class);
-    FlowSpec flowSpec = FlowBuilder.messageProcessor(Message.class)
-        .process(m -> m)
-        .metrics(metrics)
-        .build();
+    FlowSpec flowSpec =
+        FlowBuilder.messageProcessor(Message.class).process(m -> m).metrics(metrics).build();
     Flow flow = new Flow(flowSpec, new NoOpLockManager());
     flow.process(new Message("123"));
     verify(metrics).accept(any());
@@ -70,5 +68,4 @@ class FlowTest {
     flow.process(new Message("123"));
     verify(metrics).accept(any());
   }
-
 }
