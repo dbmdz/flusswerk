@@ -32,7 +32,6 @@ class SilentProcessReportTest {
     silentProcessReport = new SilentProcessReport();
   }
 
-
   @DisplayName("should report nothing on success")
   @Test
   void reportSuccess() {
@@ -51,7 +50,8 @@ class SilentProcessReportTest {
   @DisplayName("should report nothing on fail after too many retries")
   @Test
   void reportFailAfterMaxRetries() {
-    silentProcessReport.reportFailAfterMaxRetries(new Message("123"), new StopProcessingException("stop now"));
+    silentProcessReport.reportFailAfterMaxRetries(
+        new Message("123"), new StopProcessingException("stop now"));
     assertThat(listAppender.list).isEmpty();
   }
 

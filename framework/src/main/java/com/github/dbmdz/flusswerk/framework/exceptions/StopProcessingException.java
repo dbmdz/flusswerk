@@ -51,7 +51,7 @@ public class StopProcessingException extends RuntimeException {
     if (message == null) {
       return "StopProcessingException";
     } else {
-      return  "StopProcessingException: " + message;
+      return "StopProcessingException: " + message;
     }
   }
 }

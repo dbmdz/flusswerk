@@ -14,8 +14,7 @@ public class Flows {
   }
 
   public static Flow consumingFlow() {
-    var spec = FlowBuilder.messageProcessor(Message.class).consume(m -> {
-    }).build();
+    var spec = FlowBuilder.messageProcessor(Message.class).consume(m -> {}).build();
     return new Flow(spec, new NoOpLockManager());
   }
 

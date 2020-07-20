@@ -23,8 +23,7 @@ class BaseMetricsTest {
   private static Stream<Arguments> counters() {
     return Stream.concat(
         Arrays.stream(Status.values()).map(status -> Arguments.of("processed.items", status)),
-        Arrays.stream(Status.values()).map(status -> Arguments.of("execution.time", status))
-    );
+        Arrays.stream(Status.values()).map(status -> Arguments.of("execution.time", status)));
   }
 
   @DisplayName("Should initialize counters")
@@ -35,7 +34,6 @@ class BaseMetricsTest {
     new BaseMetrics(meterFactory);
     verify(meterFactory).counter(metric, status);
   }
-
 
   @DisplayName("should use all fields of FlowInfo")
   @Test
@@ -51,5 +49,4 @@ class BaseMetricsTest {
     verify(flowInfo).duration();
     verify(flowInfo).getStatus();
   }
-
 }

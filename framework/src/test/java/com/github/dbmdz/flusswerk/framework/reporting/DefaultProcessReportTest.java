@@ -37,7 +37,8 @@ class DefaultProcessReportTest {
   void reportSuccess() {
     Message message = new Message();
     defaultProcessReport.reportSuccess(message);
-    assertThat(listAppender.list).first()
+    assertThat(listAppender.list)
+        .first()
         .hasFieldOrPropertyWithValue("level", Level.INFO)
         .hasFieldOrPropertyWithValue("formattedMessage", "testapp successful");
   }
@@ -48,9 +49,12 @@ class DefaultProcessReportTest {
     var message = new Message("123");
     var e = new StopProcessingException("stop now");
     defaultProcessReport.reportFail(message, e);
-    assertThat(listAppender.list).first()
+    assertThat(listAppender.list)
+        .first()
         .hasFieldOrPropertyWithValue("level", Level.ERROR)
-        .hasFieldOrPropertyWithValue("formattedMessage", "testapp failed terminally (message=" + message + ", exception=" + e +")");
+        .hasFieldOrPropertyWithValue(
+            "formattedMessage",
+            "testapp failed terminally (message=" + message + ", exception=" + e + ")");
   }
 
   @DisplayName("should report failure after too many retries")
@@ -59,9 +63,16 @@ class DefaultProcessReportTest {
     var message = new Message("123");
     var e = new StopProcessingException("stop now");
     defaultProcessReport.reportFailAfterMaxRetries(message, e);
-    assertThat(listAppender.list).first()
+    assertThat(listAppender.list)
+        .first()
         .hasFieldOrPropertyWithValue("level", Level.ERROR)
-        .hasFieldOrPropertyWithValue("formattedMessage", "testapp failed after maximum number of retries (message=" + message + ", exception=" + e +")");
+        .hasFieldOrPropertyWithValue(
+            "formattedMessage",
+            "testapp failed after maximum number of retries (message="
+                + message
+                + ", exception="
+                + e
+                + ")");
   }
 
   @DisplayName("should report failure with planned retries")
@@ -70,9 +81,11 @@ class DefaultProcessReportTest {
     var message = new Message("123");
     var e = new RetryProcessingException("stop now");
     defaultProcessReport.reportReject(message, e);
-    assertThat(listAppender.list).first()
+    assertThat(listAppender.list)
+        .first()
         .hasFieldOrPropertyWithValue("level", Level.WARN)
-        .hasFieldOrPropertyWithValue("formattedMessage", "testapp rejected for retry (message=" + message + ", exception=" + e +")");
-
+        .hasFieldOrPropertyWithValue(
+            "formattedMessage",
+            "testapp rejected for retry (message=" + message + ", exception=" + e + ")");
   }
 }
