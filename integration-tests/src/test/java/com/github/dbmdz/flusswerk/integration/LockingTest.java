@@ -13,7 +13,7 @@ import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.locking.LockManager;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
-import com.github.dbmdz.flusswerk.integration.SuccessfulProcessingTest.FlowConfiguration;
+import com.github.dbmdz.flusswerk.integration.LockingTest.FlowConfiguration;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -62,7 +62,7 @@ public class LockingTest {
 
   private final RedisUtil redisUtil;
 
-  private final ProcessorAdapter<Message> processorAdapter;
+  private final ProcessorAdapter processorAdapter;
 
   private final LockManager lockManager;
 
@@ -72,7 +72,7 @@ public class LockingTest {
       RoutingProperties routingProperties,
       RedisProperties redisProperties,
       RabbitMQ rabbitMQ,
-      ProcessorAdapter<Message> processorAdapter,
+      ProcessorAdapter processorAdapter,
       LockManager lockManager) {
     this.engine = engine;
     this.processorAdapter = processorAdapter;
@@ -87,22 +87,20 @@ public class LockingTest {
   /**
    * Adapter class so that tests can inject test logic while we still can use Spring Test Autowiring
    * setup.
-   *
-   * @param <T> Message or a subclass of Message - the incoming message type.
    */
-  static class ProcessorAdapter<T extends Message> implements Function<T, Message> {
+  static class ProcessorAdapter implements Function<Message, Message> {
 
-    private Function<T, Message> function;
+    private Function<Message, Message> function;
 
     @Override
-    public Message apply(T message) {
+    public Message apply(Message message) {
       if (function == null) {
         throw new RuntimeException("Processor called before actual function was assigned");
       }
       return function.apply(message);
     }
 
-    public void setFunction(Function<T, Message> function) {
+    public void setFunction(Function<Message, Message> function) {
       this.function = function;
     }
   }
@@ -111,12 +109,12 @@ public class LockingTest {
   static class FlowConfiguration {
 
     @Bean
-    public ProcessorAdapter<Message> processorAdapter() {
-      return new ProcessorAdapter<>();
+    public ProcessorAdapter processorAdapter() {
+      return new ProcessorAdapter();
     }
 
     @Bean
-    public FlowSpec flowSpec(ProcessorAdapter<Message> processorAdapter) {
+    public FlowSpec flowSpec(ProcessorAdapter processorAdapter) {
       return FlowBuilder.messageProcessor(Message.class).process(processorAdapter).build();
     }
   }
@@ -133,10 +131,9 @@ public class LockingTest {
   }
 
   @Test
-  public void successfulMessagesShouldGoToOutQueue() throws Exception {
+  public void testLocksAreSet() throws Exception {
     var inputQueue = routing.getIncoming().get(0);
     var outputQueue = routing.getOutgoing().get("default");
-    var failurePolicy = routing.getFailurePolicy(inputQueue);
 
     Message expected = new Message("123456");
     rabbitMQ.topic(inputQueue).send(expected);
@@ -154,9 +151,7 @@ public class LockingTest {
           return message;
         });
 
-    var received =
-        rabbitUtil.waitForMessage(outputQueue, failurePolicy, this.getClass().getSimpleName());
-    rabbitMQ.ack(received);
+    rabbitUtil.waitAndAck(outputQueue, routing.getFailurePolicy(inputQueue).getBackoff());
 
     assertThat(redisUtil.getRLock(id)).is(UNLOCKED);
   }
