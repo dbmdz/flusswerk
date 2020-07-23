@@ -8,10 +8,6 @@ public class TestingWatch implements Watch {
     this.now = 333; // do not start at zero to rule out no-ops in measurements
   }
 
-  public void setNow(long now) {
-    this.now = now;
-  }
-
   @Override
   public long now() {
     return now;

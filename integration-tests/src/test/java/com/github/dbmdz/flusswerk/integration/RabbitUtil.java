@@ -6,6 +6,7 @@ import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.FailurePolicy;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import java.io.IOException;
+import java.time.Duration;
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,5 +68,22 @@ public class RabbitUtil {
     if (deletedMessages != 0) {
       LOGGER.error("Purged {} and found {} messages.", queue, deletedMessages);
     }
+  }
+
+  public Message waitAndAck(String queueName, Duration backoff)
+      throws IOException, InvalidMessageException, InterruptedException {
+    var queue = rabbitMQ.queue(queueName);
+    var received = queue.receive();
+    var attempts = 0;
+    while (received.isEmpty()) {
+      if (attempts > 50) {
+        Assert.fail("Too many attempts to receive message");
+      }
+      Thread.sleep(backoff.toMillis()); // dead letter backoff time is 1s
+      received = queue.receive();
+      attempts++;
+    }
+    rabbitMQ.ack(received.get());
+    return received.get();
   }
 }

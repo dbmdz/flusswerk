@@ -12,11 +12,17 @@ public class RedisProperties {
   private final String password;
 
   public RedisProperties(String address, String password) {
-    if (StringUtils.hasText(address)) {
-      this.address = address.contains(":") ? address : address + ":6379";
-    } else {
+    if (!StringUtils.hasText(address)) {
       this.address = null; // if Redis is not configured/used
+      this.password = null;
+      return;
     }
+
+    if (!(address.startsWith("redis://") || address.startsWith("rediss://"))) {
+      throw new RuntimeException("Redis connection string has to start with redis:// or rediss://");
+    }
+
+    this.address = address;
     this.password = password; // might be null if no authentication is used
   }
 

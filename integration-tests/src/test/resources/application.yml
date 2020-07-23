@@ -12,6 +12,8 @@ flusswerk:
       - localhost
     username: guest
     password: guest
+  redis:
+    address: redis://127.0.0.1:6379
   routing:
     exchange: my.exchange
     incoming:
