@@ -1,7 +1,11 @@
 version: '3'
 services:
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:3-management-alpine
     ports:
       - 5672:5672
       - 15672:15672
+  redis:
+    image: redis:6-alpine
+    ports:
+      - 6379:6379
