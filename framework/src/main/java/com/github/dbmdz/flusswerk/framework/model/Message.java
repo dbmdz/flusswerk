@@ -60,6 +60,6 @@ public class Message {
 
   @Override
   public int hashCode() {
-    return Objects.hash(envelope, tracingId);
+    return Objects.hash(tracingId);
   }
 }

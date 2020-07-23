@@ -1,7 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
@@ -25,5 +24,12 @@ class MessageTest {
   @MethodSource("messages")
   void testEquals(Message m1, Message m2, boolean shouldBeEqual) {
     assertThat(m1.equals(m2)).isEqualTo(shouldBeEqual);
+  }
+
+  @DisplayName("should be have the same hashCode as another message with the same tracing id")
+  @ParameterizedTest
+  @MethodSource("messages")
+  void testHashCode(Message m1, Message m2, boolean shouldBeEqual) {
+    assertThat(m1.hashCode() == m2.hashCode()).isEqualTo(shouldBeEqual);
   }
 }
