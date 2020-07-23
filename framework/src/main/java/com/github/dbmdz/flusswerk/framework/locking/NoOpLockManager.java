@@ -18,12 +18,12 @@ public class NoOpLockManager implements LockManager {
   }
 
   @Override
-  public long getWaitedForLocksMs() {
+  public long getWaitedForLocksNs() {
     return 0;
   }
 
   @Override
-  public long getLocksHeldMs() {
+  public long getLocksHeldNs() {
     return 0;
   }
 

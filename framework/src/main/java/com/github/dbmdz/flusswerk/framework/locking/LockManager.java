@@ -15,13 +15,13 @@ public interface LockManager {
    * @return the total amount of time spent on waiting for locks. Time for locks held at the same
    *     time is added up.
    */
-  long getWaitedForLocksMs();
+  long getWaitedForLocksNs();
 
   /**
    * @return the total amount of time all locks have been held. Time for locks held at the same time
    *     is added up.
    */
-  long getLocksHeldMs();
+  long getLocksHeldNs();
 
   boolean threadHasLock();
 
