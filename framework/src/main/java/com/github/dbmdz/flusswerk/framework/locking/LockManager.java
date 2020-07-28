@@ -1,10 +1,11 @@
 package com.github.dbmdz.flusswerk.framework.locking;
 
+import com.github.dbmdz.flusswerk.framework.exceptions.LockingException;
 import java.util.Optional;
 
 public interface LockManager {
 
-  void acquire(String id) throws InterruptedException;
+  void acquire(String id) throws LockingException;
 
   void release();
 
@@ -26,4 +27,6 @@ public interface LockManager {
   boolean threadHasLock();
 
   Optional<String> getLockedIdForThread();
+
+  boolean isLocked(String id);
 }

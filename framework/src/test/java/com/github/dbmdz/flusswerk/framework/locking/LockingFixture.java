@@ -27,12 +27,22 @@ class LockingFixture {
 
   Lock mockLockForId(String id) {
     var lock = mock(RLock.class);
+    try {
+      when(lock.tryLock(timeoutMs, TimeUnit.MILLISECONDS)).thenReturn(true);
+    } catch (InterruptedException e) {
+      throw new RuntimeException("Could not instrument mock", e);
+    }
     when(redissonClient.getLock(redisLockManager.key(id))).thenReturn(lock);
     return lock;
   }
 
   Lock mockLockForAnyId() {
     var lock = mock(RLock.class);
+    try {
+      when(lock.tryLock(timeoutMs, TimeUnit.MILLISECONDS)).thenReturn(true);
+    } catch (InterruptedException e) {
+      throw new RuntimeException("Could not instrument mock", e);
+    }
     when(redissonClient.getLock(any())).thenReturn(lock);
     return lock;
   }

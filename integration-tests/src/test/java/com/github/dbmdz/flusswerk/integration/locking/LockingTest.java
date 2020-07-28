@@ -1,30 +1,32 @@
-package com.github.dbmdz.flusswerk.integration;
+package com.github.dbmdz.flusswerk.integration.locking;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import com.github.dbmdz.flusswerk.framework.config.FlusswerkConfiguration;
 import com.github.dbmdz.flusswerk.framework.config.FlusswerkPropertiesConfiguration;
+import com.github.dbmdz.flusswerk.framework.config.properties.RedisProperties;
 import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
-import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
-import com.github.dbmdz.flusswerk.framework.exceptions.RetryProcessingException;
+import com.github.dbmdz.flusswerk.framework.exceptions.LockingException;
 import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
+import com.github.dbmdz.flusswerk.framework.locking.LockManager;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
-import com.github.dbmdz.flusswerk.integration.RetryTest.FlowConfiguration;
+import com.github.dbmdz.flusswerk.integration.ProcessorAdapter;
+import com.github.dbmdz.flusswerk.integration.RabbitUtil;
+import com.github.dbmdz.flusswerk.integration.RedisUtil;
+import com.github.dbmdz.flusswerk.integration.locking.LockingTest.FlowConfiguration;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.UnaryOperator;
+import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.redisson.api.RLock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.metrics.CompositeMeterRegistryAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfiguration;
@@ -44,9 +46,12 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
       FlusswerkConfiguration.class
     })
 @Import({MetricsAutoConfiguration.class, CompositeMeterRegistryAutoConfiguration.class})
-public class RetryTest {
+public class LockingTest {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(RetryTest.class);
+  private static final Condition<? super RLock> LOCKED = new Condition<>(RLock::isLocked, "locked");
+
+  private static final Condition<? super RLock> UNLOCKED =
+      new Condition<>(lock -> !lock.isLocked(), "locked");
 
   private final Engine engine;
 
@@ -58,31 +63,41 @@ public class RetryTest {
 
   private final RabbitMQ rabbitMQ;
 
+  private final RedisUtil redisUtil;
+
+  private final ProcessorAdapter processorAdapter;
+
+  private final LockManager lockManager;
+
   @Autowired
-  public RetryTest(Engine engine, RabbitMQ rabbitMQ, RoutingProperties routingProperties) {
+  public LockingTest(
+      Engine engine,
+      RoutingProperties routingProperties,
+      RedisProperties redisProperties,
+      RabbitMQ rabbitMQ,
+      ProcessorAdapter processorAdapter,
+      LockManager lockManager) {
     this.engine = engine;
-    this.rabbitMQ = rabbitMQ;
+    this.processorAdapter = processorAdapter;
     this.routing = routingProperties;
+    this.rabbitMQ = rabbitMQ;
+    this.redisUtil = new RedisUtil(redisProperties);
+    this.lockManager = lockManager;
     executorService = Executors.newSingleThreadExecutor();
     rabbitUtil = new RabbitUtil(rabbitMQ, routing);
-  }
-
-  static class CountFailures implements UnaryOperator<Message> {
-
-    private final AtomicInteger count = new AtomicInteger();
-
-    @Override
-    public Message apply(Message message) {
-      throw new RetryProcessingException("Fail message to retry ({})", count.incrementAndGet());
-    }
   }
 
   @TestConfiguration
   static class FlowConfiguration {
 
     @Bean
-    public FlowSpec flowSpec() {
-      return FlowBuilder.messageProcessor(Message.class).process(new CountFailures()).build();
+    public ProcessorAdapter processorAdapter() {
+      return new ProcessorAdapter();
+    }
+
+    @Bean
+    public FlowSpec flowSpec(ProcessorAdapter processorAdapter) {
+      return FlowBuilder.messageProcessor(Message.class).process(processorAdapter).build();
     }
   }
 
@@ -97,29 +112,29 @@ public class RetryTest {
     rabbitUtil.purgeQueues();
   }
 
-  private void purge(String queue) throws IOException {
-    var deletedMessages = rabbitMQ.queue(queue).purge();
-    if (deletedMessages != 0) {
-      LOGGER.error("Purged {} and found {} messages.", queue, deletedMessages);
-    }
-  }
-
   @Test
-  @DisplayName("should retry message 5 times")
-  void shouldRetryMessage() throws IOException, InvalidMessageException, InterruptedException {
-    var message = new Message("12345");
-
+  public void testLocksAreSet() throws Exception {
     var inputQueue = routing.getIncoming().get(0);
-    var failurePolicy = routing.getFailurePolicy(inputQueue);
+    var outputQueue = routing.getOutgoing().get("default");
 
-    rabbitMQ.topic(inputQueue).send(message);
+    Message expected = new Message("123456");
+    rabbitMQ.topic(inputQueue).send(expected);
 
-    var received =
-        rabbitUtil.waitForMessage(
-            failurePolicy.getFailedRoutingKey(), failurePolicy, this.getClass().getSimpleName());
+    String id = "123";
+    processorAdapter.setFunction(
+        message -> {
+          assertThat(redisUtil.getRLock(id)).is(UNLOCKED);
+          try {
+            lockManager.acquire(id);
+          } catch (LockingException e) {
+            fail("Could not acquire lock", e);
+          }
+          assertThat(redisUtil.getRLock(id)).is(LOCKED);
+          return message;
+        });
 
-    rabbitMQ.ack(received);
-    assertThat(received.getTracingId()).isEqualTo(message.getTracingId());
-    assertThat(received.getEnvelope().getRetries()).isEqualTo(failurePolicy.getRetries());
+    rabbitUtil.waitAndAck(outputQueue, routing.getFailurePolicy(inputQueue).getBackoff());
+
+    assertThat(redisUtil.getRLock(id)).is(UNLOCKED);
   }
 }

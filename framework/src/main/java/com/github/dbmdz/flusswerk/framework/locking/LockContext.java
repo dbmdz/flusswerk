@@ -2,6 +2,7 @@ package com.github.dbmdz.flusswerk.framework.locking;
 
 import static java.util.Objects.requireNonNull;
 
+import com.github.dbmdz.flusswerk.framework.exceptions.LockingException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
@@ -27,9 +28,15 @@ class LockContext {
     this.watch = watch;
   }
 
-  public void acquire(long timeout, TimeUnit unit) throws InterruptedException {
+  public void acquire(long timeout, TimeUnit unit) throws LockingException {
     acquisitionStarted = watch.now();
-    lock.tryLock(timeout, unit);
+    try {
+      if (!lock.tryLock(timeout, unit)) {
+        throw new LockingException("Could not acquire lock: Timeout of " + timeout + "ms reached");
+      }
+    } catch (InterruptedException e) {
+      throw new LockingException("Could not acquire lock", e);
+    }
     acquired = watch.now();
   }
 

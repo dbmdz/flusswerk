@@ -6,7 +6,7 @@ spring:
 
 flusswerk:
   processing:
-    threads: 1
+    threads: 2
   rabbitmq:
     hosts:
       - localhost
