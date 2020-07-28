@@ -1,4 +1,4 @@
-package com.github.dbmdz.flusswerk.integration;
+package com.github.dbmdz.flusswerk.integration.processing;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -6,18 +6,26 @@ import com.github.dbmdz.flusswerk.framework.config.FlusswerkConfiguration;
 import com.github.dbmdz.flusswerk.framework.config.FlusswerkPropertiesConfiguration;
 import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
+import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
+import com.github.dbmdz.flusswerk.framework.exceptions.RetryProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
-import com.github.dbmdz.flusswerk.integration.SuccessfulProcessingTest.FlowConfiguration;
+import com.github.dbmdz.flusswerk.integration.RabbitUtil;
+import com.github.dbmdz.flusswerk.integration.processing.RetryTest.FlowConfiguration;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.UnaryOperator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.metrics.CompositeMeterRegistryAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfiguration;
@@ -37,7 +45,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
       FlusswerkConfiguration.class
     })
 @Import({MetricsAutoConfiguration.class, CompositeMeterRegistryAutoConfiguration.class})
-public class SuccessfulProcessingTest {
+public class RetryTest {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(RetryTest.class);
 
   private final Engine engine;
 
@@ -50,20 +60,30 @@ public class SuccessfulProcessingTest {
   private final RabbitMQ rabbitMQ;
 
   @Autowired
-  public SuccessfulProcessingTest(
-      Engine engine, RoutingProperties routingProperties, RabbitMQ rabbitMQ) {
+  public RetryTest(Engine engine, RabbitMQ rabbitMQ, RoutingProperties routingProperties) {
     this.engine = engine;
-    this.routing = routingProperties;
     this.rabbitMQ = rabbitMQ;
+    this.routing = routingProperties;
     executorService = Executors.newSingleThreadExecutor();
     rabbitUtil = new RabbitUtil(rabbitMQ, routing);
   }
 
+  static class CountFailures implements UnaryOperator<Message> {
+
+    private final AtomicInteger count = new AtomicInteger();
+
+    @Override
+    public Message apply(Message message) {
+      throw new RetryProcessingException("Fail message to retry ({})", count.incrementAndGet());
+    }
+  }
+
   @TestConfiguration
   static class FlowConfiguration {
+
     @Bean
     public FlowSpec flowSpec() {
-      return FlowBuilder.messageProcessor(Message.class).process(m -> m).build();
+      return FlowBuilder.messageProcessor(Message.class).process(new CountFailures()).build();
     }
   }
 
@@ -78,23 +98,29 @@ public class SuccessfulProcessingTest {
     rabbitUtil.purgeQueues();
   }
 
+  private void purge(String queue) throws IOException {
+    var deletedMessages = rabbitMQ.queue(queue).purge();
+    if (deletedMessages != 0) {
+      LOGGER.error("Purged {} and found {} messages.", queue, deletedMessages);
+    }
+  }
+
   @Test
-  public void successfulMessagesShouldGoToOutQueue() throws Exception {
+  @DisplayName("should retry message 5 times")
+  void shouldRetryMessage() throws IOException, InvalidMessageException, InterruptedException {
+    var message = new Message("12345");
+
     var inputQueue = routing.getIncoming().get(0);
-    var outputQueue = routing.getOutgoing().get("default");
     var failurePolicy = routing.getFailurePolicy(inputQueue);
 
-    Message expected = new Message("123456");
-    rabbitMQ.topic(inputQueue).send(expected);
+    rabbitMQ.topic(inputQueue).send(message);
 
     var received =
-        rabbitUtil.waitForMessage(outputQueue, failurePolicy, this.getClass().getSimpleName());
-    rabbitMQ.ack(received);
-    assertThat(received.getTracingId()).isEqualTo(expected.getTracingId());
+        rabbitUtil.waitForMessage(
+            failurePolicy.getFailedRoutingKey(), failurePolicy, this.getClass().getSimpleName());
 
-    assertThat(rabbitMQ.queue(inputQueue).messageCount()).isZero();
-    assertThat(rabbitMQ.queue(outputQueue).messageCount()).isZero();
-    assertThat(rabbitMQ.queue(failurePolicy.getRetryRoutingKey()).messageCount()).isZero();
-    assertThat(rabbitMQ.queue(failurePolicy.getFailedRoutingKey()).messageCount()).isZero();
+    rabbitMQ.ack(received);
+    assertThat(received.getTracingId()).isEqualTo(message.getTracingId());
+    assertThat(received.getEnvelope().getRetries()).isEqualTo(failurePolicy.getRetries());
   }
 }

@@ -24,7 +24,6 @@ import com.github.dbmdz.flusswerk.framework.reporting.DefaultProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.io.IOException;
-import java.time.Duration;
 import java.util.Set;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
@@ -118,7 +117,9 @@ public class FlusswerkConfiguration {
       Config config = createRedisConfig(redisProperties);
       RedissonClient client = Redisson.create(config);
       return new RedisLockManager(
-          client, "flusswerk", Duration.ofMillis(50)); // TODO add configuration
+          client,
+          redisProperties.getKeyspace(),
+          redisProperties.getLockWaitTimeout()); // TODO add configuration
     } else {
       return new NoOpLockManager();
     }

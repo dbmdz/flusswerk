@@ -2,6 +2,7 @@ package com.github.dbmdz.flusswerk.framework.locking;
 
 import static java.util.Objects.requireNonNull;
 
+import com.github.dbmdz.flusswerk.framework.exceptions.LockingException;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -38,14 +39,15 @@ public class RedisLockManager implements LockManager {
   }
 
   @Override
-  public void acquire(String id) throws InterruptedException {
+  public void acquire(String id) throws LockingException {
     acquire(id, Thread.currentThread().getId());
   }
 
-  void acquire(String id, long threadId) throws InterruptedException {
+  void acquire(String id, long threadId) throws LockingException {
     if (locks.containsKey(threadId)) {
       throw new RuntimeException("Cannot acquire more than one lock per thread at the same time");
     }
+    System.out.println("ACQUIRE LOCK FOR id=" + id + " threadId=" + threadId);
     Lock lock = client.getLock(key(id));
     LockContext context = new LockContext(lock, id, watch);
     locks.put(threadId, context);
@@ -54,7 +56,7 @@ public class RedisLockManager implements LockManager {
       context.acquire(timeout, TimeUnit.MILLISECONDS);
       locksAcquired.incrementAndGet();
       waitedForLocksNs.addAndGet(context.waitedForAcquisitionNs());
-    } catch (InterruptedException e) {
+    } catch (LockingException e) {
       locks.remove(threadId);
       throw e;
     }
@@ -107,5 +109,10 @@ public class RedisLockManager implements LockManager {
       return Optional.empty();
     }
     return Optional.of(context.getId());
+  }
+
+  @Override
+  public boolean isLocked(String id) {
+    return client.getLock(key(id)).isLocked();
   }
 }

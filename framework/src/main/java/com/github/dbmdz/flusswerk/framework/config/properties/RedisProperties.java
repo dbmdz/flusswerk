@@ -1,5 +1,8 @@
 package com.github.dbmdz.flusswerk.framework.config.properties;
 
+import static java.util.Objects.requireNonNullElse;
+
+import java.time.Duration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
 import org.springframework.util.StringUtils;
@@ -12,8 +15,18 @@ public class RedisProperties {
 
   private final String address;
   private final String password;
+  private final Duration lockWaitTimeout;
+  private final String keyspace;
 
-  public RedisProperties(String address, String password) {
+  public RedisProperties(
+      String address, String password, Duration lockWaitTimeout, String keyspace) {
+    this.lockWaitTimeout = requireNonNullElse(lockWaitTimeout, Duration.ofSeconds(5));
+    if (StringUtils.hasText(keyspace)) {
+      this.keyspace = keyspace.trim();
+    } else {
+      this.keyspace = "flusswerk";
+    }
+
     if (!StringUtils.hasText(address)) {
       this.address = null; // if Redis is not configured/used
       this.password = null;
@@ -47,5 +60,13 @@ public class RedisProperties {
 
   public boolean redisIsAvailable() {
     return this.address != null;
+  }
+
+  public Duration getLockWaitTimeout() {
+    return lockWaitTimeout;
+  }
+
+  public String getKeyspace() {
+    return keyspace;
   }
 }

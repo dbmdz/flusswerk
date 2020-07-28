@@ -22,6 +22,11 @@ class LockContextTest {
   @BeforeEach
   void setUp() {
     lock = mock(Lock.class);
+    try {
+      when(lock.tryLock(50, TimeUnit.MILLISECONDS)).thenReturn(true);
+    } catch (InterruptedException e) {
+      throw new RuntimeException("Could not instrument mock", e);
+    }
     watch = new TestingWatch();
     lockContext = new LockContext(lock, "123", watch);
   }

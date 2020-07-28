@@ -22,7 +22,7 @@ class RedisPropertiesTest {
     "rediss://localhost:1234,rediss://localhost:1234"
   })
   void shouldNormalizeAddresses(String address, String expected) {
-    var properties = new RedisProperties(address, null);
+    var properties = new RedisProperties(address, null, null, null);
     assertThat(properties.getAddress()).isEqualTo(expected);
   }
 
@@ -31,22 +31,14 @@ class RedisPropertiesTest {
   @NullSource
   @ValueSource(strings = {"", " \t"})
   void shouldAllowNotSettingAddress(String address) {
-    var properties = new RedisProperties(address, null);
+    var properties = new RedisProperties(address, null, null, null);
     assertThat(properties.redisIsAvailable()).isFalse();
-  }
-
-  @DisplayName("should set default port if port is missing")
-  @ParameterizedTest(name = "{0} → {1}")
-  @CsvSource({"host,host:6379", "host:12345,host:12345"})
-  void shouldSetDefaultPortIfPortIsMissing(String address, String expected) {
-    var properties = new RedisProperties(address, null);
-    assertThat(properties.getAddress()).isEqualTo(expected);
   }
 
   @DisplayName("should allow not setting password")
   @Test
   void shouldAllowNotSettingPassword() {
-    var properties = new RedisProperties("localhost", null);
+    var properties = new RedisProperties("localhost", null, null, null);
     assertThat(properties.getPassword()).isNull();
   }
 }

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.github.dbmdz.flusswerk.framework.exceptions.LockingException;
 import java.time.Duration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -79,7 +80,7 @@ class RedisLockManagerTest {
 
     lockingFixture.whenTryAcquire(lock).thenThrow(InterruptedException.class);
 
-    assertThatExceptionOfType(InterruptedException.class)
+    assertThatExceptionOfType(LockingException.class)
         .isThrownBy(() -> redisLockManager.acquire(id));
     assertThat(redisLockManager.getLockedIdForThread()).isEmpty();
   }
