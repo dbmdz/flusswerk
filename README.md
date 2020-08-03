@@ -38,13 +38,16 @@ Example](https://github.com/dbmdz/flusswerk-example) application.
 
 Starting with Flusswerk 4, there are two major changes:
 
- - Any Flusswerk application uses now Spring Boot and needs beans for [FlowSpec][FlowSpec]
-    (defining the processing) and [IncomingMessageType][IncomingMessageType].
+ - Any Flusswerk application uses now Spring Boot and needs beans for
+    [FlowSpec][FlowSpec] (defining the processing) and
+    [IncomingMessageType][IncomingMessageType].
  - The package names changed from `de.digitalcollections.flusswerk.engine` to
    `com.github.dbmdz.framework`.
 
-[FlowSpec]: framework/src/main/java/com/github/dbmdz/flusswerk/framework/flow/FlowSpec.java
-[IncomingMessageType]: framework/src/main/java/com/github/dbmdz/flusswerk/framework/model/IncomingMessageType.java
+[FlowSpec]:
+framework/src/main/java/com/github/dbmdz/flusswerk/framework/flow/FlowSpec.java
+[IncomingMessageType]:
+framework/src/main/java/com/github/dbmdz/flusswerk/framework/model/IncomingMessageType.java
 
 ## The Big Picture
 
@@ -105,7 +108,7 @@ public IncomingMessageType incomingMessageType() {
 
 ### Configuration
 
-All configuraton magic happens in Spring's `application.yml`.
+All configuration magic happens in Spring's `application.yml`.
 
 A minimal configuration might look like:
 
@@ -196,7 +199,7 @@ The sections of the `Flusswerk` configuration
 
 ### Data Processing
 
-To setup your data processing flow, define a Spring bean of type FlowSpec:
+To set up your data processing flow, define a Spring bean of type FlowSpec:
 
 ```java
 @Bean
@@ -214,7 +217,7 @@ With the `Reader`, `Transformer` and `Writer` implementing the `Function` interf
 |               |                                     |                                                                         |
 | ------------- | ----------------------------------- | ----------------------------------------------------------------------- |
 | `Reader`      | `Function<IndexMessage, Document>`  | loads document from storage                                             |
-| `Transformer` | `Function<Document, IndexDocument>` | uses `Document` to build up the datastructure needed for indexing       |
+| `Transformer` | `Function<Document, IndexDocument>` | uses `Document` to build up the data structure needed for indexing       |
 | `Writer`      | `Function<IndexDocument, Message>`  | sends indexes the data and returns a message for the next workflow step |
 
 
@@ -227,23 +230,24 @@ With the `Reader`, `Transformer` and `Writer` implementing the `Function` interf
 All classes that do data processing (Reader, Transformer, Writer,...) should be
 stateless. This has two reasons:
 
-First, it makes your code threadsafe and multiprocessing easy without you having
-to even think about it. Just keep it stateless and fly!
+First, it makes your code thread-safe and multiprocessing easy without you
+having to even think about it. Just keep it stateless and fly!
 
 Second, it makes testing a breeze: You throw in data and check the data that
-comes out. Things can go wrong? Just check if the right exception is thrown.
-Wherever you need to interact with extrenal services, mock the behaviour and
-your good to go (the Flusswerk tests make heay use of Mockito, btw.).
+comes out. Things can go wrong? Just check if your code throws the right
+exceptions. Wherever you need to interact with external services, mock the
+behaviour, and your good to go (the Flusswerk tests make heavy use of Mockito,
+btw.).
 
-If you absolutely have to introduce state, make sure your code is threadsafe.
+If you absolutely have to introduce state, make sure your code is thread-safe.
 
 
 ### Immutable Data
 
-Wherever sesnsible, make your data classes immutable - set everything via
+Wherever sensible, make your data classes immutable - set everything via the
 constructor and avoid setters. Implement `equals()` and `hashCode()`. This leads
 usually to more readable code, and makes writing tests much easier. This applies
-to Message classes and to the classes you use to pass data around. 
+to Message classes and to the classes that contain data. 
 
 Your particular data processing needs to build your data over time and can't be
 immutable? Think again if that is the best way, but don't worry too much.
@@ -278,7 +282,7 @@ The default retry behaviour is to wait 30 seconds between retries and try up to
 if a StopProcessingException had been thrown and will be routed to a failed
 queue.
 
-For more finegrained control, see the configuration parameters for
+For more fine-grained control, see the configuration parameters for
 `flusswerk.routing.failure policies`.
 
 [StopProcessingException]:
@@ -290,20 +294,26 @@ https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/RuntimeEx
 
 ## Collecting Metrics
 
-Every Flusswerk application provides base metrics via as a [Prometheus][Prometheus] endpoint:
+Every Flusswerk application provides base metrics via as a
+[Prometheus][Prometheus] endpoint:
 
 |                             |                                                         |
 | --------------------------- | ------------------------------------------------------- |
 | `flusswerk.processed.items` | total number of processed items since application start |
 | `flusswerk.execution.time`  | total amount of time spend on processing these items    |
 
-To include custom metrics, get counters via [MeterFactory](framework/src/main/java/com/github/dbmdz/flusswerk/framework/monitoring/MeterFactory.java). A bean of type `FlowMetrics` can also consume execution information of single flows (best to extend [BaseMetrics](framework/src/main/java/com/github/dbmdz/flusswerk/framework/monitoring/BaseMetrics.java) for that). 
+To include custom metrics, get counters via [MeterFactory][MeterFactory]. A bean
+of type [FlowMetrics][FlowMetrics] can also consume execution information of
+single flows (best to extend [BaseMetrics][BaseMetrics] for that). 
 
 
 The prometheus endpoint is available at `/actuator/prometheus`.
 
 
+[BaseMetrics]: framework/src/main/java/com/github/dbmdz/flusswerk/framework/monitoring/BaseMetrics.java
+[FlowMetrics]: framework/src/main/java/com/github/dbmdz/flusswerk/framework/monitoring/FlowMetrics.java
 [Prometheus]: https://prometheus.io/
+[MeterFactory]: framework/src/main/java/com/github/dbmdz/flusswerk/framework/monitoring/MeterFactory.java
 
 
 ## Customize Logging
@@ -316,7 +326,7 @@ To customize log messages, provide a bean of type [ProcessReport](framework/src/
 
 Flusswerk supports centralized locking of objects across different threads,
 Flusswerk apps and even services unrelated to Flusswerk all together. To use
-this feature configure a Redis connection in `application.yml` and inject
+this feature, configure a Redis connection in `application.yml` and inject
 [LockManager][LockManager]:
 
 ```java
