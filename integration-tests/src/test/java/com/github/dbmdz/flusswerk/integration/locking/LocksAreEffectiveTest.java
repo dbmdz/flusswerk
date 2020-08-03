@@ -36,7 +36,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -49,7 +48,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
       FlusswerkConfiguration.class
     })
 @Import({MetricsAutoConfiguration.class, CompositeMeterRegistryAutoConfiguration.class})
-@ActiveProfiles({"multithreading"})
 public class LocksAreEffectiveTest {
 
   private final Engine engine;
