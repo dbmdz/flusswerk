@@ -117,9 +117,7 @@ public class FlusswerkConfiguration {
       Config config = createRedisConfig(redisProperties);
       RedissonClient client = Redisson.create(config);
       return new RedisLockManager(
-          client,
-          redisProperties.getKeyspace(),
-          redisProperties.getLockWaitTimeout()); // TODO add configuration
+          client, redisProperties.getKeyspace(), redisProperties.getLockWaitTimeout());
     } else {
       return new NoOpLockManager();
     }

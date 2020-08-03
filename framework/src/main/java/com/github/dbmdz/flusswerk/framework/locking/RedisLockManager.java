@@ -47,7 +47,6 @@ public class RedisLockManager implements LockManager {
     if (locks.containsKey(threadId)) {
       throw new RuntimeException("Cannot acquire more than one lock per thread at the same time");
     }
-    System.out.println("ACQUIRE LOCK FOR id=" + id + " threadId=" + threadId);
     Lock lock = client.getLock(key(id));
     LockContext context = new LockContext(lock, id, watch);
     locks.put(threadId, context);
