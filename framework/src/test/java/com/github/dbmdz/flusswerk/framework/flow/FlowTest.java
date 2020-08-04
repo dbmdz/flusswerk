@@ -12,12 +12,18 @@ import com.github.dbmdz.flusswerk.framework.locking.NoOpLockManager;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlowMetrics;
 import java.util.Set;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 
 @DisplayName("The Flow")
 class FlowTest {
+
+  @AfterEach
+  void afterEach() {
+    MDC.clear();
+  }
 
   @DisplayName("should not replace tracing ids")
   @Test
@@ -78,5 +84,14 @@ class FlowTest {
     assertThat(MDC.get("id")).isNull();
     flow.setLoggingData(new TestMessage("123"));
     assertThat(MDC.get("id")).isEqualTo("123");
+  }
+
+  @DisplayName("should set tracing id for logging if present")
+  @Test
+  void shouldSetTracingIdForLoggingIfPresent() {
+    Flow flow = Flows.messageProcessor(m -> m);
+    assertThat(MDC.get("tracingId")).isNull();
+    flow.setLoggingData(new Message("123"));
+    assertThat(MDC.get("tracingId")).isEqualTo("123");
   }
 }
