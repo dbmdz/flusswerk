@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import com.github.dbmdz.flusswerk.framework.TestMessage;
 import com.github.dbmdz.flusswerk.framework.fixtures.Flows;
 import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.locking.NoOpLockManager;
@@ -13,6 +14,7 @@ import com.github.dbmdz.flusswerk.framework.monitoring.FlowMetrics;
 import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.slf4j.MDC;
 
 @DisplayName("The Flow")
 class FlowTest {
@@ -67,5 +69,14 @@ class FlowTest {
     flow.registerFlowMetrics(Set.of(metrics));
     flow.process(new Message("123"));
     verify(metrics).accept(any());
+  }
+
+  @DisplayName("should set id for logging if present")
+  @Test
+  void shouldSetIdForLoggingIfPresent() {
+    Flow flow = Flows.messageProcessor(m -> m);
+    assertThat(MDC.get("id")).isNull();
+    flow.setLoggingData(new TestMessage("123"));
+    assertThat(MDC.get("id")).isEqualTo("123");
   }
 }

@@ -6,12 +6,15 @@ import static java.util.Objects.requireNonNullElse;
 import com.github.dbmdz.flusswerk.framework.locking.LockManager;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlowMetrics;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import org.slf4j.MDC;
 
 /**
  * Recipe for the data processing. Every message will be processed by the readerFactory, then the
@@ -47,6 +50,8 @@ public class Flow {
     FlowInfo info = new FlowInfo();
     Collection<Message> result;
 
+    setLoggingData(message);
+
     try {
       var r = reader.apply(message);
       var t = transformer.apply(r);
@@ -71,5 +76,26 @@ public class Flow {
       newMessage.setTracingId(message.getTracingId());
     }
     return result;
+  }
+
+  void setLoggingData(Message message) {
+    MDC.clear(); // Remove logging data from previous message
+    if (message.getTracingId() != null) {
+      MDC.put("tracingId", message.getTracingId());
+    }
+    for (Method method : message.getClass().getMethods()) {
+      if (!("getId".equalsIgnoreCase(method.getName()) && method.canAccess(message))) {
+        continue;
+      }
+      try {
+        Object id = method.invoke(message);
+        if (id != null) {
+          MDC.put("id", id.toString());
+        }
+      } catch (IllegalAccessException | InvocationTargetException e) {
+        throw new RuntimeException("Cannot get ID for logging but should be able to");
+      }
+      break; // found the id, no need to search further
+    }
   }
 }
