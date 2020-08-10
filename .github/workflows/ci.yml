@@ -3,7 +3,6 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 11
@@ -17,5 +16,9 @@ jobs:
     services:
       rabbitmq:
         image: rabbitmq:3-alpine
+        ports:
+          - 5672:5672
       redis:
         image: redis
+        ports:
+          - 6379:6379
