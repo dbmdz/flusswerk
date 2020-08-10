@@ -19,7 +19,7 @@ jobs:
       - name: Build with Maven
         run: mvn -B verify
       - name: Integration Tests
-        run: mvn -B --projects integration-tests -PintegrationCI surefire:test
+        run: mvn -B --projects integration-tests -Pintegration surefire:test
       - name: Report Coverage
         uses: codecov/codecov-action@v1
 
