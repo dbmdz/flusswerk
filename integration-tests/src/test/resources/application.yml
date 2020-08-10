@@ -35,14 +35,3 @@ flusswerk:
   rabbitmq:
     hosts:
       - localhost
-
----
-spring:
-  profiles: ci
-
-flusswerk:
-  rabbitmq:
-    hosts:
-      - rabbitmq
-  redis:
-    address: redis://redis:6379
