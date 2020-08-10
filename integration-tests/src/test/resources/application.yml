@@ -43,6 +43,6 @@ spring:
 flusswerk:
   rabbitmq:
     hosts:
-      - docker
+      - rabbitmq
   redis:
-    address: redis://docker:6379
+    address: redis://redis:6379
