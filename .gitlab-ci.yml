@@ -32,3 +32,12 @@ integration_tests:openjdk12:
   only:
     variables:
       - $USE_OPENJDK12
+
+publish_snapshot:
+  extends: .publish
+  only:
+    - main
+    - master
+  script:
+    - if [[ ! "$PROJECT_VERSION" =~ .*SNAPSHOT ]]; then exit 0; fi
+    - mvn $MAVEN_CLI_OPTS -T 4 deploy -DskipTests -Pmaven-central --settings settings.xml

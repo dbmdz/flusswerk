@@ -153,10 +153,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
       </plugin>
-      <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>nexus-staging-maven-plugin</artifactId>
-      </plugin>
     </plugins>
 
     <pluginManagement>
@@ -255,7 +251,7 @@
 
   <profiles>
     <profile>
-      <id>deploy</id>
+      <id>maven-central</id>
       <build>
         <plugins>
           <plugin>
@@ -271,6 +267,10 @@
                 </goals>
               </execution>
             </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
           </plugin>
         </plugins>
       </build>
