@@ -17,9 +17,7 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
       - name: Build with Maven
-        run: mvn -B verify
-      - name: Integration Tests
-        run: mvn -B --projects integration-tests -Pintegration surefire:test
+        run: mvn -B -Pintegration verify
       - name: Report Coverage
         uses: codecov/codecov-action@v1
 
