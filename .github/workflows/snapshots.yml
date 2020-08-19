@@ -14,8 +14,10 @@ jobs:
           server-id: ossrh-snapshots
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
-    - uses: actions/cache@v1
-      with:
+      - uses: actions/cache@v2
+        env:
+          cache-name: cache-maven-artifacts
+        with:
         path: ~/.m2/repository
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
     - name: Deploy to Sonatype Snapshots
