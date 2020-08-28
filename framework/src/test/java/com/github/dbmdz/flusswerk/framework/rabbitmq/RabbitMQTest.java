@@ -1,6 +1,5 @@
 package com.github.dbmdz.flusswerk.framework.rabbitmq;
 
-import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -45,7 +44,7 @@ class RabbitMQTest {
 
   @BeforeEach
   void setUp() {
-    var routing = new RoutingProperties("test.exchange", incoming, outgoing, emptyMap());
+    var routing = RoutingProperties.minimal(incoming, outgoing);
     var rabbitClient = mock(RabbitClient.class);
     channel = mock(Channel.class);
     when(rabbitClient.getChannel()).thenReturn(channel);

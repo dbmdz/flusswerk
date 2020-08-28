@@ -1,5 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.config.properties;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.Objects.requireNonNullElseGet;
 
@@ -19,9 +20,11 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 @ConfigurationProperties(prefix = "flusswerk.routing")
 public class RoutingProperties {
 
-  @NotBlank private final String exchange;
+  private final String defaultExchange;
   private final String deadLetterExchange;
   private final List<String> incoming;
+  private final Map<String, String> exchanges;
+  private final Map<String, String> deadLetterExchanges;
   private final Map<String, String> outgoing;
   private final Map<String, FailurePolicy> failurePolicies;
 
@@ -34,15 +37,56 @@ public class RoutingProperties {
       @NotBlank String exchange,
       List<String> incoming,
       Map<String, String> outgoing,
+      Map<String, String> exchanges,
+      Map<String, String> deadLetterExchanges,
       Map<String, FailurePolicyProperties> failurePolicies) {
-    this.exchange = requireNonNullElse(exchange, "flusswerk_default");
-    this.deadLetterExchange = this.exchange + ".retry";
+    this.defaultExchange = requireNonNullElse(exchange, "flusswerk_default");
+    this.deadLetterExchange = this.defaultExchange + ".retry";
     this.incoming = requireNonNullElseGet(incoming, Collections::emptyList);
+
+    this.exchanges = new HashMap<>();
+    this.deadLetterExchanges = new HashMap<>();
+    setupExchangeConfigurations(
+        this.defaultExchange,
+        this.deadLetterExchange,
+        requireNonNullElse(exchanges, emptyMap()),
+        requireNonNullElse(deadLetterExchanges, emptyMap()));
+
     this.outgoing = requireNonNullElseGet(outgoing, Collections::emptyMap); // might be null
 
     this.failurePolicies =
         createFailurePolicies(
             this.incoming, requireNonNullElseGet(failurePolicies, Collections::emptyMap));
+  }
+
+  /**
+   * Create RoutingProperties by only specifying input queues and routes to support simple tests.
+   *
+   * @param incoming The incoming queues.
+   * @param outgoing The routes for outgoing messages.
+   * @return routing properties that rely on defaults wherever possible
+   */
+  public static RoutingProperties minimal(List<String> incoming, Map<String, String> outgoing) {
+    return new RoutingProperties(null, incoming, outgoing, null, null, null);
+  }
+
+  private void setupExchangeConfigurations(
+      String defaultExchange,
+      String defaultDlx,
+      Map<String, String> specificExchanges,
+      Map<String, String> specificDeadLetterExchanges) {
+    if (defaultExchange == null) {
+      defaultDlx = "flusswerk_default";
+    }
+    if (defaultDlx == null) {
+      defaultDlx = defaultExchange + ".retry";
+    }
+    for (String queue : this.incoming) {
+      String exchange = specificExchanges.getOrDefault(queue, defaultExchange);
+      this.exchanges.put(queue, exchange);
+      String deadLetterExchange = specificDeadLetterExchanges.getOrDefault(queue, defaultDlx);
+      this.deadLetterExchanges.put(queue, deadLetterExchange);
+    }
   }
 
   private static Map<String, FailurePolicy> createFailurePolicies(
@@ -69,8 +113,14 @@ public class RoutingProperties {
   }
 
   /** @return The exchange name to use (required). */
-  public String getExchange() {
-    return exchange;
+  @Deprecated
+  public String getDefaultExchange() {
+    return defaultExchange;
+  }
+
+  /** @return The exchange name to use (required). */
+  public String getExchange(String queue) {
+    return exchanges.getOrDefault(queue, defaultExchange);
   }
 
   /** @return The queue to read from (optional). */
@@ -87,14 +137,19 @@ public class RoutingProperties {
     return failurePolicies.get(queue);
   }
 
+  @Deprecated
   public String getDeadLetterExchange() {
     return deadLetterExchange;
+  }
+
+  public String getDeadLetterExchange(String queue) {
+    return deadLetterExchanges.get(queue);
   }
 
   @Override
   public String toString() {
     return StringRepresentation.of(RoutingProperties.class)
-        .property("exchange", exchange)
+        .property("exchange", defaultExchange)
         .property("readFrom", String.join(",", incoming))
         .property("writeTo", outgoing)
         .toString();
@@ -105,7 +160,7 @@ public class RoutingProperties {
   }
 
   public static RoutingProperties defaults() {
-    return new RoutingProperties(null, null, null, null);
+    return new RoutingProperties(null, null, null, null, null, null);
   }
 
   public static class FailurePolicyProperties {

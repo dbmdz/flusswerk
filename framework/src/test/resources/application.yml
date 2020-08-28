@@ -14,6 +14,8 @@ flusswerk:
     password: guest
   routing:
     exchange: my.exchange
+    exchanges:
+      second: other.exchange
     incoming:
       - first
       - second
