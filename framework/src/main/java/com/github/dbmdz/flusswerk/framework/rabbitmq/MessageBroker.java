@@ -76,7 +76,7 @@ public class MessageBroker {
    * @throws IOException if sending the message fails.
    */
   void send(String routingKey, Message message) throws IOException {
-    rabbitClient.send(routingConfig.getExchange(), routingKey, message);
+    rabbitClient.send(routingConfig.getDefaultExchange(), routingKey, message);
   }
 
   /**
@@ -139,16 +139,16 @@ public class MessageBroker {
     String failedRoutingKey = failurePolicy.getFailedRoutingKey();
     if (failedRoutingKey != null) {
       rabbitClient.sendRaw(
-          routingConfig.getExchange(), failedRoutingKey, envelope.getBody().getBytes());
+          routingConfig.getDefaultExchange(), failedRoutingKey, envelope.getBody().getBytes());
     }
   }
 
   private void provideInputQueues() throws IOException {
     final String deadLetterExchange = routingConfig.getDeadLetterExchange();
-    final String exchange = routingConfig.getExchange();
 
     for (String inputQueue : routingConfig.getIncoming()) {
       FailurePolicy failurePolicy = routingConfig.getFailurePolicy(inputQueue);
+      final String exchange = routingConfig.getExchange(inputQueue);
       rabbitClient.declareQueue(
           inputQueue, exchange, inputQueue, Map.of(DEAD_LETTER_EXCHANGE, deadLetterExchange));
       if (failurePolicy.getRetryRoutingKey() != null) {
@@ -176,7 +176,7 @@ public class MessageBroker {
     for (String topic : routingConfig.getOutgoing().values()) {
       rabbitClient.declareQueue(
           topic,
-          routingConfig.getExchange(),
+          routingConfig.getDefaultExchange(),
           topic,
           Map.of(DEAD_LETTER_EXCHANGE, routingConfig.getDeadLetterExchange()));
     }
@@ -241,7 +241,7 @@ public class MessageBroker {
   }
 
   private void provideExchanges() throws IOException {
-    rabbitClient.provideExchange(routingConfig.getExchange());
+    rabbitClient.provideExchange(routingConfig.getDefaultExchange());
     rabbitClient.provideExchange(routingConfig.getDeadLetterExchange());
   }
 

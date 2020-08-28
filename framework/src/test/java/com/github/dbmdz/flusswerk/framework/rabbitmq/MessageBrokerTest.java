@@ -15,7 +15,6 @@ import com.github.dbmdz.flusswerk.framework.model.Envelope;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,11 +39,8 @@ class MessageBrokerTest {
   void setUp() throws IOException {
     failurePolicy = new FailurePolicy("some.input.queue");
     routing =
-        new RoutingProperties(
-            "some.exchange",
-            List.of("some.input.queue"),
-            Map.of("default", "some.output.queue"),
-            Collections.emptyMap());
+        RoutingProperties.minimal(
+            List.of("some.input.queue"), Map.of("default", "some.output.queue"));
 
     rabbitClient = mock(RabbitClient.class);
     messageBroker = new MessageBroker(routing, rabbitClient);
@@ -122,9 +118,7 @@ class MessageBrokerTest {
   @Test
   @DisplayName("getMessageCount should return all message counts")
   void getMessageCountsShouldGetAllMessageCounts() throws IOException {
-    RoutingProperties routing =
-        new RoutingProperties(
-            "test.exchange", List.of("input1", "input2"), null, Collections.emptyMap());
+    RoutingProperties routing = RoutingProperties.minimal(List.of("input1", "input2"), null);
 
     Map<String, Long> expected = new HashMap<>();
     expected.put("input1", 100L);
