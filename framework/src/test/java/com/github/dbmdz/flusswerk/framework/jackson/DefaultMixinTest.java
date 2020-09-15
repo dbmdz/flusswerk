@@ -4,10 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.dbmdz.flusswerk.framework.TestMessage;
-import com.github.dbmdz.flusswerk.framework.model.Envelope;
+import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,13 +18,7 @@ class DefaultMixinTest {
 
   @BeforeEach
   void setUp() {
-    objectMapper =
-        new ObjectMapper()
-            .addMixIn(Message.class, DefaultMixin.class)
-            .addMixIn(Envelope.class, EnvelopeMixin.class)
-            .registerModule(new JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .enable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
+    objectMapper = new FlusswerkObjectMapper(new IncomingMessageType());
   }
 
   @Test
