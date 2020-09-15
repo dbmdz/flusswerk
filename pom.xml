@@ -6,7 +6,7 @@
 
   <groupId>com.github.dbmdz.flusswerk</groupId>
   <artifactId>flusswerk</artifactId>
-  <version>4.0.1</version>
+  <version>4.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Flusswerk</name>
@@ -71,7 +71,7 @@
     <!-- Dependency versions -->
     <version.amqp-client>5.6.0</version.amqp-client>
     <version.logstash-encoder>6.4</version.logstash-encoder>
-    <version.flusswerk>4.0.1</version.flusswerk>
+    <version.flusswerk>4.1.0-SNAPSHOT</version.flusswerk>
     <version.redisson>3.13.4</version.redisson>
     <!-- Plugin versions -->
     <version.fmt-maven-plugin>2.10</version.fmt-maven-plugin>
