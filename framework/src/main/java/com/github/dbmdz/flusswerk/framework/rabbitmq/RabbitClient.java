@@ -1,10 +1,7 @@
 package com.github.dbmdz.flusswerk.framework.rabbitmq;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
-import com.github.dbmdz.flusswerk.framework.jackson.DefaultMixin;
-import com.github.dbmdz.flusswerk.framework.jackson.EnvelopeMixin;
+import com.github.dbmdz.flusswerk.framework.jackson.FlusswerkObjectMapper;
 import com.github.dbmdz.flusswerk.framework.model.Envelope;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.model.Message;
@@ -32,9 +29,7 @@ public class RabbitClient {
 
   private Channel channel;
 
-  private final ObjectMapper objectMapper;
-
-  private final Class<? extends Message> messageClass;
+  private final FlusswerkObjectMapper objectMapper;
 
   private final RabbitConnection connection;
 
@@ -42,18 +37,14 @@ public class RabbitClient {
     this(new IncomingMessageType(), rabbitConnection);
   }
 
-  public RabbitClient(IncomingMessageType incomingMessageType, RabbitConnection connection) {
+  public RabbitClient(FlusswerkObjectMapper flusswerkObjectMapper, RabbitConnection connection) {
     this.connection = connection;
     channel = connection.getChannel();
-    objectMapper = new ObjectMapper();
-    messageClass = incomingMessageType.getMessageClass();
-    if (incomingMessageType.hasMixin()) {
-      objectMapper.addMixIn(incomingMessageType.getMessageClass(), incomingMessageType.getMixin());
-    } else {
-      objectMapper.addMixIn(Message.class, DefaultMixin.class);
-    }
-    objectMapper.addMixIn(Envelope.class, EnvelopeMixin.class);
-    objectMapper.registerModule(new JavaTimeModule());
+    objectMapper = flusswerkObjectMapper;
+  }
+
+  public RabbitClient(IncomingMessageType incomingMessageType, RabbitConnection connection) {
+    this(new FlusswerkObjectMapper(incomingMessageType), connection);
   }
 
   void send(String exchange, String routingKey, Message message) throws IOException {
@@ -77,7 +68,7 @@ public class RabbitClient {
   }
 
   Message deserialize(String body) throws IOException {
-    return objectMapper.readValue(body, messageClass);
+    return objectMapper.deserialize(body);
   }
 
   byte[] serialize(Message message) throws IOException {
