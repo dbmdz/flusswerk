@@ -9,6 +9,7 @@ import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
+import com.github.dbmdz.flusswerk.framework.jackson.FlusswerkObjectMapper;
 import com.github.dbmdz.flusswerk.framework.locking.LockManager;
 import com.github.dbmdz.flusswerk.framework.locking.NoOpLockManager;
 import com.github.dbmdz.flusswerk.framework.locking.RedisLockManager;
@@ -87,6 +88,12 @@ public class FlusswerkConfiguration {
   }
 
   @Bean
+  public FlusswerkObjectMapper flusswerkObjectMapper(
+      ObjectProvider<IncomingMessageType> incomingMessageType) {
+    return new FlusswerkObjectMapper(incomingMessageType.getIfAvailable(IncomingMessageType::new));
+  }
+
+  @Bean
   public RabbitConnection rabbitConnection(RabbitMQProperties rabbitMQProperties)
       throws IOException {
     return new RabbitConnection(rabbitMQProperties);
@@ -94,9 +101,8 @@ public class FlusswerkConfiguration {
 
   @Bean
   public RabbitClient rabbitClient(
-      ObjectProvider<IncomingMessageType> incomingMessageType, RabbitConnection rabbitConnection) {
-    return new RabbitClient(
-        incomingMessageType.getIfAvailable(IncomingMessageType::new), rabbitConnection);
+      FlusswerkObjectMapper flusswerkObjectMapper, RabbitConnection rabbitConnection) {
+    return new RabbitClient(flusswerkObjectMapper, rabbitConnection);
   }
 
   @Bean
