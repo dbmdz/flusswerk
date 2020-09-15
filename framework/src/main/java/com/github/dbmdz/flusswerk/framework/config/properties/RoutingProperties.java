@@ -9,8 +9,10 @@ import com.github.dbmdz.flusswerk.framework.rabbitmq.FailurePolicy;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
@@ -19,6 +21,9 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 @ConstructorBinding
 @ConfigurationProperties(prefix = "flusswerk.routing")
 public class RoutingProperties {
+
+  public static final String DEFAULT_EXCHANGE = "flusswerk_default";
+  public static final String DEFAULT_DEAD_LETTER_EXCHANGE = DEFAULT_EXCHANGE + ".retry";
 
   private final String defaultExchange;
   private final String deadLetterExchange;
@@ -43,6 +48,7 @@ public class RoutingProperties {
     this.defaultExchange = requireNonNullElse(exchange, "flusswerk_default");
     this.deadLetterExchange = this.defaultExchange + ".retry";
     this.incoming = requireNonNullElseGet(incoming, Collections::emptyList);
+    this.outgoing = requireNonNullElseGet(outgoing, Collections::emptyMap); // might be null
 
     this.exchanges = new HashMap<>();
     this.deadLetterExchanges = new HashMap<>();
@@ -51,8 +57,6 @@ public class RoutingProperties {
         this.deadLetterExchange,
         requireNonNullElse(exchanges, emptyMap()),
         requireNonNullElse(deadLetterExchanges, emptyMap()));
-
-    this.outgoing = requireNonNullElseGet(outgoing, Collections::emptyMap); // might be null
 
     this.failurePolicies =
         createFailurePolicies(
@@ -76,12 +80,19 @@ public class RoutingProperties {
       Map<String, String> specificExchanges,
       Map<String, String> specificDeadLetterExchanges) {
     if (defaultExchange == null) {
-      defaultDlx = "flusswerk_default";
+      // FIXME is that really correct? Not defaultExchange?!
+      defaultExchange = DEFAULT_EXCHANGE;
     }
     if (defaultDlx == null) {
       defaultDlx = defaultExchange + ".retry";
     }
     for (String queue : this.incoming) {
+      String exchange = specificExchanges.getOrDefault(queue, defaultExchange);
+      this.exchanges.put(queue, exchange);
+      String deadLetterExchange = specificDeadLetterExchanges.getOrDefault(queue, defaultDlx);
+      this.deadLetterExchanges.put(queue, deadLetterExchange);
+    }
+    for (String queue : this.outgoing.values()) {
       String exchange = specificExchanges.getOrDefault(queue, defaultExchange);
       this.exchanges.put(queue, exchange);
       String deadLetterExchange = specificDeadLetterExchanges.getOrDefault(queue, defaultDlx);
@@ -157,6 +168,14 @@ public class RoutingProperties {
 
   public FailurePolicy getFailurePolicy(Message message) {
     return getFailurePolicy(message.getEnvelope().getSource());
+  }
+
+  public Set<String> getExchanges() {
+    return new HashSet<>(exchanges.values());
+  }
+
+  public Set<String> getDeadLetterExchanges() {
+    return new HashSet<>(deadLetterExchanges.values());
   }
 
   public static RoutingProperties defaults() {

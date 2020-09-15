@@ -57,4 +57,20 @@ class RoutingPropertiesTest {
     assertThat(routingProperties.getDeadLetterExchange("queue.with.specific.dlx"))
         .isEqualTo("specific.dlx");
   }
+
+  @DisplayName("should provide a valid minimal config")
+  @Test
+  void shouldProvideValidMinimalConfig() {
+    var routingConfig =
+        RoutingProperties.minimal(
+            List.of("some.input.queue"), Map.of("default", "some.output.queue"));
+    assertThat(routingConfig.getExchange("some.input.queue"))
+        .isEqualTo(RoutingProperties.DEFAULT_EXCHANGE);
+    assertThat(routingConfig.getDeadLetterExchange("some.input.queue"))
+        .isEqualTo(RoutingProperties.DEFAULT_DEAD_LETTER_EXCHANGE);
+    assertThat(routingConfig.getExchange("some.output.queue"))
+        .isEqualTo(RoutingProperties.DEFAULT_EXCHANGE);
+    assertThat(routingConfig.getDeadLetterExchange("some.output.queue"))
+        .isEqualTo(RoutingProperties.DEFAULT_DEAD_LETTER_EXCHANGE);
+  }
 }
