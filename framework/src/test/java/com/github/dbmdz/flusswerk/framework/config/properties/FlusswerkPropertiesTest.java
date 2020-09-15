@@ -40,9 +40,11 @@ public class FlusswerkPropertiesTest {
   public void valuesOfRouting() {
     RoutingProperties routing = properties.getRouting();
     assertThat(routing)
-        .hasFieldOrPropertyWithValue("exchange", "my.exchange")
+        .hasFieldOrPropertyWithValue("defaultExchange", "my.exchange")
         .hasFieldOrPropertyWithValue("incoming", List.of("first", "second"))
         .hasFieldOrPropertyWithValue("outgoing", Map.of("default", "default.queue.to.write.to"));
+
+    assertThat(routing.getExchange("second")).isEqualTo("other.exchange");
 
     assertThat(routing.getFailurePolicy("first"))
         .hasFieldOrPropertyWithValue("backoff", Duration.ofSeconds(15))
