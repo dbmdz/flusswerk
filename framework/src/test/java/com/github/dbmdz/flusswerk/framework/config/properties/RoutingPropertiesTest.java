@@ -1,5 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.config.properties;
 
+import static com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties.DEFAULT_EXCHANGE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
@@ -64,13 +65,11 @@ class RoutingPropertiesTest {
     var routingConfig =
         RoutingProperties.minimal(
             List.of("some.input.queue"), Map.of("default", "some.output.queue"));
-    assertThat(routingConfig.getExchange("some.input.queue"))
-        .isEqualTo(RoutingProperties.DEFAULT_EXCHANGE);
+    assertThat(routingConfig.getExchange("some.input.queue")).isEqualTo(DEFAULT_EXCHANGE);
     assertThat(routingConfig.getDeadLetterExchange("some.input.queue"))
-        .isEqualTo(RoutingProperties.DEFAULT_DEAD_LETTER_EXCHANGE);
-    assertThat(routingConfig.getExchange("some.output.queue"))
-        .isEqualTo(RoutingProperties.DEFAULT_EXCHANGE);
+        .isEqualTo(RoutingProperties.defaultDeadLetterExchange(DEFAULT_EXCHANGE));
+    assertThat(routingConfig.getExchange("some.output.queue")).isEqualTo(DEFAULT_EXCHANGE);
     assertThat(routingConfig.getDeadLetterExchange("some.output.queue"))
-        .isEqualTo(RoutingProperties.DEFAULT_DEAD_LETTER_EXCHANGE);
+        .isEqualTo(RoutingProperties.defaultDeadLetterExchange(DEFAULT_EXCHANGE));
   }
 }
