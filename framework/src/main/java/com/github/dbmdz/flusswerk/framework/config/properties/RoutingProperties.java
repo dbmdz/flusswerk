@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 import javax.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
@@ -55,8 +56,8 @@ public class RoutingProperties {
     setupExchangeConfigurations(
         this.defaultExchange,
         this.deadLetterExchange,
-        requireNonNullElse(exchanges, emptyMap()),
-        requireNonNullElse(deadLetterExchanges, emptyMap()));
+        requireNonNullElse(exchanges, emptyMap()), // user input, not class attribute
+        requireNonNullElse(deadLetterExchanges, emptyMap())); // user input, not class attribute
 
     this.failurePolicies =
         createFailurePolicies(
@@ -79,25 +80,15 @@ public class RoutingProperties {
       String defaultDlx,
       Map<String, String> specificExchanges,
       Map<String, String> specificDeadLetterExchanges) {
-    if (defaultExchange == null) {
-      // FIXME is that really correct? Not defaultExchange?!
-      defaultExchange = DEFAULT_EXCHANGE;
-    }
-    if (defaultDlx == null) {
-      defaultDlx = defaultExchange + ".retry";
-    }
-    for (String queue : this.incoming) {
-      String exchange = specificExchanges.getOrDefault(queue, defaultExchange);
-      this.exchanges.put(queue, exchange);
-      String deadLetterExchange = specificDeadLetterExchanges.getOrDefault(queue, defaultDlx);
-      this.deadLetterExchanges.put(queue, deadLetterExchange);
-    }
-    for (String queue : this.outgoing.values()) {
-      String exchange = specificExchanges.getOrDefault(queue, defaultExchange);
-      this.exchanges.put(queue, exchange);
-      String deadLetterExchange = specificDeadLetterExchanges.getOrDefault(queue, defaultDlx);
-      this.deadLetterExchanges.put(queue, deadLetterExchange);
-    }
+    Stream.concat(this.incoming.stream(), this.outgoing.values().stream())
+        .forEach(
+            queue -> {
+              String exchange = specificExchanges.getOrDefault(queue, defaultExchange);
+              this.exchanges.put(queue, exchange);
+              String deadLetterExchange =
+                  specificDeadLetterExchanges.getOrDefault(queue, defaultDlx);
+              this.deadLetterExchanges.put(queue, deadLetterExchange);
+            });
   }
 
   private static Map<String, FailurePolicy> createFailurePolicies(
