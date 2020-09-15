@@ -3,7 +3,6 @@ package com.github.dbmdz.flusswerk.framework.jackson;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dbmdz.flusswerk.framework.TestMessage;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.model.Message;
@@ -14,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 class DefaultMixinTest {
 
-  private ObjectMapper objectMapper;
+  private FlusswerkObjectMapper objectMapper;
 
   @BeforeEach
   void setUp() {
