@@ -24,7 +24,6 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 public class RoutingProperties {
 
   public static final String DEFAULT_EXCHANGE = "flusswerk_default";
-  public static final String DEFAULT_DEAD_LETTER_EXCHANGE = DEFAULT_EXCHANGE + ".retry";
 
   private final String defaultExchange;
   private final String deadLetterExchange;
@@ -47,7 +46,7 @@ public class RoutingProperties {
       Map<String, String> deadLetterExchanges,
       Map<String, FailurePolicyProperties> failurePolicies) {
     this.defaultExchange = requireNonNullElse(exchange, "flusswerk_default");
-    this.deadLetterExchange = this.defaultExchange + ".retry";
+    this.deadLetterExchange = defaultDeadLetterExchange(this.defaultExchange);
     this.incoming = requireNonNullElseGet(incoming, Collections::emptyList);
     this.outgoing = requireNonNullElseGet(outgoing, Collections::emptyMap); // might be null
 
@@ -203,5 +202,9 @@ public class RoutingProperties {
     public Duration getBackoff() {
       return backoff;
     }
+  }
+
+  public static String defaultDeadLetterExchange(String exchange) {
+    return exchange + ".retry";
   }
 }
