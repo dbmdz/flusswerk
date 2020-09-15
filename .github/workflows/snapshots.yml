@@ -19,9 +19,9 @@ jobs:
           cache-name: cache-maven-artifacts
         with:
           path: ~/.m2/repository
-          key: "${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}"
-    - name: Deploy to Sonatype Snapshots
-        run: mvn -B verify
-        env:
-          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+      - name: Deploy to Sonatype Snapshots
+          run: mvn -B verify
+          env:
+            MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+            MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
