@@ -72,7 +72,7 @@
     <version.amqp-client>5.6.0</version.amqp-client>
     <version.logstash-encoder>6.4</version.logstash-encoder>
     <version.flusswerk>4.0.1</version.flusswerk>
-    <version.redisson>3.13.3</version.redisson>
+    <version.redisson>3.13.4</version.redisson>
     <!-- Plugin versions -->
     <version.fmt-maven-plugin>2.10</version.fmt-maven-plugin>
     <version.githook-maven-plugin>1.0.5</version.githook-maven-plugin>
