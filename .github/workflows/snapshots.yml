@@ -21,7 +21,7 @@ jobs:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
       - name: Deploy to Sonatype Snapshots
-        run: mvn -B verify
+        run: mvn -B deploy -P maven-central
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
