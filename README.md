@@ -166,11 +166,15 @@ The sections of the `Flusswerk` configuration
 
 `routing` - Messages in and out
 
-| property           | default   |                                                   |
-| ------------------ | --------- | ------------------------------------------------- |
-| `incoming`         | `–`       | list of queues to read from in order              |
-| `outgoing`         | `–`       | routes to send messages to (format 'name: topic') |
-| `failure policies` | `default` | how to handle messages with processing errors     |
+| property                | default                 |                                                                  |
+| ----------------------- | ----------------------- | ---------------------------------------------------------------- |
+| `incoming`              | `–`                     | list of queues to read from in order                             |
+| `outgoing`              | `–`                     | routes to send messages to (format 'name: topic')                |
+| `exchange`              | `flusswerk_default`     | default exchange for all queues                                  |
+| `dead letter exchange`  | `<exchange> + ".retry"` | default dead letter exchange for all queues                      |
+| `exchanges`             | `-`                     | `queue: exchange name` to override default exchanges             |
+| `dead letter exchanges` | `<exchange> + ".retry"` | `queue: exchange name` to override default dead letter exchanges |
+| `failure policies`      | `default`               | how to handle messages with processing errors                    |
 
 `routing.failure policies` - how to handle messages with processing errors
 
@@ -189,7 +193,7 @@ The sections of the `Flusswerk` configuration
 
 `redis` - Redis settings
 
-| property          |   default                |                                                 |
+| property          | default                  |                                                 |
 | ----------------- | ------------------------ | ----------------------------------------------- |
 | `address`         | `redis://localhost:6379` | Redis connection string                         |
 | `password`        | –                        | Redis password (optional)                       |
@@ -217,7 +221,7 @@ With the `Reader`, `Transformer` and `Writer` implementing the `Function` interf
 |               |                                     |                                                                         |
 | ------------- | ----------------------------------- | ----------------------------------------------------------------------- |
 | `Reader`      | `Function<IndexMessage, Document>`  | loads document from storage                                             |
-| `Transformer` | `Function<Document, IndexDocument>` | uses `Document` to build up the data structure needed for indexing       |
+| `Transformer` | `Function<Document, IndexDocument>` | uses `Document` to build up the data structure needed for indexing      |
 | `Writer`      | `Function<IndexDocument, Message>`  | sends indexes the data and returns a message for the next workflow step |
 
 
