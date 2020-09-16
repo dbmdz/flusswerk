@@ -77,7 +77,7 @@
     <version.fmt-maven-plugin>2.10</version.fmt-maven-plugin>
     <version.githook-maven-plugin>1.0.5</version.githook-maven-plugin>
     <version.maven-gpg-plugin>1.6</version.maven-gpg-plugin>
-    <version.maven-jacoco-plugin>0.8.5</version.maven-jacoco-plugin>
+    <version.maven-jacoco-plugin>0.8.6</version.maven-jacoco-plugin>
     <version.nexus-staging-maven-plugin>1.6.8</version.nexus-staging-maven-plugin>
     <version.wagon-maven-plugin>2.0.0</version.wagon-maven-plugin>
   </properties>
