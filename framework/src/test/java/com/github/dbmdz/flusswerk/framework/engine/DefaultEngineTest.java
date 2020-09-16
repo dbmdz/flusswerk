@@ -28,7 +28,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("The Engine")
-class EngineTest {
+class DefaultEngineTest {
 
   private MessageBroker messageBroker;
 
@@ -41,7 +41,7 @@ class EngineTest {
   }
 
   private Engine createEngine(Flow flow) {
-    return new Engine(messageBroker, flow, 5, new SilentProcessReport());
+    return new DefaultEngine(messageBroker, flow, 5, new SilentProcessReport());
   }
 
   @Test

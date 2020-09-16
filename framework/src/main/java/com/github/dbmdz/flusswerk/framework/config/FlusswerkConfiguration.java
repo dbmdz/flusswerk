@@ -6,7 +6,9 @@ import com.github.dbmdz.flusswerk.framework.config.properties.ProcessingProperti
 import com.github.dbmdz.flusswerk.framework.config.properties.RabbitMQProperties;
 import com.github.dbmdz.flusswerk.framework.config.properties.RedisProperties;
 import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
+import com.github.dbmdz.flusswerk.framework.engine.DefaultEngine;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
+import com.github.dbmdz.flusswerk.framework.engine.NoOpEngine;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.jackson.FlusswerkObjectMapper;
@@ -25,6 +27,7 @@ import com.github.dbmdz.flusswerk.framework.reporting.DefaultProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Set;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
@@ -34,43 +37,49 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-/** Spring configuration to provide beans for{@link MessageBroker} and {@link Engine}. */
+/** Spring configuration to provide beans for{@link MessageBroker} and {@link DefaultEngine}. */
 @Configuration
 @Import(FlusswerkPropertiesConfiguration.class)
 public class FlusswerkConfiguration {
 
   @Bean
-  public Flow flow(ObjectProvider<FlowSpec> flowSpec, LockManager lockManager) {
-    var spec = flowSpec.getIfAvailable();
-    if (spec == null) {
-      throw new RuntimeException("Missing flow definition. Please create a FlowSpec bean.");
+  public Flow flow(Optional<FlowSpec> flowSpec, LockManager lockManager) {
+    if (flowSpec.isEmpty()) {
+      return null; // No FlowSpec → no Flow. We will have to handle this case when creating the
+      // Engine bean as the sole consumer of the Flow bean.
     }
-    return new Flow(spec, lockManager);
+    return new Flow(flowSpec.get(), lockManager);
   }
 
   /**
    * @param messageBroker The messageBroker to use.
    * @param flow The flow to use (optional).
    * @param processingProperties The external configuration from <code>application.yml</code>.
-   * @param processReportProvider A custom process report provider (optional).
+   * @param processReport A custom process report provider (optional).
    * @param flowMetrics The metrics collector.
-   * @return The {@link Engine} used for this job.
+   * @return The {@link DefaultEngine} used for this job.
    */
   @Bean
   public Engine engine(
       AppProperties appProperties,
       MessageBroker messageBroker,
-      Flow flow,
+      Optional<Flow> flow,
       ProcessingProperties processingProperties,
-      ObjectProvider<ProcessReport> processReportProvider,
+      Optional<ProcessReport> processReport,
       Set<FlowMetrics> flowMetrics) {
-    flow.registerFlowMetrics(flowMetrics);
 
-    ProcessReport processReport =
-        processReportProvider.getIfAvailable(
-            () -> new DefaultProcessReport(appProperties.getName()));
+    if (flow.isEmpty()) {
+      return new NoOpEngine(); // No Flow, nothing to do
+    }
 
-    return new Engine(messageBroker, flow, processingProperties.getThreads(), processReport);
+    flow.get().registerFlowMetrics(flowMetrics);
+
+    ProcessReport actualProcessReport =
+        processReport.orElseGet(() -> new DefaultProcessReport(appProperties.getName()));
+
+    var threads = processingProperties.getThreads();
+
+    return new DefaultEngine(messageBroker, flow.get(), threads, actualProcessReport);
   }
 
   @Bean
