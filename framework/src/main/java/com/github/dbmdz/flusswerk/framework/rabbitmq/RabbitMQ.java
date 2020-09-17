@@ -88,6 +88,13 @@ public class RabbitMQ {
     return queues.computeIfAbsent(name, key -> new Queue(key, rabbitClient));
   }
 
+  /**
+   * Acknowledges a message with RabbitMQ. This needs the message to have an Envelope with an valid
+   * delivery tag (usually because it came from RabbitMQ in the first place).
+   *
+   * @param message The message to acknowledge.
+   * @throws IOException If communication with RabbitMQ fails.
+   */
   public void ack(Message message) throws IOException {
     var deliveryTag = message.getEnvelope().getDeliveryTag();
     channel.basicAck(deliveryTag, false);
