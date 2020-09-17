@@ -11,6 +11,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Represents a AMQP/RabbitMQ queue to receive messages or perform management tasks. */
 public class Queue {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Queue.class);
@@ -46,6 +47,14 @@ public class Queue {
     return channel.messageCount(this.name);
   }
 
+  /**
+   * Tries to receives a message from RabbitMQ.
+   *
+   * @return An {@link Optional} that contains the received message or is empty if the queue is
+   *     empty.
+   * @throws IOException If communication with RabbitMQ fails.
+   * @throws InvalidMessageException If deserialization of the message fails.
+   */
   public Optional<Message> receive() throws IOException, InvalidMessageException {
     Message message = rabbitClient.receive(name);
     return Optional.ofNullable(message);
@@ -73,6 +82,7 @@ public class Queue {
     return "Queue{name='" + name + "'}";
   }
 
+  /** @return The name of the represented queue. */
   public String getName() {
     return name;
   }
