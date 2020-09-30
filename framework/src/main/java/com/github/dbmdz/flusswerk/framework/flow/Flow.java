@@ -47,7 +47,7 @@ public class Flow {
   }
 
   public Collection<Message> process(Message message) {
-    FlowInfo info = new FlowInfo();
+    FlowInfo info = new FlowInfo(message);
     Collection<Message> result;
 
     setLoggingData(message);
