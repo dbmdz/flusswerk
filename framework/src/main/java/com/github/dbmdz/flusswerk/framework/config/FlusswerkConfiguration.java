@@ -73,16 +73,11 @@ public class FlusswerkConfiguration {
       ProcessingProperties processingProperties,
       Optional<ProcessReport> processReport,
       Set<FlowMetrics> flowMetrics,
-      MeterFactory meterFactory,
-      Tracing tracing) {
+      Tracing tracing,
+      MeterFactory meterFactory) {
 
     if (flow.isEmpty()) {
       return new NoOpEngine(); // No Flow, nothing to do
-    }
-
-    // Use DefaultFlowMetrics only if there are no other FlowMetrics beans defined in the app
-    if (flowMetrics.isEmpty()) {
-      flowMetrics.add(new DefaultFlowMetrics(meterFactory));
     }
 
     flow.get().registerFlowMetrics(flowMetrics);
