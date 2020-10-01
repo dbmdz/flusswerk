@@ -17,8 +17,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-@DisplayName("The BaseMetrics")
-class BaseMetricsTest {
+@DisplayName("The DefaultFlowMetrics")
+class DefaultFlowMetricsTest {
 
   private static Stream<Arguments> counters() {
     return Stream.concat(
@@ -41,11 +41,11 @@ class BaseMetricsTest {
     MeterFactory meterFactory = mock(MeterFactory.class);
     Counter counter = mock(Counter.class);
     when(meterFactory.counter(any(), eq(Status.SUCCESS))).thenReturn(counter);
-    DefaultFlowMetrics baseMetrics = new DefaultFlowMetrics(meterFactory);
+    DefaultFlowMetrics defaultFlowMetrics = new DefaultFlowMetrics(meterFactory);
 
     FlowInfo flowInfo = mock(FlowInfo.class);
     when(flowInfo.getStatus()).thenReturn(Status.SUCCESS);
-    baseMetrics.accept(flowInfo);
+    defaultFlowMetrics.accept(flowInfo);
     verify(flowInfo).duration();
     verify(flowInfo).getStatus();
   }
