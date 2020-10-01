@@ -31,7 +31,7 @@ class BaseMetricsTest {
   @MethodSource("counters")
   void shouldInitializeCounters(String metric, Status status) {
     MeterFactory meterFactory = mock(MeterFactory.class);
-    new BaseMetrics(meterFactory);
+    new DefaultFlowMetrics(meterFactory);
     verify(meterFactory).counter(metric, status);
   }
 
@@ -41,7 +41,7 @@ class BaseMetricsTest {
     MeterFactory meterFactory = mock(MeterFactory.class);
     Counter counter = mock(Counter.class);
     when(meterFactory.counter(any(), eq(Status.SUCCESS))).thenReturn(counter);
-    BaseMetrics baseMetrics = new BaseMetrics(meterFactory);
+    DefaultFlowMetrics baseMetrics = new DefaultFlowMetrics(meterFactory);
 
     FlowInfo flowInfo = mock(FlowInfo.class);
     when(flowInfo.getStatus()).thenReturn(Status.SUCCESS);
