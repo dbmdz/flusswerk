@@ -6,13 +6,16 @@ import io.micrometer.core.instrument.Counter;
 import java.util.EnumMap;
 import java.util.Map;
 
-/** Collect metrics on flow execution. */
-public class BaseMetrics implements FlowMetrics {
+/**
+ * Collect metrics on flow execution. This implementation is default if there are no other
+ * FlowMetrics beans defined. You can define as many FlowMetrics beans as needed.
+ */
+public class DefaultFlowMetrics implements FlowMetrics {
 
   private final Map<Status, Counter> executionTime;
   private final Map<Status, Counter> processedItems;
 
-  public BaseMetrics(MeterFactory meterFactory) {
+  public DefaultFlowMetrics(MeterFactory meterFactory) {
     this.executionTime = new EnumMap<>(Status.class);
     this.processedItems = new EnumMap<>(Status.class);
 

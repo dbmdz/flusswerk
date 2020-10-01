@@ -16,7 +16,7 @@ import com.github.dbmdz.flusswerk.framework.locking.LockManager;
 import com.github.dbmdz.flusswerk.framework.locking.NoOpLockManager;
 import com.github.dbmdz.flusswerk.framework.locking.RedisLockManager;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
-import com.github.dbmdz.flusswerk.framework.monitoring.BaseMetrics;
+import com.github.dbmdz.flusswerk.framework.monitoring.DefaultFlowMetrics;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlowMetrics;
 import com.github.dbmdz.flusswerk.framework.monitoring.MeterFactory;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
@@ -66,10 +66,15 @@ public class FlusswerkConfiguration {
       Optional<Flow> flow,
       ProcessingProperties processingProperties,
       Optional<ProcessReport> processReport,
-      Set<FlowMetrics> flowMetrics) {
+      Set<FlowMetrics> flowMetrics,
+      MeterFactory meterFactory) {
 
     if (flow.isEmpty()) {
       return new NoOpEngine(); // No Flow, nothing to do
+    }
+
+    if (flowMetrics.isEmpty()) {
+      new DefaultFlowMetrics(meterFactory);
     }
 
     flow.get().registerFlowMetrics(flowMetrics);
@@ -80,11 +85,6 @@ public class FlusswerkConfiguration {
     var threads = processingProperties.getThreads();
 
     return new DefaultEngine(messageBroker, flow.get(), threads, actualProcessReport);
-  }
-
-  @Bean
-  public BaseMetrics baseMetrics(MeterFactory meterFactory) {
-    return new BaseMetrics(meterFactory);
   }
 
   @Bean
