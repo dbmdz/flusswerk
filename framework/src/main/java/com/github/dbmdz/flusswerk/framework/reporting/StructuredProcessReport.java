@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 public class StructuredProcessReport implements ProcessReport {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(DefaultProcessReport.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(StructuredProcessReport.class);
 
   private final String name;
 
