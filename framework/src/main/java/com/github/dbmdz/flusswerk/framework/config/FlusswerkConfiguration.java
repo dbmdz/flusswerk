@@ -73,8 +73,9 @@ public class FlusswerkConfiguration {
       return new NoOpEngine(); // No Flow, nothing to do
     }
 
+    // Use DefaultFlowMetrics only if there are no other FlowMetrics beans defined in the app
     if (flowMetrics.isEmpty()) {
-      new DefaultFlowMetrics(meterFactory);
+      flowMetrics.add(new DefaultFlowMetrics(meterFactory));
     }
 
     flow.get().registerFlowMetrics(flowMetrics);
