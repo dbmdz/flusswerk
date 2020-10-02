@@ -28,7 +28,7 @@ public class StructuredProcessReport implements ProcessReport {
   @Override
   public void reportFail(Message message, StopProcessingException e) {
     Envelope envelope = message.getEnvelope();
-    LOGGER.error(
+    getLogger().error(
         "{} failed, will not retry",
         name,
         keyValue("status", "stop"),
@@ -42,7 +42,7 @@ public class StructuredProcessReport implements ProcessReport {
   @Override
   public void reportFailAfterMaxRetries(Message message, Exception e) {
     Envelope envelope = message.getEnvelope();
-    LOGGER.error(
+    getLogger().error(
         "{} failed after max retries",
         name,
         keyValue("status", "spent"),
@@ -56,7 +56,7 @@ public class StructuredProcessReport implements ProcessReport {
   @Override
   public void reportReject(Message message, Exception e) {
     Envelope envelope = message.getEnvelope();
-    LOGGER.error(
+    getLogger().error(
         "{} failed, but will retry later",
         name,
         keyValue("status", "retry"),
@@ -65,5 +65,9 @@ public class StructuredProcessReport implements ProcessReport {
         keyValue("timestamp", envelope.getTimestamp().format(DateTimeFormatter.ISO_DATE_TIME)),
         keyValue("tracingId", message.getTracingId()),
         e);
+  }
+
+  protected Logger getLogger() {
+    return LOGGER;
   }
 }

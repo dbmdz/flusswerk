@@ -25,7 +25,7 @@ public class DefaultProcessReport implements ProcessReport {
 
   @Override
   public void reportFail(Message message, StopProcessingException e) {
-    LOGGER.error(
+    getLogger().error(
         "{} failed terminally ({}, {})",
         name,
         keyValue("message", message),
@@ -35,7 +35,7 @@ public class DefaultProcessReport implements ProcessReport {
 
   @Override
   public void reportFailAfterMaxRetries(Message message, Exception e) {
-    LOGGER.error(
+    getLogger().error(
         "{} failed after maximum number of retries ({}, {})",
         name,
         keyValue("message", message),
@@ -45,10 +45,14 @@ public class DefaultProcessReport implements ProcessReport {
 
   @Override
   public void reportReject(Message message, Exception e) {
-    LOGGER.warn(
+    getLogger().warn(
         "{} rejected for retry ({}, {})",
         name,
         keyValue("message", message),
         keyValue("exception", e.toString()));
+  }
+
+  protected Logger getLogger() {
+    return LOGGER;
   }
 }
