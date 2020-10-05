@@ -51,10 +51,12 @@ public class Tracing {
     this.tracingPath.put(currentThread.id(), tracingPath);
   }
 
+  /** Delete tracing information for current Thread. */
   public void deregister() {
     tracingPath.remove(currentThread.id());
   }
 
+  /** @return The tracing information for the current thread. */
   public List<String> tracingPath() {
     return tracingPath.getOrDefault(currentThread.id(), Collections.emptyList());
   }
