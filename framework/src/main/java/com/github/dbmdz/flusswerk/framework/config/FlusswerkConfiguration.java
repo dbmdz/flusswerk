@@ -25,6 +25,7 @@ import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitConnection;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import com.github.dbmdz.flusswerk.framework.reporting.DefaultProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
+import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.io.IOException;
 import java.util.Optional;
@@ -43,12 +44,17 @@ import org.springframework.context.annotation.Import;
 public class FlusswerkConfiguration {
 
   @Bean
-  public Flow flow(Optional<FlowSpec> flowSpec, LockManager lockManager) {
+  public Tracing tracing() {
+    return new Tracing();
+  }
+
+  @Bean
+  public Flow flow(Optional<FlowSpec> flowSpec, LockManager lockManager, Tracing tracing) {
     if (flowSpec.isEmpty()) {
       return null; // No FlowSpec → no Flow. We will have to handle this case when creating the
       // Engine bean as the sole consumer of the Flow bean.
     }
-    return new Flow(flowSpec.get(), lockManager);
+    return new Flow(flowSpec.get(), lockManager, tracing);
   }
 
   /**
@@ -117,8 +123,11 @@ public class FlusswerkConfiguration {
 
   @Bean
   public RabbitMQ rabbitMQ(
-      RoutingProperties routingProperties, RabbitClient rabbitClient, MessageBroker messageBroker) {
-    return new RabbitMQ(routingProperties, rabbitClient, messageBroker);
+      RoutingProperties routingProperties,
+      RabbitClient rabbitClient,
+      MessageBroker messageBroker,
+      Tracing tracing) {
+    return new RabbitMQ(routingProperties, rabbitClient, messageBroker, tracing);
   }
 
   @Bean

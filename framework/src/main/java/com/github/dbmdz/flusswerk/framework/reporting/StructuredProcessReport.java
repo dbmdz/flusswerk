@@ -15,9 +15,11 @@ public class StructuredProcessReport implements ProcessReport {
   private static final Logger LOGGER = LoggerFactory.getLogger(StructuredProcessReport.class);
 
   private final String name;
+  private final Tracing tracing;
 
-  public StructuredProcessReport(String name) {
+  public StructuredProcessReport(String name, Tracing tracing) {
     this.name = requireNonNull(name);
+    this.tracing = requireNonNull(tracing);
   }
 
   @Override
@@ -36,6 +38,7 @@ public class StructuredProcessReport implements ProcessReport {
         keyValue("retries", envelope.getRetries()),
         keyValue("timestamp", envelope.getTimestamp().format(DateTimeFormatter.ISO_DATE_TIME)),
         keyValue("tracingId", message.getTracingId()),
+        keyValue("tracing", tracing.tracingPath()),
         e);
   }
 
@@ -50,6 +53,7 @@ public class StructuredProcessReport implements ProcessReport {
         keyValue("retries", envelope.getRetries()),
         keyValue("timestamp", envelope.getTimestamp().format(DateTimeFormatter.ISO_DATE_TIME)),
         keyValue("tracingId", message.getTracingId()),
+        keyValue("tracing", tracing.tracingPath()),
         e);
   }
 
@@ -64,6 +68,7 @@ public class StructuredProcessReport implements ProcessReport {
         keyValue("retries", envelope.getRetries()),
         keyValue("timestamp", envelope.getTimestamp().format(DateTimeFormatter.ISO_DATE_TIME)),
         keyValue("tracingId", message.getTracingId()),
+        keyValue("tracing", tracing.tracingPath()),
         e);
   }
 

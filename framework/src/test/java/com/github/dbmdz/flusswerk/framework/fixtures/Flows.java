@@ -4,6 +4,7 @@ import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.locking.NoOpLockManager;
 import com.github.dbmdz.flusswerk.framework.model.Message;
+import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.Function;
 
@@ -15,7 +16,7 @@ public class Flows {
 
   public static Flow consumingFlow() {
     var spec = FlowBuilder.messageProcessor(Message.class).consume(m -> {}).build();
-    return new Flow(spec, new NoOpLockManager());
+    return new Flow(spec, new NoOpLockManager(), new Tracing());
   }
 
   private static Flow flowWithTransformer(Function<String, String> transformer) {
@@ -25,7 +26,7 @@ public class Flows {
             .transformer(transformer)
             .writerSendingMessage(Message::new)
             .build();
-    return new Flow(spec, new NoOpLockManager());
+    return new Flow(spec, new NoOpLockManager(), new Tracing());
   }
 
   public static Flow flowThrowing(Class<? extends RuntimeException> cls) {
@@ -52,6 +53,6 @@ public class Flows {
 
   public static Flow messageProcessor(Function<Message, Message> function) {
     var spec = FlowBuilder.messageProcessor(Message.class).process(function).build();
-    return new Flow(spec, new NoOpLockManager());
+    return new Flow(spec, new NoOpLockManager(), new Tracing());
   }
 }

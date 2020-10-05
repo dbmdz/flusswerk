@@ -80,6 +80,7 @@
     <version.maven-jacoco-plugin>0.8.6</version.maven-jacoco-plugin>
     <version.nexus-staging-maven-plugin>1.6.8</version.nexus-staging-maven-plugin>
     <version.wagon-maven-plugin>2.0.0</version.wagon-maven-plugin>
+    <version.huxhorn-sulky-ulid>8.2.0</version.huxhorn-sulky-ulid>
   </properties>
 
   <dependencyManagement>
@@ -103,6 +104,11 @@
         <groupId>org.redisson</groupId>
         <artifactId>redisson</artifactId>
         <version>${version.redisson}</version>
+      </dependency>
+      <dependency>
+        <groupId>de.huxhorn.sulky</groupId>
+        <artifactId>de.huxhorn.sulky.ulid</artifactId>
+        <version>${version.huxhorn-sulky-ulid}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

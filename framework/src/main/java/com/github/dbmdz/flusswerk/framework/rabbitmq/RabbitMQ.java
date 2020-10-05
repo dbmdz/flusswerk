@@ -2,6 +2,7 @@ package com.github.dbmdz.flusswerk.framework.rabbitmq;
 
 import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.model.Message;
+import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import com.rabbitmq.client.Channel;
 import java.io.IOException;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ public class RabbitMQ {
   private final Channel channel;
   private final RabbitClient rabbitClient;
   private final MessageBroker messageBroker;
+  private final Tracing tracing;
 
   /**
    * Creates a new Queues instance.
@@ -24,7 +26,11 @@ public class RabbitMQ {
    * @param rabbitClient the connection to RabbitMQ.
    */
   public RabbitMQ(
-      RoutingProperties routingProperties, RabbitClient rabbitClient, MessageBroker messageBroker) {
+      RoutingProperties routingProperties,
+      RabbitClient rabbitClient,
+      MessageBroker messageBroker,
+      Tracing tracing) {
+    this.tracing = tracing;
     // use RabbitConnection to prevent uncontrolled access to Channel from user app
     this.queues = new HashMap<>();
     this.routes = new HashMap<>();
@@ -48,7 +54,7 @@ public class RabbitMQ {
         .forEach(
             (route, topicName) -> {
               addQueue(topicName);
-              var topic = new Topic(topicName, messageBroker);
+              var topic = new Topic(topicName, messageBroker, tracing);
               topics.put(topicName, topic);
               routes.put(route, topic);
             });
@@ -75,7 +81,7 @@ public class RabbitMQ {
    * @return The corresponding topic.
    */
   public Topic topic(String name) {
-    return topics.computeIfAbsent(name, key -> new Topic(name, messageBroker));
+    return topics.computeIfAbsent(name, key -> new Topic(name, messageBroker, tracing));
   }
 
   /**

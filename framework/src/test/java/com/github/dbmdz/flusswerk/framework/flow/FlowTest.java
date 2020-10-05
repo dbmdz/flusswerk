@@ -11,7 +11,10 @@ import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.locking.NoOpLockManager;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlowMetrics;
+import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
+import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,7 +54,7 @@ class FlowTest {
             .transformer(m -> m)
             .writerSendingMessage(m -> null)
             .build();
-    Flow flow = new Flow(flowSpec, new NoOpLockManager());
+    Flow flow = new Flow(flowSpec, new NoOpLockManager(), new Tracing());
     var actual = flow.process(new Message("123"));
     assertThat(actual).isEmpty();
   }
@@ -62,7 +65,7 @@ class FlowTest {
     FlowMetrics metrics = mock(FlowMetrics.class);
     FlowSpec flowSpec =
         FlowBuilder.messageProcessor(Message.class).process(m -> m).metrics(metrics).build();
-    Flow flow = new Flow(flowSpec, new NoOpLockManager());
+    Flow flow = new Flow(flowSpec, new NoOpLockManager(), new Tracing());
     flow.process(new Message("123"));
     verify(metrics).accept(any());
   }
@@ -93,5 +96,34 @@ class FlowTest {
     assertThat(MDC.get("tracingId")).isNull();
     flow.setLoggingData(new Message("123"));
     assertThat(MDC.get("tracingId")).isEqualTo("123");
+  }
+
+  @DisplayName("should generate tracing id if none is present")
+  void shouldGenerateTracingIdIfNoneIsPresent() {
+    Flow flow = Flows.messageProcessor(m -> m);
+    Collection<Message> actual = flow.process(new Message());
+    assertThat(actual).allSatisfy(message -> assertThat(message.getTracingId()).isNotBlank());
+  }
+
+  @DisplayName("should set generated tracing id if none is present")
+  void shouldSetTracingIdIfNoneIsPresent() {
+    Flow flow = Flows.messageProcessor(m -> m);
+    assertThat(MDC.get("tracingId")).isNull();
+    flow.process(new Message());
+    assertThat(MDC.get("tracingId")).isNotBlank();
+  }
+
+  @DisplayName("should generate different tracing ids")
+  void shouldGenerateDifferentTracingIds() {
+    Flow flow = Flows.messageProcessor(m -> m);
+    Collection<String> firstTracingIds =
+        flow.process(new Message()).stream()
+            .map(Message::getTracingId)
+            .collect(Collectors.toList());
+    Collection<String> secondTracingIds =
+        flow.process(new Message()).stream()
+            .map(Message::getTracingId)
+            .collect(Collectors.toList());
+    assertThat(firstTracingIds).isNotEqualTo(secondTracingIds);
   }
 }
