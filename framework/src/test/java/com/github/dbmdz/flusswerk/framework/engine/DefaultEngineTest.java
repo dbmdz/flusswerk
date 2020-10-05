@@ -19,6 +19,7 @@ import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.reporting.SilentProcessReport;
+import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -41,7 +42,7 @@ class DefaultEngineTest {
   }
 
   private Engine createEngine(Flow flow) {
-    return new DefaultEngine(messageBroker, flow, 5, new SilentProcessReport());
+    return new DefaultEngine(messageBroker, flow, 5, new SilentProcessReport(), new Tracing());
   }
 
   @Test

@@ -73,7 +73,8 @@ public class FlusswerkConfiguration {
       ProcessingProperties processingProperties,
       Optional<ProcessReport> processReport,
       Set<FlowMetrics> flowMetrics,
-      MeterFactory meterFactory) {
+      MeterFactory meterFactory,
+      Tracing tracing) {
 
     if (flow.isEmpty()) {
       return new NoOpEngine(); // No Flow, nothing to do
@@ -91,7 +92,7 @@ public class FlusswerkConfiguration {
 
     var threads = processingProperties.getThreads();
 
-    return new DefaultEngine(messageBroker, flow.get(), threads, actualProcessReport);
+    return new DefaultEngine(messageBroker, flow.get(), threads, actualProcessReport, tracing);
   }
 
   @Bean

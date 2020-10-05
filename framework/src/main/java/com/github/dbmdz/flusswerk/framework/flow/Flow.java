@@ -52,7 +52,6 @@ public class Flow {
 
   public Collection<Message> process(Message message) {
     FlowInfo info = new FlowInfo(message);
-    tracing.register(message.getTracing());
     setLoggingData(message);
 
     Collection<Message> result;
@@ -66,7 +65,6 @@ public class Flow {
       flowMetrics.forEach(
           metric -> metric.accept(info)); // record metrics only available from inside the framework
       lockManager.release(); // make sure any lock has been released
-      tracing.deregister();
     }
     return result;
   }

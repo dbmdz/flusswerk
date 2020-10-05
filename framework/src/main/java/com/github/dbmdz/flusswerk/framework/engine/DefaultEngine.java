@@ -1,10 +1,13 @@
 package com.github.dbmdz.flusswerk.framework.engine;
 
+import static java.util.Objects.requireNonNull;
+
 import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
+import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
@@ -41,6 +44,7 @@ public class DefaultEngine implements Engine {
   private final ReentrantLock engineStarted;
 
   private boolean running;
+  private Tracing tracing;
 
   /**
    * Creates a new Engine instance with a fixed number of concurrent workers.
@@ -51,7 +55,11 @@ public class DefaultEngine implements Engine {
    * @param processReport Reporting implementation (or null, if DefaultProcessReport shall be used)
    */
   public DefaultEngine(
-      MessageBroker messageBroker, Flow flow, int concurrentWorkers, ProcessReport processReport) {
+      MessageBroker messageBroker,
+      Flow flow,
+      int concurrentWorkers,
+      ProcessReport processReport,
+      Tracing tracing) {
     this.messageBroker = messageBroker;
     this.flow = flow;
     this.concurrentWorkers = concurrentWorkers;
@@ -59,6 +67,7 @@ public class DefaultEngine implements Engine {
     this.semaphore = new Semaphore(concurrentWorkers);
     this.activeWorkers = new AtomicInteger();
     this.processReport = processReport;
+    this.tracing = requireNonNull(tracing);
     engineStarted = new ReentrantLock();
     running = false;
   }
@@ -121,6 +130,7 @@ public class DefaultEngine implements Engine {
   public void process(Message message) {
     Collection<? extends Message> messagesToSend;
     try {
+      tracing.register(message.getTracing());
       messagesToSend = flow.process(message);
     } catch (StopProcessingException e) {
       fail(message, e);
@@ -142,6 +152,7 @@ public class DefaultEngine implements Engine {
           new StopProcessingException("Could not finish message handling").causedBy(e);
       fail(message, stopProcessingException);
     }
+    tracing.deregister();
   }
 
   private void retryOrFail(Message receivedMessage, RuntimeException e) {
