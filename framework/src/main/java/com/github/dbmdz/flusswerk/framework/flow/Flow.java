@@ -89,7 +89,6 @@ public class Flow {
         .filter(Objects::nonNull)
         .filter(m -> m.getTracing() == null || m.getTracing().isEmpty())
         .forEach(m -> m.setTracing(tracing.tracingPath()));
-    tracing.deregister();
 
     // separate loop because tracingId will be deprecated
     for (Message newMessage : result) {
