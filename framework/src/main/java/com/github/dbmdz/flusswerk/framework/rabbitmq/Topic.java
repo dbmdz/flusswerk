@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 /**
  * Represents a AMQP/RabbitMQ topic to send messages to. In many setups this is equal to the
@@ -38,21 +37,9 @@ public class Topic {
   public void send(Message message) throws IOException {
     // Only set a tracing path if there is none yet
     if (message.getTracing() == null || message.getTracing().isEmpty()) {
-      List<String> tracingPath = getTracingPath();
-      message.setTracing(tracingPath);
+      message.setTracing(getTracingPath());
     }
     messageBroker.send(name, message);
-  }
-
-  private List<String> getTracingPath() {
-    List<String> tracingPath = tracing.tracingPath();
-    if (tracingPath.isEmpty()) {
-      // no tracing path available from tracing
-      // => app does not operate on incoming messages
-      // => needs a fresh tracing path
-      tracingPath = tracing.newPath();
-    }
-    return tracingPath;
   }
 
   /**
@@ -71,17 +58,15 @@ public class Topic {
     messageBroker.send(name, messages);
   }
 
-  public void send(Stream<Message> messages) {
-    String tracingId = "123";
-    messages.forEach(
-        message -> {
-          message.setTracingId(tracingId);
-          try {
-            messageBroker.send(name, message);
-          } catch (IOException e) {
-            throw new RuntimeException(e);
-          }
-        });
+  private List<String> getTracingPath() {
+    List<String> tracingPath = tracing.tracingPath();
+    if (tracingPath.isEmpty()) {
+      // no tracing path available from tracing
+      // => app does not operate on incoming messages
+      // => needs a fresh tracing path
+      tracingPath = tracing.newPath();
+    }
+    return tracingPath;
   }
 
   @Override
