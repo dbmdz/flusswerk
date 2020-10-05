@@ -6,11 +6,13 @@ import static java.util.Objects.requireNonNullElse;
 import com.github.dbmdz.flusswerk.framework.locking.LockManager;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlowMetrics;
+import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -29,8 +31,9 @@ public class Flow {
   private final Runnable cleanup;
   private final Set<Consumer<FlowInfo>> flowMetrics;
   private final LockManager lockManager;
+  private final Tracing tracing;
 
-  public Flow(FlowSpec flowSpec, LockManager lockManager) {
+  public Flow(FlowSpec flowSpec, LockManager lockManager, Tracing tracing) {
     this.reader = requireNonNull(flowSpec.getReader());
     this.transformer = requireNonNull(flowSpec.getTransformer());
     this.writer = requireNonNull(flowSpec.getWriter());
@@ -40,6 +43,7 @@ public class Flow {
       this.flowMetrics.add(flowSpec.getMonitor());
     }
     this.lockManager = lockManager;
+    this.tracing = requireNonNull(tracing);
   }
 
   public void registerFlowMetrics(Set<FlowMetrics> flowMetrics) {
@@ -48,27 +52,46 @@ public class Flow {
 
   public Collection<Message> process(Message message) {
     FlowInfo info = new FlowInfo(message);
-    Collection<Message> result;
-
+    tracing.register(message.getTracing());
     setLoggingData(message);
+
+    Collection<Message> result;
+    try {
+      result = innerProcess(message);
+    } catch (RuntimeException e) {
+      info.setStatusFrom(e);
+      throw e; // Throw exception again after inspecting for ensure control flow in engine
+    } finally {
+      info.stop();
+      flowMetrics.forEach(
+          metric -> metric.accept(info)); // record metrics only available from inside the framework
+      lockManager.release(); // make sure any lock has been released
+      tracing.deregister();
+    }
+    return result;
+  }
+
+  public Collection<Message> innerProcess(Message message) {
+    Collection<Message> result;
 
     try {
       var r = reader.apply(message);
       var t = transformer.apply(r);
       result = writer.apply(t);
-    } catch (RuntimeException e) {
-      info.setStatusFrom(e);
-      throw e; // Throw exception again after inspecting for ensure control flow in engine
     } finally {
       cleanup.run();
-      info.stop();
-      flowMetrics.forEach(
-          metric -> metric.accept(info)); // record metrics only available from inside the framework
-      lockManager.release(); // make sure any lock has been released
     }
     if (result == null) {
       return Collections.emptyList();
     }
+
+    result.stream()
+        .filter(Objects::nonNull)
+        .filter(m -> m.getTracing() == null || m.getTracing().isEmpty())
+        .forEach(m -> m.setTracing(tracing.tracingPath()));
+    tracing.deregister();
+
+    // separate loop because tracingId will be deprecated
     for (Message newMessage : result) {
       if (newMessage == null || newMessage.getTracingId() != null) {
         continue; // Do not update the tracing id if the user set one by hand

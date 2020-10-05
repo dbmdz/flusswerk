@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import com.github.dbmdz.flusswerk.framework.model.Message;
+import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import java.io.IOException;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,11 +19,13 @@ class TopicTest {
 
   private MessageBroker messageBroker;
   private Topic topic;
+  private Tracing tracing;
 
   @BeforeEach
   void setUp() {
     messageBroker = mock(MessageBroker.class);
-    topic = new Topic("test.topic", messageBroker);
+    tracing = mock(Tracing.class);
+    topic = new Topic("test.topic", messageBroker, tracing);
   }
 
   @DisplayName("should send a single message")
@@ -44,14 +47,14 @@ class TopicTest {
   @DisplayName("should be equal to another identical topic")
   @Test
   void testEquals() {
-    var expected = new Topic(topic.getName(), mock(MessageBroker.class));
+    var expected = new Topic(topic.getName(), mock(MessageBroker.class), tracing);
     assertThat(topic).isEqualTo(expected);
   }
 
   @DisplayName("should have the same hash code as identical topic")
   @Test
   void testHashCode() {
-    var expected = new Topic(topic.getName(), mock(MessageBroker.class));
+    var expected = new Topic(topic.getName(), mock(MessageBroker.class), tracing);
     assertThat(topic.hashCode()).isEqualTo(expected.hashCode());
   }
 
