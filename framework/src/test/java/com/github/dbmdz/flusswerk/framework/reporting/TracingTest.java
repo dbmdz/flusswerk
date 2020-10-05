@@ -6,7 +6,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing.CurrentThread;
-import de.huxhorn.sulky.ulid.ULID;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
@@ -63,15 +62,5 @@ class TracingTest {
   @Test
   void register() {
     assertThat(tracing.tracingPath()).isEmpty();
-  }
-
-  @Test
-  void ulidsTest() {
-    ULID ulid = new ULID();
-    System.out.println(ulid.nextULID());
-    System.out.println(ulid.nextULID());
-    System.out.println(ulid.nextULID());
-    System.out.println(ulid.nextULID());
-    System.out.println(ulid.nextULID());
   }
 }
