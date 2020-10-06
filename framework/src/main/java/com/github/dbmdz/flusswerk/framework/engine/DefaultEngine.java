@@ -151,8 +151,9 @@ public class DefaultEngine implements Engine {
       var stopProcessingException =
           new StopProcessingException("Could not finish message handling").causedBy(e);
       fail(message, stopProcessingException);
+    } finally {
+      tracing.deregister();
     }
-    tracing.deregister();
   }
 
   private void retryOrFail(Message receivedMessage, RuntimeException e) {
