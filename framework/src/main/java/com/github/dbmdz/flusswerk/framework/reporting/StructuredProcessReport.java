@@ -30,46 +30,49 @@ public class StructuredProcessReport implements ProcessReport {
   @Override
   public void reportFail(Message message, StopProcessingException e) {
     Envelope envelope = message.getEnvelope();
-    getLogger().error(
-        "{} failed, will not retry",
-        name,
-        keyValue("status", "stop"),
-        keyValue("incomingQueue", envelope.getSource()),
-        keyValue("retries", envelope.getRetries()),
-        keyValue("timestamp", envelope.getTimestamp().format(DateTimeFormatter.ISO_DATE_TIME)),
-        keyValue("tracingId", message.getTracingId()),
-        keyValue("tracing", tracing.tracingPath()),
-        e);
+    getLogger()
+        .error(
+            "{} failed, will not retry",
+            name,
+            keyValue("status", "stop"),
+            keyValue("incomingQueue", envelope.getSource()),
+            keyValue("retries", envelope.getRetries()),
+            keyValue("timestamp", envelope.getTimestamp().format(DateTimeFormatter.ISO_DATE_TIME)),
+            keyValue("tracingId", message.getTracingId()),
+            keyValue("tracing", tracing.tracingPath()),
+            e);
   }
 
   @Override
   public void reportFailAfterMaxRetries(Message message, Exception e) {
     Envelope envelope = message.getEnvelope();
-    getLogger().error(
-        "{} failed after max retries",
-        name,
-        keyValue("status", "spent"),
-        keyValue("incomingQueue", envelope.getSource()),
-        keyValue("retries", envelope.getRetries()),
-        keyValue("timestamp", envelope.getTimestamp().format(DateTimeFormatter.ISO_DATE_TIME)),
-        keyValue("tracingId", message.getTracingId()),
-        keyValue("tracing", tracing.tracingPath()),
-        e);
+    getLogger()
+        .error(
+            "{} failed after max retries",
+            name,
+            keyValue("status", "spent"),
+            keyValue("incomingQueue", envelope.getSource()),
+            keyValue("retries", envelope.getRetries()),
+            keyValue("timestamp", envelope.getTimestamp().format(DateTimeFormatter.ISO_DATE_TIME)),
+            keyValue("tracingId", message.getTracingId()),
+            keyValue("tracing", tracing.tracingPath()),
+            e);
   }
 
   @Override
   public void reportReject(Message message, Exception e) {
     Envelope envelope = message.getEnvelope();
-    getLogger().error(
-        "{} failed, but will retry later",
-        name,
-        keyValue("status", "retry"),
-        keyValue("incomingQueue", envelope.getSource()),
-        keyValue("retries", envelope.getRetries()),
-        keyValue("timestamp", envelope.getTimestamp().format(DateTimeFormatter.ISO_DATE_TIME)),
-        keyValue("tracingId", message.getTracingId()),
-        keyValue("tracing", tracing.tracingPath()),
-        e);
+    getLogger()
+        .error(
+            "{} failed, but will retry later",
+            name,
+            keyValue("status", "retry"),
+            keyValue("incomingQueue", envelope.getSource()),
+            keyValue("retries", envelope.getRetries()),
+            keyValue("timestamp", envelope.getTimestamp().format(DateTimeFormatter.ISO_DATE_TIME)),
+            keyValue("tracingId", message.getTracingId()),
+            keyValue("tracing", tracing.tracingPath()),
+            e);
   }
 
   protected Logger getLogger() {
