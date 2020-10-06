@@ -35,10 +35,10 @@ public class StructuredProcessReport implements ProcessReport {
             "{} failed, will not retry",
             name,
             keyValue("status", "stop"),
-            keyValue("incomingQueue", envelope.getSource()),
-            keyValue("retries", envelope.getRetries()),
+            keyValue("incoming_queue", envelope.getSource()),
+            keyValue("will_retry", false),
             keyValue("timestamp", envelope.getTimestamp().format(DateTimeFormatter.ISO_DATE_TIME)),
-            keyValue("tracingId", message.getTracingId()),
+            keyValue("tracing_id", message.getTracingId()),
             keyValue("tracing", tracing.tracingPath()),
             e);
   }
@@ -51,10 +51,10 @@ public class StructuredProcessReport implements ProcessReport {
             "{} failed after max retries",
             name,
             keyValue("status", "spent"),
-            keyValue("incomingQueue", envelope.getSource()),
-            keyValue("retries", envelope.getRetries()),
+            keyValue("incoming_queue", envelope.getSource()),
+            keyValue("will_retry", false),
             keyValue("timestamp", envelope.getTimestamp().format(DateTimeFormatter.ISO_DATE_TIME)),
-            keyValue("tracingId", message.getTracingId()),
+            keyValue("tracing_id", message.getTracingId()),
             keyValue("tracing", tracing.tracingPath()),
             e);
   }
@@ -67,10 +67,10 @@ public class StructuredProcessReport implements ProcessReport {
             "{} failed, but will retry later",
             name,
             keyValue("status", "retry"),
-            keyValue("incomingQueue", envelope.getSource()),
-            keyValue("retries", envelope.getRetries()),
+            keyValue("incoming_queue", envelope.getSource()),
+            keyValue("will_retry", true),
             keyValue("timestamp", envelope.getTimestamp().format(DateTimeFormatter.ISO_DATE_TIME)),
-            keyValue("tracingId", message.getTracingId()),
+            keyValue("tracing_id", message.getTracingId()),
             keyValue("tracing", tracing.tracingPath()),
             e);
   }
