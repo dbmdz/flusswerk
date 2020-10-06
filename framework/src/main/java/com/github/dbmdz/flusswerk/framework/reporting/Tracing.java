@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Tracing {
 
-  private final ConcurrentHashMap<Long, List<String>> tracingPath;
+  private final ConcurrentHashMap<Long, List<String>> tracingPathForThread;
   private final CurrentThread currentThread;
   private final ULID ulid;
 
@@ -29,7 +29,7 @@ public class Tracing {
    * @param currentThread Proxy to get the current threads id (so mocking can be used for testing)
    */
   Tracing(CurrentThread currentThread) {
-    this.tracingPath = new ConcurrentHashMap<>();
+    this.tracingPathForThread = new ConcurrentHashMap<>();
     this.currentThread = currentThread;
     this.ulid = new ULID();
   }
@@ -48,17 +48,17 @@ public class Tracing {
       path.add(ulid.nextULID());
       tracingPath = List.copyOf(path); // make immutable
     }
-    this.tracingPath.put(currentThread.id(), tracingPath);
+    tracingPathForThread.put(currentThread.id(), tracingPath);
   }
 
   /** Delete tracing information for current Thread. */
   public void deregister() {
-    tracingPath.remove(currentThread.id());
+    tracingPathForThread.remove(currentThread.id());
   }
 
   /** @return The tracing information for the current thread. */
   public List<String> tracingPath() {
-    return tracingPath.getOrDefault(currentThread.id(), Collections.emptyList());
+    return tracingPathForThread.getOrDefault(currentThread.id(), Collections.emptyList());
   }
 
   /**
