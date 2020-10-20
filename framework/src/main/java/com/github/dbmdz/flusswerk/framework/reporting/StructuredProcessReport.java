@@ -6,7 +6,6 @@ import static net.logstash.logback.argument.StructuredArguments.keyValue;
 import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
 import com.github.dbmdz.flusswerk.framework.model.Envelope;
 import com.github.dbmdz.flusswerk.framework.model.Message;
-import java.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +36,6 @@ public class StructuredProcessReport implements ProcessReport {
             keyValue("will_retry", false),
             keyValue("incoming_queue", envelope.getSource()),
             keyValue("retries", envelope.getRetries()),
-            keyValue("timestamp", envelope.getTimestamp().format(DateTimeFormatter.ISO_DATE_TIME)),
             keyValue("tracing_id", message.getTracingId()),
             keyValue("tracing", tracing.tracingPath()),
             e);
@@ -53,7 +51,6 @@ public class StructuredProcessReport implements ProcessReport {
             keyValue("will_retry", false),
             keyValue("incoming_queue", envelope.getSource()),
             keyValue("retries", envelope.getRetries()),
-            keyValue("timestamp", envelope.getTimestamp().format(DateTimeFormatter.ISO_DATE_TIME)),
             keyValue("tracing_id", message.getTracingId()),
             keyValue("tracing", tracing.tracingPath()),
             e);
@@ -69,7 +66,6 @@ public class StructuredProcessReport implements ProcessReport {
             keyValue("will_retry", true),
             keyValue("incoming_queue", envelope.getSource()),
             keyValue("retries", envelope.getRetries()),
-            keyValue("timestamp", envelope.getTimestamp().format(DateTimeFormatter.ISO_DATE_TIME)),
             keyValue("tracing_id", message.getTracingId()),
             keyValue("tracing", tracing.tracingPath()),
             e);
