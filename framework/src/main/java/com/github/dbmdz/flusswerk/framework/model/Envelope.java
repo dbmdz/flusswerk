@@ -81,6 +81,7 @@ public class Envelope {
    *
    * @return The timestamp when the message was created.
    */
+  @Deprecated
   public LocalDateTime getTimestamp() {
     return timestamp;
   }
