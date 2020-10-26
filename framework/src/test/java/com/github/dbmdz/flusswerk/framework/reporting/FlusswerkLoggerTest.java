@@ -4,11 +4,13 @@ import static net.logstash.logback.argument.StructuredArguments.keyValue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import net.logstash.logback.argument.StructuredArgument;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,6 +35,15 @@ class FlusswerkLoggerTest {
   void error() {
     flusswerkLogger.error("format string", "a");
     verify(logger).error(anyString(), (Object[]) any());
+  }
+
+  @DisplayName("should move Throwable to the end")
+  @Test
+  void shouldMoveThrowableToTheEnd() {
+    var throwable = mock(Throwable.class);
+    flusswerkLogger.error("format string", "a", throwable);
+    verify(logger)
+        .error(eq("format string"), eq("a"), any(StructuredArgument.class), eq(throwable));
   }
 
   @DisplayName("should use warn logging")
