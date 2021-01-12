@@ -52,6 +52,8 @@ jobs:
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+      - name: Install XML utils
+        run: sudo apt install libxml2-utils
       - name: Set project version
         run: echo "PROJECT_VERSION=$(xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]/text()' pom.xml)" >> $GITHUB_ENV
       - name: Deploy to Sonatype Snapshots (only snapshots)
