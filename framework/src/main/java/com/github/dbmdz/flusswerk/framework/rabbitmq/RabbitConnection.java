@@ -20,16 +20,19 @@ public class RabbitConnection {
   private final ConnectionFactory factory;
 
   private Channel channel;
+  private final String appName;
 
   private final RabbitMQProperties rabbitMQ;
 
-  public RabbitConnection(RabbitMQProperties rabbitMQ) throws IOException {
-    this(rabbitMQ, new ConnectionFactory());
+  public RabbitConnection(RabbitMQProperties rabbitMQ, String appName) throws IOException {
+    this(rabbitMQ, new ConnectionFactory(), appName);
   }
 
-  RabbitConnection(RabbitMQProperties rabbitMQ, ConnectionFactory factory) throws IOException {
+  RabbitConnection(RabbitMQProperties rabbitMQ, ConnectionFactory factory, String appName)
+      throws IOException {
     this.rabbitMQ = rabbitMQ;
     this.factory = factory;
+    this.appName = appName;
     factory.setUsername(rabbitMQ.getUsername());
     factory.setPassword(rabbitMQ.getPassword());
     rabbitMQ.getVirtualHost().ifPresent(factory::setVirtualHost);
@@ -54,7 +57,7 @@ public class RabbitConnection {
     while (connectionIsFailing) {
       try {
         LOGGER.debug("Waiting for connection to {} ...", addresses);
-        com.rabbitmq.client.Connection connection = factory.newConnection(addresses);
+        com.rabbitmq.client.Connection connection = factory.newConnection(addresses, appName);
         channel = connection.createChannel();
         channel.basicRecover(true);
         connectionIsFailing = false;
