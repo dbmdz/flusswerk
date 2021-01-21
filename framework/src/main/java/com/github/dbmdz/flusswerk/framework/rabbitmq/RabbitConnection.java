@@ -3,6 +3,7 @@ package com.github.dbmdz.flusswerk.framework.rabbitmq;
 import com.github.dbmdz.flusswerk.framework.config.properties.RabbitMQProperties;
 import com.rabbitmq.client.Address;
 import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import java.io.IOException;
 import java.util.List;
@@ -57,7 +58,7 @@ public class RabbitConnection {
     while (connectionIsFailing) {
       try {
         LOGGER.debug("Waiting for connection to {} ...", addresses);
-        com.rabbitmq.client.Connection connection = factory.newConnection(addresses, appName);
+        Connection connection = factory.newConnection(addresses, appName);
         channel = connection.createChannel();
         channel.basicRecover(true);
         connectionIsFailing = false;
