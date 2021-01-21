@@ -111,9 +111,9 @@ public class FlusswerkConfiguration {
   }
 
   @Bean
-  public RabbitConnection rabbitConnection(RabbitMQProperties rabbitMQProperties)
-      throws IOException {
-    return new RabbitConnection(rabbitMQProperties);
+  public RabbitConnection rabbitConnection(
+      AppProperties appProperties, RabbitMQProperties rabbitMQProperties) throws IOException {
+    return new RabbitConnection(rabbitMQProperties, appProperties.getName());
   }
 
   @Bean
