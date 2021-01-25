@@ -41,17 +41,25 @@ public class Worker implements Runnable {
   @Override
   public void run() {
     while (running) {
-      try {
-        // Waiting with intervals so stopping the worker is possible
-        Task task = queue.poll(1, TimeUnit.SECONDS);
-        if (task == null) {
-          continue;
-        }
-        Message message = task.getMessage();
-        process(message);
-      } catch (InterruptedException e) {
-        LOGGER.debug("Interrupt while waiting for message", e);
+      step();
+    }
+  }
+
+  /**
+   * One step in the processing loop - wait for up to 1 second for a new task from the task queue
+   * and process the message if there was one.
+   */
+  void step() {
+    try {
+      // Waiting with intervals so stopping the worker is possible
+      Task task = queue.poll(1, TimeUnit.SECONDS);
+      if (task == null) {
+        return;
       }
+      Message message = task.getMessage();
+      process(message);
+    } catch (InterruptedException e) {
+      LOGGER.debug("Interrupt while waiting for message", e);
     }
   }
 

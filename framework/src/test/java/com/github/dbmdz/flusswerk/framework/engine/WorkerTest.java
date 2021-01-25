@@ -1,6 +1,9 @@
 package com.github.dbmdz.flusswerk.framework.engine;
 
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,6 +16,7 @@ import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,26 +68,82 @@ class WorkerTest {
     verify(tracing).register(message.getTracing());
   }
 
-  @DisplayName("will fail message on StopProcessingException")
-  void willFailMessageOnStopProcessingException() throws IOException {
+  @DisplayName("should fail message on StopProcessingException")
+  @Test
+  void shouldFailMessageOnStopProcessingException() throws IOException {
     when(flow.process(message)).thenThrow(new StopProcessingException("Intentional Exception"));
     worker.process(message);
     verify(messageBroker).fail(message);
   }
 
-  @DisplayName("will retry message on RetryProcessingException")
+  @DisplayName("should retry message on RetryProcessingException")
   @ParameterizedTest
   @MethodSource("retryableExceptions")
-  void willRetryMessageOnRetryProcessingException(RuntimeException exception) throws IOException {
+  void shouldRetryMessageOnRetryProcessingException(RuntimeException exception) throws IOException {
     when(flow.process(message)).thenThrow(exception);
     worker.process(message);
     verify(messageBroker).reject(message);
   }
 
-  @DisplayName("will acknowledge message")
+  @DisplayName("should acknowledge message")
   @Test
-  void willAcknowledgeMessage() throws IOException {
+  void shouldAcknowledgeMessage() throws IOException {
     worker.process(message);
     verify(messageBroker).ack(message);
+  }
+
+  @DisplayName("should read message from task queue")
+  @Test
+  void shouldReadMessageFromTaskQueue() {
+    Task task = new Task(message, 42);
+    taskQueue.put(task);
+    worker.step();
+    verify(flow).process(message);
+  }
+
+  @DisplayName("should log failure on StopProcessingException")
+  @Test
+  void shouldLogFailure() {
+    StopProcessingException exception = new StopProcessingException("intentional");
+    when(flow.process(message)).thenThrow(exception);
+    worker.process(message);
+    verify(processReport).reportFail(any(), eq(exception));
+  }
+
+  @DisplayName("should log retry on exception")
+  @Test
+  void shouldLogRetry() throws IOException {
+    Exception exception = new RetryProcessingException("intentional");
+    when(flow.process(message)).thenThrow(exception);
+    when(messageBroker.reject(message)).thenReturn(true); // retry
+    worker.process(message);
+    verify(processReport).reportReject(any(), any(Exception.class));
+  }
+
+  @DisplayName("should log failure after too many retries")
+  @Test
+  void shouldLogFailureAfterTooManyRetries() {
+    message.getEnvelope().setRetries(5);
+    Exception exception = new RetryProcessingException("intentional");
+    when(flow.process(message)).thenThrow(exception);
+    worker.process(message);
+    verify(processReport).reportFailAfterMaxRetries(any(), eq(exception));
+  }
+
+  @DisplayName("should send messages")
+  @Test
+  void shouldSendMessages() throws IOException {
+    when(flow.process(message)).thenReturn(List.of(message));
+    worker.process(message);
+    verify(messageBroker).send(List.of(message));
+  }
+
+  @DisplayName("should fail processing when sending messages fails")
+  @Test
+  void shouldFailProcessingWhenSendingMessagesFails() throws IOException {
+    when(flow.process(message)).thenReturn(List.of(message));
+    doThrow(IOException.class).when(messageBroker).send(any());
+    worker.process(message);
+    verify(processReport).reportFail(any(), any());
   }
 }
