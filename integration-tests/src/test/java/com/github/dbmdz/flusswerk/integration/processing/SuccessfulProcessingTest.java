@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
       FlusswerkConfiguration.class
     })
 @Import({MetricsAutoConfiguration.class, CompositeMeterRegistryAutoConfiguration.class})
+@DisplayName("When Flusswerk successfully processes a message")
 public class SuccessfulProcessingTest {
 
   private final Engine engine;
@@ -79,6 +81,7 @@ public class SuccessfulProcessingTest {
     rabbitUtil.purgeQueues();
   }
 
+  @DisplayName("then the message should end up in the output queue")
   @Test
   public void successfulMessagesShouldGoToOutQueue() throws Exception {
     var inputQueue = routing.getIncoming().get(0);

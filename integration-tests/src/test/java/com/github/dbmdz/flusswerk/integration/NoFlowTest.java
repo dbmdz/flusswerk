@@ -11,6 +11,8 @@ import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import java.io.IOException;
 import java.time.Duration;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,18 +28,26 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ContextConfiguration(
     classes = {FlusswerkPropertiesConfiguration.class, FlusswerkConfiguration.class})
 @Import({MetricsAutoConfiguration.class, CompositeMeterRegistryAutoConfiguration.class})
+@DisplayName("When Flusswerk is created without a Flow")
 public class NoFlowTest {
 
-  private final RabbitUtil rabbitUtil;
-
+  private final Engine engine;
   private final RabbitMQ rabbitMQ;
+  private final RabbitUtil rabbitUtil;
 
   @Autowired
   public NoFlowTest(Engine engine, RoutingProperties routingProperties, RabbitMQ rabbitMQ) {
+    this.engine = engine;
     this.rabbitMQ = rabbitMQ;
     this.rabbitUtil = new RabbitUtil(rabbitMQ, routingProperties);
   }
 
+  @AfterEach
+  void stopEngine() throws IOException {
+    rabbitUtil.purgeQueues();
+  }
+
+  @DisplayName("then it still should send a message to a route")
   @Test
   public void shouldSendMessageToRoute()
       throws IOException, InterruptedException, InvalidMessageException {
@@ -45,5 +55,11 @@ public class NoFlowTest {
     rabbitMQ.route("default").send(message);
     Message received = rabbitUtil.waitAndAck("target.queue", Duration.ofMillis(50));
     assertThat(received).isEqualTo(message);
+  }
+
+  @DisplayName("then it should not create an instance of Engine")
+  @Test
+  public void shouldNotCreateAnInstanceOfEngine() {
+    assertThat(engine).isNull();
   }
 }
