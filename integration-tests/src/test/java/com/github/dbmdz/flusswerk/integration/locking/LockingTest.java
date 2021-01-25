@@ -12,11 +12,12 @@ import com.github.dbmdz.flusswerk.framework.exceptions.LockingException;
 import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.locking.LockManager;
-import com.github.dbmdz.flusswerk.framework.model.Message;
+import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import com.github.dbmdz.flusswerk.integration.ProcessorAdapter;
 import com.github.dbmdz.flusswerk.integration.RabbitUtil;
 import com.github.dbmdz.flusswerk.integration.RedisUtil;
+import com.github.dbmdz.flusswerk.integration.TestMessage;
 import com.github.dbmdz.flusswerk.integration.locking.LockingTest.FlowConfiguration;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -24,6 +25,7 @@ import java.util.concurrent.Executors;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.redisson.api.RLock;
@@ -46,6 +48,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
       FlusswerkConfiguration.class
     })
 @Import({MetricsAutoConfiguration.class, CompositeMeterRegistryAutoConfiguration.class})
+@DisplayName("When the user creates a lock")
 public class LockingTest {
 
   private static final Condition<? super RLock> LOCKED = new Condition<>(RLock::isLocked, "locked");
@@ -65,7 +68,7 @@ public class LockingTest {
 
   private final RedisUtil redisUtil;
 
-  private final ProcessorAdapter processorAdapter;
+  private final ProcessorAdapter<TestMessage> processorAdapter;
 
   private final LockManager lockManager;
 
@@ -75,7 +78,7 @@ public class LockingTest {
       RoutingProperties routingProperties,
       RedisProperties redisProperties,
       RabbitMQ rabbitMQ,
-      ProcessorAdapter processorAdapter,
+      ProcessorAdapter<TestMessage> processorAdapter,
       LockManager lockManager) {
     this.engine = engine;
     this.processorAdapter = processorAdapter;
@@ -91,13 +94,18 @@ public class LockingTest {
   static class FlowConfiguration {
 
     @Bean
-    public ProcessorAdapter processorAdapter() {
-      return new ProcessorAdapter();
+    public IncomingMessageType incomingMessageType() {
+      return new IncomingMessageType(TestMessage.class);
     }
 
     @Bean
-    public FlowSpec flowSpec(ProcessorAdapter processorAdapter) {
-      return FlowBuilder.messageProcessor(Message.class).process(processorAdapter).build();
+    public ProcessorAdapter<TestMessage> processorAdapter() {
+      return new ProcessorAdapter<>();
+    }
+
+    @Bean
+    public FlowSpec flowSpec(ProcessorAdapter<TestMessage> processorAdapter) {
+      return FlowBuilder.messageProcessor(TestMessage.class).process(processorAdapter).build();
     }
   }
 
@@ -112,12 +120,13 @@ public class LockingTest {
     rabbitUtil.purgeQueues();
   }
 
+  @DisplayName("then the lock  is set in Redis")
   @Test
   public void testLocksAreSet() throws Exception {
     var inputQueue = routing.getIncoming().get(0);
     var outputQueue = routing.getOutgoing().get("default");
 
-    Message expected = new Message("123456");
+    TestMessage expected = new TestMessage("123456");
     rabbitMQ.topic(inputQueue).send(expected);
 
     String id = "123";

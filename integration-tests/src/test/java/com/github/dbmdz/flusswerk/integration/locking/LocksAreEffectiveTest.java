@@ -18,6 +18,7 @@ import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import com.github.dbmdz.flusswerk.integration.ProcessorAdapter;
 import com.github.dbmdz.flusswerk.integration.RabbitUtil;
+import com.github.dbmdz.flusswerk.integration.TestMessage;
 import com.github.dbmdz.flusswerk.integration.locking.LocksAreEffectiveTest.LocksAreEffectiveConfiguration;
 import java.io.IOException;
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.concurrent.Semaphore;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +50,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
       FlusswerkConfiguration.class
     })
 @Import({MetricsAutoConfiguration.class, CompositeMeterRegistryAutoConfiguration.class})
+@DisplayName("When there are locks")
 public class LocksAreEffectiveTest {
 
   private final Engine engine;
@@ -60,7 +63,7 @@ public class LocksAreEffectiveTest {
 
   private final RabbitMQ rabbitMQ;
 
-  private final ProcessorAdapter processorAdapter;
+  private final ProcessorAdapter<LockTestingMessage> processorAdapter;
 
   private final LockManager lockManager;
 
@@ -69,7 +72,7 @@ public class LocksAreEffectiveTest {
       Engine engine,
       RoutingProperties routingProperties,
       RabbitMQ rabbitMQ,
-      ProcessorAdapter processorAdapter,
+      ProcessorAdapter<LockTestingMessage> processorAdapter,
       LockManager lockManager) {
     this.engine = engine;
     this.processorAdapter = processorAdapter;
@@ -81,13 +84,16 @@ public class LocksAreEffectiveTest {
   }
 
   static class LockTestingMessage extends Message {
+    private final String id;
     private final boolean wasAlreadyLocked;
     private final long waitedForLockMs;
 
     @JsonCreator
     public LockTestingMessage(
+        @JsonProperty("id") String id,
         @JsonProperty("wasAlreadyLocked") boolean wasAlreadyLocked,
         @JsonProperty("waitedForLockNs") long waitedForLockMs) {
+      this.id = id;
       this.waitedForLockMs = waitedForLockMs;
       this.wasAlreadyLocked = wasAlreadyLocked;
     }
@@ -100,11 +106,15 @@ public class LocksAreEffectiveTest {
       return waitedForLockMs;
     }
 
+    public String getId() {
+      return id;
+    }
+
     @Override
     public String toString() {
       return String.format(
-          "LockTestingMessage{tracingId=%s, wasAlreadyLocked=%s, waitedForLockMs=%,d}",
-          getTracingId(), wasAlreadyLocked, waitedForLockMs);
+          "LockTestingMessage{id=%s, wasAlreadyLocked=%s, waitedForLockMs=%,d}",
+          id, wasAlreadyLocked, waitedForLockMs);
     }
   }
 
@@ -116,13 +126,15 @@ public class LocksAreEffectiveTest {
     }
 
     @Bean
-    public ProcessorAdapter processorAdapter() {
-      return new ProcessorAdapter();
+    public ProcessorAdapter<LockTestingMessage> processorAdapter() {
+      return new ProcessorAdapter<>();
     }
 
     @Bean
-    public FlowSpec flowSpec(ProcessorAdapter processorAdapter) {
-      return FlowBuilder.messageProcessor(Message.class).process(processorAdapter).build();
+    public FlowSpec flowSpec(ProcessorAdapter<LockTestingMessage> processorAdapter) {
+      return FlowBuilder.messageProcessor(LockTestingMessage.class)
+          .process(processorAdapter)
+          .build();
     }
   }
 
@@ -151,13 +163,14 @@ public class LocksAreEffectiveTest {
         nanoseconds);
   }
 
+  @DisplayName("then these locks block further processing until released")
   @Test
   public void testLocksAreEffective() throws Exception {
     var inputQueue = routing.getIncoming().get(0);
     var outputQueue = routing.getOutgoing().get("default");
 
-    rabbitMQ.topic(inputQueue).send(new Message("1"));
-    rabbitMQ.topic(inputQueue).send(new Message("2"));
+    rabbitMQ.topic(inputQueue).send(new TestMessage("1"));
+    rabbitMQ.topic(inputQueue).send(new TestMessage("2"));
 
     String id = "123";
     long expectedWaitingTimeMs = 1000;
@@ -167,7 +180,7 @@ public class LocksAreEffectiveTest {
 
     processorAdapter.setFunction(
         message -> {
-          if ("2".equals(message.getTracingId())) {
+          if ("2".equals(message.getId())) {
             try {
               waitForThreadOneGettingLock.acquire();
             } catch (InterruptedException e) {
@@ -178,7 +191,7 @@ public class LocksAreEffectiveTest {
           long startWaiting = System.nanoTime();
           try {
             lockManager.acquire(id);
-            if ("1".equals(message.getTracingId())) {
+            if ("1".equals(message.getId())) {
               waitForThreadOneGettingLock.release();
             }
           } catch (LockingException e) {
@@ -192,7 +205,7 @@ public class LocksAreEffectiveTest {
             fail("Could not wait enough to test locks", e);
           }
 
-          return new LockTestingMessage(alreadyLocked, waitedForLockMs);
+          return new LockTestingMessage(message.getId(), alreadyLocked, waitedForLockMs);
         });
 
     var backoff = routing.getFailurePolicy(inputQueue).getBackoff();

@@ -45,6 +45,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
       FlusswerkConfiguration.class
     })
 @Import({MetricsAutoConfiguration.class, CompositeMeterRegistryAutoConfiguration.class})
+@DisplayName("When processing for a message fails")
 public class RetryTest {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RetryTest.class);
@@ -106,7 +107,7 @@ public class RetryTest {
   }
 
   @Test
-  @DisplayName("should retry message 5 times")
+  @DisplayName("then Flusswerk should retry the message 5 times")
   void shouldRetryMessage() throws IOException, InvalidMessageException, InterruptedException {
     var message = new Message("12345");
 
