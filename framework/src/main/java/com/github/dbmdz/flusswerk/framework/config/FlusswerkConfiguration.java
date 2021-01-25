@@ -145,22 +145,17 @@ public class FlusswerkConfiguration {
   }
 
   @Bean
-  public ProcessReport flusswerkProcessReport(
-      AppProperties appProperties, Optional<ProcessReport> processReport) {
-    return processReport.orElseGet(() -> new DefaultProcessReport(appProperties.getName()));
-  }
-
-  @Bean
   public PriorityBlockingQueue<Task> taskQueue() {
     return new PriorityBlockingQueue<>();
   }
 
   @Bean
   public List<Worker> workers(
+      AppProperties appProperties,
       Optional<Flow> flow,
       MessageBroker messageBroker,
       ProcessingProperties processingProperties,
-      ProcessReport flusswerkProcessReport,
+      Optional<ProcessReport> processReport,
       PriorityBlockingQueue<Task> taskQueue,
       Tracing tracing) {
     if (flow.isEmpty()) {
@@ -168,7 +163,14 @@ public class FlusswerkConfiguration {
     }
     return IntStream.range(0, processingProperties.getThreads())
         .mapToObj(
-            n -> new Worker(flow.get(), messageBroker, flusswerkProcessReport, taskQueue, tracing))
+            n ->
+                new Worker(
+                    flow.get(),
+                    messageBroker,
+                    processReport.orElseGet(
+                        () -> new DefaultProcessReport(appProperties.getName())),
+                    taskQueue,
+                    tracing))
         .collect(Collectors.toList());
   }
 
