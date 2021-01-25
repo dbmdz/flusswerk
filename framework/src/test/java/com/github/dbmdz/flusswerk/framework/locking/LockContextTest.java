@@ -67,7 +67,7 @@ class LockContextTest {
 
   @DisplayName("should return no time waited for locks never acquired")
   @Test
-  void shouldReturnNoTimeWaitedForLocksNeverAcquired() throws InterruptedException {
+  void shouldReturnNoTimeWaitedForLocksNeverAcquired() {
     watch.sleepNano(123); // wait some time to rule out accidental measurements
     lockContext.acquire(50, TimeUnit.MILLISECONDS);
 
@@ -76,7 +76,7 @@ class LockContextTest {
 
   @DisplayName("should return no time waited for locks never acquired")
   @Test
-  void shouldReturnNoTimeHeldForLocksNeverAcquired() throws InterruptedException {
+  void shouldReturnNoTimeHeldForLocksNeverAcquired() {
     watch.sleepNano(123); // wait some time to rule out accidental measurements
     assertThat(lockContext.lockHeldNs()).isZero();
   }
