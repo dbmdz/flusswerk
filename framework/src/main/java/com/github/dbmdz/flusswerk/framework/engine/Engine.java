@@ -1,17 +1,112 @@
 package com.github.dbmdz.flusswerk.framework.engine;
 
-/** Manage data processing for incoming messages. */
-public interface Engine {
+import com.github.dbmdz.flusswerk.framework.flow.Flow;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
+import com.rabbitmq.client.Channel;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Run flows {@link Flow} for every message from the {@link MessageBroker} - usually several in
+ * parallel.
+ */
+public class Engine {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(Engine.class);
+
+  private final ExecutorService executorService;
+  private final List<Worker> workers;
+  private final List<FlusswerkConsumer> consumers;
+  private final Channel channel;
+  private final Semaphore startOnlyOnce;
 
   /**
-   * Start the worker threads and wait for incoming messages to process with {@link
-   * com.github.dbmdz.flusswerk.framework.flow.Flow}.
+   * Creates a new Engine bridging RabbitMQ consumers and Flusswerk workers.
+   *
+   * @param channel the RabbitMQ channel new messages are read from
+   * @param flusswerkConsumers the consumers that read those messages from RabbitMQ
+   * @param workers the workers that do the processing
    */
-  void start();
+  public Engine(Channel channel, List<FlusswerkConsumer> flusswerkConsumers, List<Worker> workers) {
+    this.channel = channel;
+    this.executorService = Executors.newFixedThreadPool(workers.size());
+    this.workers = workers;
+    this.consumers = flusswerkConsumers;
+    this.startOnlyOnce = new Semaphore(1);
+  }
 
-  /** Stops all worker threads. */
-  void stop();
+  /**
+   * Starts processing messages until {@link Engine#stop()} is called. If there are no messages in
+   * the input queue, the engine waits for new messages to arrive.
+   */
+  public void start() {
+    if (!startOnlyOnce.tryAcquire()) {
+      LOGGER.error("Engine had already been started once. Starting again is not possible.");
+      return;
+    }
 
-  /** @return data processing stats for monitoring and debugging. */
-  EngineStats getStats();
+    LOGGER.debug("Starting worker threads");
+    workers.forEach(executorService::execute);
+
+    LOGGER.debug("Starting consumers");
+    consumers.forEach(
+        consumer -> {
+          try {
+            channel.basicConsume(consumer.getInputQueue(), false, consumer);
+          } catch (IOException e) {
+            LOGGER.error("Could not start RabbitMQ consumer.", e);
+          }
+        });
+  }
+
+  /**
+   * Stops processing new messages or waiting for new messages to arrive. This usually means that
+   * the application will shut down when the last worker finished.
+   */
+  public void stop() {
+    // Stop receiving new messages
+    consumers.forEach(
+        consumer -> {
+          try {
+            channel.basicCancel(consumer.getConsumerTag());
+          } catch (IOException e) {
+            LOGGER.error("Could not cancel consumer", e);
+          }
+        });
+
+    // Drain internal task queue
+    PriorityBlockingQueue<Task> taskQueue = new PriorityBlockingQueue<>();
+    List<Task> remainingTasks = new ArrayList<>();
+    taskQueue.drainTo(remainingTasks);
+
+    // NACK and requeue all messages that have not be processed yet
+    for (var task : remainingTasks) {
+      long deliveryTag = task.getMessage().getEnvelope().getDeliveryTag();
+      try {
+        channel.basicNack(deliveryTag, false, true);
+      } catch (IOException e) {
+        LOGGER.error("Could not NACK message with delivery tag {}", deliveryTag, e);
+      }
+    }
+
+    // Wait for workers to stop
+    workers.forEach(Worker::stop);
+    executorService.shutdown();
+    try {
+      boolean shutdownSuccessful = executorService.awaitTermination(5, TimeUnit.MINUTES);
+      if (!shutdownSuccessful) {
+        LOGGER.error("Not all workers did terminate during shutdown window of 5 minutes");
+      }
+    } catch (InterruptedException e) {
+      LOGGER.error("Timeout awaiting worker shutdown after 5 minutes", e);
+    }
+  }
 }

@@ -1,28 +1,35 @@
 package com.github.dbmdz.flusswerk.framework;
 
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
+import java.util.Optional;
+import javax.annotation.PreDestroy;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ConfigurableApplicationContext;
 
 /** Common base class for application main class to remove boilerplate. */
 @SpringBootApplication
 @EnableFlusswerk
 public class FlusswerkApplication implements CommandLineRunner {
 
-  protected final Engine engine;
+  protected final Engine engine; // can be null if Flusswerk is only used to send messages
 
-  public FlusswerkApplication(Engine engine) {
-    this.engine = engine;
+  public FlusswerkApplication(Optional<Engine> engine) {
+    this.engine = engine.orElse(null);
   }
 
   @Override
   public void run(String... args) {
+    if (engine == null) {
+      return;
+    }
     engine.start();
   }
 
-  public static ConfigurableApplicationContext run(Class<?> primarySource, String... args) {
-    return SpringApplication.run(primarySource, args);
+  @PreDestroy
+  public void shutdown() {
+    if (engine == null) {
+      return;
+    }
+    engine.stop();
   }
 }

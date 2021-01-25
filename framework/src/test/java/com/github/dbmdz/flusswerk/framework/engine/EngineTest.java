@@ -13,7 +13,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("The Engine")
-class DefaultEngineTest {
+class EngineTest {
 
   private Channel channel;
   private List<FlusswerkConsumer> consumers;
@@ -26,7 +26,7 @@ class DefaultEngineTest {
     consumers = List.of(mockConsumer("consumer1", "queue1"), mockConsumer("consumer2", "queue2"));
 
     workers = List.of(mock(Worker.class), mock(Worker.class));
-    engine = new DefaultEngine(channel, consumers, workers);
+    engine = new Engine(channel, consumers, workers);
   }
 
   private FlusswerkConsumer mockConsumer(String consumerTag, String queue) {

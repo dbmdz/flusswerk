@@ -6,10 +6,8 @@ import com.github.dbmdz.flusswerk.framework.config.properties.ProcessingProperti
 import com.github.dbmdz.flusswerk.framework.config.properties.RabbitMQProperties;
 import com.github.dbmdz.flusswerk.framework.config.properties.RedisProperties;
 import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
-import com.github.dbmdz.flusswerk.framework.engine.DefaultEngine;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.engine.FlusswerkConsumer;
-import com.github.dbmdz.flusswerk.framework.engine.NoOpEngine;
 import com.github.dbmdz.flusswerk.framework.engine.Task;
 import com.github.dbmdz.flusswerk.framework.engine.Worker;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
@@ -47,7 +45,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-/** Spring configuration to provide beans for{@link MessageBroker} and {@link DefaultEngine}. */
+/** Spring configuration to provide beans for{@link MessageBroker} and {@link Engine}. */
 @Configuration
 @Import(FlusswerkPropertiesConfiguration.class)
 public class FlusswerkConfiguration {
@@ -77,7 +75,7 @@ public class FlusswerkConfiguration {
       List<Worker> workers) {
 
     if (flow.isEmpty()) {
-      return new NoOpEngine(); // No Flow, nothing to do
+      return null; // No Flow, nothing to do
     }
 
     // Use DefaultFlowMetrics only if there are no other FlowMetrics beans defined in the app
@@ -89,7 +87,7 @@ public class FlusswerkConfiguration {
 
     var threads = processingProperties.getThreads();
 
-    return new DefaultEngine(rabbitConnection.getChannel(), flusswerkConsumers, workers);
+    return new Engine(rabbitConnection.getChannel(), flusswerkConsumers, workers);
   }
 
   @Bean
