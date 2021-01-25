@@ -8,7 +8,10 @@ import com.github.dbmdz.flusswerk.framework.config.properties.RedisProperties;
 import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.engine.DefaultEngine;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
+import com.github.dbmdz.flusswerk.framework.engine.FlusswerkConsumer;
 import com.github.dbmdz.flusswerk.framework.engine.NoOpEngine;
+import com.github.dbmdz.flusswerk.framework.engine.Task;
+import com.github.dbmdz.flusswerk.framework.engine.Worker;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.jackson.FlusswerkObjectMapper;
@@ -28,8 +31,14 @@ import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -57,24 +66,15 @@ public class FlusswerkConfiguration {
     return new Flow(flowSpec.get(), lockManager, tracing);
   }
 
-  /**
-   * @param messageBroker The messageBroker to use.
-   * @param flow The flow to use (optional).
-   * @param processingProperties The external configuration from <code>application.yml</code>.
-   * @param processReport A custom process report provider (optional).
-   * @param flowMetrics The metrics collector.
-   * @return The {@link DefaultEngine} used for this job.
-   */
   @Bean
   public Engine engine(
-      AppProperties appProperties,
-      MessageBroker messageBroker,
       Optional<Flow> flow,
+      List<FlusswerkConsumer> flusswerkConsumers,
       ProcessingProperties processingProperties,
-      Optional<ProcessReport> processReport,
+      RabbitConnection rabbitConnection,
       Set<FlowMetrics> flowMetrics,
-      Tracing tracing,
-      MeterFactory meterFactory) {
+      MeterFactory meterFactory,
+      List<Worker> workers) {
 
     if (flow.isEmpty()) {
       return new NoOpEngine(); // No Flow, nothing to do
@@ -87,12 +87,9 @@ public class FlusswerkConfiguration {
 
     flow.get().registerFlowMetrics(flowMetrics);
 
-    ProcessReport actualProcessReport =
-        processReport.orElseGet(() -> new DefaultProcessReport(appProperties.getName()));
-
     var threads = processingProperties.getThreads();
 
-    return new DefaultEngine(messageBroker, flow.get(), threads, actualProcessReport, tracing);
+    return new DefaultEngine(rabbitConnection.getChannel(), flusswerkConsumers, workers);
   }
 
   @Bean
@@ -147,6 +144,59 @@ public class FlusswerkConfiguration {
     } else {
       return new NoOpLockManager();
     }
+  }
+
+  @Bean
+  public ProcessReport flusswerkProcessReport(
+      AppProperties appProperties, Optional<ProcessReport> processReport) {
+    return processReport.orElseGet(() -> new DefaultProcessReport(appProperties.getName()));
+  }
+
+  @Bean
+  public PriorityBlockingQueue<Task> taskQueue() {
+    return new PriorityBlockingQueue<>();
+  }
+
+  @Bean
+  public List<Worker> workers(
+      Optional<Flow> flow,
+      MessageBroker messageBroker,
+      ProcessingProperties processingProperties,
+      ProcessReport flusswerkProcessReport,
+      PriorityBlockingQueue<Task> taskQueue,
+      Tracing tracing) {
+    if (flow.isEmpty()) {
+      return Collections.emptyList(); // No Flow, nothing to do
+    }
+    return IntStream.range(0, processingProperties.getThreads())
+        .mapToObj(
+            n -> new Worker(flow.get(), messageBroker, flusswerkProcessReport, taskQueue, tracing))
+        .collect(Collectors.toList());
+  }
+
+  @Bean
+  public List<FlusswerkConsumer> flusswerkConsumers(
+      FlusswerkObjectMapper flusswerkObjectMapper,
+      ProcessingProperties processingProperties,
+      RabbitConnection rabbitConnection,
+      RoutingProperties routingProperties,
+      PriorityBlockingQueue<Task> taskQueue) {
+    int maxPriority = routingProperties.getIncoming().size();
+    List<FlusswerkConsumer> flusswerkConsumers = new ArrayList<>();
+    for (int i = 0; i < routingProperties.getIncoming().size(); i++) {
+      String queueName = routingProperties.getIncoming().get(i);
+      int priority = maxPriority - i;
+      for (int k = 0; k < processingProperties.getThreads(); k++) {
+        flusswerkConsumers.add(
+            new FlusswerkConsumer(
+                rabbitConnection.getChannel(),
+                flusswerkObjectMapper,
+                queueName,
+                priority,
+                taskQueue));
+      }
+    }
+    return Collections.unmodifiableList(flusswerkConsumers);
   }
 
   private Config createRedisConfig(RedisProperties redis) {

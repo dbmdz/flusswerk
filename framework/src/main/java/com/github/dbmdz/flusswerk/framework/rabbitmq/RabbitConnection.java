@@ -47,7 +47,7 @@ public class RabbitConnection {
    *
    * @return the low-level RabbitMQ channel.
    */
-  Channel getChannel() {
+  public Channel getChannel() {
     return channel;
   }
 

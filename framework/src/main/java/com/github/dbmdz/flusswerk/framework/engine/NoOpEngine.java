@@ -1,7 +1,5 @@
 package com.github.dbmdz.flusswerk.framework.engine;
 
-import com.github.dbmdz.flusswerk.framework.model.Message;
-
 /**
  * No operations Engine for Flusswerk applications that use Flusswerk only to send messages, but
  * don't have actual message driven data processing.
@@ -15,10 +13,6 @@ public class NoOpEngine implements Engine {
   public void start() {
     throw new RuntimeException("Cannot start engine. Did you define a Flow bean?");
   }
-
-  /** Does nothing as expected. */
-  @Override
-  public void process(Message message) {}
 
   /** Does nothing as no processing would ever happen. */
   @Override
