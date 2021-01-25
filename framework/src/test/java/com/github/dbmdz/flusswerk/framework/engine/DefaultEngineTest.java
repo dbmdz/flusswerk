@@ -1,29 +1,13 @@
 package com.github.dbmdz.flusswerk.framework.engine;
 
-import static com.github.dbmdz.flusswerk.framework.fixtures.Flows.consumingFlow;
-import static com.github.dbmdz.flusswerk.framework.fixtures.Flows.flowThrowing;
-import static com.github.dbmdz.flusswerk.framework.fixtures.Flows.passthroughFlow;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.github.dbmdz.flusswerk.framework.exceptions.RetryProcessingException;
-import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
-import com.github.dbmdz.flusswerk.framework.fixtures.Flows;
-import com.github.dbmdz.flusswerk.framework.flow.Flow;
-import com.github.dbmdz.flusswerk.framework.model.Message;
-import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
-import com.github.dbmdz.flusswerk.framework.reporting.SilentProcessReport;
-import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
+import com.rabbitmq.client.Channel;
 import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,106 +15,57 @@ import org.junit.jupiter.api.Test;
 @DisplayName("The Engine")
 class DefaultEngineTest {
 
-  private MessageBroker messageBroker;
-
-  private Message message;
+  private Channel channel;
+  private List<FlusswerkConsumer> consumers;
+  private List<Worker> workers;
+  private Engine engine;
 
   @BeforeEach
   void setUp() {
-    messageBroker = mock(MessageBroker.class);
-    message = new Message();
+    channel = mock(Channel.class);
+    consumers = List.of(mockConsumer("consumer1", "queue1"), mockConsumer("consumer2", "queue2"));
+
+    workers = List.of(mock(Worker.class), mock(Worker.class));
+    engine = new DefaultEngine(channel, consumers, workers);
   }
 
-  private Engine createEngine(Flow flow) {
-    return new DefaultEngine(messageBroker, flow, 5, new SilentProcessReport(), new Tracing());
+  private FlusswerkConsumer mockConsumer(String consumerTag, String queue) {
+    FlusswerkConsumer consumer = mock(FlusswerkConsumer.class);
+    when(consumer.getConsumerTag()).thenReturn(consumerTag);
+    when(consumer.getInputQueue()).thenReturn(queue);
+    return consumer;
   }
 
   @Test
-  @DisplayName("should use the maximum number of workers")
-  public void engineShouldUseMaxNumberOfWorkers() throws IOException, InterruptedException {
-    when(messageBroker.receive()).thenReturn(new Message("White Room"));
-    Engine engine = createEngine(Flows.flowBlockingAllThreads());
-    ExecutorService executorService = Executors.newSingleThreadExecutor();
-    executorService.submit(engine::start);
-
-    long start = System.currentTimeMillis();
-    int timeout = 5 * 60 * 300;
-    while (!engine.getStats().allWorkersBusy() && System.currentTimeMillis() - start < timeout) {
-      TimeUnit.MILLISECONDS.sleep(100);
-    }
-
-    var engineStats = engine.getStats();
-    assertThat(engineStats.getActiveWorkers())
-        .as(
-            "There were %d workers expected, but only %d running after waiting for %d ms",
-            engineStats.getConcurrentWorkers(),
-            engineStats.getActiveWorkers(),
-            System.currentTimeMillis() - start)
-        .isEqualTo(engineStats.getConcurrentWorkers());
-
+  public void engineShouldStartAllWorkers() {
+    engine.start();
+    workers.forEach(worker -> verify(worker).run());
     engine.stop();
   }
 
   @Test
-  @DisplayName("should reject a message when processing fails")
-  void processShouldRejectMessageOnFailure() throws IOException {
-    Engine engine = createEngine(flowThrowing(RuntimeException.class));
-    engine.process(message);
-
-    verify(messageBroker).reject(message);
-    verify(messageBroker, never()).ack(message);
+  public void engineShouldConnectAllConsumers() throws IOException {
+    engine.start();
+    for (FlusswerkConsumer consumer : consumers) {
+      verify(channel).basicConsume(eq(consumer.getInputQueue()), eq(false), eq(consumer));
+    }
+    engine.stop();
   }
 
   @Test
-  @DisplayName("should accept a message processed without failure")
-  void processShouldAcceptMessageWithoutFailure() throws IOException {
-    Engine engine = createEngine(passthroughFlow());
-    engine.process(message);
-
-    verify(messageBroker).ack(message);
-    verify(messageBroker, never()).reject(message);
+  public void engineShouldStopAllWorkers() {
+    engine.start();
+    engine.stop();
+    workers.forEach(worker -> verify(worker).stop());
   }
 
   @Test
-  @DisplayName("should not try to send messages if the writer creates none")
-  void shouldNotTryToSendMessagesIfTheWriterCreatesNone() throws IOException {
-    Engine engine = createEngine(consumingFlow());
-    engine.process(new Message());
-    verify(messageBroker, never()).send(any());
-  }
-
-  @Test
-  @DisplayName("should send a message")
-  void processShouldSendMessage() throws IOException {
-    Engine engine = createEngine(passthroughFlow());
-    engine.process(new Message());
-    verify(messageBroker).send(anyCollection());
-  }
-
-  @Test
-  @DisplayName("should stop with retry for RetryProcessException")
-  void retryProcessExceptionShouldRejectTemporarily() throws IOException {
-    Engine engine = createEngine(flowThrowing(RetryProcessingException.class));
-    engine.process(message);
-
-    verify(messageBroker).reject(message);
-  }
-
-  @Test
-  @DisplayName("should stop processing for good for StopProcessingException")
-  void shouldFailMessageForStopProcessingException() throws IOException {
-    Engine engine = createEngine(flowThrowing(StopProcessingException.class));
-    engine.process(message);
-
-    verify(messageBroker).fail(message);
-  }
-
-  @Test
-  @DisplayName("should stop processing for good when sending messages fails")
-  void shouldStopProcessingWhenSendingFails() throws IOException {
-    doThrow(RuntimeException.class).when(messageBroker).send(anyCollection());
-    Engine engine = createEngine(passthroughFlow());
-    engine.process(message);
-    verify(messageBroker).fail(message);
+  public void engineShouldDisconnectAllConsumers() throws IOException {
+    engine.start();
+    engine.stop();
+    for (FlusswerkConsumer consumer : consumers) {
+      String consumerTag = consumer.getConsumerTag();
+      verify(channel).basicCancel(eq(consumerTag));
+    }
   }
 }
