@@ -8,7 +8,7 @@ import org.redisson.config.Config;
 
 public class RedisUtil {
 
-  private final String KEY_SPACE = "flusswerk";
+  private static final String KEY_SPACE = "flusswerk";
 
   private final RedissonClient redissonClient;
 
