@@ -42,7 +42,7 @@ class RedisLockManagerTest {
 
   @DisplayName("should block if lock for id already has been acquired")
   @Test
-  void shouldBlockIfLockForIdHasAlreadyBeenAcquired() throws InterruptedException {
+  void shouldBlockIfLockForIdHasAlreadyBeenAcquired() {
     var id = "123";
     lockingFixture.mockLockForId(id);
 
@@ -87,7 +87,7 @@ class RedisLockManagerTest {
 
   @DisplayName("should release lock")
   @Test
-  void shouldReleaseLock() throws InterruptedException {
+  void shouldReleaseLock() {
     lockingFixture.mockLockForAnyId();
     redisLockManager.acquire("123");
     assertThat(redisLockManager.threadHasLock()).isTrue();
@@ -97,13 +97,13 @@ class RedisLockManagerTest {
 
   @DisplayName("should silently do nothing if there is nothing to release")
   @Test
-  void shouldSilentlyDoNothingIfThereIsNothingToRelease() throws InterruptedException {
+  void shouldSilentlyDoNothingIfThereIsNothingToRelease() {
     redisLockManager.release();
   }
 
   @DisplayName("should return the total number of locks acquired")
   @Test
-  void shouldReturnTheTotalAmountOfAcquiredLocks() throws InterruptedException {
+  void shouldReturnTheTotalAmountOfAcquiredLocks() {
     lockingFixture.mockLockForAnyId();
 
     var expected = 3;
@@ -140,7 +140,7 @@ class RedisLockManagerTest {
   }
 
   @Test
-  void getLocksHeldNs() throws InterruptedException {
+  void getLocksHeldNs() {
     lockingFixture.mockLockForAnyId();
 
     var waitingTime = 500_0000;
@@ -159,7 +159,7 @@ class RedisLockManagerTest {
   @DisplayName("should report if thread has lock")
   @ParameterizedTest
   @ValueSource(booleans = {true, false})
-  void shouldReturnIfThreadHasLocks(boolean acquireLock) throws InterruptedException {
+  void shouldReturnIfThreadHasLocks(boolean acquireLock) {
     lockingFixture.mockLockForAnyId();
     if (acquireLock) {
       redisLockManager.acquire("123");
@@ -169,7 +169,7 @@ class RedisLockManagerTest {
 
   @DisplayName("should return the id for the threads current lock")
   @Test
-  void shouldReturnTheIdForTheThreadsCurrentLock() throws InterruptedException {
+  void shouldReturnTheIdForTheThreadsCurrentLock() {
     lockingFixture.mockLockForAnyId();
     var expected = "123";
     redisLockManager.acquire(expected);
@@ -178,7 +178,7 @@ class RedisLockManagerTest {
 
   @DisplayName("should return empty id if current thread has no lock")
   @Test
-  void shouldReturnEmptyIdIfCurrentThreadHasNoLock() throws InterruptedException {
+  void shouldReturnEmptyIdIfCurrentThreadHasNoLock() {
     assertThat(redisLockManager.getLockedIdForThread()).isEmpty();
   }
 }
