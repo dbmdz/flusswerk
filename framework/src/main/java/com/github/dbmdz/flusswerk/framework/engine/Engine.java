@@ -36,8 +36,16 @@ public class Engine {
    * @param workers the workers that do the processing
    */
   public Engine(Channel channel, List<FlusswerkConsumer> flusswerkConsumers, List<Worker> workers) {
+    this(channel, flusswerkConsumers, workers, Executors.newFixedThreadPool(workers.size()));
+  }
+
+  public Engine(
+      Channel channel,
+      List<FlusswerkConsumer> flusswerkConsumers,
+      List<Worker> workers,
+      ExecutorService executorService) {
     this.channel = channel;
-    this.executorService = Executors.newFixedThreadPool(workers.size());
+    this.executorService = executorService;
     this.workers = workers;
     this.consumers = flusswerkConsumers;
     this.startOnlyOnce = new Semaphore(1);
@@ -55,6 +63,7 @@ public class Engine {
 
     LOGGER.debug("Starting worker threads");
     for (Worker worker : workers) {
+      LOGGER.debug("Starting worker {}", worker);
       executorService.execute(worker);
     }
 
