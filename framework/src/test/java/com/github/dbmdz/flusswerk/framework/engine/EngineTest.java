@@ -36,6 +36,7 @@ class EngineTest {
     return consumer;
   }
 
+  @DisplayName("should start all workers")
   @Test
   public void engineShouldStartAllWorkers() {
     engine.start();
@@ -43,6 +44,7 @@ class EngineTest {
     engine.stop();
   }
 
+  @DisplayName("should connect all consumers")
   @Test
   public void engineShouldConnectAllConsumers() throws IOException {
     engine.start();
@@ -52,6 +54,7 @@ class EngineTest {
     engine.stop();
   }
 
+  @DisplayName("should stop all workers")
   @Test
   public void engineShouldStopAllWorkers() {
     engine.start();
@@ -59,6 +62,7 @@ class EngineTest {
     workers.forEach(worker -> verify(worker).stop());
   }
 
+  @DisplayName("should disconnect all consumers")
   @Test
   public void engineShouldDisconnectAllConsumers() throws IOException {
     engine.start();
