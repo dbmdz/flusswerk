@@ -26,7 +26,7 @@ class EngineTest {
     consumers = List.of(mockConsumer("consumer1", "queue1"), mockConsumer("consumer2", "queue2"));
 
     workers = List.of(mock(Worker.class), mock(Worker.class));
-    engine = new Engine(channel, consumers, workers);
+    engine = new Engine(channel, consumers, workers, new TestingExecutorService());
   }
 
   private FlusswerkConsumer mockConsumer(String consumerTag, String queue) {
