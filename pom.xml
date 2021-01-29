@@ -72,6 +72,7 @@
     <version.amqp-client>5.6.0</version.amqp-client>
     <version.logstash-encoder>6.4</version.logstash-encoder>
     <version.flusswerk>4.3.0-SNAPSHOT</version.flusswerk>
+    <version.mockito>3.7.7</version.mockito>
     <version.redisson>3.13.6</version.redisson>
     <!-- Plugin versions -->
     <version.fmt-maven-plugin>2.10</version.fmt-maven-plugin>
@@ -99,6 +100,12 @@
         <groupId>net.logstash.logback</groupId>
         <artifactId>logstash-logback-encoder</artifactId>
         <version>${version.logstash-encoder}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>${version.mockito}</version>
+        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.redisson</groupId>
