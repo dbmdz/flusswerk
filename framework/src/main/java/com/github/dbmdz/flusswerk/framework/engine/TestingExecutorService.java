@@ -3,11 +3,10 @@ package com.github.dbmdz.flusswerk.framework.engine;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.AbstractExecutorService;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.validation.constraints.NotNull;
 
-class TestingExecutorService extends AbstractExecutorService implements ExecutorService {
+class TestingExecutorService extends AbstractExecutorService {
 
   private final LinkedList<Runnable> tasks;
   private boolean isShutdown;
