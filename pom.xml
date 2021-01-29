@@ -72,6 +72,7 @@
     <version.amqp-client>5.6.0</version.amqp-client>
     <version.logstash-encoder>6.4</version.logstash-encoder>
     <version.flusswerk>4.3.0-SNAPSHOT</version.flusswerk>
+    <version.junit>5.7.0</version.junit>
     <version.mockito>3.7.7</version.mockito>
     <version.redisson>3.13.6</version.redisson>
     <!-- Plugin versions -->
@@ -105,6 +106,12 @@
         <groupId>org.mockito</groupId>
         <artifactId>mockito-core</artifactId>
         <version>${version.mockito}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter</artifactId>
+        <version>5.7.0</version>
         <scope>test</scope>
       </dependency>
       <dependency>
