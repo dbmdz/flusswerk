@@ -54,17 +54,18 @@ public class Engine {
     }
 
     LOGGER.debug("Starting worker threads");
-    workers.forEach(executorService::execute);
+    for (Worker worker : workers) {
+      executorService.execute(worker);
+    }
 
     LOGGER.debug("Starting consumers");
-    consumers.forEach(
-        consumer -> {
-          try {
-            channel.basicConsume(consumer.getInputQueue(), false, consumer);
-          } catch (IOException e) {
-            LOGGER.error("Could not start RabbitMQ consumer.", e);
-          }
-        });
+    for (FlusswerkConsumer consumer : consumers) {
+      try {
+        channel.basicConsume(consumer.getInputQueue(), false, consumer);
+      } catch (IOException e) {
+        LOGGER.error("Could not start RabbitMQ consumer.", e);
+      }
+    }
   }
 
   /**
