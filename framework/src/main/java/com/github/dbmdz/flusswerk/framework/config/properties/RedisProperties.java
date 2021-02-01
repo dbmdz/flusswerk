@@ -69,4 +69,9 @@ public class RedisProperties {
   public String getKeyspace() {
     return keyspace;
   }
+
+  @Override
+  public String toString() {
+    return StringRepresentation.of(this).replace(password, "*****");
+  }
 }
