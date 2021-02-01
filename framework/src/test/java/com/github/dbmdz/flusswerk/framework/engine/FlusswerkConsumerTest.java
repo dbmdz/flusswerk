@@ -2,6 +2,7 @@ package com.github.dbmdz.flusswerk.framework.engine;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.dbmdz.flusswerk.framework.TestMessage;
@@ -64,6 +65,20 @@ class FlusswerkConsumerTest {
     Task actual = taskQueue.poll();
     assertThat(actual).isNotNull();
     assertThat(actual.getMessage().getEnvelope().getSource()).isEqualTo("input.queue");
+  }
+
+  @DisplayName("should set the delivery tag for each message")
+  @Test
+  void shouldSetDeliveryTag() throws IOException {
+    TestMessage message = new TestMessage("bsb12345678");
+
+    when(envelope.getDeliveryTag()).thenReturn(42L);
+    consumer.handleDelivery("consumerTag", envelope, basicProperties, json(message));
+
+    Task actual = taskQueue.poll();
+    assertThat(actual).isNotNull();
+    assertThat(actual.getMessage().getEnvelope().getDeliveryTag())
+        .isEqualTo(envelope.getDeliveryTag());
   }
 
   private byte[] json(Message message) throws JsonProcessingException {
