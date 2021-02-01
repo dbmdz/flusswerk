@@ -55,6 +55,7 @@ public class FlusswerkConsumer extends DefaultConsumer {
       String json = new String(body, StandardCharsets.UTF_8);
       Message message = flusswerkObjectMapper.deserialize(json);
       message.getEnvelope().setSource(inputQueue);
+      message.getEnvelope().setDeliveryTag(envelope.getDeliveryTag());
       taskQueue.add(new Task(message, priority));
     } catch (Exception e) {
       LOGGER.error("Could not deserialize message", e);
