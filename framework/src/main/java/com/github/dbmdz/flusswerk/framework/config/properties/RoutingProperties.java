@@ -149,11 +149,7 @@ public class RoutingProperties {
 
   @Override
   public String toString() {
-    return StringRepresentation.of(RoutingProperties.class)
-        .property("exchange", defaultExchange)
-        .property("readFrom", String.join(",", incoming))
-        .property("writeTo", outgoing)
-        .toString();
+    return StringRepresentation.of(this);
   }
 
   public FailurePolicy getFailurePolicy(Message message) {

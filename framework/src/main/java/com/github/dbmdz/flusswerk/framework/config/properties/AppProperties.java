@@ -22,4 +22,9 @@ public class AppProperties {
   public String getName() {
     return name;
   }
+
+  @Override
+  public String toString() {
+    return StringRepresentation.of(this);
+  }
 }

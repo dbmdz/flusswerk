@@ -21,9 +21,7 @@ public class MonitoringProperties {
 
   @Override
   public String toString() {
-    return StringRepresentation.of(MonitoringProperties.class)
-        .property("prefix", prefix)
-        .toString();
+    return StringRepresentation.of(this);
   }
 
   public static MonitoringProperties defaults() {

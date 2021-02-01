@@ -6,6 +6,8 @@ import java.util.Optional;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
 
 /** Model for the configuration parameters in <code>application.yml</code>. */
 @ConstructorBinding
@@ -22,6 +24,8 @@ public class FlusswerkProperties {
 
   @NestedConfigurationProperty private final RedisProperties redis;
 
+  private final Yaml yaml;
+
   @ConstructorBinding
   public FlusswerkProperties(
       ProcessingProperties processing,
@@ -34,6 +38,9 @@ public class FlusswerkProperties {
     this.routing = requireNonNullElseGet(routing, RoutingProperties::defaults);
     this.monitoring = requireNonNullElseGet(monitoring, MonitoringProperties::defaults);
     this.redis = redis; // might actually be null, then centralized locking will be disabled
+    DumperOptions options = new DumperOptions();
+    options.setAllowReadOnlyProperties(true);
+    yaml = new Yaml(options);
   }
 
   public ProcessingProperties getProcessing() {
@@ -58,11 +65,6 @@ public class FlusswerkProperties {
 
   @Override
   public String toString() {
-    return StringRepresentation.of(FlusswerkProperties.class)
-        .property("processing", processing.toString())
-        .property("routing", routing.toString())
-        .property("connection", rabbitmq.toString())
-        .property("monitoring", monitoring.toString())
-        .toString();
+    return StringRepresentation.of(this);
   }
 }

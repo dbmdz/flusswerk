@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNullElse;
 import javax.validation.constraints.Min;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
+import org.yaml.snakeyaml.Yaml;
 
 /** Configuration related to the processing. */
 @ConstructorBinding
@@ -25,9 +26,8 @@ public class ProcessingProperties {
 
   @Override
   public String toString() {
-    return StringRepresentation.of(ProcessingProperties.class)
-        .property("threads", threads)
-        .toString();
+    Yaml yaml = new Yaml();
+    return yaml.dump(this);
   }
 
   public static ProcessingProperties defaults() {

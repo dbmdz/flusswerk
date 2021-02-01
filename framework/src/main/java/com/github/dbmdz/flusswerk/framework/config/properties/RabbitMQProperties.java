@@ -54,12 +54,7 @@ public class RabbitMQProperties {
 
   @Override
   public String toString() {
-    return StringRepresentation.of(RabbitMQProperties.class)
-        .property("hosts", hosts)
-        .property("virtualHost", virtualHost)
-        .property("username", username)
-        .maskedProperty("password", password)
-        .toString();
+    return StringRepresentation.of(this).replace(password, "*****");
   }
 
   public static RabbitMQProperties defaults() {

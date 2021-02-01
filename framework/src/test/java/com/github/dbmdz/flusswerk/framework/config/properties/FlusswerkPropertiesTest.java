@@ -52,4 +52,11 @@ public class FlusswerkPropertiesTest {
         .hasFieldOrPropertyWithValue("retryRoutingKey", "first.custom.retry")
         .hasFieldOrPropertyWithValue("failedRoutingKey", "first.custom.failed");
   }
+
+  @Test
+  void testToString() {
+    String yaml = properties.toString();
+    System.out.println(yaml);
+    assertThat(yaml).isEqualTo("");
+  }
 }
