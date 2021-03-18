@@ -1,5 +1,7 @@
 package com.github.dbmdz.flusswerk.integration;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.model.Message;
@@ -7,7 +9,6 @@ import com.github.dbmdz.flusswerk.framework.rabbitmq.FailurePolicy;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import java.io.IOException;
 import java.time.Duration;
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +32,7 @@ public class RabbitUtil {
     var attempts = 0;
     while (received.isEmpty()) {
       if (attempts > 50) {
-        Assert.fail("Too many attempts to receive message");
+        fail("Too many attempts to receive message");
       }
       Thread.sleep(failurePolicy.getBackoff().toMillis()); // dead letter backoff time is 1s
       received = queue.receive();
@@ -77,7 +78,7 @@ public class RabbitUtil {
     var attempts = 0;
     while (received.isEmpty()) {
       if (attempts > 50) {
-        Assert.fail("Too many attempts to receive message");
+        fail("Too many attempts to receive message");
       }
       Thread.sleep(backoff.toMillis()); // dead letter backoff time is 1s
       received = queue.receive();
