@@ -18,6 +18,7 @@ import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.Semaphore;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,6 +30,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 @DisplayName("The Worker")
 class WorkerTest {
 
+  private Semaphore availableWorkers;
   private Worker worker;
   private Flow flow;
   private Tracing tracing;
@@ -45,12 +47,13 @@ class WorkerTest {
 
   @BeforeEach
   void setUp() {
+    availableWorkers = mock(Semaphore.class);
     flow = mock(Flow.class);
     messageBroker = mock(MessageBroker.class);
     processReport = mock(ProcessReport.class);
     taskQueue = new PriorityBlockingQueue<>();
     tracing = mock(Tracing.class);
-    worker = new Worker(flow, messageBroker, processReport, taskQueue, tracing);
+    worker = new Worker(availableWorkers, flow, messageBroker, processReport, taskQueue, tracing);
     message = new Message("tracing id");
   }
 
@@ -145,5 +148,12 @@ class WorkerTest {
     doThrow(IOException.class).when(messageBroker).send(any());
     worker.process(message);
     verify(processReport).reportFail(any(), any());
+  }
+
+  @DisplayName("should release semaphore")
+  @Test
+  void shouldReleaseSemaphore() throws IOException {
+    worker.process(message);
+    verify(availableWorkers).release();
   }
 }

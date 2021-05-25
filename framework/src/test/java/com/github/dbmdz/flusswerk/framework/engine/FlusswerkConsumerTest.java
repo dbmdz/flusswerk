@@ -2,6 +2,7 @@ package com.github.dbmdz.flusswerk.framework.engine;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -14,6 +15,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Envelope;
 import java.io.IOException;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.Semaphore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +23,7 @@ import org.junit.jupiter.api.Test;
 @DisplayName("The FlusswerkConsumer")
 class FlusswerkConsumerTest {
 
+  private Semaphore availableWorkers;
   private BasicProperties basicProperties;
   private FlusswerkConsumer consumer;
   private PriorityBlockingQueue<Task> taskQueue;
@@ -29,11 +32,14 @@ class FlusswerkConsumerTest {
 
   @BeforeEach
   void setUp() {
+    availableWorkers = mock(Semaphore.class);
     Channel channel = mock(Channel.class);
     taskQueue = new PriorityBlockingQueue<>();
     IncomingMessageType incomingMessageType = new IncomingMessageType(TestMessage.class);
     flusswerkObjectMapper = new FlusswerkObjectMapper(incomingMessageType);
-    consumer = new FlusswerkConsumer(channel, flusswerkObjectMapper, "input.queue", 42, taskQueue);
+    consumer =
+        new FlusswerkConsumer(
+            availableWorkers, channel, flusswerkObjectMapper, "input.queue", 42, taskQueue);
     basicProperties = mock(BasicProperties.class);
     envelope = mock(Envelope.class);
   }
@@ -79,6 +85,14 @@ class FlusswerkConsumerTest {
     assertThat(actual).isNotNull();
     assertThat(actual.getMessage().getEnvelope().getDeliveryTag())
         .isEqualTo(envelope.getDeliveryTag());
+  }
+
+  @DisplayName("should acquire semaphore")
+  @Test
+  void shouldAcquireSemaphore() throws InterruptedException, IOException {
+    TestMessage message = new TestMessage("bsb12345678");
+    consumer.handleDelivery("consumerTag", envelope, basicProperties, json(message));
+    verify(availableWorkers).acquire();
   }
 
   private byte[] json(Message message) throws JsonProcessingException {

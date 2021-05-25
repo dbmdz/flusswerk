@@ -9,6 +9,7 @@ import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ public class Worker implements Runnable {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Worker.class);
 
+  private final Semaphore availableWorkers;
   private final Flow flow;
   private final MessageBroker messageBroker;
   private final ProcessReport processReport;
@@ -25,11 +27,13 @@ public class Worker implements Runnable {
   private final Tracing tracing;
 
   public Worker(
+      Semaphore availableWorkers,
       Flow flow,
       MessageBroker messageBroker,
       ProcessReport processReport,
       PriorityBlockingQueue<Task> queue,
       Tracing tracing) {
+    this.availableWorkers = availableWorkers;
     this.flow = flow;
     this.messageBroker = messageBroker;
     this.processReport = processReport;
@@ -89,6 +93,7 @@ public class Worker implements Runnable {
       fail(message, stopProcessingException);
     } finally {
       tracing.deregister();
+      availableWorkers.release();
     }
   }
 

@@ -61,6 +61,7 @@ public class RabbitConnection {
         Connection connection = factory.newConnection(addresses, appName);
         channel = connection.createChannel();
         channel.basicRecover(true);
+        channel.basicQos(1);
         connectionIsFailing = false;
         LOGGER.debug("Connected to {}", addresses);
       } catch (IOException | TimeoutException e) {
