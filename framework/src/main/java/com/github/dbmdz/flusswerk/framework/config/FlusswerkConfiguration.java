@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.redisson.Redisson;
@@ -150,8 +151,14 @@ public class FlusswerkConfiguration {
   }
 
   @Bean
+  public Semaphore availableWorkers(ProcessingProperties processingProperties) {
+    return new Semaphore(processingProperties.getThreads());
+  }
+
+  @Bean
   public List<Worker> workers(
       AppProperties appProperties,
+      Semaphore availableWorkers,
       Optional<Flow> flow,
       MessageBroker messageBroker,
       ProcessingProperties processingProperties,
@@ -165,6 +172,7 @@ public class FlusswerkConfiguration {
         .mapToObj(
             n ->
                 new Worker(
+                    availableWorkers,
                     flow.get(),
                     messageBroker,
                     processReport.orElseGet(
@@ -176,6 +184,7 @@ public class FlusswerkConfiguration {
 
   @Bean
   public List<FlusswerkConsumer> flusswerkConsumers(
+      Semaphore availableWorkers,
       FlusswerkObjectMapper flusswerkObjectMapper,
       ProcessingProperties processingProperties,
       RabbitConnection rabbitConnection,
@@ -189,6 +198,7 @@ public class FlusswerkConfiguration {
       for (int k = 0; k < processingProperties.getThreads(); k++) {
         flusswerkConsumers.add(
             new FlusswerkConsumer(
+                availableWorkers,
                 rabbitConnection.getChannel(),
                 flusswerkObjectMapper,
                 queueName,
