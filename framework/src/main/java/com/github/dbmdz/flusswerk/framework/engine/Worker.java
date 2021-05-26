@@ -54,23 +54,28 @@ public class Worker implements Runnable {
    * and process the message if there was one.
    */
   void step() {
+    final Message message;
     try {
       // Waiting with intervals so stopping the worker is possible
       Task task = queue.poll(1, TimeUnit.SECONDS);
       if (task == null) {
         return;
       }
-      Message message = task.getMessage();
-      process(message);
+      message = task.getMessage();
     } catch (InterruptedException e) {
       LOGGER.debug("Interrupt while waiting for message", e);
+      return;
     }
+
+    tracing.register(message.getTracing());
+    process(message);
+    tracing.deregister();
+    availableWorkers.release();
   }
 
   public void process(Message message) {
     Collection<? extends Message> messagesToSend;
     try {
-      tracing.register(message.getTracing());
       messagesToSend = flow.process(message);
     } catch (StopProcessingException e) {
       fail(message, e);
@@ -91,9 +96,6 @@ public class Worker implements Runnable {
       var stopProcessingException =
           new StopProcessingException("Could not finish message handling").causedBy(e);
       fail(message, stopProcessingException);
-    } finally {
-      tracing.deregister();
-      availableWorkers.release();
     }
   }
 

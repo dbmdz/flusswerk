@@ -75,7 +75,7 @@ public class RetryTest {
 
     @Override
     public Message apply(Message message) {
-      throw new RetryProcessingException("Fail message to retry ({})", count.incrementAndGet());
+      throw new RetryProcessingException("Fail message to retry (%d)", count.incrementAndGet());
     }
   }
 
@@ -90,7 +90,7 @@ public class RetryTest {
 
   @BeforeEach
   void startEngine() {
-    executorService.submit(engine::start);
+    engine.start();
   }
 
   @AfterEach
