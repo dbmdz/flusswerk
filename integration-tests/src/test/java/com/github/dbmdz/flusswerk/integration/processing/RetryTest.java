@@ -54,8 +54,6 @@ public class RetryTest {
 
   private final RoutingProperties routing;
 
-  private final ExecutorService executorService;
-
   private final RabbitUtil rabbitUtil;
 
   private final RabbitMQ rabbitMQ;
@@ -65,7 +63,6 @@ public class RetryTest {
     this.engine = engine;
     this.rabbitMQ = rabbitMQ;
     this.routing = routingProperties;
-    executorService = Executors.newSingleThreadExecutor();
     rabbitUtil = new RabbitUtil(rabbitMQ, routing);
   }
 
