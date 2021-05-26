@@ -67,7 +67,7 @@ class WorkerTest {
   @DisplayName("registers tracing information")
   @Test
   void registersTracingInformation() {
-    worker.process(message);
+    worker.executeProcessing(message);
     verify(tracing).register(message.getTracing());
   }
 
@@ -153,7 +153,7 @@ class WorkerTest {
   @DisplayName("should release semaphore")
   @Test
   void shouldReleaseSemaphore() throws IOException {
-    worker.process(message);
+    worker.executeProcessing(message);
     verify(availableWorkers).release();
   }
 }

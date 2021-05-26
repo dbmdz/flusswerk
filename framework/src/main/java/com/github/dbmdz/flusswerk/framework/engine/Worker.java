@@ -60,18 +60,21 @@ public class Worker implements Runnable {
       if (task == null) {
         return;
       }
-      process(task.getMessage());
+      executeProcessing(task.getMessage());
     } catch (InterruptedException e) {
       LOGGER.debug("Interrupt while waiting for message", e);
       return;
     }
   }
 
-  public void process(Message message) {
-    // Prepare
+  void executeProcessing(Message message) {
     tracing.register(message.getTracing());
+    process(message);
+    tracing.deregister();
+    availableWorkers.release();
+  }
 
-    // Process
+  public void process(Message message) {
     Collection<? extends Message> messagesToSend;
     try {
       messagesToSend = flow.process(message);
@@ -95,10 +98,6 @@ public class Worker implements Runnable {
           new StopProcessingException("Could not finish message handling").causedBy(e);
       fail(message, stopProcessingException);
     }
-
-    // Clean up
-    tracing.deregister();
-    availableWorkers.release();
   }
 
   private void retryOrFail(Message receivedMessage, RuntimeException e) {
