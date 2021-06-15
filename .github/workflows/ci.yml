@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [11, 15]
+        java: [11, 16]
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK
@@ -44,7 +44,7 @@ jobs:
         with:
           java-version: 11
           server-id: ossrh-snapshots
-          server-username: MAVEN_USERNAME
+          server-username: MAVEN_USERNAMEhttps://github.com/coveooss/fmt-maven-plugin
           server-password: MAVEN_PASSWORD
       - uses: actions/cache@v2
         env:
