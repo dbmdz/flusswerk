@@ -50,7 +50,7 @@ jobs:
         with:
           java-version: 11
           server-id: ossrh-snapshots
-          server-username: MAVEN_USERNAMEhttps://github.com/coveooss/fmt-maven-plugin
+          server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
       - uses: actions/cache@v2
         env:
