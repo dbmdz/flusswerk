@@ -76,7 +76,7 @@
     <version.mockito>3.12.1</version.mockito>
     <version.redisson>3.15.4</version.redisson>
     <!-- Plugin versions -->
-    <version.fmt-maven-plugin>2.11</version.fmt-maven-plugin>
+    <version.fmt-maven-plugin>2.12</version.fmt-maven-plugin>
     <version.githook-maven-plugin>1.0.5</version.githook-maven-plugin>
     <version.maven-gpg-plugin>3.0.1</version.maven-gpg-plugin>
     <version.maven-jacoco-plugin>0.8.7</version.maven-jacoco-plugin>
