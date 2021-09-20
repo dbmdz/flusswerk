@@ -13,7 +13,6 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 public class Worker implements Runnable {
 
@@ -77,7 +76,6 @@ public class Worker implements Runnable {
 
   public void process(Message message) {
     Collection<? extends Message> messagesToSend;
-    long start = System.nanoTime();
     try {
       messagesToSend = flow.process(message);
     } catch (StopProcessingException e) {
@@ -86,10 +84,6 @@ public class Worker implements Runnable {
     } catch (RuntimeException e) {
       retryOrFail(message, e);
       return; // processing was not successful → stop here
-    } finally {
-      long stop = System.nanoTime();
-      double duration = (stop - start) / 1e6;
-      MDC.put("duration_ms", Double.toString(duration));
     }
 
     // Data processing was successful, now handle the messaging
