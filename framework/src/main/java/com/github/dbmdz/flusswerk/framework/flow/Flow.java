@@ -55,6 +55,7 @@ public class Flow {
     setLoggingData(message);
 
     Collection<Message> result;
+    long start = System.nanoTime();
     try {
       result = innerProcess(message);
     } catch (RuntimeException e) {
@@ -62,6 +63,9 @@ public class Flow {
       throw e; // Throw exception again after inspecting for ensure control flow in engine
     } finally {
       info.stop();
+      long stop = System.nanoTime();
+      double duration = (stop - start) / 1e6;
+      MDC.put("duration_ms", Double.toString(duration));
       flowMetrics.forEach(
           metric -> metric.accept(info)); // record metrics only available from inside the framework
       lockManager.release(); // make sure any lock has been released
