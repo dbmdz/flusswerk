@@ -89,7 +89,7 @@ public class Worker implements Runnable {
     } finally {
       long stop = System.nanoTime();
       double duration = (stop - start) / 1e9;
-      MDC.put("duration", Double.toString(duration));
+      MDC.put("duration_s", Double.toString(duration));
     }
 
     // Data processing was successful, now handle the messaging
