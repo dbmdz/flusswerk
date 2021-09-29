@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import com.github.dbmdz.flusswerk.framework.TestMessage;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import java.io.IOException;
@@ -31,7 +32,7 @@ class TopicTest {
   @DisplayName("should send a single message")
   @Test
   void shouldSendOneMessage() throws IOException {
-    var message = new Message("123123");
+    var message = new TestMessage("123");
     topic.send(message);
     verify(messageBroker).send(any(), eq(message));
   }
@@ -39,7 +40,7 @@ class TopicTest {
   @DisplayName("should send all messages")
   @Test
   void shouldSendManyMessages() throws IOException {
-    var messages = List.of(new Message("1"), new Message("2"));
+    List<Message> messages = List.of(new TestMessage("1"), new TestMessage("2"));
     topic.send(messages);
     verify(messageBroker).send(any(), eq(messages));
   }

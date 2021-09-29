@@ -13,6 +13,7 @@ import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import com.github.dbmdz.flusswerk.integration.RabbitUtil;
+import com.github.dbmdz.flusswerk.integration.TestMessage;
 import com.github.dbmdz.flusswerk.integration.processing.RetryTest.FlowConfiguration;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -104,7 +105,7 @@ public class RetryTest {
   @Test
   @DisplayName("then Flusswerk should retry the message 5 times")
   void shouldRetryMessage() throws IOException, InvalidMessageException, InterruptedException {
-    var message = new Message("12345");
+    var message = new TestMessage("12345");
 
     var inputQueue = routing.getIncoming().get(0);
     var failurePolicy = routing.getFailurePolicy(inputQueue);
@@ -116,7 +117,7 @@ public class RetryTest {
             failurePolicy.getFailedRoutingKey(), failurePolicy, this.getClass().getSimpleName());
 
     rabbitMQ.ack(received);
-    assertThat(received.getTracingId()).isEqualTo(message.getTracingId());
+    assertThat(((TestMessage) received).getId()).isEqualTo(message.getId());
     assertThat(received.getEnvelope().getRetries()).isEqualTo(failurePolicy.getRetries());
   }
 }

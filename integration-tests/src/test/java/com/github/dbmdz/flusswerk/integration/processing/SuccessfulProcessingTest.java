@@ -11,6 +11,7 @@ import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import com.github.dbmdz.flusswerk.integration.RabbitUtil;
+import com.github.dbmdz.flusswerk.integration.TestMessage;
 import com.github.dbmdz.flusswerk.integration.processing.SuccessfulProcessingTest.FlowConfiguration;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -88,13 +89,13 @@ public class SuccessfulProcessingTest {
     var outputQueue = routing.getOutgoing().get("default");
     var failurePolicy = routing.getFailurePolicy(inputQueue);
 
-    Message expected = new Message("123456");
+    TestMessage expected = new TestMessage("123456");
     rabbitMQ.topic(inputQueue).send(expected);
 
     var received =
         rabbitUtil.waitForMessage(outputQueue, failurePolicy, this.getClass().getSimpleName());
     rabbitMQ.ack(received);
-    assertThat(received.getTracingId()).isEqualTo(expected.getTracingId());
+    assertThat(((TestMessage) received).getId()).isEqualTo(expected.getId());
 
     assertThat(rabbitMQ.queue(inputQueue).messageCount()).isZero();
     assertThat(rabbitMQ.queue(outputQueue).messageCount()).isZero();

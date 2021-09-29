@@ -2,10 +2,12 @@ package com.github.dbmdz.flusswerk.framework.flow.builder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.github.dbmdz.flusswerk.framework.TestMessage;
 import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.flow.Type;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.util.List;
+import java.util.Locale;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -16,44 +18,50 @@ class FlowBuilderTest {
   @DisplayName("should build a regular flow (using classes)")
   void shouldBuildRegularFlowUsingClasses() {
     FlowSpec flow =
-        FlowBuilder.flow(Message.class, String.class, String.class)
-            .reader(Message::getTracingId)
+        FlowBuilder.flow(TestMessage.class, String.class, String.class)
+            .reader(TestMessage::getId)
             .transformer(String::toUpperCase)
-            .writerSendingMessage(Message::new)
+            .writerSendingMessage(TestMessage::new)
             .build();
-    assertThat(flow).isNotNull(); // Lame test, just a API demo for now
+    assertThat(flow.getReader().apply(new TestMessage("abc"))).isEqualTo("abc");
+    assertThat(flow.getTransformer().apply("abc")).isEqualTo("ABC");
+    assertThat(flow.getWriter().apply("abc")).containsExactly(new TestMessage("abc"));
   }
 
   @Test
   @DisplayName("should build a regular flow (using types)")
   void shouldBuildRegularFlowUsingTypes() {
     FlowSpec flow =
-        FlowBuilder.flow(new Type<>() {}, new Type<String>() {}, new Type<String>() {})
-            .reader(Message::getTracingId)
+        FlowBuilder.flow(new Type<TestMessage>() {}, new Type<String>() {}, new Type<String>() {})
+            .reader(TestMessage::getId)
             .transformer(String::toUpperCase)
-            .writerSendingMessage(Message::new)
+            .writerSendingMessage(TestMessage::new)
             .build();
-    assertThat(flow).isNotNull(); // Lame test, just a API demo for now
+    assertThat(flow.getReader().apply(new TestMessage("abc"))).isEqualTo("abc");
+    assertThat(flow.getTransformer().apply("abc")).isEqualTo("ABC");
+    assertThat(flow.getWriter().apply("abc")).containsExactly(new TestMessage("abc"));
   }
 
   @Test
   @DisplayName("should build a message processing flow sending a single message (using class)")
   void shouldBuildMessageProcessingFlowReturningSingleMessage() {
     FlowSpec flow =
-        FlowBuilder.messageProcessor(Message.class)
-            .process(message -> new Message(message.getTracingId()))
+        FlowBuilder.messageProcessor(TestMessage.class)
+            .process(message -> new TestMessage(message.getId().toUpperCase(Locale.GERMAN)))
             .build();
-    assertThat(flow).isNotNull(); // Lame test, just a API demo for now
+    assertThat(flow.getWriter().apply(new TestMessage("abc")))
+        .containsExactly(new TestMessage("ABC"));
   }
 
   @Test
   @DisplayName("should build a message processing flow sending a single message (using types)")
   void shouldBuildMessageProcessingFlowReturningSingleMessageUsingTypes() {
     FlowSpec flow =
-        FlowBuilder.messageProcessor(new Type<>() {})
-            .process(message -> new Message(message.getTracingId()))
+        FlowBuilder.messageProcessor(new Type<TestMessage>() {})
+            .process(message -> new TestMessage(message.getId().toUpperCase(Locale.GERMAN)))
             .build();
-    assertThat(flow).isNotNull(); // Lame test, just a API demo for now
+    assertThat(flow.getWriter().apply(new TestMessage("abc")))
+        .containsExactly(new TestMessage("ABC"));
   }
 
   @Test
@@ -63,7 +71,8 @@ class FlowBuilderTest {
         FlowBuilder.messageProcessor(Message.class)
             .expand(message -> List.of(message, message, message))
             .build();
-    assertThat(flow).isNotNull(); // Lame test, just a API demo for now
+    var message = new TestMessage("abc");
+    assertThat(flow.getWriter().apply(message)).containsExactly(message, message, message);
   }
 
   @Test
@@ -73,6 +82,7 @@ class FlowBuilderTest {
         FlowBuilder.messageProcessor(new Type<>() {})
             .expand(message -> List.of(message, message, message))
             .build();
-    assertThat(flow).isNotNull(); // Lame test, just a API demo for now
+    var message = new TestMessage("abc");
+    assertThat(flow.getWriter().apply(message)).containsExactly(message, message, message);
   }
 }

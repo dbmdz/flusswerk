@@ -54,7 +54,7 @@ class WorkerTest {
     taskQueue = new PriorityBlockingQueue<>();
     tracing = mock(Tracing.class);
     worker = new Worker(availableWorkers, flow, messageBroker, processReport, taskQueue, tracing);
-    message = new Message("tracing id");
+    message = new Message();
   }
 
   @DisplayName("uses underlying Flow")

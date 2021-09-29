@@ -40,7 +40,7 @@ class RabbitClientTest {
     connection = mock(RabbitConnection.class);
     channel = mock(Channel.class);
     when(connection.getChannel()).thenReturn(channel);
-    message = new Message("Hey");
+    message = new Message();
   }
 
   @Test
@@ -87,7 +87,7 @@ class RabbitClientTest {
     LocalDateTime timestamp = LocalDateTime.now();
     String inputQueue = "some.input.queue";
 
-    Message messageToReceive = createMessage(tracingId, retries, timestamp);
+    Message messageToReceive = createMessage(retries, timestamp);
     GetResponse response = createResponse(deliveryTag, messageToReceive, rabbitClient);
 
     String body = new String(response.getBody(), StandardCharsets.UTF_8);
@@ -99,11 +99,10 @@ class RabbitClientTest {
         .returns(deliveryTag, from(Envelope::getDeliveryTag))
         .returns(retries, from(Envelope::getRetries))
         .returns(timestamp, from(Envelope::getTimestamp));
-    assertThat(message).returns(tracingId, from(Message::getTracingId));
   }
 
-  private Message createMessage(String tracingId, int retries, LocalDateTime timestamp) {
-    Message messageToReceive = new Message(tracingId);
+  private Message createMessage(int retries, LocalDateTime timestamp) {
+    Message messageToReceive = new Message();
     messageToReceive.getEnvelope().setRetries(retries);
     messageToReceive.getEnvelope().setTimestamp(timestamp);
     return messageToReceive;

@@ -43,7 +43,7 @@ class SilentProcessReportTest {
   @DisplayName("should report nothing on fail")
   @Test
   void reportFail() {
-    silentProcessReport.reportFail(new Message("123"), new StopProcessingException("stop now"));
+    silentProcessReport.reportFail(new Message(), new StopProcessingException("stop now"));
     assertThat(listAppender.list).isEmpty();
   }
 
@@ -51,14 +51,14 @@ class SilentProcessReportTest {
   @Test
   void reportFailAfterMaxRetries() {
     silentProcessReport.reportFailAfterMaxRetries(
-        new Message("123"), new StopProcessingException("stop now"));
+        new Message(), new StopProcessingException("stop now"));
     assertThat(listAppender.list).isEmpty();
   }
 
   @DisplayName("should report nothing on fail with retries")
   @Test
   void reportReject() {
-    silentProcessReport.reportReject(new Message("123"), new RetryProcessingException("stop now"));
+    silentProcessReport.reportReject(new Message(), new RetryProcessingException("stop now"));
     assertThat(listAppender.list).isEmpty();
   }
 }

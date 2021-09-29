@@ -47,7 +47,7 @@ class QueueTest {
 
   @Test
   void receive() throws IOException, InvalidMessageException {
-    var expected = new Message("13123123");
+    var expected = new Message();
     when(rabbitClient.receive(queue.getName())).thenReturn(expected);
     assertThat(queue.receive()).contains(expected);
   }
