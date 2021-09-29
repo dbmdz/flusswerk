@@ -31,7 +31,6 @@ public class FlusswerkProcessReport implements ProcessReport {
         keyValue("will_retry", false),
         keyValue("incoming_queue", envelope.getSource()),
         keyValue("retries", envelope.getRetries()),
-        keyValue("tracing_id", message.getTracingId()),
         e);
   }
 
@@ -44,7 +43,6 @@ public class FlusswerkProcessReport implements ProcessReport {
         keyValue("will_retry", false),
         keyValue("incoming_queue", envelope.getSource()),
         keyValue("retries", envelope.getRetries()),
-        keyValue("tracing_id", message.getTracingId()),
         e);
   }
 
@@ -57,7 +55,6 @@ public class FlusswerkProcessReport implements ProcessReport {
         keyValue("will_retry", true),
         keyValue("incoming_queue", envelope.getSource()),
         keyValue("retries", envelope.getRetries()),
-        keyValue("tracing_id", message.getTracingId()),
         e);
   }
 }

@@ -9,18 +9,10 @@ public class Message {
 
   private final Envelope envelope;
 
-  private String tracingId;
   private List<String> tracing;
 
   public Message() {
     this.envelope = new Envelope();
-    this.tracingId = null;
-    this.tracing = Collections.emptyList();
-  }
-
-  public Message(String tracingId) {
-    this.envelope = new Envelope();
-    this.tracingId = tracingId;
     this.tracing = Collections.emptyList();
   }
 
@@ -33,19 +25,6 @@ public class Message {
     return envelope;
   }
 
-  public void setTracingId(String tracingId) {
-    this.tracingId = tracingId;
-  }
-
-  /**
-   * Tracing ids allow to follow the processing of one object across multiple workflow jobs,
-   *
-   * @return the tracing id
-   */
-  public String getTracingId() {
-    return tracingId;
-  }
-
   public List<String> getTracing() {
     return tracing;
   }
@@ -56,7 +35,7 @@ public class Message {
 
   @Override
   public String toString() {
-    return String.format("Message{hashcode=%s, tracingId=%s}", hashCode(), tracingId);
+    return String.format("Message{hashcode=%s, tracing=%s}", hashCode(), tracing);
   }
 
   @Override
@@ -68,11 +47,11 @@ public class Message {
       return false;
     }
     Message message = (Message) o;
-    return Objects.equals(tracingId, message.tracingId) && tracing.equals(message.getTracing());
+    return tracing.equals(message.getTracing());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(tracingId, tracing);
+    return Objects.hash(tracing);
   }
 }

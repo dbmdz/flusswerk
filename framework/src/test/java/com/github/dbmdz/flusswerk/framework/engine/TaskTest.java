@@ -3,7 +3,7 @@ package com.github.dbmdz.flusswerk.framework.engine;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-import com.github.dbmdz.flusswerk.framework.model.Message;
+import com.github.dbmdz.flusswerk.framework.TestMessage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -19,25 +19,32 @@ class TaskTest {
 
   private static Stream<Arguments> tasks() {
     return Stream.of(
-        arguments(new Task(new Message("tracing"), 0), new Task(new Message("tracing"), 0), true),
-        arguments(new Task(new Message("X_X_X_X"), 0), new Task(new Message("tracing"), 0), false),
-        arguments(new Task(new Message("tracing"), 9), new Task(new Message("tracing"), 0), false));
+        arguments(
+            new Task(new TestMessage("tracing"), 0), new Task(new TestMessage("tracing"), 0), true),
+        arguments(
+            new Task(new TestMessage("X_X_X_X"), 0),
+            new Task(new TestMessage("tracing"), 0),
+            false),
+        arguments(
+            new Task(new TestMessage("tracing"), 9),
+            new Task(new TestMessage("tracing"), 0),
+            false));
   }
 
   @DisplayName("should be ordered by priority descending (higher priority → lower position)")
   @Test
   void compareTo() {
-    Task highPriority = new Task(new Message("high"), 10);
-    Task lowPriority = new Task(new Message("low"), 1);
+    Task highPriority = new Task(new TestMessage("high"), 10);
+    Task lowPriority = new Task(new TestMessage("low"), 1);
     assertThat(highPriority).isLessThan(lowPriority);
   }
 
   @DisplayName("should be returned from priority queue in descending order")
   @Test
   void shouldReturnFromPriorityQueueInDescendingPriority() {
-    Task highPriority = new Task(new Message("high"), 10);
-    Task midPriority = new Task(new Message("mid"), 5);
-    Task lowPriority = new Task(new Message("low"), 1);
+    Task highPriority = new Task(new TestMessage("high"), 10);
+    Task midPriority = new Task(new TestMessage("mid"), 5);
+    Task lowPriority = new Task(new TestMessage("low"), 1);
 
     PriorityBlockingQueue<Task> tasks = new PriorityBlockingQueue<>();
     tasks.add(highPriority);

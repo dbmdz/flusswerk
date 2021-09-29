@@ -92,21 +92,11 @@ public class Flow {
         .filter(m -> m.getTracing() == null || m.getTracing().isEmpty())
         .forEach(m -> m.setTracing(tracing.tracingPath()));
 
-    // separate loop because tracingId will be deprecated
-    for (Message newMessage : result) {
-      if (newMessage == null || newMessage.getTracingId() != null) {
-        continue; // Do not update the tracing id if the user set one by hand
-      }
-      newMessage.setTracingId(message.getTracingId());
-    }
     return result;
   }
 
   void setLoggingData(Message message) {
     MDC.clear(); // Remove logging data from previous message
-    if (message.getTracingId() != null) {
-      MDC.put("tracingId", message.getTracingId());
-    }
     for (Method method : message.getClass().getMethods()) {
       if (!("getId".equalsIgnoreCase(method.getName()) && method.canAccess(message))) {
         continue;

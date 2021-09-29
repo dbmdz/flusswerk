@@ -23,11 +23,10 @@ class DefaultMixinTest {
   @Test
   @DisplayName("Deserialization should ignore unknown fields")
   void shouldIgnoreUnknownFields() throws IOException {
-    Message message = new Message("tracing-123");
+    Message message = new Message();
     String json = objectMapper.writeValueAsString(message);
     json = json.substring(0, json.length() - 1) + ", \"stupidField\": 0}";
     Message restored = objectMapper.readValue(json, Message.class);
-    assertThat(message.getTracingId()).isEqualTo(restored.getTracingId());
   }
 
   @Test
@@ -41,7 +40,7 @@ class DefaultMixinTest {
   @Test
   @DisplayName("Should deserialize Envelope.retries")
   void shouldDeserializeRetries() throws IOException {
-    Message message = new Message("tracing-123");
+    Message message = new Message();
     message.getEnvelope().setRetries(42);
     Message deserialized =
         objectMapper.readValue(objectMapper.writeValueAsString(message), Message.class);

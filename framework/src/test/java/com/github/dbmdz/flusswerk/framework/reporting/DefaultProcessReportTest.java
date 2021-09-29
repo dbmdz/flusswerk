@@ -46,7 +46,7 @@ class DefaultProcessReportTest {
   @DisplayName("should report failure")
   @Test
   void reportFail() {
-    var message = new Message("123");
+    var message = new Message();
     var e = new StopProcessingException("stop now");
     defaultProcessReport.reportFail(message, e);
     assertThat(listAppender.list)
@@ -60,7 +60,7 @@ class DefaultProcessReportTest {
   @DisplayName("should report failure after too many retries")
   @Test
   void reportFailAfterMaxRetries() {
-    var message = new Message("123");
+    var message = new Message();
     var e = new StopProcessingException("stop now");
     defaultProcessReport.reportFailAfterMaxRetries(message, e);
     assertThat(listAppender.list)
@@ -78,7 +78,7 @@ class DefaultProcessReportTest {
   @DisplayName("should report failure with planned retries")
   @Test
   void reportReject() {
-    var message = new Message("123");
+    var message = new Message();
     var e = new RetryProcessingException("stop now");
     defaultProcessReport.reportReject(message, e);
     assertThat(listAppender.list)

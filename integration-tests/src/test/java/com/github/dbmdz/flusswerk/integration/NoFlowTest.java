@@ -51,7 +51,7 @@ public class NoFlowTest {
   @Test
   public void shouldSendMessageToRoute()
       throws IOException, InterruptedException, InvalidMessageException {
-    Message message = new Message("123");
+    Message message = new TestMessage("123");
     rabbitMQ.route("default").send(message);
     Message received = rabbitUtil.waitAndAck("target.queue", Duration.ofMillis(50));
     assertThat(received).isEqualTo(message);

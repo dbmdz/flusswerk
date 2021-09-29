@@ -1,11 +1,11 @@
 package com.github.dbmdz.flusswerk.framework.fixtures;
 
+import com.github.dbmdz.flusswerk.framework.TestMessage;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.locking.NoOpLockManager;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
-import java.lang.reflect.InvocationTargetException;
 import java.util.function.Function;
 
 public class Flows {
@@ -20,39 +20,23 @@ public class Flows {
   }
 
   private static Flow flowWithTransformer(Function<String, String> transformer) {
+    Function<Message, String> emptyReader = m -> "";
+    Function<String, Message> emptyWriter = s -> new Message();
     var spec =
         FlowBuilder.flow(Message.class, String.class, String.class)
-            .reader(Message::getTracingId)
+            .reader(emptyReader)
             .transformer(transformer)
-            .writerSendingMessage(Message::new)
+            .writerSendingMessage(emptyWriter)
             .build();
     return new Flow(spec, new NoOpLockManager(), new Tracing());
-  }
-
-  public static Flow flowThrowing(Class<? extends RuntimeException> cls) {
-    var message = String.format("Generated %s for unit test", cls.getSimpleName());
-    final RuntimeException exception;
-    try {
-      exception = cls.getConstructor(String.class).newInstance(message);
-    } catch (InstantiationException
-        | IllegalAccessException
-        | InvocationTargetException
-        | NoSuchMethodException e) {
-      throw new Error("Could not instantiate exception", e); // If test is broken give up
-    }
-    Function<String, String> transformerWithException =
-        s -> {
-          throw exception;
-        };
-    return flowWithTransformer(transformerWithException);
   }
 
   public static Flow flowBlockingAllThreads() {
     return flowWithTransformer(new ThreadBlockingTransformer<>());
   }
 
-  public static Flow messageProcessor(Function<Message, Message> function) {
-    var spec = FlowBuilder.messageProcessor(Message.class).process(function).build();
+  public static Flow messageProcessor(Function<TestMessage, Message> function) {
+    var spec = FlowBuilder.messageProcessor(TestMessage.class).process(function).build();
     return new Flow(spec, new NoOpLockManager(), new Tracing());
   }
 }
