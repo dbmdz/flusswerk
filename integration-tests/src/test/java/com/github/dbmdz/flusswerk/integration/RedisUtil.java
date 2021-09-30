@@ -28,4 +28,8 @@ public class RedisUtil {
   public RLock getRLock(String key) {
     return redissonClient.getLock(KEY_SPACE + "::" + key);
   }
+
+  public void deleteAll() {
+    redissonClient.getKeys().deleteByPattern(KEY_SPACE + "::*");
+  }
 }

@@ -58,6 +58,17 @@ public class Topic {
     messageBroker.send(name, messages);
   }
 
+  /**
+   * Convenience implementation, mostly for tests.
+   *
+   * @param messages The messages to send.
+   * @throws IOException If communication with RabbitMQ fails or if the message cannot be serialized
+   *     to JSON.
+   */
+  public void send(Message... messages) throws IOException {
+    send(List.of(messages));
+  }
+
   private List<String> getTracingPath() {
     List<String> tracingPath = tracing.tracingPath();
     if (tracingPath.isEmpty()) {
