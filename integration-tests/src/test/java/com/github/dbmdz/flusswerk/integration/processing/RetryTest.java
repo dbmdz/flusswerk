@@ -10,6 +10,7 @@ import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.exceptions.RetryProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
+import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import com.github.dbmdz.flusswerk.integration.RabbitUtil;
@@ -17,7 +18,7 @@ import com.github.dbmdz.flusswerk.integration.TestMessage;
 import com.github.dbmdz.flusswerk.integration.processing.RetryTest.FlowConfiguration;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.UnaryOperator;
+import java.util.function.Function;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -65,22 +66,26 @@ public class RetryTest {
     rabbitUtil = new RabbitUtil(rabbitMQ, routing);
   }
 
-  static class CountFailures implements UnaryOperator<Message> {
+  static class CountFailures implements Function<TestMessage, Message> {
 
     private final AtomicInteger count = new AtomicInteger();
 
     @Override
-    public Message apply(Message message) {
+    public Message apply(TestMessage message) {
       throw new RetryProcessingException("Fail message to retry (%d)", count.incrementAndGet());
     }
   }
 
   @TestConfiguration
   static class FlowConfiguration {
+    @Bean
+    public IncomingMessageType incomingMessageType() {
+      return new IncomingMessageType(TestMessage.class);
+    }
 
     @Bean
     public FlowSpec flowSpec() {
-      return FlowBuilder.messageProcessor(Message.class).process(new CountFailures()).build();
+      return FlowBuilder.messageProcessor(TestMessage.class).process(new CountFailures()).build();
     }
   }
 
