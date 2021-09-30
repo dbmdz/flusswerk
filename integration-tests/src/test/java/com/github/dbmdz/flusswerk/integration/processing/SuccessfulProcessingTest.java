@@ -8,7 +8,7 @@ import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
-import com.github.dbmdz.flusswerk.framework.model.Message;
+import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import com.github.dbmdz.flusswerk.integration.RabbitUtil;
 import com.github.dbmdz.flusswerk.integration.TestMessage;
@@ -66,8 +66,13 @@ public class SuccessfulProcessingTest {
   @TestConfiguration
   static class FlowConfiguration {
     @Bean
+    public IncomingMessageType incomingMessageType() {
+      return new IncomingMessageType(TestMessage.class);
+    }
+
+    @Bean
     public FlowSpec flowSpec() {
-      return FlowBuilder.messageProcessor(Message.class).process(m -> m).build();
+      return FlowBuilder.messageProcessor(TestMessage.class).process(m -> m).build();
     }
   }
 
