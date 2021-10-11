@@ -25,6 +25,7 @@ import java.util.concurrent.Executors;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,6 +50,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
     })
 @Import({MetricsAutoConfiguration.class, CompositeMeterRegistryAutoConfiguration.class})
 @DisplayName("When the user creates a lock")
+@Disabled("Feature wil be removed until there is a more reliable implementation")
 public class LockingTest {
 
   private static final Condition<? super RLock> LOCKED = new Condition<>(RLock::isLocked, "locked");
