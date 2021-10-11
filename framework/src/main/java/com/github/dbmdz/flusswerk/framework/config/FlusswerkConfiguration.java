@@ -13,9 +13,6 @@ import com.github.dbmdz.flusswerk.framework.engine.Worker;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.jackson.FlusswerkObjectMapper;
-import com.github.dbmdz.flusswerk.framework.locking.LockManager;
-import com.github.dbmdz.flusswerk.framework.locking.NoOpLockManager;
-import com.github.dbmdz.flusswerk.framework.locking.RedisLockManager;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.monitoring.DefaultFlowMetrics;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlowMetrics;
@@ -38,8 +35,6 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import org.redisson.Redisson;
-import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
@@ -57,12 +52,12 @@ public class FlusswerkConfiguration {
   }
 
   @Bean
-  public Flow flow(Optional<FlowSpec> flowSpec, LockManager lockManager, Tracing tracing) {
+  public Flow flow(Optional<FlowSpec> flowSpec, Tracing tracing) {
     if (flowSpec.isEmpty()) {
       return null; // No FlowSpec → no Flow. We will have to handle this case when creating the
       // Engine bean as the sole consumer of the Flow bean.
     }
-    return new Flow(flowSpec.get(), lockManager, tracing);
+    return new Flow(flowSpec.get(), tracing);
   }
 
   @Bean
@@ -131,18 +126,6 @@ public class FlusswerkConfiguration {
   public MessageBroker messageBroker(RoutingProperties routingProperties, RabbitClient rabbitClient)
       throws IOException {
     return new MessageBroker(routingProperties, rabbitClient);
-  }
-
-  @Bean
-  public LockManager lockManager(RedisProperties redisProperties) {
-    if (redisProperties.redisIsAvailable()) {
-      Config config = createRedisConfig(redisProperties);
-      RedissonClient client = Redisson.create(config);
-      return new RedisLockManager(
-          client, redisProperties.getKeyspace(), redisProperties.getLockWaitTimeout());
-    } else {
-      return new NoOpLockManager();
-    }
   }
 
   @Bean

@@ -3,7 +3,6 @@ package com.github.dbmdz.flusswerk.framework.flow;
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 
-import com.github.dbmdz.flusswerk.framework.locking.LockManager;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlowMetrics;
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
@@ -30,10 +29,9 @@ public class Flow {
   private final Function<Object, Collection<Message>> writer;
   private final Runnable cleanup;
   private final Set<Consumer<FlowInfo>> flowMetrics;
-  private final LockManager lockManager;
   private final Tracing tracing;
 
-  public Flow(FlowSpec flowSpec, LockManager lockManager, Tracing tracing) {
+  public Flow(FlowSpec flowSpec, Tracing tracing) {
     this.reader = requireNonNull(flowSpec.getReader());
     this.transformer = requireNonNull(flowSpec.getTransformer());
     this.writer = requireNonNull(flowSpec.getWriter());
@@ -42,7 +40,6 @@ public class Flow {
     if (flowSpec.getMonitor() != null) {
       this.flowMetrics.add(flowSpec.getMonitor());
     }
-    this.lockManager = lockManager;
     this.tracing = requireNonNull(tracing);
   }
 
@@ -68,7 +65,6 @@ public class Flow {
       MDC.put("duration_ms", Double.toString(duration));
       flowMetrics.forEach(
           metric -> metric.accept(info)); // record metrics only available from inside the framework
-      lockManager.release(); // make sure any lock has been released
     }
     return result;
   }
