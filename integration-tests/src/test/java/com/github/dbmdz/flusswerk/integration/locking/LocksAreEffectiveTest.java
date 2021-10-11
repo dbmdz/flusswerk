@@ -60,6 +60,8 @@ public class LocksAreEffectiveTest {
 
   private final LockManager lockManager;
 
+  private final WorkflowFixture workflowFixture;
+
   @Autowired
   public LocksAreEffectiveTest(
       Engine engine,
