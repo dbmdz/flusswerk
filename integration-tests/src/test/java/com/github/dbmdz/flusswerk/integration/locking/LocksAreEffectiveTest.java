@@ -23,6 +23,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +47,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
     })
 @Import({MetricsAutoConfiguration.class, CompositeMeterRegistryAutoConfiguration.class})
 @DisplayName("When there are locks")
+@Disabled("Feature wil be removed until there is a more reliable implementation")
 public class LocksAreEffectiveTest {
 
   private static final String MDZ_ID = "bsb12345678";
@@ -57,8 +59,6 @@ public class LocksAreEffectiveTest {
   private final ProcessorAdapter<TestMessage> processorAdapter;
 
   private final LockManager lockManager;
-
-  private final WorkflowFixture workflowFixture;
 
   @Autowired
   public LocksAreEffectiveTest(
