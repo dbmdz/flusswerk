@@ -2,7 +2,6 @@ package com.github.dbmdz.flusswerk.framework.config.properties;
 
 import static java.util.Objects.requireNonNullElseGet;
 
-import java.util.Optional;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
@@ -22,8 +21,6 @@ public class FlusswerkProperties {
 
   @NestedConfigurationProperty private final MonitoringProperties monitoring;
 
-  @NestedConfigurationProperty private final RedisProperties redis;
-
   private final Yaml yaml;
 
   @ConstructorBinding
@@ -31,13 +28,11 @@ public class FlusswerkProperties {
       ProcessingProperties processing,
       RabbitMQProperties rabbitmq,
       RoutingProperties routing,
-      MonitoringProperties monitoring,
-      RedisProperties redis) {
+      MonitoringProperties monitoring) {
     this.processing = requireNonNullElseGet(processing, ProcessingProperties::defaults);
     this.rabbitmq = requireNonNullElseGet(rabbitmq, RabbitMQProperties::defaults);
     this.routing = requireNonNullElseGet(routing, RoutingProperties::defaults);
     this.monitoring = requireNonNullElseGet(monitoring, MonitoringProperties::defaults);
-    this.redis = redis; // might actually be null, then centralized locking will be disabled
     DumperOptions options = new DumperOptions();
     options.setAllowReadOnlyProperties(true);
     yaml = new Yaml(options);
@@ -57,10 +52,6 @@ public class FlusswerkProperties {
 
   public MonitoringProperties getMonitoring() {
     return monitoring;
-  }
-
-  public Optional<RedisProperties> getRedis() {
-    return Optional.ofNullable(redis);
   }
 
   @Override

@@ -4,7 +4,6 @@ import com.github.dbmdz.flusswerk.framework.config.properties.AppProperties;
 import com.github.dbmdz.flusswerk.framework.config.properties.MonitoringProperties;
 import com.github.dbmdz.flusswerk.framework.config.properties.ProcessingProperties;
 import com.github.dbmdz.flusswerk.framework.config.properties.RabbitMQProperties;
-import com.github.dbmdz.flusswerk.framework.config.properties.RedisProperties;
 import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.engine.FlusswerkConsumer;
@@ -35,7 +34,6 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import org.redisson.config.Config;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -190,12 +188,6 @@ public class FlusswerkConfiguration {
       }
     }
     return Collections.unmodifiableList(flusswerkConsumers);
-  }
-
-  private Config createRedisConfig(RedisProperties redis) {
-    Config config = new Config();
-    config.useSingleServer().setAddress(redis.getAddress()).setPassword(redis.getPassword());
-    return config;
   }
 
   public static boolean isSet(Object value) {

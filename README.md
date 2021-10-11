@@ -64,8 +64,6 @@ Other optional parts are
 
  - Custom metrics collection
  - Custom logging formats (aka `ProcessReport`)
- - Centralized locking
-
 
 ### Messages
 
@@ -190,15 +188,6 @@ The sections of the `Flusswerk` configuration
 | -------- | ----------- | ----------------------------- |
 | `prefix` | `flusswerk` | prefix for prometheus metrics |
 
-`redis` - Redis settings
-
-| property          | default                  |                                                 |
-| ----------------- | ------------------------ | ----------------------------------------------- |
-| `address`         | `redis://localhost:6379` | Redis connection string                         |
-| `password`        | –                        | Redis password (optional)                       |
-| `lockWaitTimeout` | `5s`                     | how long to wait for a lock                     |
-| `keyspace`        | `flusswerk`              | prefix of the keys in Redis (separated by `::`) |
-
 
 ### Data Processing
 
@@ -322,50 +311,3 @@ The prometheus endpoint is available at `/actuator/prometheus`.
 ## Customize Logging
 
 To customize log messages, provide a bean of type [ProcessReport](framework/src/main/java/com/github/dbmdz/flusswerk/framework/reporting/ProcessReport.java).
-
-## Centralized Locking
-
-### How to use
-
-Flusswerk supports centralized locking of objects across different threads,
-Flusswerk apps and even services unrelated to Flusswerk all together. To use
-this feature, configure a Redis connection in `application.yml` and inject
-[LockManager][LockManager]:
-
-```java
-@Component
-class Transformer implements Fuction<String, String> {
-
-  private LockManager lockManager;
-  
-  @Autowired
-  public Transformer(LockManager lockManager) {
-    this.lockManager = requireNonNull(lockManager);
-  }
-
-  public String apply(String id) {
-    lockManager.acquire(id);
-    // process data
-
-    // releasing the lock manually (as early as possible)
-    lockManager.release();
-    // otherwise, Flusswerk will release the lock after the Writer/Cleanup step
-  }
-
-}
-```
-
-Flusswerk always binds locks to the containing thread and automatically releases
-acquired locks after the cleanup step (after sending messages from the writer
-step).
-
-### A note on testing
-
-Locking makes testing usually harder and more tedious. Flusswerk provides a
-[NoOpLockManager][NoOpLockManager] that literally does nothing. In your tests,
-you can either provide mocks for [LockManager][LockManager], or simply use the
-[NoOpLockManager][NoOpLockManager] to ignore locking while testing for other
-functionality.
-
-[LockManager]: framework/src/main/java/com/github/dbmdz/flusswerk/framework/locking/LockManager.java
-[NoOpLockManager]: framework/src/main/java/com/github/dbmdz/flusswerk/framework/locking/NoOpLockManager.java
