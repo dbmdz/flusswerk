@@ -1,6 +1,5 @@
 package com.github.dbmdz.flusswerk.integration;
 
-import com.github.dbmdz.flusswerk.framework.config.properties.RedisProperties;
 import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.model.Message;
@@ -12,19 +11,15 @@ public class WorkflowFixture {
   private final RabbitMQ rabbitMQ;
   private final RoutingProperties routing;
   private final RabbitUtil rabbitUtil;
-  private final RedisUtil redisUtil;
 
-  public WorkflowFixture(
-      RabbitMQ rabbitMQ, RoutingProperties routing, RedisProperties redisProperties) {
+  public WorkflowFixture(RabbitMQ rabbitMQ, RoutingProperties routing) {
     this.rabbitMQ = rabbitMQ;
     this.routing = routing;
     this.rabbitUtil = new RabbitUtil(rabbitMQ, routing);
-    this.redisUtil = new RedisUtil(redisProperties);
   }
 
   public void purge() throws IOException {
     rabbitUtil.purgeQueues();
-    redisUtil.deleteAll();
   }
 
   public void send(Message... messages) throws IOException {

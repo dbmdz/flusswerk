@@ -74,7 +74,6 @@
     <version.flusswerk>5.0.0-SNAPSHOT</version.flusswerk>
     <version.junit>5.7.0</version.junit>
     <version.mockito>4.0.0</version.mockito>
-    <version.redisson>3.15.4</version.redisson>
     <!-- Plugin versions -->
     <version.fmt-maven-plugin>2.12</version.fmt-maven-plugin>
     <version.githook-maven-plugin>1.0.5</version.githook-maven-plugin>
@@ -113,11 +112,6 @@
         <artifactId>junit-jupiter</artifactId>
         <version>5.8.1</version>
         <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.redisson</groupId>
-        <artifactId>redisson</artifactId>
-        <version>${version.redisson}</version>
       </dependency>
       <dependency>
         <groupId>de.huxhorn.sulky</groupId>

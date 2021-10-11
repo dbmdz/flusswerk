@@ -5,7 +5,6 @@ import com.github.dbmdz.flusswerk.framework.config.properties.FlusswerkPropertie
 import com.github.dbmdz.flusswerk.framework.config.properties.MonitoringProperties;
 import com.github.dbmdz.flusswerk.framework.config.properties.ProcessingProperties;
 import com.github.dbmdz.flusswerk.framework.config.properties.RabbitMQProperties;
-import com.github.dbmdz.flusswerk.framework.config.properties.RedisProperties;
 import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
@@ -16,7 +15,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
   MonitoringProperties.class,
   ProcessingProperties.class,
   RabbitMQProperties.class,
-  RedisProperties.class,
   RoutingProperties.class
 })
 public class FlusswerkPropertiesConfiguration {}
