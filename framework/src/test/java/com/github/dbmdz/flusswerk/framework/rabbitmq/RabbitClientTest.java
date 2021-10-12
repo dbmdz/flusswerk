@@ -21,7 +21,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.GetResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -84,10 +84,10 @@ class RabbitClientTest {
     long deliveryTag = 476253;
     String tracingId = "123123123";
     int retries = 333;
-    LocalDateTime timestamp = LocalDateTime.now();
+    Instant created = Instant.now();
     String inputQueue = "some.input.queue";
 
-    Message messageToReceive = createMessage(retries, timestamp);
+    Message messageToReceive = createMessage(retries, created);
     GetResponse response = createResponse(deliveryTag, messageToReceive, rabbitClient);
 
     String body = new String(response.getBody(), StandardCharsets.UTF_8);
@@ -98,13 +98,13 @@ class RabbitClientTest {
         .returns(body, from(Envelope::getBody))
         .returns(deliveryTag, from(Envelope::getDeliveryTag))
         .returns(retries, from(Envelope::getRetries))
-        .returns(timestamp, from(Envelope::getTimestamp));
+        .returns(created, from(Envelope::getCreated));
   }
 
-  private Message createMessage(int retries, LocalDateTime timestamp) {
+  private Message createMessage(int retries, Instant created) {
     Message messageToReceive = new Message();
     messageToReceive.getEnvelope().setRetries(retries);
-    messageToReceive.getEnvelope().setTimestamp(timestamp);
+    messageToReceive.getEnvelope().setCreated(created);
     return messageToReceive;
   }
 

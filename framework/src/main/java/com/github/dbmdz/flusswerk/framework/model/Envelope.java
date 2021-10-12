@@ -1,6 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.model;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /** Technical metadata all implementations of {@link Message} must have. */
 public class Envelope {
@@ -11,13 +11,13 @@ public class Envelope {
 
   private int retries;
 
-  private LocalDateTime timestamp;
+  private Instant created;
 
   private String source;
 
   /** Default constructor setting the Envelope.timestamp to now. */
   public Envelope() {
-    timestamp = LocalDateTime.now();
+    created = Instant.now();
   }
 
   /**
@@ -81,18 +81,17 @@ public class Envelope {
    *
    * @return The timestamp when the message was created.
    */
-  @Deprecated
-  public LocalDateTime getTimestamp() {
-    return timestamp;
+  public Instant getCreated() {
+    return created;
   }
 
   /**
    * Sets the timestamp when the {@link Message} was created.
    *
-   * @param timestamp The timestamp when the message was created.
+   * @param created The timestamp when the message was created.
    */
-  public void setTimestamp(LocalDateTime timestamp) {
-    this.timestamp = timestamp;
+  public void setCreated(Instant created) {
+    this.created = created;
   }
 
   /**
