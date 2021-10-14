@@ -15,7 +15,7 @@ Java application).
 <dependency>
   <groupId>com.github.dbmdz.flusswerk</groupId>
   <artifactId>framework</artifactId>
-  <version>4.1.0</version>
+  <version>5.0.0</version>
 </dependency>
 ```
 
@@ -23,7 +23,7 @@ Java application).
 
 ```groovy
 dependencies {
-    compile group: 'com.github.dbmdz.flusswerk', name: 'flusswerk', version: '4.1.0'
+    compile group: 'com.github.dbmdz.flusswerk', name: 'flusswerk', version: '5.0.0'
 }
 ``` 
  
@@ -33,15 +33,14 @@ To get started, clone or copy the [Flusswerk
 Example](https://github.com/dbmdz/flusswerk-example) application.
 
  
-## Migration to version 4
+## What's new in Flusswerk 5
 
-Starting with Flusswerk 4, there are two major changes:
-
- - Any Flusswerk application uses now Spring Boot and needs beans for
-    [FlowSpec][FlowSpec] (defining the processing) and
-    [IncomingMessageType][IncomingMessageType].
- - The package names changed from `de.digitalcollections.flusswerk.engine` to
-   `com.github.dbmdz.framework`.
+- Flusswerk connections are now shown in RabbitMQ management UI
+- structured logging now automatically contains fields `duration` and `duration_ms` that report the time your app spent on processing a certain message in seconds or milliseconds.
+- The deprecated `tracing_id` has been removed
+- The deprecated `Envelope.timestamp` has been removed in favor of `Envelope.created` which is now of type `Instant`.
+- Constructor of FlusswerkApplication now takes `Optional<Engine>` as an argument (call as `super(Optional.of(engine));`).
+- Options for centralized locking using Redis have been removed
 
 [FlowSpec]:
 framework/src/main/java/com/github/dbmdz/flusswerk/framework/flow/FlowSpec.java
