@@ -6,7 +6,7 @@
 
   <groupId>com.github.dbmdz.flusswerk</groupId>
   <artifactId>flusswerk</artifactId>
-  <version>5.0.0</version>
+  <version>5.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Flusswerk</name>
@@ -71,7 +71,7 @@
     <!-- Dependency versions -->
     <version.amqp-client>5.13.1</version.amqp-client>
     <version.logstash-encoder>6.6</version.logstash-encoder>
-    <version.flusswerk>5.0.0</version.flusswerk>
+    <version.flusswerk>5.0.1-SNAPSHOT</version.flusswerk>
     <version.junit>5.7.0</version.junit>
     <version.mockito>4.0.0</version.mockito>
     <!-- Plugin versions -->
