@@ -75,6 +75,7 @@ public class FlusswerkConsumer extends DefaultConsumer {
     } catch (Exception e) {
       LOGGER.error("Could not deserialize message", e);
       channel.basicAck(envelope.getDeliveryTag(), false);
+      availableWorkers.release();
     }
   }
 
