@@ -1,6 +1,9 @@
 package com.github.dbmdz.flusswerk.framework.engine;
 
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
 import com.github.dbmdz.flusswerk.framework.jackson.FlusswerkObjectMapper;
+import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
@@ -8,6 +11,7 @@ import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.Semaphore;
 import org.slf4j.Logger;
@@ -19,6 +23,8 @@ import org.slf4j.LoggerFactory;
  */
 public class FlusswerkConsumer extends DefaultConsumer {
 
+  public static final FlusswerkObjectMapper FALLBACK_MAPPER =
+      new FlusswerkObjectMapper(new IncomingMessageType());
   private static final Logger LOGGER = LoggerFactory.getLogger(FlusswerkConsumer.class);
 
   private final Semaphore availableWorkers;
@@ -66,14 +72,24 @@ public class FlusswerkConsumer extends DefaultConsumer {
       return;
     }
 
+    String json = new String(body, StandardCharsets.UTF_8);
     try {
-      String json = new String(body, StandardCharsets.UTF_8);
       Message message = flusswerkObjectMapper.deserialize(json);
       message.getEnvelope().setSource(inputQueue);
       message.getEnvelope().setDeliveryTag(envelope.getDeliveryTag());
       taskQueue.put(new Task(message, priority));
     } catch (Exception e) {
-      LOGGER.error("Could not deserialize message", e);
+      List<String> tracing = null;
+      try {
+        Message fallbackMessage = FALLBACK_MAPPER.deserialize(json);
+        tracing = fallbackMessage.getTracing();
+      } catch (Exception exception) {
+        LOGGER.error("Deserialize message fallback failed, too", exception);
+      }
+      // if there is no tracing, then the exception above already has been logged
+      if (tracing != null) {
+        LOGGER.error("Could not deserialize message", kv("tracing", tracing), e);
+      }
       channel.basicAck(envelope.getDeliveryTag(), false);
       availableWorkers.release();
     }
