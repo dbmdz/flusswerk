@@ -55,11 +55,15 @@ class FlusswerkConsumerTest {
   @Test
   void handleDelivery() throws IOException {
     TestMessage message = new TestMessage("bsb12345678");
-    Task expected = new Task(message, 42);
+    int priority = 42;
 
     consumer.handleDelivery("consumerTag", envelope, basicProperties, json(message));
     assertThat(taskQueue).hasSize(1);
-    assertThat(taskQueue.poll()).isEqualTo(expected);
+    Task actual = taskQueue.poll();
+    assertThat(actual).isNotNull(); // to prevent NPE warning
+    // task.callback breaks actual.equals(expected) here, so we need to compare fields directly
+    assertThat(actual.getMessage()).isEqualTo(message);
+    assertThat(actual.getPriority()).isEqualTo(priority);
   }
 
   @DisplayName("should return input queue")
