@@ -77,7 +77,7 @@ public class FlusswerkConsumer extends DefaultConsumer {
       Message message = flusswerkObjectMapper.deserialize(json);
       message.getEnvelope().setSource(inputQueue);
       message.getEnvelope().setDeliveryTag(envelope.getDeliveryTag());
-      taskQueue.put(new Task(message, priority));
+      taskQueue.put(new Task(message, priority, availableWorkers::release));
     } catch (Exception e) {
       List<String> tracing = null;
       try {

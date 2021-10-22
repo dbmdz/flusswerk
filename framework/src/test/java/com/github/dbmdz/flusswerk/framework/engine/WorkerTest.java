@@ -18,7 +18,6 @@ import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.Semaphore;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,7 +29,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 @DisplayName("The Worker")
 class WorkerTest {
 
-  private Semaphore availableWorkers;
   private Worker worker;
   private Flow flow;
   private Tracing tracing;
@@ -47,13 +45,12 @@ class WorkerTest {
 
   @BeforeEach
   void setUp() {
-    availableWorkers = mock(Semaphore.class);
     flow = mock(Flow.class);
     messageBroker = mock(MessageBroker.class);
     processReport = mock(ProcessReport.class);
     taskQueue = new PriorityBlockingQueue<>();
     tracing = mock(Tracing.class);
-    worker = new Worker(availableWorkers, flow, messageBroker, processReport, taskQueue, tracing);
+    worker = new Worker(flow, messageBroker, processReport, taskQueue, tracing);
     message = new Message();
   }
 
@@ -150,10 +147,14 @@ class WorkerTest {
     verify(processReport).reportFail(any(), any());
   }
 
-  @DisplayName("should release semaphore")
+  @DisplayName("should confirm that task is done")
   @Test
-  void shouldReleaseSemaphore() throws IOException {
+  void shouldReleaseSemaphore() {
+    Runnable callback = mock(Runnable.class);
+    Task task = new Task(message, 42, callback);
+    taskQueue.put(task);
+    worker.step();
     worker.executeProcessing(message);
-    verify(availableWorkers).release();
+    verify(callback).run();
   }
 }

@@ -132,14 +132,8 @@ public class FlusswerkConfiguration {
   }
 
   @Bean
-  public Semaphore availableWorkers(ProcessingProperties processingProperties) {
-    return new Semaphore(processingProperties.getThreads());
-  }
-
-  @Bean
   public List<Worker> workers(
       AppProperties appProperties,
-      Semaphore availableWorkers,
       Optional<Flow> flow,
       MessageBroker messageBroker,
       ProcessingProperties processingProperties,
@@ -153,7 +147,6 @@ public class FlusswerkConfiguration {
         .mapToObj(
             n ->
                 new Worker(
-                    availableWorkers,
                     flow.get(),
                     messageBroker,
                     processReport.orElseGet(
@@ -165,7 +158,6 @@ public class FlusswerkConfiguration {
 
   @Bean
   public List<FlusswerkConsumer> flusswerkConsumers(
-      Semaphore availableWorkers,
       FlusswerkObjectMapper flusswerkObjectMapper,
       ProcessingProperties processingProperties,
       RabbitConnection rabbitConnection,
@@ -173,6 +165,8 @@ public class FlusswerkConfiguration {
       PriorityBlockingQueue<Task> taskQueue) {
     int maxPriority = routingProperties.getIncoming().size();
     List<FlusswerkConsumer> flusswerkConsumers = new ArrayList<>();
+
+    Semaphore availableWorkers = new Semaphore(processingProperties.getThreads());
     for (int i = 0; i < routingProperties.getIncoming().size(); i++) {
       String queueName = routingProperties.getIncoming().get(i);
       int priority = maxPriority - i;
