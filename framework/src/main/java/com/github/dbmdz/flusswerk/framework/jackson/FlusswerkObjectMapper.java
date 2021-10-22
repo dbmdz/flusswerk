@@ -25,4 +25,14 @@ public class FlusswerkObjectMapper extends ObjectMapper {
   public Message deserialize(String json) throws JsonProcessingException {
     return readValue(json, messageClass);
   }
+
+  /**
+   * Convenience factory method to prevent overly long lines.
+   *
+   * @param type The class for incoming messages
+   * @return a new instance of FlusswerkObjectMapper.
+   */
+  public static FlusswerkObjectMapper forIncoming(Class<? extends Message> type) {
+    return new FlusswerkObjectMapper(new IncomingMessageType(type));
+  }
 }
