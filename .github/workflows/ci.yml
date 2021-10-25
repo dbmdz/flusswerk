@@ -91,7 +91,7 @@ jobs:
           server-username: MAVEN_USERNAME
       - name: Publish release to the Maven Central Repository
         if: github.event_name == 'release' && !endswith(env.PROJECT_VERSION, 'SNAPSHOT')
-        run: mvn -B deploy -P maven-central
+        run: mvn -B deploy -Psign,maven-central
         env:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
