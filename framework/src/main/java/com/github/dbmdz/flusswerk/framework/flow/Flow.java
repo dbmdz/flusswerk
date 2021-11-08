@@ -11,6 +11,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -62,8 +63,8 @@ public class Flow {
       info.stop();
       long stop = System.nanoTime();
       double durationMs = (stop - start) / 1e3;
-      MDC.put("duration", Double.toString(durationMs / 1e3));
-      MDC.put("duration_ms", Double.toString(durationMs));
+      MDC.put("duration", String.format(Locale.ENGLISH, "%f", durationMs / 1e3));
+      MDC.put("duration_ms", String.format(Locale.ENGLISH, "%f", durationMs));
       flowMetrics.forEach(
           metric -> metric.accept(info)); // record metrics only available from inside the framework
     }
