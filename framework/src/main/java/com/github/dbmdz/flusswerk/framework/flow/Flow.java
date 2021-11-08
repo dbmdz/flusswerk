@@ -61,9 +61,9 @@ public class Flow {
     } finally {
       info.stop();
       long stop = System.nanoTime();
-      double duration = (stop - start) / 1e3;
-      MDC.put("duration", Double.toString(duration));
-      MDC.put("duration_ms", Double.toString(duration / 1e3));
+      double durationMs = (stop - start) / 1e3;
+      MDC.put("duration", Double.toString(durationMs / 1e3));
+      MDC.put("duration_ms", Double.toString(durationMs));
       flowMetrics.forEach(
           metric -> metric.accept(info)); // record metrics only available from inside the framework
     }
