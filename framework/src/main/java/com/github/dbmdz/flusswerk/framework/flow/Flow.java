@@ -61,14 +61,21 @@ public class Flow {
       throw e; // Throw exception again after inspecting for ensure control flow in engine
     } finally {
       info.stop();
-      long stop = System.nanoTime();
-      double durationMs = (stop - start) / 1e3;
-      MDC.put("duration", String.format(Locale.ENGLISH, "%f", durationMs / 1e3));
-      MDC.put("duration_ms", String.format(Locale.ENGLISH, "%f", durationMs));
+      long durationNs = System.nanoTime() - start;
+      MDC.put("duration", String.format(Locale.ENGLISH, "%f", ns_to_seconds(durationNs)));
+      MDC.put("duration_ms", String.format(Locale.ENGLISH, "%f", ns_to_milliseconds(durationNs)));
       flowMetrics.forEach(
           metric -> metric.accept(info)); // record metrics only available from inside the framework
     }
     return result;
+  }
+
+  static double ns_to_seconds(long value) {
+    return value / 1e9;
+  }
+
+  static double ns_to_milliseconds(long value) {
+    return value / 1e6;
   }
 
   public Collection<Message> innerProcess(Message message) {
