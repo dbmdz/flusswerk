@@ -53,8 +53,7 @@ class DefaultProcessReportTest {
         .first()
         .hasFieldOrPropertyWithValue("level", Level.ERROR)
         .hasFieldOrPropertyWithValue(
-            "formattedMessage",
-            "testapp failed terminally (message=" + message + ", exception=" + e + ")");
+            "formattedMessage", "testapp failed terminally: " + e.getMessage());
   }
 
   @DisplayName("should report failure after too many retries")
@@ -68,11 +67,7 @@ class DefaultProcessReportTest {
         .hasFieldOrPropertyWithValue("level", Level.ERROR)
         .hasFieldOrPropertyWithValue(
             "formattedMessage",
-            "testapp failed after maximum number of retries (message="
-                + message
-                + ", exception="
-                + e
-                + ")");
+            "testapp failed after maximum number of retries: " + e.getMessage());
   }
 
   @DisplayName("should report failure with planned retries")
@@ -85,7 +80,6 @@ class DefaultProcessReportTest {
         .first()
         .hasFieldOrPropertyWithValue("level", Level.WARN)
         .hasFieldOrPropertyWithValue(
-            "formattedMessage",
-            "testapp rejected for retry (message=" + message + ", exception=" + e + ")");
+            "formattedMessage", "testapp rejected for retry: " + e.getMessage());
   }
 }
