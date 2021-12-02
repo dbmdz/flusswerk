@@ -27,9 +27,10 @@ public class DefaultProcessReport implements ProcessReport {
   public void reportFail(Message message, StopProcessingException e) {
     getLogger()
         .error(
-            "{} failed terminally ({}, {})",
+            "{} failed terminally: {}",
             name,
-            keyValue("message", message),
+            e.getMessage(),
+            keyValue("amqp_message", message.toString()),
             keyValue("exception", e.toString()),
             e);
   }
@@ -38,9 +39,10 @@ public class DefaultProcessReport implements ProcessReport {
   public void reportFailAfterMaxRetries(Message message, Exception e) {
     getLogger()
         .error(
-            "{} failed after maximum number of retries ({}, {})",
+            "{} failed after maximum number of retries: {}",
             name,
-            keyValue("message", message),
+            e.getMessage(),
+            keyValue("amqp_message", message.toString()),
             keyValue("exception", e.toString()),
             e);
   }
@@ -49,9 +51,10 @@ public class DefaultProcessReport implements ProcessReport {
   public void reportReject(Message message, Exception e) {
     getLogger()
         .warn(
-            "{} rejected for retry ({}, {})",
+            "{} rejected for retry: {}",
             name,
-            keyValue("message", message),
+            e.getMessage(),
+            keyValue("amqp_message", message.toString()),
             keyValue("exception", e.toString()));
   }
 
