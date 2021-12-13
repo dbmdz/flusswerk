@@ -81,7 +81,7 @@
     <version.maven-jacoco-plugin>0.8.7</version.maven-jacoco-plugin>
     <version.nexus-staging-maven-plugin>1.6.8</version.nexus-staging-maven-plugin>
     <version.wagon-maven-plugin>2.0.2</version.wagon-maven-plugin>
-    <version.huxhorn-sulky-ulid>8.2.0</version.huxhorn-sulky-ulid>
+    <version.huxhorn-sulky-ulid>8.3.0</version.huxhorn-sulky-ulid>
   </properties>
 
   <dependencyManagement>
