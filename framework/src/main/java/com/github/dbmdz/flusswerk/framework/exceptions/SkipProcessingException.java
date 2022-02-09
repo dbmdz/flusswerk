@@ -33,17 +33,6 @@ public class SkipProcessingException extends RuntimeException {
   }
 
   /**
-   * Add a message to send to the next workflow job.
-   *
-   * @param message The message to send.
-   * @return <code>this</code> for a fluent interface.
-   */
-  public SkipProcessingException send(Message message) {
-    outgoingMessages.add(message);
-    return this;
-  }
-
-  /**
    * Add messages to send to the next workflow job.
    *
    * @param messages The messages to send.
