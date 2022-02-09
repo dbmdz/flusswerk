@@ -1,5 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.engine;
 
+import com.github.dbmdz.flusswerk.framework.exceptions.SkipProcessingException;
 import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.model.Message;
@@ -76,6 +77,8 @@ public class Worker implements Runnable {
     } catch (StopProcessingException e) {
       fail(message, e);
       return; // processing was not successful → stop here
+    } catch (SkipProcessingException e) {
+      messagesToSend = e.getOutgoingMessages();
     } catch (RuntimeException e) {
       retryOrFail(message, e);
       return; // processing was not successful → stop here
@@ -94,6 +97,8 @@ public class Worker implements Runnable {
       fail(message, stopProcessingException);
     }
   }
+
+  private void skip(Message message, SkipProcessingException e) {}
 
   private void retryOrFail(Message receivedMessage, RuntimeException e) {
     try {
