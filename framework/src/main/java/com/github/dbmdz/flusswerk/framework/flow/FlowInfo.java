@@ -1,5 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.flow;
 
+import com.github.dbmdz.flusswerk.framework.exceptions.SkipProcessingException;
 import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.builder.ConfigurationStep;
 import com.github.dbmdz.flusswerk.framework.model.Message;
@@ -15,7 +16,8 @@ public class FlowInfo {
   public enum Status {
     SUCCESS,
     ERROR_RETRY,
-    ERROR_STOP
+    ERROR_STOP,
+    SKIP
   }
 
   private final long startTime;
@@ -38,7 +40,9 @@ public class FlowInfo {
   }
 
   void setStatusFrom(Exception e) {
-    if (e instanceof StopProcessingException) {
+    if (e instanceof SkipProcessingException) {
+      status = Status.SKIP;
+    } else if (e instanceof StopProcessingException) {
       status = Status.ERROR_STOP;
     } else {
       status = Status.ERROR_RETRY;

@@ -3,6 +3,7 @@ package com.github.dbmdz.flusswerk.framework.flow;
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 
+import com.github.dbmdz.flusswerk.framework.exceptions.SkipProcessingException;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlowMetrics;
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
@@ -57,6 +58,7 @@ public class Flow {
     try {
       result = innerProcess(message);
     } catch (RuntimeException e) {
+      MDC.put("skipped", string(e instanceof SkipProcessingException));
       info.setStatusFrom(e);
       throw e; // Throw exception again after inspecting for ensure control flow in engine
     } finally {
@@ -68,6 +70,10 @@ public class Flow {
           metric -> metric.accept(info)); // record metrics only available from inside the framework
     }
     return result;
+  }
+
+  private String string(boolean b) {
+    return b ? "true" : "false";
   }
 
   static double ns_to_seconds(long value) {
