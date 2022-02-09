@@ -72,7 +72,7 @@ public class Flow {
     return result;
   }
 
-  private String string(boolean b) {
+  private static String string(boolean b) {
     return b ? "true" : "false";
   }
 
