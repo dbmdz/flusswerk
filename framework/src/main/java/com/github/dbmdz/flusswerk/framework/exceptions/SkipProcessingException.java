@@ -14,16 +14,6 @@ public class SkipProcessingException extends RuntimeException {
   private final List<Message> outgoingMessages = new ArrayList<>();
 
   /**
-   * Skip processing with an explanation and a cause.
-   *
-   * @param message The explanation why skipping makes sense here.
-   * @param cause The cause why skipping should happen.
-   */
-  public SkipProcessingException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
-  /**
    * Skip processing with an explanation of why.
    *
    * @param message Why should processing be skipped?
