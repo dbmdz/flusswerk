@@ -15,7 +15,7 @@ class MeterFactoryTest {
     var monitoringMetric = "test.metric";
 
     SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
-    MeterFactory meterFactory = new MeterFactory(monitoringPrefix, "test_app", meterRegistry);
+    MeterFactory meterFactory = new MeterFactory(monitoringPrefix, meterRegistry);
 
     Counter counter = meterFactory.counter(monitoringMetric);
     Search search = meterRegistry.find(monitoringPrefix + "." + monitoringMetric);
