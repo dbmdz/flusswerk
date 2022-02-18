@@ -86,11 +86,8 @@ public class FlusswerkConfiguration {
 
   @Bean
   public MeterFactory meterFactory(
-      AppProperties appProperties,
-      MonitoringProperties monitoringProperties,
-      MeterRegistry meterRegistry) {
-    return new MeterFactory(
-        monitoringProperties.getPrefix(), appProperties.getName(), meterRegistry);
+      MonitoringProperties monitoringProperties, MeterRegistry meterRegistry) {
+    return new MeterFactory(monitoringProperties.getPrefix(), meterRegistry);
   }
 
   @Bean
