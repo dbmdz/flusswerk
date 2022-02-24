@@ -13,6 +13,7 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 public class Worker implements Runnable {
 
@@ -72,14 +73,21 @@ public class Worker implements Runnable {
 
   public void process(Message message) {
     Collection<? extends Message> messagesToSend;
+    Exception skip = null;
     try {
       messagesToSend = flow.process(message);
+      MDC.put("status", "success");
     } catch (StopProcessingException e) {
       fail(message, e);
+      MDC.put("status", "stop");
       return; // processing was not successful → stop here
     } catch (SkipProcessingException e) {
       messagesToSend = e.getOutgoingMessages();
+      skip = e;
+      MDC.put("status", "skip");
+      MDC.put("skipReason", e.getMessage());
     } catch (RuntimeException e) {
+      MDC.put("status", "retry");
       retryOrFail(message, e);
       return; // processing was not successful → stop here
     }
@@ -90,7 +98,11 @@ public class Worker implements Runnable {
         messageBroker.send(messagesToSend);
       }
       messageBroker.ack(message);
-      processReport.reportSuccess(message);
+      if (skip != null) {
+        processReport.reportSkip(message, skip);
+      } else {
+        processReport.reportSuccess(message);
+      }
     } catch (Exception e) {
       var stopProcessingException =
           new StopProcessingException("Could not finish message handling").causedBy(e);

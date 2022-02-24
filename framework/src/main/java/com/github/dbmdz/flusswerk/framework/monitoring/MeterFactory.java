@@ -2,7 +2,6 @@ package com.github.dbmdz.flusswerk.framework.monitoring;
 
 import static java.util.Arrays.asList;
 
-import com.github.dbmdz.flusswerk.framework.flow.FlowInfo.Status;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.util.ArrayList;

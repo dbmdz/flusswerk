@@ -1,7 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.monitoring;
 
 import com.github.dbmdz.flusswerk.framework.flow.FlowInfo;
-import com.github.dbmdz.flusswerk.framework.flow.FlowInfo.Status;
 import io.micrometer.core.instrument.Counter;
 import java.util.EnumMap;
 import java.util.Map;
