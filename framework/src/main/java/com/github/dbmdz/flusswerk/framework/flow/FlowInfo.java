@@ -4,6 +4,7 @@ import com.github.dbmdz.flusswerk.framework.exceptions.SkipProcessingException;
 import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.builder.ConfigurationStep;
 import com.github.dbmdz.flusswerk.framework.model.Message;
+import com.github.dbmdz.flusswerk.framework.monitoring.Status;
 
 /**
  * Collect base metrics for a single flow - did the execution have errors and how long does it take?
@@ -12,13 +13,6 @@ import com.github.dbmdz.flusswerk.framework.model.Message;
  * @see ConfigurationStep
  */
 public class FlowInfo {
-
-  public enum Status {
-    SUCCESS,
-    ERROR_RETRY,
-    ERROR_STOP,
-    SKIP
-  }
 
   private final long startTime;
   private long endTime;

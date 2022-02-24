@@ -7,7 +7,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.github.dbmdz.flusswerk.framework.flow.FlowInfo;
-import com.github.dbmdz.flusswerk.framework.flow.FlowInfo.Status;
 import io.micrometer.core.instrument.Counter;
 import java.util.Arrays;
 import java.util.stream.Stream;

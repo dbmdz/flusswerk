@@ -35,4 +35,9 @@ public interface ProcessReport {
    * @param e The exception, why the message failed
    */
   void reportReject(Message message, Exception e);
+
+  default void reportSkip(Message message, Exception skip) {
+    reportSuccess(message);
+  }
+  ;
 }
