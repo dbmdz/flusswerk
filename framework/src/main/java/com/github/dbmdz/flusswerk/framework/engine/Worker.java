@@ -73,7 +73,7 @@ public class Worker implements Runnable {
 
   public void process(Message message) {
     Collection<? extends Message> messagesToSend;
-    Exception skip = null;
+    SkipProcessingException skip = null;
     try {
       messagesToSend = flow.process(message);
       MDC.put("status", "success");
