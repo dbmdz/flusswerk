@@ -110,8 +110,6 @@ public class Worker implements Runnable {
     }
   }
 
-  private void skip(Message message, SkipProcessingException e) {}
-
   private void retryOrFail(Message receivedMessage, RuntimeException e) {
     try {
       boolean isRejected = messageBroker.reject(receivedMessage);

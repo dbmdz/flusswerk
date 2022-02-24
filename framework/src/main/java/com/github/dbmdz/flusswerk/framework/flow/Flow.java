@@ -70,10 +70,6 @@ public class Flow {
     return result;
   }
 
-  private static String string(boolean b) {
-    return b ? "true" : "false";
-  }
-
   static double ns_to_seconds(long value) {
     return value / 1e9;
   }
