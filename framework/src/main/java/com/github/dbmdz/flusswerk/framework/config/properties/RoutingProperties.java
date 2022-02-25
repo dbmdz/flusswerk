@@ -58,6 +58,14 @@ public class RoutingProperties {
         requireNonNullElse(exchanges, emptyMap()), // user input, not class attribute
         requireNonNullElse(deadLetterExchanges, emptyMap())); // user input, not class attribute
 
+    failurePolicies = requireNonNullElseGet(failurePolicies, Collections::emptyMap);
+    for (String queue : failurePolicies.keySet()) {
+      if (!this.incoming.contains(queue)) {
+        throw new IllegalArgumentException(
+            String.format("FailurePolicy for queue '%s' does not match any incoming queue", queue));
+      }
+    }
+
     this.failurePolicies =
         createFailurePolicies(
             this.incoming, requireNonNullElseGet(failurePolicies, Collections::emptyMap));
@@ -105,7 +113,7 @@ public class RoutingProperties {
       result.put(input, failurePolicy);
     }
     for (String input : readFrom) {
-      if (result.containsKey(input)) {
+      if (result.containsKey(input)) { // don't overwrite user-defined failure policies
         continue;
       }
       result.put(input, new FailurePolicy(input));
