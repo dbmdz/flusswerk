@@ -14,8 +14,6 @@ import com.github.dbmdz.flusswerk.integration.RabbitUtil;
 import com.github.dbmdz.flusswerk.integration.TestMessage;
 import com.github.dbmdz.flusswerk.integration.processing.SuccessfulProcessingTest.FlowConfiguration;
 import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -47,8 +45,6 @@ public class SuccessfulProcessingTest {
 
   private final RoutingProperties routing;
 
-  private final ExecutorService executorService;
-
   private final RabbitUtil rabbitUtil;
 
   private final RabbitMQ rabbitMQ;
@@ -59,12 +55,12 @@ public class SuccessfulProcessingTest {
     this.engine = engine;
     this.routing = routingProperties;
     this.rabbitMQ = rabbitMQ;
-    executorService = Executors.newSingleThreadExecutor();
     rabbitUtil = new RabbitUtil(rabbitMQ, routing);
   }
 
   @TestConfiguration
   static class FlowConfiguration {
+
     @Bean
     public IncomingMessageType incomingMessageType() {
       return new IncomingMessageType(TestMessage.class);
@@ -78,7 +74,7 @@ public class SuccessfulProcessingTest {
 
   @BeforeEach
   void startEngine() {
-    executorService.submit(engine::start);
+    engine.start();
   }
 
   @AfterEach

@@ -81,6 +81,7 @@
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
+              <parallel>suites</parallel>
               <skipTests>false</skipTests>
             </configuration>
           </plugin>
