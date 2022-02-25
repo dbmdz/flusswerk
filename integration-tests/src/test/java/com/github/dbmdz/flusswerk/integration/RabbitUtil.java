@@ -1,14 +1,16 @@
 package com.github.dbmdz.flusswerk.integration;
 
-import static org.junit.jupiter.api.Assertions.fail;
-
 import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.FailurePolicy;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.Queue;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import java.io.IOException;
-import java.time.Duration;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,66 +27,80 @@ public class RabbitUtil {
     this.routing = routing;
   }
 
-  public Message waitForMessage(String queueName, FailurePolicy failurePolicy, String testName)
-      throws InterruptedException, IOException, InvalidMessageException {
+  public String firstInput() {
+    return routing.getIncoming().get(0);
+  }
+
+  public String secondInput() {
+    return routing.getIncoming().get(1);
+  }
+
+  public String output() {
+    return routing.getOutgoing().get("default");
+  }
+
+  public void send(Message message) throws IOException {
+    rabbitMQ.topic(firstInput()).send(message);
+  }
+
+  private Message checkedReceive(String queueName)
+      throws InvalidMessageException, IOException, InterruptedException {
     var queue = rabbitMQ.queue(queueName);
-    var received = queue.receive();
-    var attempts = 0;
-    while (received.isEmpty()) {
-      if (attempts > 50) {
-        fail("Too many attempts to receive message");
-      }
-      Thread.sleep(failurePolicy.getBackoff().toMillis()); // dead letter backoff time is 1s
+    Thread.sleep(10); // wait for message to arrive
+    Optional<Message> received = queue.receive();
+    if (received.isEmpty()) {
+      Thread.sleep(1_000); // wait more in case first wait was not enough
       received = queue.receive();
-      attempts++;
-      LOGGER.info(
-          "{}: Receive message attempt {}, got {} ({} retry, {} failed)",
-          testName,
-          attempts,
-          received.isPresent() ? "message" : "nothing",
-          rabbitMQ.queue(failurePolicy.getRetryRoutingKey()).messageCount(),
-          rabbitMQ.queue(failurePolicy.getFailedRoutingKey()).messageCount());
     }
-    return received.get();
+    if (received.isEmpty()) {
+      throw new RuntimeException("No message received");
+    }
+    Message message = received.get();
+    rabbitMQ.ack(message);
+    return message;
+  }
+
+  public Message receive() {
+    try {
+      return checkedReceive(output());
+    } catch (InterruptedException | InvalidMessageException | IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public Message receiveFailed() {
+    String failedQueue = routing.getFailurePolicy(firstInput()).getFailedRoutingKey();
+    try {
+      return checkedReceive(failedQueue);
+    } catch (InterruptedException | InvalidMessageException | IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public void purgeQueues() throws IOException {
-    // Cleanup leftover messages to not pollute other tests
-    var readFrom = routing.getIncoming();
-    for (String queue : readFrom) {
-      purge(queue);
-      var failurePolicy = routing.getFailurePolicy(queue);
-      purge(failurePolicy.getFailedRoutingKey()); // here routing key == queue name
-      purge(failurePolicy.getRetryRoutingKey()); // here routing key == queue name
-    }
-
-    var writeTo = routing.getOutgoing();
-    for (String queue : writeTo.values()) {
-      purge(queue);
-    }
-  }
-
-  private void purge(String queue) throws IOException {
-    var deletedMessages = rabbitMQ.queue(queue).purge();
-    if (deletedMessages != 0) {
-      LOGGER.error("Purged {} and found {} messages.", queue, deletedMessages);
-    }
-  }
-
-  public Message waitAndAck(String queueName, Duration backoff)
-      throws IOException, InvalidMessageException, InterruptedException {
-    var queue = rabbitMQ.queue(queueName);
-    var received = queue.receive();
-    var attempts = 0;
-    while (received.isEmpty()) {
-      if (attempts > 50) {
-        fail("Too many attempts to receive message");
+    for (Queue queue : allQueues()) {
+      var deletedMessages = queue.purge();
+      if (deletedMessages != 0) {
+        LOGGER.error("Purged {} and found {} messages.", queue, deletedMessages);
       }
-      Thread.sleep(backoff.toMillis()); // dead letter backoff time is 1s
-      received = queue.receive();
-      attempts++;
     }
-    rabbitMQ.ack(received.get());
-    return received.get();
+  }
+
+  public List<Queue> allQueues() {
+    Stream<String> queueNames = routing.getIncoming().stream();
+    queueNames = Stream.concat(queueNames, routing.getOutgoing().values().stream());
+    queueNames =
+        Stream.concat(
+            queueNames,
+            routing.getIncoming().stream()
+                .map(routing::getFailurePolicy)
+                .map(FailurePolicy::getFailedRoutingKey));
+    queueNames =
+        Stream.concat(
+            queueNames,
+            routing.getIncoming().stream()
+                .map(routing::getFailurePolicy)
+                .map(FailurePolicy::getRetryRoutingKey));
+    return queueNames.map(rabbitMQ::queue).collect(Collectors.toList());
   }
 }

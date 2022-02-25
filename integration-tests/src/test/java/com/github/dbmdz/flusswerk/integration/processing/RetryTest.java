@@ -1,12 +1,12 @@
 package com.github.dbmdz.flusswerk.integration.processing;
 
+import static com.github.dbmdz.flusswerk.integration.RabbitUtilAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.dbmdz.flusswerk.framework.config.FlusswerkConfiguration;
 import com.github.dbmdz.flusswerk.framework.config.FlusswerkPropertiesConfiguration;
 import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
-import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.exceptions.RetryProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
@@ -33,6 +33,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -46,6 +48,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
     })
 @Import({MetricsAutoConfiguration.class, CompositeMeterRegistryAutoConfiguration.class})
 @DisplayName("When processing for a message fails")
+@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class RetryTest {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RetryTest.class);
@@ -100,29 +103,21 @@ public class RetryTest {
     rabbitUtil.purgeQueues();
   }
 
-  private void purge(String queue) throws IOException {
-    var deletedMessages = rabbitMQ.queue(queue).purge();
-    if (deletedMessages != 0) {
-      LOGGER.error("Purged {} and found {} messages.", queue, deletedMessages);
-    }
-  }
-
   @Test
   @DisplayName("then Flusswerk should retry the message 5 times")
-  void shouldRetryMessage() throws IOException, InvalidMessageException, InterruptedException {
+  void shouldRetryMessage() throws IOException {
     var message = new TestMessage("12345");
 
     var inputQueue = routing.getIncoming().get(0);
     var failurePolicy = routing.getFailurePolicy(inputQueue);
 
-    rabbitMQ.topic(inputQueue).send(message);
+    rabbitUtil.send(message);
 
-    var received =
-        rabbitUtil.waitForMessage(
-            failurePolicy.getFailedRoutingKey(), failurePolicy, this.getClass().getSimpleName());
+    var received = rabbitUtil.receiveFailed();
 
     rabbitMQ.ack(received);
     assertThat(((TestMessage) received).getId()).isEqualTo(message.getId());
     assertThat(received.getEnvelope().getRetries()).isEqualTo(failurePolicy.getRetries());
+    assertThat(rabbitUtil).allQueuesAreEmpty();
   }
 }

@@ -15,14 +15,14 @@ flusswerk:
   routing:
     exchange: my.exchange
     incoming:
-      - first
-      - second
+      - input.first
+      - input.second
     outgoing:
-      default: target.queue
+      default: output
     failure policies:
-      first:
+      "[input.first]":
           retries: 5
-          backoff: 500ms
+          backoff: 50ms
 
 ---
 

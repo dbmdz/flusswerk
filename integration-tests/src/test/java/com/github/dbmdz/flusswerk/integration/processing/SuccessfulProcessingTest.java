@@ -1,5 +1,6 @@
 package com.github.dbmdz.flusswerk.integration.processing;
 
+import static com.github.dbmdz.flusswerk.integration.RabbitUtilAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.dbmdz.flusswerk.framework.config.FlusswerkConfiguration;
@@ -26,6 +27,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -39,6 +42,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
     })
 @Import({MetricsAutoConfiguration.class, CompositeMeterRegistryAutoConfiguration.class})
 @DisplayName("When Flusswerk successfully processes a message")
+@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class SuccessfulProcessingTest {
 
   private final Engine engine;
@@ -86,21 +90,12 @@ public class SuccessfulProcessingTest {
   @DisplayName("then the message should end up in the output queue")
   @Test
   public void successfulMessagesShouldGoToOutQueue() throws Exception {
-    var inputQueue = routing.getIncoming().get(0);
-    var outputQueue = routing.getOutgoing().get("default");
-    var failurePolicy = routing.getFailurePolicy(inputQueue);
-
     TestMessage expected = new TestMessage("123456");
-    rabbitMQ.topic(inputQueue).send(expected);
 
-    var received =
-        rabbitUtil.waitForMessage(outputQueue, failurePolicy, this.getClass().getSimpleName());
-    rabbitMQ.ack(received);
-    assertThat(((TestMessage) received).getId()).isEqualTo(expected.getId());
+    rabbitUtil.send(expected);
+    var received = (TestMessage) rabbitUtil.receive();
 
-    assertThat(rabbitMQ.queue(inputQueue).messageCount()).isZero();
-    assertThat(rabbitMQ.queue(outputQueue).messageCount()).isZero();
-    assertThat(rabbitMQ.queue(failurePolicy.getRetryRoutingKey()).messageCount()).isZero();
-    assertThat(rabbitMQ.queue(failurePolicy.getFailedRoutingKey()).messageCount()).isZero();
+    assertThat(received.getId()).isEqualTo(expected.getId());
+    assertThat(rabbitUtil).allQueuesAreEmpty();
   }
 }
