@@ -1,12 +1,12 @@
 package com.github.dbmdz.flusswerk.integration.processing;
 
+import static com.github.dbmdz.flusswerk.integration.RabbitUtilAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.dbmdz.flusswerk.framework.config.FlusswerkConfiguration;
 import com.github.dbmdz.flusswerk.framework.config.FlusswerkPropertiesConfiguration;
 import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
-import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.exceptions.SkipProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
@@ -28,6 +28,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -40,7 +42,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
       FlusswerkConfiguration.class
     })
 @Import({MetricsAutoConfiguration.class, CompositeMeterRegistryAutoConfiguration.class})
-@DisplayName("When Flusswerk is supposed to skip processing")
+@DisplayName("When Flusswerk skips a message")
+@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class SkipProcessingTest {
 
   private final Engine engine;
@@ -71,16 +74,24 @@ public class SkipProcessingTest {
       return FlowBuilder.flow(TestMessage.class, String.class)
           .reader(
               testMessage -> {
-                throw new SkipProcessingException("Skip processing for testing").send(testMessage);
+                throw new SkipProcessingException("Skip processing for testing")
+                    .send(new TestMessage("Skipping worked!"));
               })
-          .noTransformer()
-          .writerSendingMessage(value -> new TestMessage("Skipping did not work"))
+          .transformer(
+              string -> {
+                throw new RuntimeException(
+                    "Skipping did not work: Transformer should not be called");
+              })
+          .writerSendingMessage(
+              value -> {
+                throw new RuntimeException("Skipping did not work: Writer should not be called");
+              })
           .build();
     }
   }
 
   @BeforeEach
-  void startEngine() throws InterruptedException {
+  void startEngine() {
     engine.start();
   }
 
@@ -90,23 +101,16 @@ public class SkipProcessingTest {
     rabbitUtil.purgeQueues();
   }
 
+  @DisplayName("then the message should end up in the output queue")
   @Test
-  void shouldSkipProcessing() throws IOException, InvalidMessageException, InterruptedException {
-    var inputQueue = routing.getIncoming().get(0);
-    var outputQueue = routing.getOutgoing().get("default");
-    var failurePolicy = routing.getFailurePolicy(inputQueue);
+  public void successfulMessagesShouldGoToOutQueue() throws Exception {
 
-    TestMessage expected = new TestMessage("123456");
-    rabbitMQ.topic(inputQueue).send(expected);
+    rabbitUtil.send(new TestMessage("Test message"));
 
-    var received =
-        rabbitUtil.waitForMessage(outputQueue, failurePolicy, this.getClass().getSimpleName());
-    rabbitMQ.ack(received);
-    assertThat(((TestMessage) received).getId()).isEqualTo(expected.getId());
+    var received = (TestMessage) rabbitUtil.receive();
 
-    assertThat(rabbitMQ.queue(inputQueue).messageCount()).isZero();
-    assertThat(rabbitMQ.queue(outputQueue).messageCount()).isZero();
-    assertThat(rabbitMQ.queue(failurePolicy.getRetryRoutingKey()).messageCount()).isZero();
-    assertThat(rabbitMQ.queue(failurePolicy.getFailedRoutingKey()).messageCount()).isZero();
+    assertThat(received.getId()).isEqualTo("Skipping worked!");
+
+    assertThat(rabbitUtil).allQueuesAreEmpty();
   }
 }

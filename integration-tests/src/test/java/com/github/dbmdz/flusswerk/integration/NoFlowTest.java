@@ -6,13 +6,11 @@ import com.github.dbmdz.flusswerk.framework.config.FlusswerkConfiguration;
 import com.github.dbmdz.flusswerk.framework.config.FlusswerkPropertiesConfiguration;
 import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
-import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import com.github.dbmdz.flusswerk.integration.NoFlowTest.NoFlowTestConfiguration;
 import java.io.IOException;
-import java.time.Duration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -65,11 +63,10 @@ public class NoFlowTest {
 
   @DisplayName("then it still should send a message to a route")
   @Test
-  public void shouldSendMessageToRoute()
-      throws IOException, InterruptedException, InvalidMessageException {
+  public void shouldSendMessageToRoute() throws IOException {
     Message message = new TestMessage("123");
-    rabbitMQ.route("default").send(message);
-    Message received = rabbitUtil.waitAndAck("target.queue", Duration.ofMillis(50));
+    rabbitMQ.topic(rabbitUtil.output()).send(message);
+    Message received = rabbitUtil.receive();
     assertThat(received).isEqualTo(message);
   }
 
