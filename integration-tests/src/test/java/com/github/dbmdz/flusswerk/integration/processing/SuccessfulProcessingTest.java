@@ -13,7 +13,6 @@ import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import com.github.dbmdz.flusswerk.integration.RabbitUtil;
 import com.github.dbmdz.flusswerk.integration.TestMessage;
-import com.github.dbmdz.flusswerk.integration.processing.SuccessfulProcessingTest.FlowConfiguration;
 import java.io.IOException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,7 +35,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @SpringBootTest
 @ContextConfiguration(
     classes = {
-      FlowConfiguration.class,
+      SuccessfulProcessingTest.FlowConfiguration.class,
       FlusswerkPropertiesConfiguration.class,
       FlusswerkConfiguration.class
     })

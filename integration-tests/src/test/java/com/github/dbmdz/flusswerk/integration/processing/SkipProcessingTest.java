@@ -14,7 +14,6 @@ import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import com.github.dbmdz.flusswerk.integration.RabbitUtil;
 import com.github.dbmdz.flusswerk.integration.TestMessage;
-import com.github.dbmdz.flusswerk.integration.processing.SuccessfulProcessingTest.FlowConfiguration;
 import java.io.IOException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,7 +36,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @SpringBootTest
 @ContextConfiguration(
     classes = {
-      FlowConfiguration.class,
+      SkipProcessingTest.FlowConfiguration.class,
       FlusswerkPropertiesConfiguration.class,
       FlusswerkConfiguration.class
     })
@@ -48,18 +47,12 @@ public class SkipProcessingTest {
 
   private final Engine engine;
 
-  private final RoutingProperties routing;
-
   private final RabbitUtil rabbitUtil;
-
-  private final RabbitMQ rabbitMQ;
 
   @Autowired
   public SkipProcessingTest(Engine engine, RoutingProperties routingProperties, RabbitMQ rabbitMQ) {
     this.engine = engine;
-    this.routing = routingProperties;
-    this.rabbitMQ = rabbitMQ;
-    rabbitUtil = new RabbitUtil(rabbitMQ, routing);
+    rabbitUtil = new RabbitUtil(rabbitMQ, routingProperties);
   }
 
   @TestConfiguration
@@ -74,16 +67,19 @@ public class SkipProcessingTest {
       return FlowBuilder.flow(TestMessage.class, String.class)
           .reader(
               testMessage -> {
+                System.out.println("Reader: " + testMessage);
                 throw new SkipProcessingException("Skip processing for testing")
                     .send(new TestMessage("Skipping worked!"));
               })
           .transformer(
               string -> {
+                System.out.println("Transformer: " + string);
                 throw new RuntimeException(
                     "Skipping did not work: Transformer should not be called");
               })
           .writerSendingMessage(
               value -> {
+                System.out.println("Writer: " + value);
                 throw new RuntimeException("Skipping did not work: Writer should not be called");
               })
           .build();
@@ -103,14 +99,13 @@ public class SkipProcessingTest {
 
   @DisplayName("then the message should end up in the output queue")
   @Test
-  public void successfulMessagesShouldGoToOutQueue() throws Exception {
+  void successfulMessagesShouldGoToOutQueue() throws Exception {
 
     rabbitUtil.send(new TestMessage("Test message"));
 
     var received = (TestMessage) rabbitUtil.receive();
 
     assertThat(received.getId()).isEqualTo("Skipping worked!");
-
     assertThat(rabbitUtil).allQueuesAreEmpty();
   }
 }
