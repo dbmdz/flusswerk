@@ -46,19 +46,13 @@ public class SuccessfulProcessingTest {
 
   private final Engine engine;
 
-  private final RoutingProperties routing;
-
   private final RabbitUtil rabbitUtil;
-
-  private final RabbitMQ rabbitMQ;
 
   @Autowired
   public SuccessfulProcessingTest(
       Engine engine, RoutingProperties routingProperties, RabbitMQ rabbitMQ) {
     this.engine = engine;
-    this.routing = routingProperties;
-    this.rabbitMQ = rabbitMQ;
-    rabbitUtil = new RabbitUtil(rabbitMQ, routing);
+    rabbitUtil = new RabbitUtil(rabbitMQ, routingProperties);
   }
 
   @TestConfiguration
