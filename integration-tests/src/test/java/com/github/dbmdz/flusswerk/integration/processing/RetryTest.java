@@ -15,7 +15,6 @@ import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import com.github.dbmdz.flusswerk.integration.RabbitUtil;
 import com.github.dbmdz.flusswerk.integration.TestMessage;
-import com.github.dbmdz.flusswerk.integration.processing.RetryTest.FlowConfiguration;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -40,7 +39,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @SpringBootTest
 @ContextConfiguration(
     classes = {
-      FlowConfiguration.class,
+      RetryTest.FlowConfiguration.class,
       FlusswerkPropertiesConfiguration.class,
       FlusswerkConfiguration.class
     })
