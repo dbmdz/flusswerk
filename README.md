@@ -212,8 +212,6 @@ With the `Reader`, `Transformer` and `Writer` implementing the `Function` interf
 | `Writer`      | `Function<IndexDocument, Message>`  | sends indexes the data and returns a message for the next workflow step |
 
 
-
-
 ## Best Practices
 
 ### Stateless Processing
@@ -282,6 +280,12 @@ framework/src/main/java/com/github/dbmdz/flusswerk/framework/exceptions/StopProc
 framework/src/main/java/com/github/dbmdz/flusswerk/framework/exceptions/RetryProcessingException.java
 [RuntimeException]:
 https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/RuntimeException.html
+
+
+### Skip Processing
+
+Processing can be skipped for a message by throwing SkipProcessingException at any point in your
+code. Log messages and metrics will have `status=skip` to indicate that processing was skipped. 
 
 ## Collecting Metrics
 
