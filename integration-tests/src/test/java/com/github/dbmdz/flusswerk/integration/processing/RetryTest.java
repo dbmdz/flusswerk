@@ -24,8 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.metrics.CompositeMeterRegistryAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfiguration;
@@ -51,22 +49,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class RetryTest {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(RetryTest.class);
-
   private final Engine engine;
 
-  private final RoutingProperties routing;
-
   private final RabbitUtil rabbitUtil;
-
-  private final RabbitMQ rabbitMQ;
 
   @Autowired
   public RetryTest(Engine engine, RabbitMQ rabbitMQ, RoutingProperties routingProperties) {
     this.engine = engine;
-    this.rabbitMQ = rabbitMQ;
-    this.routing = routingProperties;
-    rabbitUtil = new RabbitUtil(rabbitMQ, routing);
+    rabbitUtil = new RabbitUtil(rabbitMQ, routingProperties);
   }
 
   static class CountFailures implements Function<TestMessage, Message> {
@@ -108,16 +98,13 @@ public class RetryTest {
   void shouldRetryMessage() throws IOException {
     var message = new TestMessage("12345");
 
-    var inputQueue = routing.getIncoming().get(0);
-    var failurePolicy = routing.getFailurePolicy(inputQueue);
-
     rabbitUtil.send(message);
 
     var received = rabbitUtil.receiveFailed();
 
-    rabbitMQ.ack(received);
     assertThat(((TestMessage) received).getId()).isEqualTo(message.getId());
-    assertThat(received.getEnvelope().getRetries()).isEqualTo(failurePolicy.getRetries());
+    assertThat(received.getEnvelope().getRetries())
+        .isEqualTo(rabbitUtil.firstFailurePolicy().getRetries());
     assertThat(rabbitUtil).allQueuesAreEmpty();
   }
 }

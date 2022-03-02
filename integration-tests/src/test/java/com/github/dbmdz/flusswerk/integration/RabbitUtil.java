@@ -77,6 +77,10 @@ public class RabbitUtil {
     }
   }
 
+  public FailurePolicy firstFailurePolicy() {
+    return routing.getFailurePolicy(firstInput());
+  }
+
   public void purgeQueues() throws IOException {
     for (Queue queue : allQueues()) {
       var deletedMessages = queue.purge();
