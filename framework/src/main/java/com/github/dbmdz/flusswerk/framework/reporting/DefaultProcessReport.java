@@ -58,6 +58,11 @@ public class DefaultProcessReport implements ProcessReport {
             keyValue("exception", e.toString()));
   }
 
+  @Override
+  public void reportSkip(Message message, Exception skip) {
+    LOGGER.info("Skipped: {}", skip.getMessage());
+  }
+
   protected Logger getLogger() {
     return LOGGER;
   }
