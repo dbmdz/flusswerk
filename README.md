@@ -181,6 +181,19 @@ The sections of the `Flusswerk` configuration
 | `failedRoutingKey` | `–`     | where to send messages to that should not be processed again |
 | `backoff`          | `–`     | how long to wait until retrying a message                    |
 
+The queue that should get a custom failure policy is a YAML key here. Please note that the name not
+only gets processed by YAML, but also by Spring and therefore needs to be quoted and inside square
+brackets - otherwise Spring Boot will silently ignore it:
+
+```yaml
+flusswerk:
+  routing:
+    failurePolicies:
+      "[search.index]":
+        retries: 3
+        backoff: '1s'
+```
+
 `monitoring` - Prometheus settings
 
 | property | default     |                               |
