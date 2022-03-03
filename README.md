@@ -284,7 +284,7 @@ https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/RuntimeEx
 
 ### Skip Processing
 
-Processing can be skipped for a message by throwing SkipProcessingException at any point in your
+Processing can be skipped for a message by throwing a `SkipProcessingException` at any point in your
 code. Log messages and metrics will have `status=skip` to indicate that processing was skipped. 
 
 ## Collecting Metrics
