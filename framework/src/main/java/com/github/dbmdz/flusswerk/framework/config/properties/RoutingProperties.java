@@ -121,23 +121,31 @@ public class RoutingProperties {
     return result;
   }
 
-  /** @return The exchange name to use (required). */
+  /**
+   * @return The exchange name to use (required).
+   */
   @Deprecated
   public String getDefaultExchange() {
     return defaultExchange;
   }
 
-  /** @return The exchange name to use (required). */
+  /**
+   * @return The exchange name to use (required).
+   */
   public String getExchange(String queue) {
     return exchanges.getOrDefault(queue, defaultExchange);
   }
 
-  /** @return The queue to read from (optional). */
+  /**
+   * @return The queue to read from (optional).
+   */
   public List<String> getIncoming() {
     return incoming;
   }
 
-  /** @return The topic to send to per default (optional). */
+  /**
+   * @return The topic to send to per default (optional).
+   */
   public Map<String, String> getOutgoing() {
     return outgoing;
   }

@@ -43,7 +43,9 @@ public class SkipProcessingException extends RuntimeException {
     return this;
   }
 
-  /** @return The messages that should be sent to the next workflow job. */
+  /**
+   * @return The messages that should be sent to the next workflow job.
+   */
   public List<Message> getOutgoingMessages() {
     return unmodifiableList(outgoingMessages);
   }

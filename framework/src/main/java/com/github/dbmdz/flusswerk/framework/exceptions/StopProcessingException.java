@@ -6,7 +6,9 @@ import java.util.function.Supplier;
 /** Throw this exception in case of errors that won't go away when trying again later. */
 public class StopProcessingException extends RuntimeException {
 
-  /** @param message The message, possibly including format strings */
+  /**
+   * @param message The message, possibly including format strings
+   */
   public StopProcessingException(String message) {
     super(message); // String-only constructor is needed for supplier
   }
