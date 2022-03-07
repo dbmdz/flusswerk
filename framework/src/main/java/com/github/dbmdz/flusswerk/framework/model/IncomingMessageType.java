@@ -36,17 +36,23 @@ public class IncomingMessageType {
     this.mixin = requireNonNull(mixin);
   }
 
-  /** @return the class of the custom message implementation */
+  /**
+   * @return the class of the custom message implementation
+   */
   public Class<? extends Message> getMessageClass() {
     return messageClass;
   }
 
-  /** @return the custom Jackson mixin for the {@link Message} implementation */
+  /**
+   * @return the custom Jackson mixin for the {@link Message} implementation
+   */
   public Class<?> getMixin() {
     return mixin;
   }
 
-  /** @return true, if there is also a Jackson mixin for the message class */
+  /**
+   * @return true, if there is also a Jackson mixin for the message class
+   */
   public boolean hasMixin() {
     return this.mixin != null;
   }

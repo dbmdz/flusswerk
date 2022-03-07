@@ -32,22 +32,30 @@ public class RabbitMQProperties {
     this.password = requireNonNullElse(password, "guest");
   }
 
-  /** @return The connection hosts to RabbitMQ. May include a specific port separated by ":". */
+  /**
+   * @return The connection hosts to RabbitMQ. May include a specific port separated by ":".
+   */
   public List<String> getHosts() {
     return hosts;
   }
 
-  /** @return The RabbitMQ/AMQP virtual host. <em>Can be null.</em> */
+  /**
+   * @return The RabbitMQ/AMQP virtual host. <em>Can be null.</em>
+   */
   public Optional<String> getVirtualHost() {
     return Optional.ofNullable(virtualHost);
   }
 
-  /** @return The username for RabbitMQ login */
+  /**
+   * @return The username for RabbitMQ login
+   */
   public String getUsername() {
     return username;
   }
 
-  /** @return The password for RabbitMQ login */
+  /**
+   * @return The password for RabbitMQ login
+   */
   public String getPassword() {
     return password;
   }

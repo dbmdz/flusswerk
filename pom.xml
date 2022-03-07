@@ -177,7 +177,7 @@
           <version>${version.githook-maven-plugin}</version>
         </plugin>
         <plugin>
-          <groupId>com.coveo</groupId>
+          <groupId>com.spotify.fmt</groupId>
           <artifactId>fmt-maven-plugin</artifactId>
           <version>${version.fmt-maven-plugin}</version>
         </plugin>

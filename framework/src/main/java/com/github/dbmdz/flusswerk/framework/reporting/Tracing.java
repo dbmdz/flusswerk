@@ -56,7 +56,9 @@ public class Tracing {
     tracingPathForThread.remove(currentThread.id());
   }
 
-  /** @return The tracing information for the current thread. */
+  /**
+   * @return The tracing information for the current thread.
+   */
   public List<String> tracingPath() {
     return tracingPathForThread.getOrDefault(currentThread.id(), Collections.emptyList());
   }

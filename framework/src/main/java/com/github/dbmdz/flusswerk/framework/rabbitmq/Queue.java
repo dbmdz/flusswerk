@@ -82,7 +82,9 @@ public class Queue {
     return "Queue{name='" + name + "'}";
   }
 
-  /** @return The name of the represented queue. */
+  /**
+   * @return The name of the represented queue.
+   */
   public String getName() {
     return name;
   }

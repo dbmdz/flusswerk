@@ -19,7 +19,9 @@ public class ProcessingProperties {
     this.threads = requireNonNullElse(threads, 5);
   }
 
-  /** @return The number of concurrent processing threads in one job instance. */
+  /**
+   * @return The number of concurrent processing threads in one job instance.
+   */
   public Integer getThreads() {
     return threads;
   }

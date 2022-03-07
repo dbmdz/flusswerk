@@ -102,7 +102,9 @@ public class Topic {
     return "Topic{name='" + name + "'}";
   }
 
-  /** @return The name of this {@link Topic}. */
+  /**
+   * @return The name of this {@link Topic}.
+   */
   public String getName() {
     return name;
   }
