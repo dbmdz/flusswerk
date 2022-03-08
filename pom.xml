@@ -126,6 +126,7 @@
       <plugin>
         <groupId>com.spotify.fmt</groupId>
         <artifactId>fmt-maven-plugin</artifactId>
+        <version>${version.fmt-maven-plugin}</version>
         <executions>
           <execution>
             <goals>
@@ -146,7 +147,7 @@
               <hooks>
                 <pre-commit>
                   if ! mvn com.spotify.fmt:fmt-maven-plugin:check ; then
-                      mvn com.spotify.fmt:format
+                      mvn com.spotify.fmt:fmt-maven-plugin:format
                       echo -e "\e[31mCode has been reformatted to match code style\e[0m"
                       echo -e "\e[31mPlease use git add … to add modified files\e[0m"
                       echo "Your commit message was:"
