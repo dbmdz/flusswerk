@@ -78,8 +78,8 @@ public class Worker implements Runnable {
       messagesToSend = flow.process(message);
       MDC.put("status", "success");
     } catch (StopProcessingException e) {
-      fail(message, e);
       MDC.put("status", "stop");
+      fail(message, e);
       return; // processing was not successful → stop here
     } catch (SkipProcessingException e) {
       messagesToSend = e.getOutgoingMessages();
