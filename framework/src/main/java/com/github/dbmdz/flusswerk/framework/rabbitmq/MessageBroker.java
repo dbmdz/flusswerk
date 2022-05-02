@@ -79,6 +79,10 @@ public class MessageBroker {
     rabbitClient.send(routingConfig.getExchange(routingKey), routingKey, message);
   }
 
+  void sendRaw(String routingKey, byte[] message) throws IOException {
+    rabbitClient.sendRaw(routingConfig.getExchange(routingKey), routingKey, message);
+  }
+
   /**
    * Sends multiple messages to a certain queue as JSON documents. The messages are sent in the same
    * order as returned by the iterator over <code>messages</code>.
