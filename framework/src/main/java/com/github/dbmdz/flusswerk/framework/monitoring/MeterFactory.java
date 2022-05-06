@@ -32,4 +32,8 @@ public class MeterFactory {
     allTags.add(status.toString().toLowerCase());
     return counter(metric, allTags.toArray(new String[] {}));
   }
+
+  public Counter frameworkCounter(String name, Status status) {
+    return registry.counter("flusswerk." + name, "status", status.toString().toLowerCase());
+  }
 }
