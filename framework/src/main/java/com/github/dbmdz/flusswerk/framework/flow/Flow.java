@@ -67,6 +67,12 @@ public class Flow {
       flowMetrics.forEach(
           metric -> metric.accept(info)); // record metrics only available from inside the framework
     }
+
+    result.stream()
+        .filter(Objects::nonNull)
+        .filter(m -> m.getTracing() == null || m.getTracing().isEmpty())
+        .forEach(m -> m.setTracing(tracing.tracingPath()));
+
     return result;
   }
 
@@ -91,11 +97,6 @@ public class Flow {
     if (result == null) {
       return Collections.emptyList();
     }
-
-    result.stream()
-        .filter(Objects::nonNull)
-        .filter(m -> m.getTracing() == null || m.getTracing().isEmpty())
-        .forEach(m -> m.setTracing(tracing.tracingPath()));
 
     return result;
   }
