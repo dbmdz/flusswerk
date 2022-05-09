@@ -69,6 +69,18 @@ public class Topic {
     send(List.of(messages));
   }
 
+  /**
+   * Sends a bunch of bytes to RabbitMQ.
+   *
+   * <p><b>Use with caution and only when using {@link Message} is not viable.</b>
+   *
+   * @param message The message serialized to bytes
+   * @throws IOException if sending the message fails
+   */
+  public void sendRaw(byte[] message) throws IOException {
+    messageBroker.sendRaw(name, message);
+  }
+
   private List<String> getTracingPath() {
     List<String> tracingPath = tracing.tracingPath();
     if (tracingPath.isEmpty()) {
