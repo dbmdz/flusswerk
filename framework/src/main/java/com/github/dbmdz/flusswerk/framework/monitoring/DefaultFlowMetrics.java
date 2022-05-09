@@ -12,7 +12,7 @@ import java.util.Map;
 public class DefaultFlowMetrics implements FlowMetrics {
 
   protected final Map<Status, Counter> messagesTotal;
-  protected final Map<Status, Counter> processingSeconds;
+  protected final Map<Status, Counter> messagesSeconds;
 
   @Deprecated(since = "5.1.0", forRemoval = true)
   private final Map<Status, Counter> executionTime;
@@ -22,7 +22,7 @@ public class DefaultFlowMetrics implements FlowMetrics {
 
   public DefaultFlowMetrics(MeterFactory meterFactory) {
     messagesTotal = new EnumMap<>(Status.class);
-    processingSeconds = new EnumMap<>(Status.class);
+    messagesSeconds = new EnumMap<>(Status.class);
     this.executionTime = new EnumMap<>(Status.class);
     this.processedItems = new EnumMap<>(Status.class);
 
@@ -30,7 +30,7 @@ public class DefaultFlowMetrics implements FlowMetrics {
       processedItems.put(status, meterFactory.counter("processed.items", status));
       executionTime.put(status, meterFactory.counter("execution.time", status));
       messagesTotal.put(status, meterFactory.frameworkCounter("messages.total", status));
-      processingSeconds.put(status, meterFactory.frameworkCounter("processing.seconds", status));
+      messagesSeconds.put(status, meterFactory.frameworkCounter("messages.seconds", status));
     }
   }
 
@@ -39,6 +39,6 @@ public class DefaultFlowMetrics implements FlowMetrics {
     processedItems.get(status).increment();
     executionTime.get(status).increment(flowInfo.duration());
     messagesTotal.get(status).increment();
-    processingSeconds.get(status).increment(flowInfo.duration());
+    messagesSeconds.get(status).increment(flowInfo.duration());
   }
 }
