@@ -4,6 +4,7 @@ import com.github.dbmdz.flusswerk.framework.exceptions.SkipProcessingException;
 import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.model.Message;
+import com.github.dbmdz.flusswerk.framework.monitoring.FlusswerkMetrics;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
@@ -20,6 +21,7 @@ public class Worker implements Runnable {
   private static final Logger LOGGER = LoggerFactory.getLogger(Worker.class);
 
   private final Flow flow;
+  private final FlusswerkMetrics metrics;
   private final MessageBroker messageBroker;
   private final ProcessReport processReport;
   private final PriorityBlockingQueue<Task> queue;
@@ -28,12 +30,14 @@ public class Worker implements Runnable {
 
   public Worker(
       Flow flow,
+      FlusswerkMetrics metrics,
       MessageBroker messageBroker,
       ProcessReport processReport,
       PriorityBlockingQueue<Task> queue,
       Tracing tracing) {
     this.flow = flow;
     this.messageBroker = messageBroker;
+    this.metrics = metrics;
     this.processReport = processReport;
     this.queue = queue;
     this.tracing = tracing;
@@ -66,9 +70,11 @@ public class Worker implements Runnable {
   }
 
   void executeProcessing(Message message) {
+    metrics.incrementActiveWorkers();
     tracing.register(message.getTracing());
     process(message);
     tracing.deregister();
+    metrics.decrementActiveWorkers();
   }
 
   public void process(Message message) {

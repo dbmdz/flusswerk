@@ -15,6 +15,7 @@ import com.github.dbmdz.flusswerk.framework.jackson.FlusswerkObjectMapper;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.monitoring.DefaultFlowMetrics;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlowMetrics;
+import com.github.dbmdz.flusswerk.framework.monitoring.FlusswerkMetrics;
 import com.github.dbmdz.flusswerk.framework.monitoring.MeterFactory;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitClient;
@@ -136,7 +137,8 @@ public class FlusswerkConfiguration {
       ProcessingProperties processingProperties,
       Optional<ProcessReport> processReport,
       PriorityBlockingQueue<Task> taskQueue,
-      Tracing tracing) {
+      Tracing tracing,
+      FlusswerkMetrics metrics) {
     if (flow.isEmpty()) {
       return Collections.emptyList(); // No Flow, nothing to do
     }
@@ -145,12 +147,19 @@ public class FlusswerkConfiguration {
             n ->
                 new Worker(
                     flow.get(),
+                    metrics,
                     messageBroker,
                     processReport.orElseGet(
                         () -> new DefaultProcessReport(appProperties.getName())),
                     taskQueue,
                     tracing))
         .collect(Collectors.toList());
+  }
+
+  @Bean
+  public FlusswerkMetrics metrics(
+      ProcessingProperties processingProperties, MeterRegistry meterRegistry) {
+    return new FlusswerkMetrics(processingProperties, meterRegistry);
   }
 
   @Bean
