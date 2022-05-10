@@ -12,6 +12,7 @@ import com.github.dbmdz.flusswerk.framework.exceptions.RetryProcessingException;
 import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.model.Message;
+import com.github.dbmdz.flusswerk.framework.monitoring.FlusswerkMetrics;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
@@ -25,6 +26,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
 
 @DisplayName("The Worker")
 class WorkerTest {
@@ -36,6 +39,7 @@ class WorkerTest {
   private ProcessReport processReport;
   private PriorityBlockingQueue<Task> taskQueue;
   private Message message;
+  private FlusswerkMetrics flusswerkMetrics;
 
   private static Stream<Arguments> retryableExceptions() {
     return Stream.of(
@@ -49,8 +53,9 @@ class WorkerTest {
     messageBroker = mock(MessageBroker.class);
     processReport = mock(ProcessReport.class);
     taskQueue = new PriorityBlockingQueue<>();
+    flusswerkMetrics = mock(FlusswerkMetrics.class);
     tracing = mock(Tracing.class);
-    worker = new Worker(flow, messageBroker, processReport, taskQueue, tracing);
+    worker = new Worker(flow, flusswerkMetrics, messageBroker, processReport, taskQueue, tracing);
     message = new Message();
   }
 
@@ -156,5 +161,15 @@ class WorkerTest {
     worker.step();
     worker.executeProcessing(message);
     verify(callback).run();
+  }
+
+  @DisplayName("should register active workers")
+  @Test
+  void shouldRegisterActiveWorkers() throws IOException {
+    worker.executeProcessing(new Message());
+    InOrder inOrder = Mockito.inOrder(flusswerkMetrics, messageBroker);
+    inOrder.verify(flusswerkMetrics).incrementActiveWorkers();
+    inOrder.verify(messageBroker).ack(any());
+    inOrder.verify(flusswerkMetrics).decrementActiveWorkers();
   }
 }
