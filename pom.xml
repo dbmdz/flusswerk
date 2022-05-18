@@ -6,7 +6,7 @@
 
   <groupId>com.github.dbmdz.flusswerk</groupId>
   <artifactId>flusswerk</artifactId>
-  <version>5.1.0-SNAPSHOT</version>
+  <version>5.1.0</version>
   <packaging>pom</packaging>
 
   <name>Flusswerk</name>
@@ -72,7 +72,7 @@
     <version.amqp-client>5.14.2</version.amqp-client>
     <version.byte-buddy>1.12.10</version.byte-buddy>
     <version.logstash-encoder>7.1.1</version.logstash-encoder>
-    <version.flusswerk>5.1.0-SNAPSHOT</version.flusswerk>
+    <version.flusswerk>5.1.0</version.flusswerk>
     <version.junit>5.7.0</version.junit>
     <version.mockito>4.5.1</version.mockito>
     <!-- Plugin versions -->
@@ -83,6 +83,7 @@
     <version.nexus-staging-maven-plugin>1.6.13</version.nexus-staging-maven-plugin>
     <version.wagon-maven-plugin>2.0.2</version.wagon-maven-plugin>
     <version.huxhorn-sulky-ulid>8.3.0</version.huxhorn-sulky-ulid>
+    <version.junit-jupiter>5.8.2</version.junit-jupiter>
   </properties>
 
   <dependencyManagement>
@@ -117,7 +118,7 @@
       <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter</artifactId>
-        <version>5.8.2</version>
+        <version>${version.junit-jupiter}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
