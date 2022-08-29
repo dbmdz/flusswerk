@@ -69,7 +69,7 @@
     <maven.compiler.target>11</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- Dependency versions -->
-    <version.amqp-client>5.14.2</version.amqp-client>
+    <version.amqp-client>5.15.0</version.amqp-client>
     <version.byte-buddy>1.12.14</version.byte-buddy>
     <version.logstash-encoder>7.2</version.logstash-encoder>
     <version.flusswerk>5.1.1-SNAPSHOT</version.flusswerk>
