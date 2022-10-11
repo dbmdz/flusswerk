@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.github.dbmdz.flusswerk.framework.exceptions.RetryProcessingException;
+import com.github.dbmdz.flusswerk.framework.exceptions.SkipProcessingException;
 import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.model.Message;
@@ -171,5 +172,20 @@ class WorkerTest {
     inOrder.verify(flusswerkMetrics).incrementActiveWorkers();
     inOrder.verify(messageBroker).ack(any());
     inOrder.verify(flusswerkMetrics).decrementActiveWorkers();
+  }
+
+  @DisplayName("should add tracing information to messages after skipping")
+  @Test
+  void shouldAddTracingAfterSkipping() throws IOException {
+    List<String> tracingPath = List.of("abcde", "1234567");
+    Message incomingMessage = new Message();
+    incomingMessage.setTracing(tracingPath);
+    when(tracing.tracingPath()).thenReturn(tracingPath);
+    when(flow.process(incomingMessage))
+        .thenThrow(new SkipProcessingException("Skip processing").send(new Message()));
+    worker.process(incomingMessage);
+    Message expectedMessage = new Message();
+    expectedMessage.setTracing(tracingPath);
+    verify(messageBroker).send(List.of(expectedMessage));
   }
 }
