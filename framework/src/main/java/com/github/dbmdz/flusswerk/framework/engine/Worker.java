@@ -10,6 +10,7 @@ import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -89,6 +90,10 @@ public class Worker implements Runnable {
       return; // processing was not successful → stop here
     } catch (SkipProcessingException e) {
       messagesToSend = e.getOutgoingMessages();
+      messagesToSend.stream()
+          .filter(Objects::nonNull)
+          .filter(m -> m.getTracing() == null || m.getTracing().isEmpty())
+          .forEach(m -> m.setTracing(tracing.tracingPath()));
       skip = e;
       MDC.put("status", "skip");
       MDC.put("skipReason", e.getMessage());
