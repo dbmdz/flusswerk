@@ -55,25 +55,27 @@ public class RabbitClient {
     // We need a recoverable connection since we don't want to handle connection and channel
     // recovery ourselves.
     if (channel instanceof RecoverableChannel rc) {
-      rc.addRecoveryListener(new RecoveryListener() {
-        @Override
-        public void handleRecovery(Recoverable recoverable) {
-          // Whenever a connection has failed and is then automatically recovered, we want to reset
-          // the availability flag and signal all threads that are currently waiting for the
-          // connection's channel to become available again so they can retry their respective
-          // channel operation.
-          log.info("Connection recovered");
-          channelAvailable = true;
-          channelLock.lock();
-          channelAvailableAgain.signal();
-          channelLock.unlock();
-        }
+      rc.addRecoveryListener(
+          new RecoveryListener() {
+            @Override
+            public void handleRecovery(Recoverable recoverable) {
+              // Whenever a connection has failed and is then automatically recovered, we want to
+              // reset
+              // the availability flag and signal all threads that are currently waiting for the
+              // connection's channel to become available again so they can retry their respective
+              // channel operation.
+              log.info("Connection recovered");
+              channelAvailable = true;
+              channelLock.lock();
+              channelAvailableAgain.signal();
+              channelLock.unlock();
+            }
 
-        @Override
-        public void handleRecoveryStarted(Recoverable recoverable) {
-          // NOP
-        }
-      });
+            @Override
+            public void handleRecoveryStarted(Recoverable recoverable) {
+              // NOP
+            }
+          });
     } else {
       throw new RuntimeException("Flusswerk needs a recoverable connection to RabbitMQ");
     }
