@@ -1,5 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.rabbitmq;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.jackson.FlusswerkObjectMapper;
 import com.github.dbmdz.flusswerk.framework.model.Envelope;
@@ -9,9 +10,17 @@ import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.GetResponse;
+import com.rabbitmq.client.Recoverable;
+import com.rabbitmq.client.RecoverableChannel;
+import com.rabbitmq.client.RecoveryListener;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RabbitClient {
 
@@ -27,19 +36,47 @@ public class RabbitClient {
 
   private static final boolean SINGLE_MESSAGE = false;
 
-  private Channel channel;
+  private static final Logger log = LoggerFactory.getLogger(RabbitClient.class);
+
+  private final Channel channel;
+
+  private final Lock channelLock = new ReentrantLock();
+  private final Condition channelAvailableAgain = channelLock.newCondition();
+  private boolean channelAvailable = true;
 
   private final FlusswerkObjectMapper objectMapper;
-
-  private final RabbitConnection connection;
 
   public RabbitClient(RabbitConnection rabbitConnection) {
     this(new IncomingMessageType(), rabbitConnection);
   }
 
   public RabbitClient(FlusswerkObjectMapper flusswerkObjectMapper, RabbitConnection connection) {
-    this.connection = connection;
     channel = connection.getChannel();
+    // We need a recoverable connection since we don't want to handle connection and channel
+    // recovery ourselves.
+    if (channel instanceof RecoverableChannel rc) {
+      rc.addRecoveryListener(new RecoveryListener() {
+        @Override
+        public void handleRecovery(Recoverable recoverable) {
+          // Whenever a connection has failed and is then automatically recovered, we want to reset
+          // the availability flag and signal all threads that are currently waiting for the
+          // connection's channel to become available again so they can retry their respective
+          // channel operation.
+          log.info("Connection recovered");
+          channelAvailable = true;
+          channelLock.lock();
+          channelAvailableAgain.signal();
+          channelLock.unlock();
+        }
+
+        @Override
+        public void handleRecoveryStarted(Recoverable recoverable) {
+          // NOP
+        }
+      });
+    } else {
+      throw new RuntimeException("Flusswerk needs a recoverable connection to RabbitMQ");
+    }
     objectMapper = flusswerkObjectMapper;
   }
 
@@ -52,22 +89,37 @@ public class RabbitClient {
     sendRaw(exchange, routingKey, data);
   }
 
-  void sendRaw(String exchange, String routingKey, byte[] data) throws IOException {
+  void sendRaw(String exchange, String routingKey, byte[] data) {
     AMQP.BasicProperties properties =
         new AMQP.BasicProperties.Builder()
             .contentType("application/json")
             .deliveryMode(PERSISTENT)
             .build();
 
-    try {
-      channel.basicPublish(exchange, routingKey, properties, data);
-    } catch (Exception e) {
-      tryToReconnect("Could not publish message to " + routingKey);
-      channel.basicPublish(exchange, routingKey, properties, data);
+    // The channel might not be available or become unavailable due to a connection error. In this
+    // case, we wait until the connection becomes available again.
+    while (true) {
+      if (channelAvailable) {
+        try {
+          channel.basicPublish(exchange, routingKey, properties, data);
+          break;
+        } catch (IOException e) {
+          log.warn("Failed to publish message to RabbitMQ: {}", e.getMessage(), e);
+          channelAvailable = false;
+        }
+      }
+      // We loop here because the signal might be triggered due to what the JVM documentation calls
+      // a 'spurious wakeup', i.e. the signal is triggered even though no connection recovery has
+      // yet happened.
+      while (!channelAvailable) {
+        channelLock.lock();
+        channelAvailableAgain.awaitUninterruptibly();
+        channelLock.unlock();
+      }
     }
   }
 
-  Message deserialize(String body) throws IOException {
+  Message deserialize(String body) throws JsonProcessingException {
     return objectMapper.deserialize(body);
   }
 
@@ -75,59 +127,76 @@ public class RabbitClient {
     return objectMapper.writeValueAsBytes(message);
   }
 
-  public void ack(Envelope envelope) throws IOException {
-    try {
-      channel.basicAck(envelope.getDeliveryTag(), SINGLE_MESSAGE);
-    } catch (Exception e) {
-      tryToReconnect("Could not ack message");
-      channel.basicAck(envelope.getDeliveryTag(), SINGLE_MESSAGE);
-    }
-  }
-
-  private void tryToReconnect(String errorMessage) throws IOException {
-    try {
-      connection.waitForConnection();
-      channel = connection.getChannel();
-    } catch (IOException e) {
-      throw new IOException(errorMessage, e);
-    }
-  }
-
-  public Message receive(String queueName) throws IOException, InvalidMessageException {
-    GetResponse response;
-    try {
-      response = channel.basicGet(queueName, NO_AUTO_ACK);
-    } catch (Exception e) {
-      tryToReconnect("Could not receive message from " + queueName);
-      response = channel.basicGet(queueName, NO_AUTO_ACK);
-    }
-    if (response != null) {
-      String body = new String(response.getBody(), StandardCharsets.UTF_8);
-
-      try {
-        Message message = deserialize(body);
-        message.getEnvelope().setBody(body);
-        message.getEnvelope().setDeliveryTag(response.getEnvelope().getDeliveryTag());
-        message.getEnvelope().setSource(queueName);
-        return message;
-      } catch (Exception e) {
-        Envelope envelope = new Envelope();
-        envelope.setBody(body);
-        envelope.setDeliveryTag(response.getEnvelope().getDeliveryTag());
-        envelope.setSource(queueName);
-        throw new InvalidMessageException(envelope, e.getMessage(), e);
+  public void ack(Envelope envelope) {
+    // The channel might not be available or become unavailable due to a connection error. In this
+    // case, we wait until the connection becomes available again.
+    while (true) {
+      if (channelAvailable) {
+        try {
+          channel.basicAck(envelope.getDeliveryTag(), SINGLE_MESSAGE);
+          break;
+        } catch (IOException e) {
+          log.warn("Failed to ACK message to RabbitMQ: {}", e.getMessage(), e);
+          channelAvailable = false;
+        }
+      }
+      // We loop here because the signal might be triggered due to what the JVM documentation calls
+      // a 'spurious wakeup', i.e. the signal is triggered even though no connection recovery has
+      // yet happened.
+      while (!channelAvailable) {
+        channelLock.lock();
+        channelAvailableAgain.awaitUninterruptibly();
+        channelLock.unlock();
       }
     }
-    return null;
+  }
+
+  public Message receive(String queueName) throws InvalidMessageException {
+    GetResponse response;
+    // The channel might not be available or become unavailable due to a connection error. In this
+    // case, we wait until the connection becomes available again.
+    while (true) {
+      if (channelAvailable) {
+        try {
+          response = channel.basicGet(queueName, NO_AUTO_ACK);
+          break;
+        } catch (IOException e) {
+          log.warn("Failed to receive message from RabbitMQ: {}", e.getMessage(), e);
+          channelAvailable = false;
+        }
+      }
+      // We loop here because the signal might be triggered due to what the JVM documentation calls
+      // a 'spurious wakeup', i.e. the signal is triggered even though no connection recovery has
+      // yet happened.
+      while (!channelAvailable) {
+        channelLock.lock();
+        channelAvailableAgain.awaitUninterruptibly();
+        channelLock.unlock();
+      }
+    }
+
+    if (response == null) {
+      return null;
+    }
+
+    String body = new String(response.getBody(), StandardCharsets.UTF_8);
+    try {
+      Message message = deserialize(body);
+      message.getEnvelope().setBody(body);
+      message.getEnvelope().setDeliveryTag(response.getEnvelope().getDeliveryTag());
+      message.getEnvelope().setSource(queueName);
+      return message;
+    } catch (JsonProcessingException e) {
+      Envelope envelope = new Envelope();
+      envelope.setBody(body);
+      envelope.setDeliveryTag(response.getEnvelope().getDeliveryTag());
+      envelope.setSource(queueName);
+      throw new InvalidMessageException(envelope, e.getMessage(), e);
+    }
   }
 
   public void provideExchange(String exchange) throws IOException {
-    try {
-      channel.exchangeDeclare(exchange, BuiltinExchangeType.TOPIC, DURABLE);
-    } catch (Exception e) {
-      tryToReconnect("Could not declare exchange");
-      channel.exchangeDeclare(exchange, BuiltinExchangeType.TOPIC, DURABLE);
-    }
+    channel.exchangeDeclare(exchange, BuiltinExchangeType.TOPIC, DURABLE);
   }
 
   public void declareQueue(
@@ -138,21 +207,11 @@ public class RabbitClient {
   }
 
   public void createQueue(String name, Map<String, Object> args) throws IOException {
-    try {
-      channel.queueDeclare(name, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, args);
-    } catch (Exception e) {
-      tryToReconnect("Could not declare queue");
-      channel.queueDeclare(name, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, args);
-    }
+    channel.queueDeclare(name, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, args);
   }
 
   public void bindQueue(String name, String exchange, String routingKey) throws IOException {
-    try {
-      channel.queueBind(name, exchange, routingKey);
-    } catch (Exception e) {
-      tryToReconnect("Could not bind queue to exchange");
-      channel.queueBind(name, exchange, routingKey);
-    }
+    channel.queueBind(name, exchange, routingKey);
   }
 
   public Long getMessageCount(String queue) throws IOException {

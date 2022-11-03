@@ -19,6 +19,7 @@ import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.GetResponse;
+import com.rabbitmq.client.RecoverableChannel;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -38,7 +39,7 @@ class RabbitClientTest {
   @BeforeEach
   void setUp() {
     connection = mock(RabbitConnection.class);
-    channel = mock(Channel.class);
+    channel = mock(RecoverableChannel.class);
     when(connection.getChannel()).thenReturn(channel);
     message = new Message();
   }

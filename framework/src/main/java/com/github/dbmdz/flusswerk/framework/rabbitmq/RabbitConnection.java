@@ -51,7 +51,7 @@ public class RabbitConnection {
     return channel;
   }
 
-  final void waitForConnection() throws IOException {
+  private void waitForConnection() throws IOException {
     List<Address> addresses =
         rabbitMQ.getHosts().stream().map(Address::parseAddress).collect(Collectors.toList());
     boolean connectionIsFailing = true;
