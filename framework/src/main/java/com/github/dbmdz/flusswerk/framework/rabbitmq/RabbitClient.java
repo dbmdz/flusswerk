@@ -7,6 +7,7 @@ import com.github.dbmdz.flusswerk.framework.model.Envelope;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.AlreadyClosedException;
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.GetResponse;
@@ -60,11 +61,10 @@ public class RabbitClient {
             @Override
             public void handleRecovery(Recoverable recoverable) {
               // Whenever a connection has failed and is then automatically recovered, we want to
-              // reset
-              // the availability flag and signal all threads that are currently waiting for the
-              // connection's channel to become available again so they can retry their respective
-              // channel operation.
-              log.info("Connection recovered");
+              // reset the availability flag and signal all threads that are currently waiting for
+              // the connection's channel to become available again so they can retry their
+              // respective channel operation.
+              log.info("Connection recovered.");
               channelAvailable = true;
               channelLock.lock();
               channelAvailableAgain.signal();
@@ -105,7 +105,7 @@ public class RabbitClient {
         try {
           channel.basicPublish(exchange, routingKey, properties, data);
           break;
-        } catch (IOException e) {
+        } catch (IOException | AlreadyClosedException e) {
           log.warn("Failed to publish message to RabbitMQ: {}", e.getMessage(), e);
           channelAvailable = false;
         }
@@ -137,7 +137,7 @@ public class RabbitClient {
         try {
           channel.basicAck(envelope.getDeliveryTag(), SINGLE_MESSAGE);
           break;
-        } catch (IOException e) {
+        } catch (IOException | AlreadyClosedException e) {
           log.warn("Failed to ACK message to RabbitMQ: {}", e.getMessage(), e);
           channelAvailable = false;
         }
@@ -162,7 +162,7 @@ public class RabbitClient {
         try {
           response = channel.basicGet(queueName, NO_AUTO_ACK);
           break;
-        } catch (IOException e) {
+        } catch (IOException | AlreadyClosedException e) {
           log.warn("Failed to receive message from RabbitMQ: {}", e.getMessage(), e);
           channelAvailable = false;
         }

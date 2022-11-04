@@ -74,6 +74,11 @@
       <version>1.17.5</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>toxiproxy</artifactId>
+      <version>1.17.5</version>
+    </dependency>
   </dependencies>
 
   <build>
