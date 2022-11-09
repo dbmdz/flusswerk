@@ -33,7 +33,7 @@ jobs:
         run: mvn -B -Pintegration verify
   publish:
     if: (github.event_name == 'push' && contains(github.ref, 'main')) || github.event_name == 'release'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build
     steps:
       - uses: actions/checkout@v2
