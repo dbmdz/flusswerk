@@ -55,7 +55,8 @@ public class RabbitClient {
     channel = connection.getChannel();
     // We need a recoverable connection since we don't want to handle connection and channel
     // recovery ourselves.
-    if (channel instanceof RecoverableChannel rc) {
+    if (channel instanceof RecoverableChannel) {
+      RecoverableChannel rc = (RecoverableChannel) channel;
       rc.addRecoveryListener(
           new RecoveryListener() {
             @Override
