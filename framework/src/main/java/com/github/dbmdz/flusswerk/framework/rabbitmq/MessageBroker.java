@@ -108,7 +108,21 @@ public class MessageBroker {
    * @throws InvalidMessageException if the message could not be read and deserialized
    */
   public Message receive(String queueName) throws IOException, InvalidMessageException {
-    return rabbitClient.receive(queueName);
+    return receive(queueName, false);
+  }
+
+  /**
+   * Gets one message from the queue. If specified, the message will be acknowledged automatically.
+   *
+   * @param queueName the queue to receive.
+   * @param autoAck whether the message should be acknowledged automatically.
+   * @return the received message.
+   * @throws IOException if communication with RabbitMQ failed.
+   * @throws InvalidMessageException if the message could not be read and deserialized
+   */
+  public Message receive(String queueName, boolean autoAck)
+      throws IOException, InvalidMessageException {
+    return rabbitClient.receive(queueName, autoAck);
   }
 
   /**

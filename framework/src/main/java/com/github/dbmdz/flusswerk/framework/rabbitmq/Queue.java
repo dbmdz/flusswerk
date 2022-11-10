@@ -48,15 +48,16 @@ public class Queue {
   }
 
   /**
-   * Tries to receives a message from RabbitMQ.
+   * Tries to receive a message from RabbitMQ.
    *
+   * @param autoAck whether the message should be acknowledged automatically.
    * @return An {@link Optional} that contains the received message or is empty if the queue is
    *     empty.
    * @throws IOException If communication with RabbitMQ fails.
    * @throws InvalidMessageException If deserialization of the message fails.
    */
-  public Optional<Message> receive() throws IOException, InvalidMessageException {
-    Message message = rabbitClient.receive(name);
+  public Optional<Message> receive(boolean autoAck) throws IOException, InvalidMessageException {
+    Message message = rabbitClient.receive(name, autoAck);
     return Optional.ofNullable(message);
   }
 

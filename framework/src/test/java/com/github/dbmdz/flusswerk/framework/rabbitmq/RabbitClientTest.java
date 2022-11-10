@@ -94,7 +94,7 @@ class RabbitClientTest {
     String body = new String(response.getBody(), StandardCharsets.UTF_8);
 
     when(channel.basicGet(inputQueue, false)).thenReturn(response);
-    Message message = rabbitClient.receive(inputQueue);
+    Message message = rabbitClient.receive(inputQueue, false);
     assertThat(message.getEnvelope())
         .returns(body, from(Envelope::getBody))
         .returns(deliveryTag, from(Envelope::getDeliveryTag))
@@ -149,7 +149,7 @@ class RabbitClientTest {
     RabbitClient rabbitClient = new RabbitClient(connection);
 
     InvalidMessageException thrown =
-        assertThrows(InvalidMessageException.class, () -> rabbitClient.receive("test"));
+        assertThrows(InvalidMessageException.class, () -> rabbitClient.receive("test", false));
     assertThat(thrown.getMessage()).startsWith("Unrecognized token 'NoValidJson'");
   }
 }

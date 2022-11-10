@@ -154,14 +154,14 @@ public class RabbitClient {
     }
   }
 
-  public Message receive(String queueName) throws InvalidMessageException {
+  public Message receive(String queueName, boolean autoAck) throws InvalidMessageException {
     GetResponse response;
     // The channel might not be available or become unavailable due to a connection error. In this
     // case, we wait until the connection becomes available again.
     while (true) {
       if (channelAvailable) {
         try {
-          response = channel.basicGet(queueName, NO_AUTO_ACK);
+          response = channel.basicGet(queueName, autoAck);
           break;
         } catch (IOException | AlreadyClosedException e) {
           log.warn("Failed to receive message from RabbitMQ: {}", e.getMessage(), e);

@@ -155,7 +155,6 @@ public class ReconnectTest {
 
   @AfterEach
   void stopEngine() throws IOException {
-    // FIXME: Stopping fails due to bad delivery tags, why is that?
     engine.stop();
     rabbitUtil.purgeQueues();
   }
@@ -175,16 +174,20 @@ public class ReconnectTest {
     log.info("Re-establishing RabbitMQ connection");
     proxy.toxics().get("timeout").remove();
     log.info("Checking that connection has recovered by fetching a message ");
-    var received = (TestMessage) rabbitUtil.receive();
+    // When using Basic.Get the RabbitMQ client will not adapt delivery tags by adding an offset.
+    // When acknowledging the message, however, the offset will be subtracted so that we end up with
+    // invalid delivery tags. (see
+    // https://github.com/rabbitmq/rabbitmq-java-client/blob/main/src/main/java/com/rabbitmq/client/impl/recovery/RecoveryAwareChannelN.java)
+    // Solution: use automatic acknowledgements with Basic.Get.
+    var received = (TestMessage) rabbitUtil.receive(true);
     assertThat(received.getId()).isEqualTo("HELLO WORLD");
     assertThat(rabbitUtil).allQueuesAreEmpty();
 
     // Any subsequent  messages should go through without any additional delay
     input = new TestMessage("and now again");
     rabbitUtil.send(input);
-    received = (TestMessage) rabbitUtil.receive();
+    received = (TestMessage) rabbitUtil.receive(true);
     assertThat(received.getId()).isEqualTo("AND NOW AGAIN");
-    // FIXME: This assertion fails, why?
     assertThat(rabbitUtil).allQueuesAreEmpty();
   }
 }
