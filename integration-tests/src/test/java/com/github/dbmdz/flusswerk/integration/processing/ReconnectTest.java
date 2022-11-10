@@ -1,6 +1,5 @@
 package com.github.dbmdz.flusswerk.integration.processing;
 
-import static com.github.dbmdz.flusswerk.integration.RabbitUtilAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.dbmdz.flusswerk.framework.config.FlusswerkConfiguration;
@@ -10,16 +9,24 @@ import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
+import com.github.dbmdz.flusswerk.framework.jackson.FlusswerkObjectMapper;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
+import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitConnection;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import com.github.dbmdz.flusswerk.integration.RabbitUtil;
 import com.github.dbmdz.flusswerk.integration.TestMessage;
+import com.rabbitmq.client.AMQP.BasicProperties;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Envelope;
 import eu.rekawek.toxiproxy.Proxy;
 import eu.rekawek.toxiproxy.ToxiproxyClient;
 import eu.rekawek.toxiproxy.model.ToxicDirection;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
@@ -83,10 +90,21 @@ public class ReconnectTest {
 
   private final RabbitUtil rabbitUtil;
 
+  private final RabbitConnection rabbitConnection;
+
+  private final FlusswerkObjectMapper flusswerkObjectMapper;
+
   @Autowired
-  public ReconnectTest(Engine engine, RoutingProperties routingProperties, RabbitMQ rabbitMQ) {
+  public ReconnectTest(
+      Engine engine,
+      RoutingProperties routingProperties,
+      RabbitMQ rabbitMQ,
+      RabbitConnection rabbitConnection,
+      FlusswerkObjectMapper flusswerkObjectMapper) {
     this.engine = engine;
     rabbitUtil = new RabbitUtil(rabbitMQ, routingProperties);
+    this.rabbitConnection = rabbitConnection;
+    this.flusswerkObjectMapper = flusswerkObjectMapper;
   }
 
   @TestConfiguration
@@ -175,23 +193,41 @@ public class ReconnectTest {
     log.info("Re-establishing RabbitMQ connection");
     proxy.toxics().get("timeout").remove();
     log.info("Checking that connection has recovered by fetching a message ");
-    // When using Basic.Get the RabbitMQ client will not adapt delivery tags by adding an offset.
-    // When acknowledging the message, however, the offset will be subtracted so that we end up with
-    // invalid delivery tags. (see
-    // https://github.com/rabbitmq/rabbitmq-java-client/blob/main/src/main/java/com/rabbitmq/client/impl/recovery/RecoveryAwareChannelN.java)
-    // Solution: use automatic acknowledgements with Basic.Get.
-    var received = (TestMessage) rabbitUtil.receive(true);
-    assertThat(received.getId()).isEqualTo("HELLO WORLD");
-    // initial message will be retransmitted because of missing ACK
-    received = (TestMessage) rabbitUtil.receive(true);
-    assertThat(received.getId()).isEqualTo("HELLO WORLD");
-    assertThat(rabbitUtil).allQueuesAreEmpty();
 
-    // Any subsequent  messages should go through without any additional delay
-    input = new TestMessage("and now again");
-    rabbitUtil.send(input);
-    received = (TestMessage) rabbitUtil.receive(true);
-    assertThat(received.getId()).isEqualTo("AND NOW AGAIN");
-    assertThat(rabbitUtil).allQueuesAreEmpty();
+    Channel channel = rabbitConnection.getChannel();
+    CollectMessages collectMessages = new CollectMessages(channel, flusswerkObjectMapper);
+    channel.basicConsume("output", true, collectMessages);
+
+    Thread.sleep(1000);
+
+    assertThat(collectMessages.getMessages())
+        .map(TestMessage.class::cast)
+        .map(TestMessage::getId)
+        .containsExactly("HELLO WORLD", "AND NOW AGAIN");
+  }
+
+  static class CollectMessages extends DefaultConsumer {
+    private final List<Message> messages = new ArrayList<>();
+    private final FlusswerkObjectMapper flusswerkObjectMapper;
+    private final Channel channel;
+
+    public CollectMessages(Channel channel, FlusswerkObjectMapper flusswerkObjectMapper) {
+      super(channel);
+      this.channel = channel;
+      this.flusswerkObjectMapper = flusswerkObjectMapper;
+    }
+
+    public void handleDelivery(
+        String consumerTag, Envelope envelope, BasicProperties properties, byte[] body)
+        throws IOException {
+      String json = new String(body, StandardCharsets.UTF_8);
+      Message message = flusswerkObjectMapper.deserialize(json);
+      messages.add(message);
+      channel.basicAck(envelope.getDeliveryTag(), false);
+    }
+
+    public List<Message> getMessages() {
+      return messages;
+    }
   }
 }
