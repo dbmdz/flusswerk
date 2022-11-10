@@ -138,7 +138,8 @@ public class ReconnectTest {
           .writerSendingMessage(
               msg -> {
                 try {
-                  Thread.sleep(100);
+                  // delay: disruption will occur before message processing is completed
+                  Thread.sleep(1000);
                 } catch (InterruptedException e) {
                   throw new RuntimeException(e);
                 }
@@ -159,9 +160,9 @@ public class ReconnectTest {
     rabbitUtil.purgeQueues();
   }
 
-  @DisplayName("then the message should end up in the output queue")
+  @DisplayName("processing should continue with the last message that wasn't acknowledged")
   @Test
-  public void successfulMessagesShouldGoToOutQueue() throws Exception {
+  public void recoveryAfterDisruptionDuringProcessing() throws Exception {
     TestMessage input = new TestMessage("hello world");
 
     log.info("Sending message");
@@ -180,6 +181,9 @@ public class ReconnectTest {
     // https://github.com/rabbitmq/rabbitmq-java-client/blob/main/src/main/java/com/rabbitmq/client/impl/recovery/RecoveryAwareChannelN.java)
     // Solution: use automatic acknowledgements with Basic.Get.
     var received = (TestMessage) rabbitUtil.receive(true);
+    assertThat(received.getId()).isEqualTo("HELLO WORLD");
+    // initial message will be retransmitted because of missing ACK
+    received = (TestMessage) rabbitUtil.receive(true);
     assertThat(received.getId()).isEqualTo("HELLO WORLD");
     assertThat(rabbitUtil).allQueuesAreEmpty();
 

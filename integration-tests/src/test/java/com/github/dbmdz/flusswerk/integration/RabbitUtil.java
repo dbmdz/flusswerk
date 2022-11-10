@@ -49,7 +49,7 @@ public class RabbitUtil {
     Thread.sleep(10); // wait for message to arrive
     Optional<Message> received = queue.receive(autoAck);
     if (received.isEmpty()) {
-      Thread.sleep(1_000); // wait more in case first wait was not enough
+      Thread.sleep(2000); // wait more in case first wait was not enough
       received = queue.receive(autoAck);
     }
     if (received.isEmpty()) {

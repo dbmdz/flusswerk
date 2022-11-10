@@ -68,7 +68,7 @@ public class RabbitClient {
               log.info("Connection recovered.");
               channelAvailable = true;
               channelLock.lock();
-              channelAvailableAgain.signal();
+              channelAvailableAgain.signalAll();
               channelLock.unlock();
             }
 
