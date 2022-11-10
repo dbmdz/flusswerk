@@ -17,7 +17,6 @@ import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import com.github.dbmdz.flusswerk.integration.RabbitUtil;
 import com.github.dbmdz.flusswerk.integration.TestMessage;
 import com.rabbitmq.client.AMQP.BasicProperties;
-import com.rabbitmq.client.AlreadyClosedException;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
@@ -193,36 +192,23 @@ public class ReconnectTest {
     Thread.sleep(15000);
     log.info("Re-establishing RabbitMQ connection");
     proxy.toxics().get("timeout").remove();
+    Thread.sleep(15000);
     log.info("Connection should be recovered now, sending another message");
-
-    try {
-      rabbitUtil.send(new TestMessage("and now again"));
-    } catch (IOException | AlreadyClosedException e) {
-      log.warn("Failed to send message, waiting for recovery: {}", e.getMessage(), e);
-      Thread.sleep(5_000);
-      log.info("Connection should be recovered now, sending message again");
-      rabbitUtil.send(new TestMessage("and now again"));
-    }
+    rabbitUtil.send(new TestMessage("and now again"));
 
     Channel channel = rabbitConnection.getChannel();
     CollectMessages collectMessages = new CollectMessages(channel, flusswerkObjectMapper);
-    try {
-      channel.basicConsume("output", true, collectMessages);
-    } catch (IOException | AlreadyClosedException e) {
-      log.warn("Failed to receive messages, waiting for recovery: {}", e.getMessage(), e);
-      Thread.sleep(5_000);
-      log.info("Connection should be recovered now, trying again");
-      channel.basicConsume("output", true, collectMessages);
-    }
+    channel.basicConsume("output", false, collectMessages);
 
-    Thread.sleep(1000);
+    // Give the second message some time to be processed
+    Thread.sleep(2000);
 
     channel.basicCancel(collectMessages.getConsumerTag());
 
     assertThat(collectMessages.getMessages())
         .map(TestMessage.class::cast)
         .map(TestMessage::getId)
-        .containsExactly("HELLO WORLD", "AND NOW AGAIN");
+        .contains("HELLO WORLD", "AND NOW AGAIN");
   }
 
   static class CollectMessages extends DefaultConsumer {

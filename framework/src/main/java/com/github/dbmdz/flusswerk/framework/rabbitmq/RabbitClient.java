@@ -107,7 +107,9 @@ public class RabbitClient {
           channel.basicPublish(exchange, routingKey, properties, data);
           break;
         } catch (IOException | AlreadyClosedException e) {
-          log.warn("Failed to publish message to RabbitMQ: {}", e.getMessage(), e);
+          log.warn(
+              "Failed to publish message to RabbitMQ: '{}', waiting for channel to become available again",
+              e.getMessage());
           channelAvailable = false;
         }
       }
