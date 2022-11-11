@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.dbmdz.flusswerk.framework.config.FlusswerkConfiguration;
 import com.github.dbmdz.flusswerk.framework.config.FlusswerkPropertiesConfiguration;
+import com.github.dbmdz.flusswerk.framework.config.properties.RabbitMQProperties;
 import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.exceptions.RetryProcessingException;
@@ -12,10 +13,12 @@ import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.model.Message;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitConnection;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import com.github.dbmdz.flusswerk.integration.RabbitUtil;
 import com.github.dbmdz.flusswerk.integration.TestMessage;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import org.junit.jupiter.api.AfterEach;
@@ -30,23 +33,32 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.testcontainers.containers.RabbitMQContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest
+@SpringBootTest(properties = "spring.main.allow-bean-definition-overriding=true")
 @ContextConfiguration(
     classes = {
-      RetryTest.FlowConfiguration.class,
       FlusswerkPropertiesConfiguration.class,
-      FlusswerkConfiguration.class
+      FlusswerkConfiguration.class,
+      RetryTest.FlowConfiguration.class,
     })
 @Import({MetricsAutoConfiguration.class, CompositeMeterRegistryAutoConfiguration.class})
 @DisplayName("When processing for a message fails")
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+@Testcontainers
 public class RetryTest {
+
+  @Container
+  static RabbitMQContainer rabbitMQContainer =
+      new RabbitMQContainer("rabbitmq:3-management-alpine");
 
   private final Engine engine;
 
@@ -70,6 +82,20 @@ public class RetryTest {
 
   @TestConfiguration
   static class FlowConfiguration {
+    @Bean
+    @Primary
+    public RabbitConnection rabbitConnection() throws IOException {
+      return new RabbitConnection(
+          new RabbitMQProperties(
+              List.of(
+                  String.format(
+                      "%s:%d", rabbitMQContainer.getHost(), rabbitMQContainer.getAmqpPort())),
+              "/",
+              "guest",
+              "guest"),
+          "no-flow-test");
+    }
+
     @Bean
     public IncomingMessageType incomingMessageType() {
       return new IncomingMessageType(TestMessage.class);

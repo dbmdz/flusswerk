@@ -14,7 +14,7 @@ jobs:
       --add-exports jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED \
       --add-exports jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED \
       --add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED "
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         java: [11, 17]
@@ -35,10 +35,6 @@ jobs:
       - name: Build with Maven
         run: mvn -B -Pintegration verify
     services:
-      rabbitmq:
-        image: rabbitmq:3-alpine
-        ports:
-          - 5672:5672
       redis:
         image: redis
         ports:

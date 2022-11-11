@@ -104,14 +104,14 @@ class MessageBrokerTest {
   void receiveShouldPullTheSpecifiedQueue() throws IOException, InvalidMessageException {
     String queue = "a.very.special.queue";
     messageBroker.receive(queue);
-    verify(rabbitClient).receive(queue);
+    verify(rabbitClient).receive(queue, false);
   }
 
   @Test
   @DisplayName("Default receive should pull from the input queue")
   void defaultReceiveShouldPullTheInputQueue() throws IOException, InvalidMessageException {
     messageBroker.receive();
-    verify(rabbitClient).receive(routing.getIncoming().get(0));
+    verify(rabbitClient).receive(routing.getIncoming().get(0), false);
   }
 
   @Test
@@ -140,7 +140,7 @@ class MessageBrokerTest {
     envelope.setDeliveryTag(1);
     envelope.setBody(invalidMessageBody);
     envelope.setSource("some.input.queue");
-    when(rabbitClient.receive(eq("some.input.queue")))
+    when(rabbitClient.receive(eq("some.input.queue"), eq(false)))
         .thenThrow(new InvalidMessageException(envelope, "Invalid message"));
 
     Assertions.assertThat(messageBroker.receive()).isNull();

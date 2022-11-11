@@ -43,35 +43,45 @@ public class RabbitUtil {
     rabbitMQ.topic(firstInput()).send(message);
   }
 
-  private Message checkedReceive(String queueName)
+  private Message checkedReceive(String queueName, boolean autoAck)
       throws InvalidMessageException, IOException, InterruptedException {
     var queue = rabbitMQ.queue(queueName);
     Thread.sleep(10); // wait for message to arrive
-    Optional<Message> received = queue.receive();
+    Optional<Message> received = queue.receive(autoAck);
     if (received.isEmpty()) {
-      Thread.sleep(1_000); // wait more in case first wait was not enough
-      received = queue.receive();
+      Thread.sleep(2000); // wait more in case first wait was not enough
+      received = queue.receive(autoAck);
     }
     if (received.isEmpty()) {
       throw new RuntimeException("No message received");
     }
     Message message = received.get();
-    rabbitMQ.ack(message);
+    if (!autoAck) {
+      rabbitMQ.ack(message);
+    }
     return message;
   }
 
   public Message receive() {
+    return receive(false);
+  }
+
+  public Message receive(boolean autoAck) {
     try {
-      return checkedReceive(output());
+      return checkedReceive(output(), autoAck);
     } catch (InterruptedException | InvalidMessageException | IOException e) {
       throw new RuntimeException(e);
     }
   }
 
   public Message receiveFailed() {
+    return receiveFailed(false);
+  }
+
+  public Message receiveFailed(boolean autoAck) {
     String failedQueue = routing.getFailurePolicy(firstInput()).getFailedRoutingKey();
     try {
-      return checkedReceive(failedQueue);
+      return checkedReceive(failedQueue, autoAck);
     } catch (InterruptedException | InvalidMessageException | IOException e) {
       throw new RuntimeException(e);
     }
