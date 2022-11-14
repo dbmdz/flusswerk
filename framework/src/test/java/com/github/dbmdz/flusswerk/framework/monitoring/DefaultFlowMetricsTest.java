@@ -3,7 +3,6 @@ package com.github.dbmdz.flusswerk.framework.monitoring;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -47,7 +46,7 @@ class DefaultFlowMetricsTest {
     FlowInfo flowInfo = mock(FlowInfo.class);
     when(flowInfo.getStatus()).thenReturn(Status.SUCCESS);
     defaultFlowMetrics.accept(flowInfo);
-    verify(flowInfo, times(2)).duration();
+    verify(flowInfo).duration();
     verify(flowInfo).getStatus();
   }
 }
