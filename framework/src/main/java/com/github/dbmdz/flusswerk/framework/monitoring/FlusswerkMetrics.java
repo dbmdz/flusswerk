@@ -38,14 +38,18 @@ public class FlusswerkMetrics implements FlowMetrics {
 
     for (Status status : Status.values()) {
       String statusTag = status.name().toLowerCase(Locale.ROOT);
-      Counter.builder("flusswerk.messages")
-          .tag("status", statusTag)
-          .description("Total number of messages processed since application start")
-          .register(registry);
-      Counter.builder("flusswerk.messages.seconds")
-          .tag("status", statusTag)
-          .description("Total time spent processing messages since application start")
-          .register(registry);
+      messagesTotal.put(
+          status,
+          Counter.builder("flusswerk.messages")
+              .tag("status", statusTag)
+              .description("Total number of messages processed since application start")
+              .register(registry));
+      messagesSeconds.put(
+          status,
+          Counter.builder("flusswerk.messages.seconds")
+              .tag("status", statusTag)
+              .description("Total time spent processing messages since application start")
+              .register(registry));
     }
   }
 
