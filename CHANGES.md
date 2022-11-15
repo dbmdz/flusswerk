@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.1.1] - 2022-11-14
+### Fixed
+
+- Rely on automatic connection recovery instead of managing it manually ([#410](https://github.com/dbmdz/flusswerk/pull/410))
+- Flusswerk metrics separated from application metrics ([#405](https://github.com/dbmdz/flusswerk/pull/405))
+- Tracing information added to messages send with `SkipProcessingException` ([#404](https://github.com/dbmdz/flusswerk/pull/404))
+
 ## [5.1.0] - 2022-05-18
 ### Added
 
