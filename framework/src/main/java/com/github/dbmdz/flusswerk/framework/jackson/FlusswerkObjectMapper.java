@@ -2,7 +2,9 @@ package com.github.dbmdz.flusswerk.framework.jackson;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.github.dbmdz.flusswerk.framework.model.Envelope;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.model.Message;
@@ -20,6 +22,8 @@ public class FlusswerkObjectMapper extends ObjectMapper {
     }
     addMixIn(Envelope.class, EnvelopeMixin.class);
     registerModule(new JavaTimeModule());
+    registerModule(new ParameterNamesModule());
+    registerModule(new Jdk8Module());
   }
 
   public Message deserialize(String json) throws JsonProcessingException {
