@@ -4,30 +4,13 @@ import static java.util.Objects.requireNonNullElse;
 
 import jakarta.validation.constraints.Min;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.yaml.snakeyaml.Yaml;
 
 /** Configuration related to the processing. */
 @ConfigurationProperties(prefix = "flusswerk.processing")
-public class ProcessingProperties {
+public record ProcessingProperties(@Min(1) Integer threads) {
 
-  @Min(1)
-  private final Integer threads;
-
-  public ProcessingProperties(@Min(1) Integer threads) {
-    this.threads = requireNonNullElse(threads, 5);
-  }
-
-  /**
-   * @return The number of concurrent processing threads in one job instance.
-   */
-  public Integer getThreads() {
-    return threads;
-  }
-
-  @Override
-  public String toString() {
-    Yaml yaml = new Yaml();
-    return yaml.dump(this);
+  public ProcessingProperties {
+    threads = requireNonNullElse(threads, 5);
   }
 
   public static ProcessingProperties defaults() {

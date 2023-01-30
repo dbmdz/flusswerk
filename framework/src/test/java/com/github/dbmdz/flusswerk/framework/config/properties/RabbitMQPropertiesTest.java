@@ -22,6 +22,6 @@ class RabbitMQPropertiesTest {
   @MethodSource("defaultHosts")
   void shouldDefaultToLocalhost(List<String> hosts) {
     var properties = new RabbitMQProperties(hosts, null, null, null);
-    assertThat(properties.getHosts()).containsExactly("localhost");
+    assertThat(properties.hosts()).containsExactly("localhost");
   }
 }

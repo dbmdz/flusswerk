@@ -22,7 +22,7 @@ public class AppPropertiesTest {
   @DisplayName("should have application name")
   @Test
   void shouldHaveAppNameFromApplicationYaml() {
-    assertThat(properties.getName()).isEqualTo("flusswerk.test");
+    assertThat(properties.name()).isEqualTo("flusswerk.test");
   }
 
   @DisplayName("should never have empty application name")

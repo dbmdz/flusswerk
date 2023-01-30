@@ -80,7 +80,7 @@ public class FlusswerkConfiguration {
 
     flow.get().registerFlowMetrics(flowMetrics);
 
-    var threads = processingProperties.getThreads();
+    var threads = processingProperties.threads();
 
     return new Engine(rabbitConnection.getChannel(), flusswerkConsumers, workers);
   }
@@ -88,7 +88,7 @@ public class FlusswerkConfiguration {
   @Bean
   public MeterFactory meterFactory(
       MonitoringProperties monitoringProperties, MeterRegistry meterRegistry) {
-    return new MeterFactory(monitoringProperties.getPrefix(), meterRegistry);
+    return new MeterFactory(monitoringProperties.prefix(), meterRegistry);
   }
 
   @Bean
@@ -100,7 +100,7 @@ public class FlusswerkConfiguration {
   @Bean
   public RabbitConnection rabbitConnection(
       AppProperties appProperties, RabbitMQProperties rabbitMQProperties) throws IOException {
-    return new RabbitConnection(rabbitMQProperties, appProperties.getName());
+    return new RabbitConnection(rabbitMQProperties, appProperties.name());
   }
 
   @Bean
@@ -142,15 +142,14 @@ public class FlusswerkConfiguration {
     if (flow.isEmpty()) {
       return Collections.emptyList(); // No Flow, nothing to do
     }
-    return IntStream.range(0, processingProperties.getThreads())
+    return IntStream.range(0, processingProperties.threads())
         .mapToObj(
             n ->
                 new Worker(
                     flow.get(),
                     metrics,
                     messageBroker,
-                    processReport.orElseGet(
-                        () -> new DefaultProcessReport(appProperties.getName())),
+                    processReport.orElseGet(() -> new DefaultProcessReport(appProperties.name())),
                     taskQueue,
                     tracing))
         .collect(Collectors.toList());
@@ -172,11 +171,11 @@ public class FlusswerkConfiguration {
     int maxPriority = routingProperties.getIncoming().size();
     List<FlusswerkConsumer> flusswerkConsumers = new ArrayList<>();
 
-    Semaphore availableWorkers = new Semaphore(processingProperties.getThreads());
+    Semaphore availableWorkers = new Semaphore(processingProperties.threads());
     for (int i = 0; i < routingProperties.getIncoming().size(); i++) {
       String queueName = routingProperties.getIncoming().get(i);
       int priority = maxPriority - i;
-      for (int k = 0; k < processingProperties.getThreads(); k++) {
+      for (int k = 0; k < processingProperties.threads(); k++) {
         flusswerkConsumers.add(
             new FlusswerkConsumer(
                 availableWorkers,
