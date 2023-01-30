@@ -1,10 +1,10 @@
 package com.github.dbmdz.flusswerk.framework.engine;
 
+import jakarta.validation.constraints.NotNull;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.TimeUnit;
-import javax.validation.constraints.NotNull;
 
 class TestingExecutorService extends AbstractExecutorService {
 

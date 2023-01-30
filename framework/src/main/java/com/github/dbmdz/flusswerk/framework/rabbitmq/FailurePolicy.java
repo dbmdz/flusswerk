@@ -3,9 +3,7 @@ package com.github.dbmdz.flusswerk.framework.rabbitmq;
 import static java.util.Objects.requireNonNullElse;
 
 import java.time.Duration;
-import org.springframework.boot.context.properties.ConstructorBinding;
 
-@ConstructorBinding
 public class FailurePolicy {
 
   private final String inputQueue;

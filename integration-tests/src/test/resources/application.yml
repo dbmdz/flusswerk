@@ -1,8 +1,9 @@
 spring:
   application:
     name: integration-tests
-  profiles:
-    active: local
+  config:
+    activate:
+      on-profile: "local"
 
 flusswerk:
   processing:
@@ -27,7 +28,9 @@ flusswerk:
 ---
 
 spring:
-  profiles: local
+  config:
+    activate:
+      on-profile: local
 
 flusswerk:
   rabbitmq:
@@ -36,7 +39,9 @@ flusswerk:
 
 ---
 spring:
-  profiles: ci
+  config:
+    activate:
+      on-profile: ci
 
 flusswerk:
   rabbitmq:
