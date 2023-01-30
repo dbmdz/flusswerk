@@ -3,13 +3,11 @@ package com.github.dbmdz.flusswerk.framework.config.properties;
 import static java.util.Objects.requireNonNullElseGet;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConstructorBinding;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
 /** Model for the configuration parameters in <code>application.yml</code>. */
-@ConstructorBinding
 @ConfigurationProperties(prefix = "flusswerk")
 public class FlusswerkProperties {
 
@@ -23,7 +21,6 @@ public class FlusswerkProperties {
 
   private final Yaml yaml;
 
-  @ConstructorBinding
   public FlusswerkProperties(
       ProcessingProperties processing,
       RabbitMQProperties rabbitmq,

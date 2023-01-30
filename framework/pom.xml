@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.github.dbmdz.flusswerk</groupId>
     <artifactId>flusswerk</artifactId>
-    <version>5.1.2-SNAPSHOT</version>
+    <version>6.0.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -42,12 +42,12 @@
       <artifactId>micrometer-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.annotation</groupId>
-      <artifactId>javax.annotation-api</artifactId>
+      <groupId>jakarta.annotation</groupId>
+      <artifactId>jakarta.annotation-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.validation</groupId>
-      <artifactId>validation-api</artifactId>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
     </dependency>
     <dependency>
       <groupId>net.logstash.logback</groupId>

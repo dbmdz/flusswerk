@@ -1,8 +1,8 @@
 package com.github.dbmdz.flusswerk.framework;
 
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
+import jakarta.annotation.PreDestroy;
 import java.util.Optional;
-import javax.annotation.PreDestroy;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

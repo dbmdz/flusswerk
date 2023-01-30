@@ -6,6 +6,7 @@ import static java.util.Objects.requireNonNullElseGet;
 
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.FailurePolicy;
+import jakarta.validation.constraints.NotBlank;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,12 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
-import javax.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConstructorBinding;
 
 /** AMQP/RabbitMQ routing information. */
-@ConstructorBinding
 @ConfigurationProperties(prefix = "flusswerk.routing")
 public class RoutingProperties {
 

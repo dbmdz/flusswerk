@@ -1,11 +1,9 @@
 package com.github.dbmdz.flusswerk.framework.config.properties;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConstructorBinding;
 import org.springframework.util.StringUtils;
 
-@ConstructorBinding
 @ConfigurationProperties(prefix = "spring.application")
 public class AppProperties {
 

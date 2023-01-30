@@ -2,10 +2,8 @@ package com.github.dbmdz.flusswerk.framework.config.properties;
 
 import java.util.Objects;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConstructorBinding;
 
 /** Settings for monitoring endpoints. */
-@ConstructorBinding
 @ConfigurationProperties(prefix = "flusswerk.monitoring")
 public class MonitoringProperties {
 
