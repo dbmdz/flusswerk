@@ -3,7 +3,7 @@ spring:
     name: integration-tests
   config:
     activate:
-      on-profile: "local"
+      on-profile: default
 
 flusswerk:
   processing:
