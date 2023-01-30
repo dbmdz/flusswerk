@@ -1,25 +1,14 @@
 package com.github.dbmdz.flusswerk.framework.config.properties;
 
-import java.util.Objects;
+import static java.util.Objects.requireNonNullElse;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /** Settings for monitoring endpoints. */
 @ConfigurationProperties(prefix = "flusswerk.monitoring")
-public class MonitoringProperties {
-
-  private final String prefix;
-
-  public MonitoringProperties(String prefix) {
-    this.prefix = Objects.requireNonNullElse(prefix, "flusswerk");
-  }
-
-  public String getPrefix() {
-    return prefix;
-  }
-
-  @Override
-  public String toString() {
-    return StringRepresentation.of(this);
+public record MonitoringProperties(String prefix) {
+  public MonitoringProperties {
+    prefix = requireNonNullElse(prefix, "flusswerk");
   }
 
   public static MonitoringProperties defaults() {

@@ -161,11 +161,6 @@ public class RoutingProperties {
     return deadLetterExchanges.get(queue);
   }
 
-  @Override
-  public String toString() {
-    return StringRepresentation.of(this);
-  }
-
   public FailurePolicy getFailurePolicy(Message message) {
     return getFailurePolicy(message.getEnvelope().getSource());
   }

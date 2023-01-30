@@ -21,7 +21,7 @@ public class FlusswerkMetrics implements FlowMetrics {
   protected final Map<Status, Counter> messagesSeconds;
 
   public FlusswerkMetrics(ProcessingProperties properties, MeterRegistry registry) {
-    this.totalWorkers = properties.getThreads();
+    this.totalWorkers = properties.threads();
 
     Gauge.builder("flusswerk.workers.total", activeWorkers, AtomicInteger::get)
         .description("Number of worker threads in the system")

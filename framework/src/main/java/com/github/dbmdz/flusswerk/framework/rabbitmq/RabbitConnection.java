@@ -34,8 +34,8 @@ public class RabbitConnection {
     this.rabbitMQ = rabbitMQ;
     this.factory = factory;
     this.appName = appName;
-    factory.setUsername(rabbitMQ.getUsername());
-    factory.setPassword(rabbitMQ.getPassword());
+    factory.setUsername(rabbitMQ.username());
+    factory.setPassword(rabbitMQ.password());
     rabbitMQ.getVirtualHost().ifPresent(factory::setVirtualHost);
     factory.setConnectionRecoveryTriggeringCondition(
         sse -> {
@@ -57,7 +57,7 @@ public class RabbitConnection {
 
   private void waitForConnection() throws IOException {
     List<Address> addresses =
-        rabbitMQ.getHosts().stream().map(Address::parseAddress).collect(Collectors.toList());
+        rabbitMQ.hosts().stream().map(Address::parseAddress).collect(Collectors.toList());
     boolean connectionIsFailing = true;
     while (connectionIsFailing) {
       try {

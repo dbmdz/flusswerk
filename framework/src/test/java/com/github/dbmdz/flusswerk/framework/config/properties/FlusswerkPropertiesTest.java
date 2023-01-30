@@ -22,13 +22,13 @@ public class FlusswerkPropertiesTest {
   @Test
   @DisplayName("Values of FlusswerkProperties.Processing are all set")
   public void valuesOfProcessing() {
-    assertThat(properties.getProcessing()).hasFieldOrPropertyWithValue("threads", 5);
+    assertThat(properties.processing()).hasFieldOrPropertyWithValue("threads", 5);
   }
 
   @Test
   @DisplayName("Values of FlusswerkProperties.Connection are all set")
   public void valuesOfConnection() {
-    assertThat(properties.getRabbitMQ())
+    assertThat(properties.rabbitmq())
         .hasFieldOrPropertyWithValue("hosts", List.of("my.rabbit.example.com"))
         .hasFieldOrPropertyWithValue("virtualHost", Optional.of("vh1"))
         .hasFieldOrPropertyWithValue("username", "guest")
@@ -38,7 +38,7 @@ public class FlusswerkPropertiesTest {
   @Test
   @DisplayName("Values of FlusswerkProperties.Routing are all set")
   public void valuesOfRouting() {
-    RoutingProperties routing = properties.getRouting();
+    RoutingProperties routing = properties.routing();
     assertThat(routing)
         .hasFieldOrPropertyWithValue("defaultExchange", "my.exchange")
         .hasFieldOrPropertyWithValue("incoming", List.of("first", "second"))
