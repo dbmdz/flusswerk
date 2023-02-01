@@ -33,13 +33,13 @@ public class Flow {
   private final Tracing tracing;
 
   public Flow(FlowSpec flowSpec, Tracing tracing) {
-    this.reader = requireNonNull(flowSpec.getReader());
-    this.transformer = requireNonNull(flowSpec.getTransformer());
-    this.writer = requireNonNull(flowSpec.getWriter());
-    this.cleanup = requireNonNullElse(flowSpec.getCleanup(), () -> {});
+    this.reader = requireNonNull(flowSpec.reader());
+    this.transformer = requireNonNull(flowSpec.transformer());
+    this.writer = requireNonNull(flowSpec.writer());
+    this.cleanup = requireNonNullElse(flowSpec.cleanup(), () -> {});
     this.flowMetrics = new HashSet<>();
-    if (flowSpec.getMonitor() != null) {
-      this.flowMetrics.add(flowSpec.getMonitor());
+    if (flowSpec.monitor() != null) {
+      this.flowMetrics.add(flowSpec.monitor());
     }
     this.tracing = requireNonNull(tracing);
   }

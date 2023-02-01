@@ -31,10 +31,6 @@ public class RabbitUtil {
     return routing.getIncoming().get(0);
   }
 
-  public String secondInput() {
-    return routing.getIncoming().get(1);
-  }
-
   public String output() {
     return routing.getOutgoing().get("default");
   }

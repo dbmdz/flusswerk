@@ -52,11 +52,9 @@ public class FlusswerkConfiguration {
 
   @Bean
   public Flow flow(Optional<FlowSpec> flowSpec, Tracing tracing) {
-    if (flowSpec.isEmpty()) {
-      return null; // No FlowSpec → no Flow. We will have to handle this case when creating the
-      // Engine bean as the sole consumer of the Flow bean.
-    }
-    return new Flow(flowSpec.get(), tracing);
+    // No FlowSpec → no Flow. We will have to handle this case when creating the
+    // Engine bean as the sole consumer of the Flow bean.
+    return flowSpec.map(spec -> new Flow(spec, tracing)).orElse(null);
   }
 
   @Bean
@@ -79,8 +77,6 @@ public class FlusswerkConfiguration {
     }
 
     flow.get().registerFlowMetrics(flowMetrics);
-
-    var threads = processingProperties.threads();
 
     return new Engine(rabbitConnection.getChannel(), flusswerkConsumers, workers);
   }
@@ -139,20 +135,22 @@ public class FlusswerkConfiguration {
       PriorityBlockingQueue<Task> taskQueue,
       Tracing tracing,
       FlusswerkMetrics metrics) {
-    if (flow.isEmpty()) {
-      return Collections.emptyList(); // No Flow, nothing to do
-    }
-    return IntStream.range(0, processingProperties.threads())
-        .mapToObj(
-            n ->
-                new Worker(
-                    flow.get(),
-                    metrics,
-                    messageBroker,
-                    processReport.orElseGet(() -> new DefaultProcessReport(appProperties.name())),
-                    taskQueue,
-                    tracing))
-        .collect(Collectors.toList());
+    return flow.map(
+            theFlow ->
+                IntStream.range(0, processingProperties.threads())
+                    .mapToObj(
+                        n ->
+                            new Worker(
+                                theFlow,
+                                metrics,
+                                messageBroker,
+                                processReport.orElseGet(
+                                    () -> new DefaultProcessReport(appProperties.name())),
+                                taskQueue,
+                                tracing))
+                    .collect(
+                        Collectors.toList())) // Return workers for each thread to process the Flow
+        .orElse(Collections.emptyList()); // No Flow, nothing to do
   }
 
   @Bean

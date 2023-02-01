@@ -57,7 +57,7 @@ class MessageBrokerTest {
 
   @Test
   @DisplayName("Ack should acknowledge messages")
-  void ack() throws IOException {
+  void ack() {
     messageBroker.ack(message);
     verify(rabbitClient).ack(message.getEnvelope());
   }

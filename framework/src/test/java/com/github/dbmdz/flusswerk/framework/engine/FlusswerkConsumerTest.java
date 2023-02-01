@@ -110,10 +110,6 @@ class FlusswerkConsumerTest {
     return flusswerkObjectMapper.writeValueAsBytes(message);
   }
 
-  private byte[] json(String message) {
-    return message.getBytes(StandardCharsets.UTF_8);
-  }
-
   static class UndeserializableMessage extends Message {
     UndeserializableMessage() {
       throw new RuntimeException("Exception to prevent deserialization");

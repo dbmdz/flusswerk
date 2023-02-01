@@ -37,10 +37,7 @@ public class RabbitConnection {
     factory.setUsername(rabbitMQ.username());
     factory.setPassword(rabbitMQ.password());
     rabbitMQ.getVirtualHost().ifPresent(factory::setVirtualHost);
-    factory.setConnectionRecoveryTriggeringCondition(
-        sse -> {
-          return !sse.isInitiatedByApplication();
-        });
+    factory.setConnectionRecoveryTriggeringCondition(sse -> !sse.isInitiatedByApplication());
     waitForConnection();
   }
 

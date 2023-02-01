@@ -4,5 +4,5 @@ public enum Status {
   SUCCESS,
   ERROR_RETRY,
   ERROR_STOP,
-  SKIP;
+  SKIP
 }
