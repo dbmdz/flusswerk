@@ -13,7 +13,6 @@ import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.jackson.FlusswerkObjectMapper;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
-import com.github.dbmdz.flusswerk.framework.monitoring.DefaultFlowMetrics;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlowMetrics;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlusswerkMetrics;
 import com.github.dbmdz.flusswerk.framework.monitoring.MeterFactory;
@@ -69,11 +68,6 @@ public class FlusswerkConfiguration {
 
     if (flow.isEmpty()) {
       return null; // No Flow, nothing to do
-    }
-
-    // Use DefaultFlowMetrics only if there are no other FlowMetrics beans defined in the app
-    if (flowMetrics.isEmpty()) {
-      flowMetrics.add(new DefaultFlowMetrics(meterFactory));
     }
 
     flow.get().registerFlowMetrics(flowMetrics);
