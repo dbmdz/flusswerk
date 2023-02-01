@@ -93,7 +93,7 @@ class WorkerTest {
 
   @DisplayName("should acknowledge message")
   @Test
-  void shouldAcknowledgeMessage() throws IOException {
+  void shouldAcknowledgeMessage() {
     worker.process(message);
     verify(messageBroker).ack(message);
   }
@@ -166,7 +166,7 @@ class WorkerTest {
 
   @DisplayName("should register active workers")
   @Test
-  void shouldRegisterActiveWorkers() throws IOException {
+  void shouldRegisterActiveWorkers() {
     worker.executeProcessing(new Message());
     InOrder inOrder = Mockito.inOrder(flusswerkMetrics, messageBroker);
     inOrder.verify(flusswerkMetrics).incrementActiveWorkers();

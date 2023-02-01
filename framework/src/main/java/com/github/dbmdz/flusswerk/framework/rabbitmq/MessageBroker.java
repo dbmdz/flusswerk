@@ -79,7 +79,7 @@ public class MessageBroker {
     rabbitClient.send(routingConfig.getExchange(routingKey), routingKey, message);
   }
 
-  void sendRaw(String routingKey, byte[] message) throws IOException {
+  void sendRaw(String routingKey, byte[] message) {
     rabbitClient.sendRaw(routingConfig.getExchange(routingKey), routingKey, message);
   }
 
@@ -104,10 +104,9 @@ public class MessageBroker {
    *
    * @param queueName the queue to receive.
    * @return the received message.
-   * @throws IOException if communication with RabbitMQ failed.
    * @throws InvalidMessageException if the message could not be read and deserialized
    */
-  public Message receive(String queueName) throws IOException, InvalidMessageException {
+  public Message receive(String queueName) throws InvalidMessageException {
     return receive(queueName, false);
   }
 
@@ -117,11 +116,9 @@ public class MessageBroker {
    * @param queueName the queue to receive.
    * @param autoAck whether the message should be acknowledged automatically.
    * @return the received message.
-   * @throws IOException if communication with RabbitMQ failed.
    * @throws InvalidMessageException if the message could not be read and deserialized
    */
-  public Message receive(String queueName, boolean autoAck)
-      throws IOException, InvalidMessageException {
+  public Message receive(String queueName, boolean autoAck) throws InvalidMessageException {
     return rabbitClient.receive(queueName, autoAck);
   }
 
@@ -149,7 +146,7 @@ public class MessageBroker {
     return message;
   }
 
-  private void failInvalidMessage(InvalidMessageException e) throws IOException {
+  private void failInvalidMessage(InvalidMessageException e) {
     Envelope envelope = e.getEnvelope();
     LOGGER.warn("Invalid message detected. Will be shifted into 'failed' queue: " + e.getMessage());
     rabbitClient.ack(envelope);
@@ -205,9 +202,8 @@ public class MessageBroker {
    * Acknowledges a message to remove it from the queue.
    *
    * @param message the message to acknowledge.
-   * @throws IOException if communication with RabbitMQ failed.
    */
-  public void ack(Message message) throws IOException {
+  public void ack(Message message) {
     rabbitClient.ack(message.getEnvelope());
   }
 
@@ -272,7 +268,7 @@ public class MessageBroker {
   /**
    * Returns the number of messages in known queues
    *
-   * @return the number of messages in known queues
+   * @return a map of queue names and the number of messages in these queues
    * @throws IOException if communication with RabbitMQ fails
    * @deprecated Use {@link Queue#messageCount()} instead.
    */

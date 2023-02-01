@@ -83,7 +83,6 @@ class RabbitClientTest {
     RabbitClient rabbitClient = new RabbitClient(connection);
 
     long deliveryTag = 476253;
-    String tracingId = "123123123";
     int retries = 333;
     Instant created = Instant.now();
     String inputQueue = "some.input.queue";

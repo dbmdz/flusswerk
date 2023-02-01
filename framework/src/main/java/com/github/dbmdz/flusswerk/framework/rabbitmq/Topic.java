@@ -75,9 +75,8 @@ public class Topic {
    * <p><b>Use with caution and only when using {@link Message} is not viable.</b>
    *
    * @param message The message serialized to bytes
-   * @throws IOException if sending the message fails
    */
-  public void sendRaw(byte[] message) throws IOException {
+  public void sendRaw(byte[] message) {
     messageBroker.sendRaw(name, message);
   }
 
@@ -97,8 +96,7 @@ public class Topic {
     if (this == o) {
       return true;
     }
-    if (o instanceof Topic) {
-      Topic topic = (Topic) o;
+    if (o instanceof Topic topic) {
       return Objects.equals(name, topic.name);
     }
     return false;

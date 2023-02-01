@@ -29,8 +29,6 @@ public class RabbitClient {
 
   private static final boolean NO_AUTO_DELETE = false;
 
-  private static final boolean NO_AUTO_ACK = false;
-
   private static final boolean NOT_EXCLUSIVE = false;
 
   private static final Integer PERSISTENT = 2;
@@ -55,8 +53,7 @@ public class RabbitClient {
     channel = connection.getChannel();
     // We need a recoverable connection since we don't want to handle connection and channel
     // recovery ourselves.
-    if (channel instanceof RecoverableChannel) {
-      RecoverableChannel rc = (RecoverableChannel) channel;
+    if (channel instanceof RecoverableChannel rc) {
       rc.addRecoveryListener(
           new RecoveryListener() {
             @Override

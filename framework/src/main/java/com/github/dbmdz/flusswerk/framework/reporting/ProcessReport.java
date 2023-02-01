@@ -39,5 +39,4 @@ public interface ProcessReport {
   default void reportSkip(Message message, Exception skip) {
     reportSuccess(message);
   }
-  ;
 }

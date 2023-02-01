@@ -50,8 +50,7 @@ public class TestMessage extends Message {
     if (this == o) {
       return true;
     }
-    if (o instanceof TestMessage) {
-      TestMessage other = (TestMessage) o;
+    if (o instanceof TestMessage other) {
       return id.equals(other.id) && values.equals(other.values);
     }
     return false;

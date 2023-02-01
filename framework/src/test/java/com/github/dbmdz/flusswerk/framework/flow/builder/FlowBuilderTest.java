@@ -23,9 +23,9 @@ class FlowBuilderTest {
             .transformer(String::toUpperCase)
             .writerSendingMessage(TestMessage::new)
             .build();
-    assertThat(flow.getReader().apply(new TestMessage("abc"))).isEqualTo("abc");
-    assertThat(flow.getTransformer().apply("abc")).isEqualTo("ABC");
-    assertThat(flow.getWriter().apply("abc")).containsExactly(new TestMessage("abc"));
+    assertThat(flow.reader().apply(new TestMessage("abc"))).isEqualTo("abc");
+    assertThat(flow.transformer().apply("abc")).isEqualTo("ABC");
+    assertThat(flow.writer().apply("abc")).containsExactly(new TestMessage("abc"));
   }
 
   @Test
@@ -37,9 +37,9 @@ class FlowBuilderTest {
             .transformer(String::toUpperCase)
             .writerSendingMessage(TestMessage::new)
             .build();
-    assertThat(flow.getReader().apply(new TestMessage("abc"))).isEqualTo("abc");
-    assertThat(flow.getTransformer().apply("abc")).isEqualTo("ABC");
-    assertThat(flow.getWriter().apply("abc")).containsExactly(new TestMessage("abc"));
+    assertThat(flow.reader().apply(new TestMessage("abc"))).isEqualTo("abc");
+    assertThat(flow.transformer().apply("abc")).isEqualTo("ABC");
+    assertThat(flow.writer().apply("abc")).containsExactly(new TestMessage("abc"));
   }
 
   @Test
@@ -49,8 +49,7 @@ class FlowBuilderTest {
         FlowBuilder.messageProcessor(TestMessage.class)
             .process(message -> new TestMessage(message.getId().toUpperCase(Locale.GERMAN)))
             .build();
-    assertThat(flow.getWriter().apply(new TestMessage("abc")))
-        .containsExactly(new TestMessage("ABC"));
+    assertThat(flow.writer().apply(new TestMessage("abc"))).containsExactly(new TestMessage("ABC"));
   }
 
   @Test
@@ -60,8 +59,7 @@ class FlowBuilderTest {
         FlowBuilder.messageProcessor(new Type<TestMessage>() {})
             .process(message -> new TestMessage(message.getId().toUpperCase(Locale.GERMAN)))
             .build();
-    assertThat(flow.getWriter().apply(new TestMessage("abc")))
-        .containsExactly(new TestMessage("ABC"));
+    assertThat(flow.writer().apply(new TestMessage("abc"))).containsExactly(new TestMessage("ABC"));
   }
 
   @Test
@@ -72,7 +70,7 @@ class FlowBuilderTest {
             .expand(message -> List.of(message, message, message))
             .build();
     var message = new TestMessage("abc");
-    assertThat(flow.getWriter().apply(message)).containsExactly(message, message, message);
+    assertThat(flow.writer().apply(message)).containsExactly(message, message, message);
   }
 
   @Test
@@ -83,6 +81,6 @@ class FlowBuilderTest {
             .expand(message -> List.of(message, message, message))
             .build();
     var message = new TestMessage("abc");
-    assertThat(flow.getWriter().apply(message)).containsExactly(message, message, message);
+    assertThat(flow.writer().apply(message)).containsExactly(message, message, message);
   }
 }
