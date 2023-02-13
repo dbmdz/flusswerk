@@ -71,7 +71,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- Dependency versions -->
     <version.amqp-client>5.16.0</version.amqp-client>
-    <version.byte-buddy>1.12.22</version.byte-buddy>
+    <version.byte-buddy>1.13.0</version.byte-buddy>
     <version.logstash-encoder>7.2</version.logstash-encoder>
     <version.flusswerk>6.0.0-SNAPSHOT</version.flusswerk>
     <version.junit>5.7.0</version.junit>
