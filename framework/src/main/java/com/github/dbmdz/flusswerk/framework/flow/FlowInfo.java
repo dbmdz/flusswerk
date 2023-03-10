@@ -5,6 +5,7 @@ import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.builder.ConfigurationStep;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.monitoring.Status;
+import java.time.Duration;
 
 /**
  * Collect base metrics for a single flow - did the execution have errors and how long does it take?
@@ -20,13 +21,13 @@ public class FlowInfo {
   private final Message message;
 
   public FlowInfo(Message message) {
-    this.startTime = System.currentTimeMillis();
+    this.startTime = System.nanoTime();
     this.status = Status.SUCCESS;
     this.message = message;
   }
 
   public void stop() {
-    this.endTime = System.currentTimeMillis();
+    this.endTime = System.nanoTime();
   }
 
   public Status getStatus() {
@@ -47,7 +48,7 @@ public class FlowInfo {
     return message;
   }
 
-  public long duration() {
-    return this.endTime - this.startTime;
+  public Duration duration() {
+    return Duration.ofNanos(this.endTime - this.startTime);
   }
 }
