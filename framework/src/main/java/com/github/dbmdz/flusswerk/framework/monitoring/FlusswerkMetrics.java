@@ -65,6 +65,6 @@ public class FlusswerkMetrics implements FlowMetrics {
   public void accept(FlowInfo flowInfo) {
     Status status = flowInfo.getStatus();
     messagesTotal.get(status).increment();
-    messagesSeconds.get(status).increment(flowInfo.duration());
+    messagesSeconds.get(status).increment(flowInfo.duration().getSeconds());
   }
 }

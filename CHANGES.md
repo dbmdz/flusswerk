@@ -6,9 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+
+- The Counter `flusswerk_messages_seconds` now records the processing time in seconds
+
 ### Changed
 
 - Migrated to SpringBoot 3 / JDK17
+- `flowInfo.duration()` returns a `Duration` object instead of `long`
 
 ## [5.1.1] - 2022-11-14
 ### Fixed

@@ -305,10 +305,10 @@ code. Log messages and metrics will have `status=skip` to indicate that processi
 Every Flusswerk application provides base metrics via as a
 [Prometheus][Prometheus] endpoint:
 
-|                             |                                                         |
-| --------------------------- | ------------------------------------------------------- |
-| `flusswerk.processed.items` | total number of processed items since application start |
-| `flusswerk.execution.time`  | total amount of time spend on processing these items    |
+|                              |                                                            |
+|------------------------------|------------------------------------------------------------|
+| `flusswerk.messages`         | total number of processed messages since application start |
+| `flusswerk.messages.seconds` | total amount of time spent on processing these messages    |
 
 To include custom metrics, get counters via [MeterFactory][MeterFactory]. A bean
 of type [FlowMetrics][FlowMetrics] can also consume execution information of
