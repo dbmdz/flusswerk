@@ -23,12 +23,12 @@ public class FlusswerkMetrics implements FlowMetrics {
   public FlusswerkMetrics(ProcessingProperties properties, MeterRegistry registry) {
     this.totalWorkers = properties.threads();
 
-    Gauge.builder("flusswerk.workers.total", activeWorkers, AtomicInteger::get)
+    Gauge.builder("flusswerk.workers", activeWorkers, AtomicInteger::get)
         .description("Number of worker threads in the system")
         .tags(Tags.of("state", "active"))
         .register(registry);
 
-    Gauge.builder("flusswerk.workers.total", activeWorkers, w -> totalWorkers - w.get())
+    Gauge.builder("flusswerk.workers", activeWorkers, w -> totalWorkers - w.get())
         .description("Number of worker threads in the system")
         .tags(Tags.of("state", "idle"))
         .register(registry);
