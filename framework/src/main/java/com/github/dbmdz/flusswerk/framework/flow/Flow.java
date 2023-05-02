@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 
 import com.github.dbmdz.flusswerk.framework.model.Message;
+import com.github.dbmdz.flusswerk.framework.monitoring.Converter;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlowMetrics;
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import java.lang.reflect.InvocationTargetException;
@@ -62,8 +63,10 @@ public class Flow {
     } finally {
       info.stop();
       long durationNs = System.nanoTime() - start;
-      MDC.put("duration", String.format(Locale.ENGLISH, "%f", ns_to_seconds(durationNs)));
-      MDC.put("duration_ms", String.format(Locale.ENGLISH, "%f", ns_to_milliseconds(durationNs)));
+      MDC.put("duration", String.format(Locale.ENGLISH, "%f", Converter.ns_to_seconds(durationNs)));
+      MDC.put(
+          "duration_ms",
+          String.format(Locale.ENGLISH, "%f", Converter.ns_to_milliseconds(durationNs)));
       flowMetrics.forEach(
           metric -> metric.accept(info)); // record metrics only available from inside the framework
     }
@@ -74,14 +77,6 @@ public class Flow {
         .forEach(m -> m.setTracing(tracing.tracingPath()));
 
     return result;
-  }
-
-  static double ns_to_seconds(long value) {
-    return value / 1e9;
-  }
-
-  static double ns_to_milliseconds(long value) {
-    return value / 1e6;
   }
 
   public Collection<Message> innerProcess(Message message) {
