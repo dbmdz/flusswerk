@@ -72,10 +72,10 @@ class DefaultProcessReportTest {
 
   @DisplayName("should report failure with planned retries")
   @Test
-  void reportReject() {
+  void reportRetry() {
     var message = new Message();
     var e = new RetryProcessingException("stop now");
-    defaultProcessReport.reportReject(message, e);
+    defaultProcessReport.reportRetry(message, e);
     assertThat(listAppender.list)
         .first()
         .hasFieldOrPropertyWithValue("level", Level.WARN)

@@ -123,7 +123,7 @@ class WorkerTest {
     when(flow.process(message)).thenThrow(exception);
     when(messageBroker.reject(message)).thenReturn(true); // retry
     worker.process(message);
-    verify(processReport).reportReject(any(), any(Exception.class));
+    verify(processReport).reportRetry(any(), any(RuntimeException.class));
   }
 
   @DisplayName("should log failure after too many retries")

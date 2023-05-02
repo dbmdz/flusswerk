@@ -1,5 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.reporting;
 
+import com.github.dbmdz.flusswerk.framework.exceptions.RetryProcessingException;
 import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 
@@ -31,10 +32,33 @@ public interface ProcessReport {
   /**
    * Report a rejected (temporarily failed) message
    *
+   * @deprecated Use {@link #reportRetry(Message, RuntimeException)} instead
    * @param message The message, which temporarily failed
    * @param e The exception, why the message failed
    */
+  @Deprecated(since = "6.0.0", forRemoval = true)
   void reportReject(Message message, Exception e);
+
+  /**
+   * Report a rejected (temporarily failed) message
+   *
+   * @param message The message, which temporarily failed
+   * @param e The exception, why the message failed
+   */
+  default void reportRetry(Message message, RuntimeException e) {
+    reportReject(message, e);
+  }
+
+  /**
+   * Report that a message has been rejected to retry with the same or different messages and
+   * potentially also has messages sent anyway.
+   *
+   * @param message The message, which temporarily failed
+   * @param e The exception, why the message failed
+   */
+  default void reportComplexRetry(Message message, RetryProcessingException e) {
+    reportReject(message, e);
+  }
 
   default void reportSkip(Message message, Exception skip) {
     reportSuccess(message);

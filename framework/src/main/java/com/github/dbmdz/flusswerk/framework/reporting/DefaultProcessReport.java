@@ -3,6 +3,7 @@ package com.github.dbmdz.flusswerk.framework.reporting;
 import static java.util.Objects.requireNonNull;
 import static net.logstash.logback.argument.StructuredArguments.keyValue;
 
+import com.github.dbmdz.flusswerk.framework.exceptions.RetryProcessingException;
 import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import org.slf4j.Logger;
@@ -49,10 +50,33 @@ public class DefaultProcessReport implements ProcessReport {
 
   @Override
   public void reportReject(Message message, Exception e) {
+    /*
+     * Framework should not call this method anymore since there are more specific methods
+     */
+    throw new RuntimeException("Not implemented", e);
+  }
+
+  @Override
+  public void reportRetry(Message message, RuntimeException e) {
     getLogger()
         .warn(
             "{} rejected for retry: {}",
             name,
+            e.getMessage(),
+            keyValue("amqp_message", message.toString()),
+            keyValue("exception", e.toString()));
+  }
+
+  @Override
+  public void reportComplexRetry(Message message, RetryProcessingException e) {
+    int newMessagesToRetry = e.getMessagesToRetry().size();
+    int messagesSent = e.getMessagesToSend().size();
+    getLogger()
+        .warn(
+            "{} rejected for retry with ({} new, {} sent) and : {}",
+            name,
+            newMessagesToRetry,
+            messagesSent,
             e.getMessage(),
             keyValue("amqp_message", message.toString()),
             keyValue("exception", e.toString()));

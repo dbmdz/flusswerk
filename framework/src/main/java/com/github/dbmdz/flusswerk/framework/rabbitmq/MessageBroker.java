@@ -245,7 +245,7 @@ public class MessageBroker {
     fail(message, true);
   }
 
-  private void retry(Message message) throws IOException {
+  public void retry(Message message) throws IOException {
     LOGGER.debug("Send message to retry queue: " + message);
     FailurePolicy failurePolicy = routingConfig.getFailurePolicy(message);
     String retryRoutingKey = failurePolicy.getRetryRoutingKey();
