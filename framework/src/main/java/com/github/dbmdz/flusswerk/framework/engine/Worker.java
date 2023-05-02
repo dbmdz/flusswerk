@@ -100,8 +100,7 @@ public class Worker implements Runnable {
       MDC.put("skipReason", e.getMessage());
     } catch (RuntimeException e) {
       MDC.put("status", "retry");
-      if (e instanceof RetryProcessingException rpe
-          && (rpe.hasMessagesToRetry() || rpe.hasMessagesToSend())) {
+      if (e instanceof RetryProcessingException rpe && rpe.isComplex()) {
         complexRetry(message, rpe);
         return;
       } else {

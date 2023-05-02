@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.github.dbmdz.flusswerk.framework.TestMessage;
 import com.github.dbmdz.flusswerk.framework.exceptions.RetryProcessingException;
 import com.github.dbmdz.flusswerk.framework.exceptions.SkipProcessingException;
 import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
@@ -187,5 +188,30 @@ class WorkerTest {
     Message expectedMessage = new Message();
     expectedMessage.setTracing(tracingPath);
     verify(messageBroker).send(List.of(expectedMessage));
+  }
+
+  @DisplayName("should perform complex retry sending messages")
+  @Test
+  void shouldPerformComplexRetrySendingMessages() throws IOException {
+    Message incomingMessage = new TestMessage("incoming");
+    Message outgoingMessage = new TestMessage("outgoing");
+    when(flow.process(incomingMessage))
+        .thenThrow(new RetryProcessingException("Retry processing").send(outgoingMessage));
+    worker.process(incomingMessage);
+    verify(messageBroker).send(List.of(outgoingMessage));
+  }
+
+  @DisplayName("should perform complex retry with new messages")
+  @Test
+  void shouldPerformComplexRetryWithNewMessages() throws IOException {
+    Message incomingMessage = new TestMessage("incoming");
+    List<Message> messagesToRetry = List.of(new TestMessage("retry1"), new TestMessage("retry2"));
+    when(flow.process(incomingMessage))
+        .thenThrow(new RetryProcessingException("Retry processing").retry(messagesToRetry));
+    worker.process(incomingMessage);
+    verify(messageBroker).ack(incomingMessage);
+    for (Message message : messagesToRetry) {
+      verify(messageBroker).retry(message);
+    }
   }
 }
