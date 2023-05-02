@@ -2,6 +2,7 @@ package com.github.dbmdz.flusswerk.framework.flow;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.github.dbmdz.flusswerk.framework.TestMessage;
 import com.github.dbmdz.flusswerk.framework.exceptions.RetryProcessingException;
 import com.github.dbmdz.flusswerk.framework.exceptions.SkipProcessingException;
 import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
@@ -44,5 +45,13 @@ class FlowInfoTest {
     flowInfo.stop();
     assertThat(flowInfo.duration())
         .isCloseTo(Duration.ofNanos(stopTime - startTime), Duration.ofMillis(1));
+  }
+
+  @DisplayName("should return the message")
+  @Test
+  void shouldReturnTheMessage() {
+    var message = new TestMessage("test");
+    var flowInfo = new FlowInfo(message);
+    assertThat(flowInfo.getMessage()).isEqualTo(message);
   }
 }
