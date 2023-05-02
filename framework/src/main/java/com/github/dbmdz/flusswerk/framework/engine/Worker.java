@@ -1,5 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.engine;
 
+import com.github.dbmdz.flusswerk.framework.exceptions.RetryProcessingException;
 import com.github.dbmdz.flusswerk.framework.exceptions.SkipProcessingException;
 import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
@@ -99,7 +100,13 @@ public class Worker implements Runnable {
       MDC.put("skipReason", e.getMessage());
     } catch (RuntimeException e) {
       MDC.put("status", "retry");
-      retryOrFail(message, e);
+      if (e instanceof RetryProcessingException rpe
+          && (rpe.hasMessagesToRetry() || rpe.hasMessagesToSend())) {
+        complexRetry(message, rpe);
+        return;
+      } else {
+        retryOrFail(message, e);
+      }
       return; // processing was not successful → stop here
     }
 
@@ -125,13 +132,27 @@ public class Worker implements Runnable {
     try {
       boolean isRejected = messageBroker.reject(receivedMessage);
       if (isRejected) {
-        processReport.reportReject(receivedMessage, e);
+        processReport.reportRetry(receivedMessage, e);
       } else {
         processReport.reportFailAfterMaxRetries(receivedMessage, e);
       }
     } catch (IOException fatalException) {
       var body = receivedMessage.getEnvelope().getBody();
       LOGGER.error("Could not reject message" + body, fatalException);
+    }
+  }
+
+  private void complexRetry(Message receivedMessage, RetryProcessingException e) {
+    try {
+      messageBroker.ack(receivedMessage);
+      for (Message retryMessage : e.getMessagesToRetry()) {
+        messageBroker.retry(retryMessage);
+      }
+      messageBroker.send(e.getMessagesToSend());
+      processReport.reportRetry(receivedMessage, e);
+    } catch (IOException fatalException) {
+      var body = receivedMessage.getEnvelope().getBody();
+      LOGGER.error("Complex retry failed" + body, fatalException);
     }
   }
 
