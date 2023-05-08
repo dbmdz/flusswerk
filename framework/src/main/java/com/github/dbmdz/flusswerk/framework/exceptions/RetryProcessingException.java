@@ -92,7 +92,7 @@ public class RetryProcessingException extends RuntimeException {
   }
 
   /**
-   * @return true, if there are messages to retry that are different from the message that cause the
+   * @return true, if there are messages to retry that are different from the message that caused the
    *     exception or if there are messages to send while still retrying other messages.
    */
   public boolean isComplex() {
