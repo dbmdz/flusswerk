@@ -218,7 +218,6 @@ public class MessageBroker {
   public boolean reject(Message message) throws IOException {
     final Envelope envelope = message.getEnvelope();
     final long maxRetries = routingConfig.getFailurePolicy(message).getRetries();
-    ack(message);
     if (envelope.getRetries() < maxRetries) {
       envelope.setRetries(envelope.getRetries() + 1);
       retry(message);

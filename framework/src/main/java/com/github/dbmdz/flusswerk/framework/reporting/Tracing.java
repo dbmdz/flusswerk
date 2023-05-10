@@ -1,9 +1,8 @@
 package com.github.dbmdz.flusswerk.framework.reporting;
 
+import com.github.dbmdz.flusswerk.framework.model.Message;
 import de.huxhorn.sulky.ulid.ULID;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Tracing {
@@ -72,5 +71,25 @@ public class Tracing {
    */
   public List<String> newPath() {
     return List.of(ulid.nextULID());
+  }
+
+  /**
+   * Sets the correct tracing path for the given message if not already manually set.
+   *
+   * @param message The message to set the tracing path for.
+   */
+  public void ensureFor(Message message) {
+    if (message.getTracing() == null || message.getTracing().isEmpty()) {
+      message.setTracing(tracingPath());
+    }
+  }
+
+  /**
+   * Sets the correct tracing path for the given messages.
+   *
+   * @param messages The messages to set the tracing path for.
+   */
+  public void ensureFor(Collection<? extends Message> messages) {
+    messages.stream().forEach(this::ensureFor);
   }
 }
