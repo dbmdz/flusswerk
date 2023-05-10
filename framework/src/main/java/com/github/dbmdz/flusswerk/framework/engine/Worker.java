@@ -4,6 +4,7 @@ import com.github.dbmdz.flusswerk.framework.exceptions.RetryProcessingException;
 import com.github.dbmdz.flusswerk.framework.exceptions.SkipProcessingException;
 import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
+import com.github.dbmdz.flusswerk.framework.model.Envelope;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlusswerkMetrics;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
@@ -11,7 +12,6 @@ import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Objects;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -91,10 +91,6 @@ public class Worker implements Runnable {
       return; // processing was not successful → stop here
     } catch (SkipProcessingException e) {
       messagesToSend = e.getOutgoingMessages();
-      messagesToSend.stream()
-          .filter(Objects::nonNull)
-          .filter(m -> m.getTracing() == null || m.getTracing().isEmpty())
-          .forEach(m -> m.setTracing(tracing.tracingPath()));
       skip = e;
       MDC.put("status", "skip");
       MDC.put("skipReason", e.getMessage());
@@ -112,6 +108,7 @@ public class Worker implements Runnable {
     // Data processing was successful, now handle the messaging
     try {
       if (!messagesToSend.isEmpty()) {
+        tracing.ensureFor(messagesToSend);
         messageBroker.send(messagesToSend);
       }
       messageBroker.ack(message);
@@ -129,6 +126,7 @@ public class Worker implements Runnable {
 
   private void retryOrFail(Message receivedMessage, RuntimeException e) {
     try {
+      messageBroker.ack(receivedMessage);
       boolean isRejected = messageBroker.reject(receivedMessage);
       if (isRejected) {
         processReport.reportRetry(receivedMessage, e);
@@ -145,9 +143,16 @@ public class Worker implements Runnable {
     try {
       messageBroker.ack(receivedMessage);
       for (Message retryMessage : e.getMessagesToRetry()) {
-        messageBroker.retry(retryMessage);
+        Envelope envelope = retryMessage.getEnvelope();
+        envelope.setRetries(receivedMessage.getEnvelope().getRetries());
+        envelope.setSource(receivedMessage.getEnvelope().getSource());
+        tracing.ensureFor(retryMessage);
+        messageBroker.reject(retryMessage);
       }
+      // Send the messages that should be sent anyway
+      tracing.ensureFor(e.getMessagesToSend());
       messageBroker.send(e.getMessagesToSend());
+
       processReport.reportRetry(receivedMessage, e);
     } catch (IOException fatalException) {
       var body = receivedMessage.getEnvelope().getBody();

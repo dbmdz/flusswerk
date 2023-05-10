@@ -31,7 +31,6 @@ public class Flow {
   private final Function<Object, Collection<Message>> writer;
   private final Runnable cleanup;
   private final Set<Consumer<FlowInfo>> flowMetrics;
-  private final Tracing tracing;
 
   public Flow(FlowSpec flowSpec, Tracing tracing) {
     this.reader = requireNonNull(flowSpec.reader());
@@ -42,7 +41,6 @@ public class Flow {
     if (flowSpec.monitor() != null) {
       this.flowMetrics.add(flowSpec.monitor());
     }
-    this.tracing = requireNonNull(tracing);
   }
 
   public void registerFlowMetrics(Set<FlowMetrics> flowMetrics) {
@@ -70,12 +68,6 @@ public class Flow {
       flowMetrics.forEach(
           metric -> metric.accept(info)); // record metrics only available from inside the framework
     }
-
-    result.stream()
-        .filter(Objects::nonNull)
-        .filter(m -> m.getTracing() == null || m.getTracing().isEmpty())
-        .forEach(m -> m.setTracing(tracing.tracingPath()));
-
     return result;
   }
 
@@ -93,7 +85,8 @@ public class Flow {
       return Collections.emptyList();
     }
 
-    return result;
+    // Filter null values here, now we don't have to care anymore
+    return result.stream().filter(Objects::nonNull).toList();
   }
 
   void setLoggingData(Message message) {
