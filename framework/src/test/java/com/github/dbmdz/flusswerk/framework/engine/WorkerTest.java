@@ -1,12 +1,9 @@
 package com.github.dbmdz.flusswerk.framework.engine;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 import com.github.dbmdz.flusswerk.framework.TestMessage;
 import com.github.dbmdz.flusswerk.framework.exceptions.RetryProcessingException;
@@ -19,29 +16,35 @@ import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InOrder;
-import org.mockito.Mockito;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @DisplayName("The Worker")
+@ExtendWith(MockitoExtension.class)
 class WorkerTest {
 
-  private Worker worker;
-  private Flow flow;
-  private Tracing tracing;
-  private MessageBroker messageBroker;
-  private ProcessReport processReport;
-  private PriorityBlockingQueue<Task> taskQueue;
+  @Mock private Flow flow;
+  @Mock private Tracing tracing;
+  @Mock private MessageBroker messageBroker;
+  @Mock private ProcessReport processReport;
+  @Mock private FlusswerkMetrics flusswerkMetrics;
+
+  @Captor private ArgumentCaptor<Collection<Message>> messagesCaptor;
+
   private Message message;
-  private FlusswerkMetrics flusswerkMetrics;
+  private PriorityBlockingQueue<Task> taskQueue;
+  private Worker worker;
 
   private static Stream<Arguments> retryableExceptions() {
     return Stream.of(
@@ -51,12 +54,7 @@ class WorkerTest {
 
   @BeforeEach
   void setUp() {
-    flow = mock(Flow.class);
-    messageBroker = mock(MessageBroker.class);
-    processReport = mock(ProcessReport.class);
     taskQueue = new PriorityBlockingQueue<>();
-    flusswerkMetrics = mock(FlusswerkMetrics.class);
-    tracing = mock(Tracing.class);
     worker = new Worker(flow, flusswerkMetrics, messageBroker, processReport, taskQueue, tracing);
     message = new Message();
   }
@@ -181,13 +179,34 @@ class WorkerTest {
     List<String> tracingPath = List.of("abcde", "1234567");
     Message incomingMessage = new Message();
     incomingMessage.setTracing(tracingPath);
-    when(tracing.tracingPath()).thenReturn(tracingPath);
+
+    // setup mocks
+    doAnswer(
+            invocation -> {
+              Collection<? extends Message> messages = invocation.getArgument(0);
+              messages.forEach(message -> message.setTracing(tracingPath));
+              return null;
+            })
+        .when(tracing)
+        .ensureFor(anyList());
+
     when(flow.process(incomingMessage))
         .thenThrow(new SkipProcessingException("Skip processing").send(new Message()));
+
+    // run test
     worker.process(incomingMessage);
+
+    // verify
     Message expectedMessage = new Message();
     expectedMessage.setTracing(tracingPath);
-    verify(messageBroker).send(List.of(expectedMessage));
+
+    verify(messageBroker).send(messagesCaptor.capture());
+    assertThat(unwrapOne(messagesCaptor.getValue()).getTracing()).isEqualTo(tracingPath);
+  }
+
+  private Message unwrapOne(Collection<? extends Message> actual) {
+    assertThat(actual).hasSize(1);
+    return actual.iterator().next();
   }
 
   @DisplayName("should perform complex retry sending messages")
@@ -211,7 +230,7 @@ class WorkerTest {
     worker.process(incomingMessage);
     verify(messageBroker).ack(incomingMessage);
     for (Message message : messagesToRetry) {
-      verify(messageBroker).retry(message);
+      verify(messageBroker).reject(message);
     }
   }
 }
