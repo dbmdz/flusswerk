@@ -39,7 +39,10 @@ public class RetryProcessingException extends RuntimeException {
    * @return An augmented version of the exception including the cause
    */
   public RetryProcessingException causedBy(Throwable cause) {
-    return new RetryProcessingException(this.getMessage(), cause);
+    var exception = new RetryProcessingException(this.getMessage(), cause);
+    exception.messagesToRetry.addAll(this.messagesToRetry);
+    exception.messagesToSend.addAll(this.messagesToSend);
+    return exception;
   }
 
   /**
@@ -92,8 +95,8 @@ public class RetryProcessingException extends RuntimeException {
   }
 
   /**
-   * @return true, if there are messages to retry that are different from the message that caused the
-   *     exception or if there are messages to send while still retrying other messages.
+   * @return true, if there are messages to retry that are different from the message that caused
+   *     the exception or if there are messages to send while still retrying other messages.
    */
   public boolean isComplex() {
     return hasMessagesToRetry() || hasMessagesToSend();
