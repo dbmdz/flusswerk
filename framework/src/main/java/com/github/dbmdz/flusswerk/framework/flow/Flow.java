@@ -6,15 +6,9 @@ import static java.util.Objects.requireNonNullElse;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.monitoring.Converter;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlowMetrics;
-import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import org.slf4j.MDC;
@@ -32,7 +26,7 @@ public class Flow {
   private final Runnable cleanup;
   private final Set<Consumer<FlowInfo>> flowMetrics;
 
-  public Flow(FlowSpec flowSpec, Tracing tracing) {
+  public Flow(FlowSpec flowSpec) {
     this.reader = requireNonNull(flowSpec.reader());
     this.transformer = requireNonNull(flowSpec.transformer());
     this.writer = requireNonNull(flowSpec.writer());
