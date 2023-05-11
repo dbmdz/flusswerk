@@ -1,10 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.config;
 
-import com.github.dbmdz.flusswerk.framework.config.properties.AppProperties;
-import com.github.dbmdz.flusswerk.framework.config.properties.MonitoringProperties;
-import com.github.dbmdz.flusswerk.framework.config.properties.ProcessingProperties;
-import com.github.dbmdz.flusswerk.framework.config.properties.RabbitMQProperties;
-import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
+import com.github.dbmdz.flusswerk.framework.config.properties.*;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.engine.FlusswerkConsumer;
 import com.github.dbmdz.flusswerk.framework.engine.Task;
@@ -25,11 +21,7 @@ import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
@@ -50,10 +42,10 @@ public class FlusswerkConfiguration {
   }
 
   @Bean
-  public Flow flow(Optional<FlowSpec> flowSpec, Tracing tracing) {
+  public Flow flow(Optional<FlowSpec> flowSpec) {
     // No FlowSpec → no Flow. We will have to handle this case when creating the
     // Engine bean as the sole consumer of the Flow bean.
-    return flowSpec.map(spec -> new Flow(spec, tracing)).orElse(null);
+    return flowSpec.map(spec -> new Flow(spec)).orElse(null);
   }
 
   @Bean

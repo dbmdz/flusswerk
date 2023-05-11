@@ -33,7 +33,7 @@ class FlowTest {
     when(transformer.apply(anyString())).thenReturn("test out");
     when(writer.apply(anyString())).thenReturn(List.of(new Message()));
     FlowSpec flowSpec = new FlowSpec(reader, transformer, writer, cleanup, null);
-    Flow flow = new Flow(flowSpec, tracing);
+    Flow flow = new Flow(flowSpec);
 
     // do the processing, because each test would do the same
     flow.process(incomingMessage);
