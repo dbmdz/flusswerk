@@ -27,11 +27,7 @@ public class RabbitMQ {
    *
    * @param rabbitClient the connection to RabbitMQ.
    */
-  public RabbitMQ(
-      RoutingProperties routingProperties,
-      RabbitClient rabbitClient,
-      MessageBroker messageBroker,
-      Tracing tracing) {
+  public RabbitMQ(RoutingProperties routingProperties, RabbitClient rabbitClient, Tracing tracing) {
     this.tracing = tracing;
     // use RabbitConnection to prevent uncontrolled access to Channel from user app
     this.queues = new HashMap<>();
