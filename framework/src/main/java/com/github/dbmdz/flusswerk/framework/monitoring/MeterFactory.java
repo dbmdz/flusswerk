@@ -2,15 +2,24 @@ package com.github.dbmdz.flusswerk.framework.monitoring;
 
 import static java.util.Arrays.asList;
 
+import com.github.dbmdz.flusswerk.framework.config.properties.MonitoringProperties;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /** Convenience factory to simplify the creation of {@link Counter} meters. */
+@Component
 public class MeterFactory {
   private final String basename;
   private final MeterRegistry registry;
+
+  @Autowired
+  public MeterFactory(MonitoringProperties monitoringProperties, MeterRegistry registry) {
+    this(monitoringProperties.prefix(), registry);
+  }
 
   /**
    * @param basename The prefix for the created metrics ("e.g. flusswerk for flusswerk.items.total")

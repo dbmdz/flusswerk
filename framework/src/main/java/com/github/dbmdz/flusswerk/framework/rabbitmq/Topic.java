@@ -16,13 +16,15 @@ import java.util.Objects;
 public class Topic {
 
   private final String name;
-  private final MessageBroker messageBroker;
+  private final String exchange;
   private final Tracing tracing;
+  private final RabbitClient rabbitClient;
 
-  Topic(String name, MessageBroker messageBroker, Tracing tracing) {
+  Topic(String name, String exchange, RabbitClient rabbitClient, Tracing tracing) {
     this.name = requireNonNull(name);
-    this.messageBroker = messageBroker;
+    this.exchange = requireNonNull(exchange);
     this.tracing = requireNonNull(tracing);
+    this.rabbitClient = requireNonNull(rabbitClient);
   }
 
   /**
@@ -39,7 +41,7 @@ public class Topic {
     if (message.getTracing() == null || message.getTracing().isEmpty()) {
       message.setTracing(getTracingPath());
     }
-    messageBroker.send(name, message);
+    rabbitClient.send(exchange, name, message);
   }
 
   /**
@@ -55,7 +57,9 @@ public class Topic {
     messages.stream()
         .filter(message -> message.getTracing() == null || message.getTracing().isEmpty())
         .forEach(message -> message.setTracing(tracingPath));
-    messageBroker.send(name, messages);
+    for (Message message : messages) {
+      rabbitClient.send(exchange, name, message);
+    }
   }
 
   /**
@@ -77,7 +81,7 @@ public class Topic {
    * @param message The message serialized to bytes
    */
   public void sendRaw(byte[] message) {
-    messageBroker.sendRaw(name, message);
+    rabbitClient.sendRaw(exchange, name, message);
   }
 
   private List<String> getTracingPath() {

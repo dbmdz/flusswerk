@@ -11,8 +11,13 @@ import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.flow.FlowSpec;
 import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
+import com.github.dbmdz.flusswerk.framework.monitoring.FlusswerkMetrics;
+import com.github.dbmdz.flusswerk.framework.monitoring.MeterFactory;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitClient;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitConnection;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
+import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import com.github.dbmdz.flusswerk.integration.RabbitUtil;
 import com.github.dbmdz.flusswerk.integration.TestMessage;
 import java.io.IOException;
@@ -44,7 +49,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     classes = {
       FlusswerkPropertiesConfiguration.class,
       FlusswerkConfiguration.class,
-      SuccessfulProcessingTest.FlowConfiguration.class
+      SuccessfulProcessingTest.FlowConfiguration.class,
+      MessageBroker.class,
+      RabbitClient.class,
+      RabbitMQ.class,
+      Tracing.class,
+      MeterFactory.class,
+      FlusswerkMetrics.class
     })
 @Import({MetricsAutoConfiguration.class, CompositeMeterRegistryAutoConfiguration.class})
 @DisplayName("When Flusswerk successfully processes a message")

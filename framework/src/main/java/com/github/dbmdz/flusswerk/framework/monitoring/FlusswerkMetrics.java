@@ -10,7 +10,9 @@ import java.util.EnumMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.springframework.stereotype.Component;
 
+@Component
 public class FlusswerkMetrics implements FlowMetrics {
 
   private final AtomicInteger activeWorkers = new AtomicInteger(0);

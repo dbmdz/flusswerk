@@ -6,14 +6,7 @@ import com.github.dbmdz.flusswerk.framework.jackson.FlusswerkObjectMapper;
 import com.github.dbmdz.flusswerk.framework.model.Envelope;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.model.Message;
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.AlreadyClosedException;
-import com.rabbitmq.client.BuiltinExchangeType;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.GetResponse;
-import com.rabbitmq.client.Recoverable;
-import com.rabbitmq.client.RecoverableChannel;
-import com.rabbitmq.client.RecoveryListener;
+import com.rabbitmq.client.*;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -22,7 +15,10 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class RabbitClient {
 
   private static final boolean DURABLE = true;
@@ -49,6 +45,7 @@ public class RabbitClient {
     this(new IncomingMessageType(), rabbitConnection);
   }
 
+  @Autowired
   public RabbitClient(FlusswerkObjectMapper flusswerkObjectMapper, RabbitConnection connection) {
     channel = connection.getChannel();
     // We need a recoverable connection since we don't want to handle connection and channel

@@ -7,8 +7,10 @@ import com.rabbitmq.client.Channel;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.stereotype.Component;
 
 /** Interactions with RabbitMQ - send messages, get the number of messages in a queue and more. */
+@Component
 public class RabbitMQ {
 
   private final Map<String, Queue> queues;
@@ -17,8 +19,8 @@ public class RabbitMQ {
 
   private final Channel channel;
   private final RabbitClient rabbitClient;
-  private final MessageBroker messageBroker;
   private final Tracing tracing;
+  private final RoutingProperties routingProperties;
 
   /**
    * Creates a new Queues instance.
@@ -37,7 +39,7 @@ public class RabbitMQ {
     this.topics = new HashMap<>();
     this.channel = rabbitClient.getChannel();
     this.rabbitClient = rabbitClient;
-    this.messageBroker = messageBroker;
+    this.routingProperties = routingProperties;
 
     routingProperties
         .getIncoming()
@@ -54,7 +56,9 @@ public class RabbitMQ {
         .forEach(
             (route, topicName) -> {
               addQueue(topicName);
-              var topic = new Topic(topicName, messageBroker, tracing);
+              var topic =
+                  new Topic(
+                      topicName, routingProperties.getExchange(topicName), rabbitClient, tracing);
               topics.put(topicName, topic);
               routes.put(route, topic);
             });
@@ -81,7 +85,8 @@ public class RabbitMQ {
    * @return The corresponding topic.
    */
   public Topic topic(String name) {
-    return topics.computeIfAbsent(name, key -> new Topic(name, messageBroker, tracing));
+    return topics.computeIfAbsent(
+        name, key -> new Topic(name, routingProperties.getExchange(name), rabbitClient, tracing));
   }
 
   /**

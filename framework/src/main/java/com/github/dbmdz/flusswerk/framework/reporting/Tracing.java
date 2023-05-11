@@ -4,7 +4,9 @@ import com.github.dbmdz.flusswerk.framework.model.Message;
 import de.huxhorn.sulky.ulid.ULID;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.stereotype.Component;
 
+@Component
 public class Tracing {
 
   private final ConcurrentHashMap<Long, List<String>> tracingPathForThread;
