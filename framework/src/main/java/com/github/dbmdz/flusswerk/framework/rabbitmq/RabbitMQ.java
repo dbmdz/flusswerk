@@ -21,13 +21,18 @@ public class RabbitMQ {
   private final RabbitClient rabbitClient;
   private final Tracing tracing;
   private final RoutingProperties routingProperties;
+  private final MessageBroker messageBroker;
 
   /**
    * Creates a new Queues instance.
    *
    * @param rabbitClient the connection to RabbitMQ.
    */
-  public RabbitMQ(RoutingProperties routingProperties, RabbitClient rabbitClient, Tracing tracing) {
+  public RabbitMQ(
+      RoutingProperties routingProperties,
+      RabbitClient rabbitClient,
+      Tracing tracing,
+      MessageBroker messageBroker) {
     this.tracing = tracing;
     // use RabbitConnection to prevent uncontrolled access to Channel from user app
     this.queues = new HashMap<>();
@@ -36,6 +41,7 @@ public class RabbitMQ {
     this.channel = rabbitClient.getChannel();
     this.rabbitClient = rabbitClient;
     this.routingProperties = routingProperties;
+    this.messageBroker = messageBroker;
 
     routingProperties
         .getIncoming()
@@ -105,5 +111,13 @@ public class RabbitMQ {
   public void ack(Message message) throws IOException {
     var deliveryTag = message.getEnvelope().getDeliveryTag();
     channel.basicAck(deliveryTag, false);
+  }
+
+  public void stop(Message message) throws IOException {
+    messageBroker.fail(message);
+  }
+
+  public boolean retry(Message message) throws IOException {
+    return messageBroker.reject(message);
   }
 }

@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RabbitClient {
+class RabbitClient {
 
   private static final boolean DURABLE = true;
 

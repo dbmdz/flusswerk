@@ -12,7 +12,8 @@ import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlusswerkMetrics;
-import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.Topic;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import java.io.IOException;
@@ -36,9 +37,10 @@ class WorkerTest {
 
   @Mock private Flow flow;
   @Mock private Tracing tracing;
-  @Mock private MessageBroker messageBroker;
   @Mock private ProcessReport processReport;
+  @Mock private RabbitMQ rabbitMQ;
   @Mock private FlusswerkMetrics flusswerkMetrics;
+  @Mock private Topic topic;
 
   @Captor private ArgumentCaptor<Collection<Message>> messagesCaptor;
 
@@ -55,7 +57,7 @@ class WorkerTest {
   @BeforeEach
   void setUp() {
     taskQueue = new PriorityBlockingQueue<>();
-    worker = new Worker(flow, flusswerkMetrics, messageBroker, processReport, taskQueue, tracing);
+    worker = new Worker(flow, flusswerkMetrics, processReport, taskQueue, rabbitMQ, tracing);
     message = new Message();
   }
 
@@ -78,7 +80,7 @@ class WorkerTest {
   void shouldFailMessageOnStopProcessingException() throws IOException {
     when(flow.process(message)).thenThrow(new StopProcessingException("Intentional Exception"));
     worker.process(message);
-    verify(messageBroker).fail(message);
+    verify(rabbitMQ).stop(message);
   }
 
   @DisplayName("should retry message on RetryProcessingException")
@@ -87,14 +89,14 @@ class WorkerTest {
   void shouldRetryMessageOnRetryProcessingException(RuntimeException exception) throws IOException {
     when(flow.process(message)).thenThrow(exception);
     worker.process(message);
-    verify(messageBroker).reject(message);
+    verify(rabbitMQ).retry(message);
   }
 
   @DisplayName("should acknowledge message")
   @Test
-  void shouldAcknowledgeMessage() {
+  void shouldAcknowledgeMessage() throws IOException {
     worker.process(message);
-    verify(messageBroker).ack(message);
+    verify(rabbitMQ).ack(message);
   }
 
   @DisplayName("should read message from task queue")
@@ -120,7 +122,7 @@ class WorkerTest {
   void shouldLogRetry() throws IOException {
     Exception exception = new RetryProcessingException("intentional");
     when(flow.process(message)).thenThrow(exception);
-    when(messageBroker.reject(message)).thenReturn(true); // retry
+    when(rabbitMQ.retry(message)).thenReturn(true); // retry
     worker.process(message);
     verify(processReport).reportRetry(any(), any(RuntimeException.class));
   }
@@ -138,16 +140,18 @@ class WorkerTest {
   @DisplayName("should send messages")
   @Test
   void shouldSendMessages() throws IOException {
+    when(rabbitMQ.route(any())).thenReturn(topic);
     when(flow.process(message)).thenReturn(List.of(message));
     worker.process(message);
-    verify(messageBroker).send(List.of(message));
+    verify(topic).send(List.of(message));
   }
 
   @DisplayName("should fail processing when sending messages fails")
   @Test
   void shouldFailProcessingWhenSendingMessagesFails() throws IOException {
+    when(rabbitMQ.route(any())).thenReturn(topic);
     when(flow.process(message)).thenReturn(List.of(message));
-    doThrow(IOException.class).when(messageBroker).send(any());
+    doThrow(IOException.class).when(topic).send(any(Message.class));
     worker.process(message);
     verify(processReport).reportFail(any(), any());
   }
@@ -165,11 +169,11 @@ class WorkerTest {
 
   @DisplayName("should register active workers")
   @Test
-  void shouldRegisterActiveWorkers() {
+  void shouldRegisterActiveWorkers() throws IOException {
     worker.executeProcessing(new Message());
-    InOrder inOrder = Mockito.inOrder(flusswerkMetrics, messageBroker);
+    InOrder inOrder = Mockito.inOrder(flusswerkMetrics, rabbitMQ);
     inOrder.verify(flusswerkMetrics).incrementActiveWorkers();
-    inOrder.verify(messageBroker).ack(any());
+    inOrder.verify(rabbitMQ).ack(any());
     inOrder.verify(flusswerkMetrics).decrementActiveWorkers();
   }
 
@@ -181,6 +185,7 @@ class WorkerTest {
     incomingMessage.setTracing(tracingPath);
 
     // setup mocks
+    when(rabbitMQ.route(any())).thenReturn(topic);
     doAnswer(
             invocation -> {
               Collection<? extends Message> messages = invocation.getArgument(0);
@@ -200,7 +205,7 @@ class WorkerTest {
     Message expectedMessage = new Message();
     expectedMessage.setTracing(tracingPath);
 
-    verify(messageBroker).send(messagesCaptor.capture());
+    verify(topic).send(messagesCaptor.capture());
     assertThat(unwrapOne(messagesCaptor.getValue()).getTracing()).isEqualTo(tracingPath);
   }
 
@@ -214,10 +219,11 @@ class WorkerTest {
   void shouldPerformComplexRetrySendingMessages() throws IOException {
     Message incomingMessage = new TestMessage("incoming");
     Message outgoingMessage = new TestMessage("outgoing");
+    when(rabbitMQ.route(any())).thenReturn(topic);
     when(flow.process(incomingMessage))
         .thenThrow(new RetryProcessingException("Retry processing").send(outgoingMessage));
     worker.process(incomingMessage);
-    verify(messageBroker).send(List.of(outgoingMessage));
+    verify(topic).send(List.of(outgoingMessage));
   }
 
   @DisplayName("should perform complex retry with new messages")
@@ -225,12 +231,13 @@ class WorkerTest {
   void shouldPerformComplexRetryWithNewMessages() throws IOException {
     Message incomingMessage = new TestMessage("incoming");
     List<Message> messagesToRetry = List.of(new TestMessage("retry1"), new TestMessage("retry2"));
+    when(rabbitMQ.route(any())).thenReturn(topic);
     when(flow.process(incomingMessage))
         .thenThrow(new RetryProcessingException("Retry processing").retry(messagesToRetry));
     worker.process(incomingMessage);
-    verify(messageBroker).ack(incomingMessage);
+    verify(rabbitMQ).ack(incomingMessage);
     for (Message message : messagesToRetry) {
-      verify(messageBroker).reject(message);
+      verify(rabbitMQ).retry(message);
     }
   }
 }

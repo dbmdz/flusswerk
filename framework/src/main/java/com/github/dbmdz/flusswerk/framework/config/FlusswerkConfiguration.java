@@ -14,8 +14,8 @@ import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlowMetrics;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlusswerkMetrics;
 import com.github.dbmdz.flusswerk.framework.monitoring.MeterFactory;
-import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitConnection;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import com.github.dbmdz.flusswerk.framework.reporting.DefaultProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
@@ -29,7 +29,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-/** Spring configuration to provide beans for{@link MessageBroker} and {@link Engine}. */
 @Configuration
 @Import(FlusswerkPropertiesConfiguration.class)
 public class FlusswerkConfiguration {
@@ -75,10 +74,10 @@ public class FlusswerkConfiguration {
   public List<Worker> workers(
       AppProperties appProperties,
       Optional<Flow> flow,
-      MessageBroker messageBroker,
       ProcessingProperties processingProperties,
       Optional<ProcessReport> processReport,
       PriorityBlockingQueue<Task> taskQueue,
+      RabbitMQ rabbitMQ,
       Tracing tracing,
       FlusswerkMetrics metrics) {
     return flow.map(
@@ -89,10 +88,10 @@ public class FlusswerkConfiguration {
                             new Worker(
                                 theFlow,
                                 metrics,
-                                messageBroker,
                                 processReport.orElseGet(
                                     () -> new DefaultProcessReport(appProperties.name())),
                                 taskQueue,
+                                rabbitMQ,
                                 tracing))
                     .collect(
                         Collectors.toList())) // Return workers for each thread to process the Flow

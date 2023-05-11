@@ -31,6 +31,7 @@ class RabbitMQTest {
 
   @Mock private Channel channel;
   @Mock private RabbitClient rabbitClient;
+  @Mock private MessageBroker messageBroker;
 
   private RabbitMQ rabbitMQ;
   private Tracing tracing;
@@ -53,7 +54,7 @@ class RabbitMQTest {
     var routing = RoutingProperties.minimal(incoming, outgoing);
     when(rabbitClient.getChannel()).thenReturn(channel);
     tracing = new Tracing();
-    rabbitMQ = new RabbitMQ(routing, rabbitClient, tracing);
+    rabbitMQ = new RabbitMQ(routing, rabbitClient, tracing, messageBroker);
   }
 
   @DisplayName("should provide matching topics for routes")

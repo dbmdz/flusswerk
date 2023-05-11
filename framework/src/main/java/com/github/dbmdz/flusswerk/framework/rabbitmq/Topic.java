@@ -51,7 +51,7 @@ public class Topic {
    * @throws IOException If communication with RabbitMQ fails or if the message cannot be serialized
    *     to JSON.
    */
-  public void send(Collection<Message> messages) throws IOException {
+  public void send(Collection<? extends Message> messages) throws IOException {
     // Get a new tracing path in case one is needed
     final List<String> tracingPath = getTracingPath();
     messages.stream()

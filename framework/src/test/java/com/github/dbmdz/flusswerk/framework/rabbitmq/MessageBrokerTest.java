@@ -1,14 +1,15 @@
 package com.github.dbmdz.flusswerk.framework.rabbitmq;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -73,15 +74,6 @@ class MessageBrokerTest {
     }
     FailurePolicy failurePolicy = routing.getFailurePolicy(message);
     verify(rabbitClient).send(anyString(), eq(failurePolicy.getFailedRoutingKey()), eq(message));
-  }
-
-  @Test
-  @DisplayName("Should send multiple messages to the specified queue")
-  void sendMultipleMessagesShouldRouteMessagesToSpecifiedQueue() throws IOException {
-    String queue = "specified.queue";
-    List<Message> messages = Arrays.asList(new Message(), new Message(), new Message());
-    messageBroker.send(queue, messages);
-    verify(rabbitClient, times(messages.size())).send(any(), eq(queue), any());
   }
 
   @Test

@@ -9,10 +9,6 @@ import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.model.Message;
-import com.github.dbmdz.flusswerk.framework.monitoring.FlusswerkMetrics;
-import com.github.dbmdz.flusswerk.framework.monitoring.MeterFactory;
-import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
-import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitClient;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitConnection;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
@@ -29,6 +25,7 @@ import org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfigu
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ContextConfiguration;
@@ -44,13 +41,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
       FlusswerkPropertiesConfiguration.class,
       FlusswerkConfiguration.class,
       NoFlowTestConfiguration.class,
-      MessageBroker.class,
-      RabbitClient.class,
-      RabbitMQ.class,
       Tracing.class,
-      MeterFactory.class,
-      FlusswerkMetrics.class
     })
+@ComponentScan({
+  "com.github.dbmdz.flusswerk.framework.rabbitmq",
+  "com.github.dbmdz.flusswerk.framework.monitoring",
+})
 @Import({MetricsAutoConfiguration.class, CompositeMeterRegistryAutoConfiguration.class})
 @DisplayName("When Flusswerk is created without a Flow")
 @Testcontainers

@@ -5,7 +5,6 @@ import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.model.Envelope;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +16,7 @@ import org.springframework.stereotype.Component;
  * for messages.
  */
 @Component
-public class MessageBroker {
+class MessageBroker {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MessageBroker.class);
   private static final String MESSAGE_TTL = "x-message-ttl";
@@ -37,22 +36,6 @@ public class MessageBroker {
   }
 
   /**
-   * Sends messages to the default output queue as JSON document.
-   *
-   * @param messages the message to send.
-   * @throws IOException if sending the message fails.
-   * @deprecated Use {@link Topic#send(Message)} instead
-   */
-  @Deprecated
-  public void send(Collection<? extends Message> messages) throws IOException {
-    var topic = routingConfig.getOutgoing().get("default");
-    if (topic == null) {
-      throw new RuntimeException("Cannot send messages, no default queue specified");
-    }
-    send(topic, messages);
-  }
-
-  /**
    * Sends a message to a certain queue as JSON document.
    *
    * @param routingKey the routing key for the queue to send the message to (usually the queue
@@ -62,21 +45,6 @@ public class MessageBroker {
    */
   void send(String routingKey, Message message) throws IOException {
     rabbitClient.send(routingConfig.getExchange(routingKey), routingKey, message);
-  }
-
-  /**
-   * Sends multiple messages to a certain queue as JSON documents. The messages are sent in the same
-   * order as returned by the iterator over <code>messages</code>.
-   *
-   * @param routingKey the routing key for the queue to send the message to (usually the queue
-   *     name).
-   * @param messages the messages to send.
-   * @throws IOException if sending a message fails.
-   */
-  void send(String routingKey, Collection<? extends Message> messages) throws IOException {
-    for (Message message : messages) {
-      send(routingKey, message);
-    }
   }
 
   /**
