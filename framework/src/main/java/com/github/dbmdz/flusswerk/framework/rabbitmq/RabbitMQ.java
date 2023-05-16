@@ -7,8 +7,10 @@ import com.rabbitmq.client.Channel;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.stereotype.Component;
 
 /** Interactions with RabbitMQ - send messages, get the number of messages in a queue and more. */
+@Component
 public class RabbitMQ {
 
   private final Map<String, Queue> queues;
@@ -17,8 +19,9 @@ public class RabbitMQ {
 
   private final Channel channel;
   private final RabbitClient rabbitClient;
-  private final MessageBroker messageBroker;
   private final Tracing tracing;
+  private final RoutingProperties routingProperties;
+  private final MessageBroker messageBroker;
 
   /**
    * Creates a new Queues instance.
@@ -28,8 +31,8 @@ public class RabbitMQ {
   public RabbitMQ(
       RoutingProperties routingProperties,
       RabbitClient rabbitClient,
-      MessageBroker messageBroker,
-      Tracing tracing) {
+      Tracing tracing,
+      MessageBroker messageBroker) {
     this.tracing = tracing;
     // use RabbitConnection to prevent uncontrolled access to Channel from user app
     this.queues = new HashMap<>();
@@ -37,6 +40,7 @@ public class RabbitMQ {
     this.topics = new HashMap<>();
     this.channel = rabbitClient.getChannel();
     this.rabbitClient = rabbitClient;
+    this.routingProperties = routingProperties;
     this.messageBroker = messageBroker;
 
     routingProperties
@@ -54,7 +58,9 @@ public class RabbitMQ {
         .forEach(
             (route, topicName) -> {
               addQueue(topicName);
-              var topic = new Topic(topicName, messageBroker, tracing);
+              var topic =
+                  new Topic(
+                      topicName, routingProperties.getExchange(topicName), rabbitClient, tracing);
               topics.put(topicName, topic);
               routes.put(route, topic);
             });
@@ -81,7 +87,8 @@ public class RabbitMQ {
    * @return The corresponding topic.
    */
   public Topic topic(String name) {
-    return topics.computeIfAbsent(name, key -> new Topic(name, messageBroker, tracing));
+    return topics.computeIfAbsent(
+        name, key -> new Topic(name, routingProperties.getExchange(name), rabbitClient, tracing));
   }
 
   /**
@@ -104,5 +111,13 @@ public class RabbitMQ {
   public void ack(Message message) throws IOException {
     var deliveryTag = message.getEnvelope().getDeliveryTag();
     channel.basicAck(deliveryTag, false);
+  }
+
+  public void stop(Message message) throws IOException {
+    messageBroker.fail(message);
+  }
+
+  public boolean retry(Message message) throws IOException {
+    return messageBroker.reject(message);
   }
 }

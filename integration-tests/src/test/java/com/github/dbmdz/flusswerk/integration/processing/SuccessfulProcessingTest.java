@@ -13,6 +13,7 @@ import com.github.dbmdz.flusswerk.framework.flow.builder.FlowBuilder;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitConnection;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
+import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import com.github.dbmdz.flusswerk.integration.RabbitUtil;
 import com.github.dbmdz.flusswerk.integration.TestMessage;
 import java.io.IOException;
@@ -28,6 +29,7 @@ import org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfigu
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.annotation.DirtiesContext;
@@ -44,8 +46,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     classes = {
       FlusswerkPropertiesConfiguration.class,
       FlusswerkConfiguration.class,
-      SuccessfulProcessingTest.FlowConfiguration.class
+      SuccessfulProcessingTest.FlowConfiguration.class,
+      Tracing.class,
     })
+@ComponentScan({
+  "com.github.dbmdz.flusswerk.framework.rabbitmq",
+  "com.github.dbmdz.flusswerk.framework.monitoring",
+})
 @Import({MetricsAutoConfiguration.class, CompositeMeterRegistryAutoConfiguration.class})
 @DisplayName("When Flusswerk successfully processes a message")
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)

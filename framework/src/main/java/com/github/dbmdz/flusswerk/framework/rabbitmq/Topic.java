@@ -16,13 +16,15 @@ import java.util.Objects;
 public class Topic {
 
   private final String name;
-  private final MessageBroker messageBroker;
+  private final String exchange;
   private final Tracing tracing;
+  private final RabbitClient rabbitClient;
 
-  Topic(String name, MessageBroker messageBroker, Tracing tracing) {
+  Topic(String name, String exchange, RabbitClient rabbitClient, Tracing tracing) {
     this.name = requireNonNull(name);
-    this.messageBroker = messageBroker;
+    this.exchange = requireNonNull(exchange);
     this.tracing = requireNonNull(tracing);
+    this.rabbitClient = requireNonNull(rabbitClient);
   }
 
   /**
@@ -39,7 +41,7 @@ public class Topic {
     if (message.getTracing() == null || message.getTracing().isEmpty()) {
       message.setTracing(getTracingPath());
     }
-    messageBroker.send(name, message);
+    rabbitClient.send(exchange, name, message);
   }
 
   /**
@@ -49,13 +51,15 @@ public class Topic {
    * @throws IOException If communication with RabbitMQ fails or if the message cannot be serialized
    *     to JSON.
    */
-  public void send(Collection<Message> messages) throws IOException {
+  public void send(Collection<? extends Message> messages) throws IOException {
     // Get a new tracing path in case one is needed
     final List<String> tracingPath = getTracingPath();
     messages.stream()
         .filter(message -> message.getTracing() == null || message.getTracing().isEmpty())
         .forEach(message -> message.setTracing(tracingPath));
-    messageBroker.send(name, messages);
+    for (Message message : messages) {
+      rabbitClient.send(exchange, name, message);
+    }
   }
 
   /**
@@ -77,7 +81,7 @@ public class Topic {
    * @param message The message serialized to bytes
    */
   public void sendRaw(byte[] message) {
-    messageBroker.sendRaw(name, message);
+    rabbitClient.sendRaw(exchange, name, message);
   }
 
   private List<String> getTracingPath() {

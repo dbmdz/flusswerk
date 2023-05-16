@@ -1,9 +1,7 @@
 package com.github.dbmdz.flusswerk.framework.rabbitmq;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.model.Message;
@@ -16,18 +14,25 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @DisplayName("RabbitMQ")
+@ExtendWith(MockitoExtension.class)
 class RabbitMQTest {
 
   private static final List<String> incoming = List.of("first.incoming", "first.incoming");
   private static final Map<String, String> outgoing =
       Map.of("first.rout", "first.outgoing", "second.route", "second.outgoing");
 
-  private Channel channel;
+  @Mock private Channel channel;
+  @Mock private RabbitClient rabbitClient;
+  @Mock private MessageBroker messageBroker;
+
   private RabbitMQ rabbitMQ;
   private Tracing tracing;
 
@@ -47,18 +52,16 @@ class RabbitMQTest {
   @BeforeEach
   void setUp() {
     var routing = RoutingProperties.minimal(incoming, outgoing);
-    var rabbitClient = mock(RabbitClient.class);
-    channel = mock(Channel.class);
     when(rabbitClient.getChannel()).thenReturn(channel);
     tracing = new Tracing();
-    rabbitMQ = new RabbitMQ(routing, rabbitClient, mock(MessageBroker.class), tracing);
+    rabbitMQ = new RabbitMQ(routing, rabbitClient, tracing, messageBroker);
   }
 
   @DisplayName("should provide matching topics for routes")
   @ParameterizedTest
   @MethodSource("routesAndTopics")
   void shouldProvideMatchingTopicsForRoutes(String route, String topic) {
-    var expected = new Topic(topic, mock(MessageBroker.class), tracing);
+    var expected = new Topic(topic, "exchange", rabbitClient, tracing);
     assertThat(rabbitMQ.route(route)).isEqualTo(expected);
   }
 
@@ -66,14 +69,14 @@ class RabbitMQTest {
   @ParameterizedTest
   @MethodSource("topics")
   void shouldProvideAllTopics(String name) {
-    var expected = new Topic(name, mock(MessageBroker.class), tracing);
+    var expected = new Topic(name, "exchange", rabbitClient, tracing);
     assertThat(rabbitMQ.topic(name)).isEqualTo(expected);
   }
 
   @DisplayName("should provide unknown topic")
   @Test
   void shouldProvideUnknownTopic() {
-    var expected = new Topic("some.queue", mock(MessageBroker.class), tracing);
+    var expected = new Topic("some.queue", "exchange", rabbitClient, tracing);
     assertThat(rabbitMQ.topic("some.queue")).isEqualTo(expected);
   }
 

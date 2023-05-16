@@ -5,18 +5,18 @@ import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.model.Envelope;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * A MessageBroker provides a high level API to interact with an MessageBroker like RabbitMQ and
  * provides the framework engines logic for message operations like sending, retrieving or rejecting
  * for messages.
  */
-public class MessageBroker {
+@Component
+class MessageBroker {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MessageBroker.class);
   private static final String MESSAGE_TTL = "x-message-ttl";
@@ -36,38 +36,6 @@ public class MessageBroker {
   }
 
   /**
-   * Sends a message to the default output queue as JSON document.
-   *
-   * @param message the message to send.
-   * @throws IOException if sending the message fails.
-   * @deprecated Use {@link Topic#send(Message)} instead
-   */
-  @Deprecated
-  void send(Message message) throws IOException {
-    var topic = routingConfig.getOutgoing().get("default");
-    if (topic == null) {
-      throw new RuntimeException("Cannot send message, no default queue specified");
-    }
-    send(topic, message);
-  }
-
-  /**
-   * Sends messages to the default output queue as JSON document.
-   *
-   * @param messages the message to send.
-   * @throws IOException if sending the message fails.
-   * @deprecated Use {@link Topic#send(Message)} instead
-   */
-  @Deprecated
-  public void send(Collection<? extends Message> messages) throws IOException {
-    var topic = routingConfig.getOutgoing().get("default");
-    if (topic == null) {
-      throw new RuntimeException("Cannot send messages, no default queue specified");
-    }
-    send(topic, messages);
-  }
-
-  /**
    * Sends a message to a certain queue as JSON document.
    *
    * @param routingKey the routing key for the queue to send the message to (usually the queue
@@ -77,25 +45,6 @@ public class MessageBroker {
    */
   void send(String routingKey, Message message) throws IOException {
     rabbitClient.send(routingConfig.getExchange(routingKey), routingKey, message);
-  }
-
-  void sendRaw(String routingKey, byte[] message) {
-    rabbitClient.sendRaw(routingConfig.getExchange(routingKey), routingKey, message);
-  }
-
-  /**
-   * Sends multiple messages to a certain queue as JSON documents. The messages are sent in the same
-   * order as returned by the iterator over <code>messages</code>.
-   *
-   * @param routingKey the routing key for the queue to send the message to (usually the queue
-   *     name).
-   * @param messages the messages to send.
-   * @throws IOException if sending a message fails.
-   */
-  void send(String routingKey, Collection<? extends Message> messages) throws IOException {
-    for (Message message : messages) {
-      send(routingKey, message);
-    }
   }
 
   /**
@@ -120,44 +69,6 @@ public class MessageBroker {
    */
   public Message receive(String queueName, boolean autoAck) throws InvalidMessageException {
     return rabbitClient.receive(queueName, autoAck);
-  }
-
-  /**
-   * Gets one message from the input queue but does not acknowledge it. To do so, use {@link
-   * MessageBroker#ack(Message)}.
-   *
-   * @return the received message.
-   * @throws IOException if communication with RabbitMQ failed.
-   */
-  public Message receive() throws IOException {
-    Message message = null;
-    for (String inputQueue : routingConfig.getIncoming()) {
-      try {
-        message = receive(inputQueue);
-      } catch (InvalidMessageException e) {
-        failInvalidMessage(e);
-        return null;
-      }
-
-      if (message != null) {
-        break;
-      }
-    }
-    return message;
-  }
-
-  private void failInvalidMessage(InvalidMessageException e) {
-    Envelope envelope = e.getEnvelope();
-    LOGGER.warn("Invalid message detected. Will be shifted into 'failed' queue: " + e.getMessage());
-    rabbitClient.ack(envelope);
-    FailurePolicy failurePolicy = routingConfig.getFailurePolicy(envelope.getSource());
-    String failedRoutingKey = failurePolicy.getFailedRoutingKey();
-    if (failedRoutingKey != null) {
-      rabbitClient.sendRaw(
-          routingConfig.getExchange(failedRoutingKey),
-          failedRoutingKey,
-          envelope.getBody().getBytes());
-    }
   }
 
   private void provideInputQueues() throws IOException {
@@ -262,45 +173,5 @@ public class MessageBroker {
     for (String deadLetterExchange : routingConfig.getDeadLetterExchanges()) {
       rabbitClient.provideExchange(deadLetterExchange);
     }
-  }
-
-  /**
-   * Returns the number of messages in known queues
-   *
-   * @return a map of queue names and the number of messages in these queues
-   * @throws IOException if communication with RabbitMQ fails
-   * @deprecated Use {@link Queue#messageCount()} instead.
-   */
-  @Deprecated
-  Map<String, Long> getMessageCounts() throws IOException {
-    Map<String, Long> result = new HashMap<>();
-    for (String queue : routingConfig.getIncoming()) {
-      result.put(queue, rabbitClient.getMessageCount(queue));
-    }
-    return result;
-  }
-
-  Map<String, Long> getFailedMessageCounts() throws IOException {
-    Map<String, Long> result = new HashMap<>();
-    for (String inputQueue : routingConfig.getIncoming()) {
-      FailurePolicy failurePolicy = routingConfig.getFailurePolicy(inputQueue);
-      if (failurePolicy != null) {
-        String queue = failurePolicy.getFailedRoutingKey();
-        result.put(queue, rabbitClient.getMessageCount(queue));
-      }
-    }
-    return result;
-  }
-
-  public Map<String, Long> getRetryMessageCounts() throws IOException {
-    Map<String, Long> result = new HashMap<>();
-    for (String inputQueue : routingConfig.getIncoming()) {
-      FailurePolicy failurePolicy = routingConfig.getFailurePolicy(inputQueue);
-      if (failurePolicy != null) {
-        String queue = failurePolicy.getRetryRoutingKey();
-        result.put(queue, rabbitClient.getMessageCount(queue));
-      }
-    }
-    return result;
   }
 }

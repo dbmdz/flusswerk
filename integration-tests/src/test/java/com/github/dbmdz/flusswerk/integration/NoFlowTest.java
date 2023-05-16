@@ -11,6 +11,7 @@ import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitConnection;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
+import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import com.github.dbmdz.flusswerk.integration.NoFlowTest.NoFlowTestConfiguration;
 import java.io.IOException;
 import java.util.List;
@@ -24,6 +25,7 @@ import org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfigu
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ContextConfiguration;
@@ -38,8 +40,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     classes = {
       FlusswerkPropertiesConfiguration.class,
       FlusswerkConfiguration.class,
-      NoFlowTestConfiguration.class
+      NoFlowTestConfiguration.class,
+      Tracing.class,
     })
+@ComponentScan({
+  "com.github.dbmdz.flusswerk.framework.rabbitmq",
+  "com.github.dbmdz.flusswerk.framework.monitoring",
+})
 @Import({MetricsAutoConfiguration.class, CompositeMeterRegistryAutoConfiguration.class})
 @DisplayName("When Flusswerk is created without a Flow")
 @Testcontainers

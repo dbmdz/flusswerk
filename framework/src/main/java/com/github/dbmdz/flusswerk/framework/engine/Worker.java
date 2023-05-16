@@ -7,7 +7,7 @@ import com.github.dbmdz.flusswerk.framework.flow.Flow;
 import com.github.dbmdz.flusswerk.framework.model.Envelope;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlusswerkMetrics;
-import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import java.io.IOException;
@@ -24,21 +24,22 @@ public class Worker implements Runnable {
 
   private final Flow flow;
   private final FlusswerkMetrics metrics;
-  private final MessageBroker messageBroker;
   private final ProcessReport processReport;
   private final PriorityBlockingQueue<Task> queue;
+
+  private final RabbitMQ rabbitMQ;
   private boolean running;
   private final Tracing tracing;
 
   public Worker(
       Flow flow,
       FlusswerkMetrics metrics,
-      MessageBroker messageBroker,
       ProcessReport processReport,
       PriorityBlockingQueue<Task> queue,
+      RabbitMQ rabbitMQ,
       Tracing tracing) {
     this.flow = flow;
-    this.messageBroker = messageBroker;
+    this.rabbitMQ = rabbitMQ;
     this.metrics = metrics;
     this.processReport = processReport;
     this.queue = queue;
@@ -109,9 +110,9 @@ public class Worker implements Runnable {
     try {
       if (!messagesToSend.isEmpty()) {
         tracing.ensureFor(messagesToSend);
-        messageBroker.send(messagesToSend);
+        rabbitMQ.route("default").send(messagesToSend);
       }
-      messageBroker.ack(message);
+      rabbitMQ.ack(message);
       if (skip != null) {
         processReport.reportSkip(message, skip);
       } else {
@@ -126,8 +127,8 @@ public class Worker implements Runnable {
 
   private void retryOrFail(Message receivedMessage, RuntimeException e) {
     try {
-      messageBroker.ack(receivedMessage);
-      boolean isRejected = messageBroker.reject(receivedMessage);
+      rabbitMQ.ack(receivedMessage);
+      boolean isRejected = rabbitMQ.retry(receivedMessage);
       if (isRejected) {
         processReport.reportRetry(receivedMessage, e);
       } else {
@@ -141,17 +142,17 @@ public class Worker implements Runnable {
 
   private void complexRetry(Message receivedMessage, RetryProcessingException e) {
     try {
-      messageBroker.ack(receivedMessage);
+      rabbitMQ.ack(receivedMessage);
       for (Message retryMessage : e.getMessagesToRetry()) {
         Envelope envelope = retryMessage.getEnvelope();
         envelope.setRetries(receivedMessage.getEnvelope().getRetries());
         envelope.setSource(receivedMessage.getEnvelope().getSource());
         tracing.ensureFor(retryMessage);
-        messageBroker.reject(retryMessage);
+        rabbitMQ.retry(retryMessage);
       }
       // Send the messages that should be sent anyway
       tracing.ensureFor(e.getMessagesToSend());
-      messageBroker.send(e.getMessagesToSend());
+      rabbitMQ.route("default").send(e.getMessagesToSend());
 
       processReport.reportRetry(receivedMessage, e);
     } catch (IOException fatalException) {
@@ -163,7 +164,7 @@ public class Worker implements Runnable {
   private void fail(Message message, StopProcessingException e) {
     try {
       processReport.reportFail(message, e);
-      messageBroker.fail(message);
+      rabbitMQ.stop(message);
     } catch (IOException fatalException) {
       var body = message.getEnvelope().getBody();
       LOGGER.error("Could not fail message" + body, fatalException);

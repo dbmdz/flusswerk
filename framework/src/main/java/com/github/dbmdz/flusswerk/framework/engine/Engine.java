@@ -1,23 +1,15 @@
 package com.github.dbmdz.flusswerk.framework.engine;
 
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
-import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
 import com.rabbitmq.client.Channel;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Run flows {@link Flow} for every message from the {@link MessageBroker} - usually several in
- * parallel.
- */
+/** Run flows {@link Flow} for every message from RabbitMQ - usually several in parallel. */
 public class Engine {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Engine.class);

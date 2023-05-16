@@ -1,6 +1,8 @@
 package com.github.dbmdz.flusswerk.framework.config;
 
-import com.github.dbmdz.flusswerk.framework.config.properties.*;
+import com.github.dbmdz.flusswerk.framework.config.properties.AppProperties;
+import com.github.dbmdz.flusswerk.framework.config.properties.ProcessingProperties;
+import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.engine.Engine;
 import com.github.dbmdz.flusswerk.framework.engine.FlusswerkConsumer;
 import com.github.dbmdz.flusswerk.framework.engine.Task;
@@ -12,15 +14,11 @@ import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlowMetrics;
 import com.github.dbmdz.flusswerk.framework.monitoring.FlusswerkMetrics;
 import com.github.dbmdz.flusswerk.framework.monitoring.MeterFactory;
-import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
-import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitClient;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitConnection;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
 import com.github.dbmdz.flusswerk.framework.reporting.DefaultProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
-import io.micrometer.core.instrument.MeterRegistry;
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.Semaphore;
@@ -31,21 +29,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-/** Spring configuration to provide beans for{@link MessageBroker} and {@link Engine}. */
 @Configuration
 @Import(FlusswerkPropertiesConfiguration.class)
 public class FlusswerkConfiguration {
 
   @Bean
-  public Tracing tracing() {
-    return new Tracing();
-  }
-
-  @Bean
   public Flow flow(Optional<FlowSpec> flowSpec) {
     // No FlowSpec → no Flow. We will have to handle this case when creating the
     // Engine bean as the sole consumer of the Flow bean.
-    return flowSpec.map(spec -> new Flow(spec)).orElse(null);
+    return flowSpec.map(Flow::new).orElse(null);
   }
 
   @Bean
@@ -68,42 +60,9 @@ public class FlusswerkConfiguration {
   }
 
   @Bean
-  public MeterFactory meterFactory(
-      MonitoringProperties monitoringProperties, MeterRegistry meterRegistry) {
-    return new MeterFactory(monitoringProperties.prefix(), meterRegistry);
-  }
-
-  @Bean
   public FlusswerkObjectMapper flusswerkObjectMapper(
       ObjectProvider<IncomingMessageType> incomingMessageType) {
     return new FlusswerkObjectMapper(incomingMessageType.getIfAvailable(IncomingMessageType::new));
-  }
-
-  @Bean
-  public RabbitConnection rabbitConnection(
-      AppProperties appProperties, RabbitMQProperties rabbitMQProperties) throws IOException {
-    return new RabbitConnection(rabbitMQProperties, appProperties.name());
-  }
-
-  @Bean
-  public RabbitClient rabbitClient(
-      FlusswerkObjectMapper flusswerkObjectMapper, RabbitConnection rabbitConnection) {
-    return new RabbitClient(flusswerkObjectMapper, rabbitConnection);
-  }
-
-  @Bean
-  public RabbitMQ rabbitMQ(
-      RoutingProperties routingProperties,
-      RabbitClient rabbitClient,
-      MessageBroker messageBroker,
-      Tracing tracing) {
-    return new RabbitMQ(routingProperties, rabbitClient, messageBroker, tracing);
-  }
-
-  @Bean
-  public MessageBroker messageBroker(RoutingProperties routingProperties, RabbitClient rabbitClient)
-      throws IOException {
-    return new MessageBroker(routingProperties, rabbitClient);
   }
 
   @Bean
@@ -115,10 +74,10 @@ public class FlusswerkConfiguration {
   public List<Worker> workers(
       AppProperties appProperties,
       Optional<Flow> flow,
-      MessageBroker messageBroker,
       ProcessingProperties processingProperties,
       Optional<ProcessReport> processReport,
       PriorityBlockingQueue<Task> taskQueue,
+      RabbitMQ rabbitMQ,
       Tracing tracing,
       FlusswerkMetrics metrics) {
     return flow.map(
@@ -129,20 +88,14 @@ public class FlusswerkConfiguration {
                             new Worker(
                                 theFlow,
                                 metrics,
-                                messageBroker,
                                 processReport.orElseGet(
                                     () -> new DefaultProcessReport(appProperties.name())),
                                 taskQueue,
+                                rabbitMQ,
                                 tracing))
                     .collect(
                         Collectors.toList())) // Return workers for each thread to process the Flow
         .orElse(Collections.emptyList()); // No Flow, nothing to do
-  }
-
-  @Bean
-  public FlusswerkMetrics metrics(
-      ProcessingProperties processingProperties, MeterRegistry meterRegistry) {
-    return new FlusswerkMetrics(processingProperties, meterRegistry);
   }
 
   @Bean

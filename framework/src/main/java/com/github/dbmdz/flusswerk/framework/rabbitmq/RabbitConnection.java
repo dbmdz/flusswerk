@@ -1,5 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.rabbitmq;
 
+import com.github.dbmdz.flusswerk.framework.config.properties.AppProperties;
 import com.github.dbmdz.flusswerk.framework.config.properties.RabbitMQProperties;
 import com.rabbitmq.client.Address;
 import com.rabbitmq.client.Channel;
@@ -12,7 +13,10 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class RabbitConnection {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RabbitConnection.class);
@@ -24,6 +28,12 @@ public class RabbitConnection {
   private final String appName;
 
   private final RabbitMQProperties rabbitMQ;
+
+  @Autowired
+  public RabbitConnection(RabbitMQProperties rabbitMQ, AppProperties appProperties)
+      throws IOException {
+    this(rabbitMQ, new ConnectionFactory(), appProperties.name());
+  }
 
   public RabbitConnection(RabbitMQProperties rabbitMQ, String appName) throws IOException {
     this(rabbitMQ, new ConnectionFactory(), appName);

@@ -14,6 +14,7 @@ import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitConnection;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
+import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
 import com.github.dbmdz.flusswerk.integration.RabbitUtil;
 import com.github.dbmdz.flusswerk.integration.TestMessage;
 import com.rabbitmq.client.AMQP.BasicProperties;
@@ -42,6 +43,7 @@ import org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfigu
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.annotation.DirtiesContext;
@@ -60,8 +62,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     classes = {
       FlusswerkPropertiesConfiguration.class,
       FlusswerkConfiguration.class,
-      ReconnectTest.FlowConfiguration.class
+      ReconnectTest.FlowConfiguration.class,
+      Tracing.class,
     })
+@ComponentScan({
+  "com.github.dbmdz.flusswerk.framework.rabbitmq",
+  "com.github.dbmdz.flusswerk.framework.monitoring",
+})
 @Import({MetricsAutoConfiguration.class, CompositeMeterRegistryAutoConfiguration.class})
 @DisplayName("When the RabbitMQ connection is lost")
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
