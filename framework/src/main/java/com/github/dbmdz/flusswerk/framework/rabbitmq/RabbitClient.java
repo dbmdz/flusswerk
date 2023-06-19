@@ -1,6 +1,7 @@
 package com.github.dbmdz.flusswerk.framework.rabbitmq;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.github.dbmdz.flusswerk.framework.engine.FlusswerkConsumer;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.jackson.FlusswerkObjectMapper;
 import com.github.dbmdz.flusswerk.framework.model.Envelope;
@@ -195,6 +196,38 @@ public class RabbitClient {
       envelope.setSource(queueName);
       throw new InvalidMessageException(envelope, e.getMessage(), e);
     }
+  }
+
+  public void consume(FlusswerkConsumer consumer, boolean autoAck) {
+    // The channel might not be available or become unavailable due to a connection error. In this
+    // case, we wait until the connection becomes available again.
+    while (true) {
+      if (channelAvailable) {
+        try {
+          channel.basicConsume(consumer.getInputQueue(), autoAck, consumer);
+          break;
+        } catch (IOException | AlreadyClosedException e) {
+          log.warn("Could not start RabbitMQ consumer.", e);
+          channelAvailable = false;
+        }
+      }
+      // We loop here because the signal might be triggered due to what the JVM documentation calls
+      // a 'spurious wakeup', i.e. the signal is triggered even though no connection recovery has
+      // yet happened.
+      while (!channelAvailable) {
+        channelLock.lock();
+        channelAvailableAgain.awaitUninterruptibly();
+        channelLock.unlock();
+      }
+    }
+  }
+
+  public void nack(long deliveryTag, boolean multiple, boolean requeue) throws IOException {
+    channel.basicNack(deliveryTag, multiple, requeue);
+  }
+
+  public void cancel(String consumerTag) throws IOException {
+    channel.basicCancel(consumerTag);
   }
 
   public void provideExchange(String exchange) throws IOException {

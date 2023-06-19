@@ -52,10 +52,8 @@ public class FlusswerkConfiguration {
   public Engine engine(
       Optional<Flow> flow,
       List<FlusswerkConsumer> flusswerkConsumers,
-      ProcessingProperties processingProperties,
-      RabbitConnection rabbitConnection,
+      RabbitClient rabbitClient,
       Set<FlowMetrics> flowMetrics,
-      MeterFactory meterFactory,
       List<Worker> workers) {
 
     if (flow.isEmpty()) {
@@ -64,7 +62,7 @@ public class FlusswerkConfiguration {
 
     flow.get().registerFlowMetrics(flowMetrics);
 
-    return new Engine(rabbitConnection.getChannel(), flusswerkConsumers, workers);
+    return new Engine(rabbitClient, flusswerkConsumers, workers);
   }
 
   @Bean
