@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -151,6 +150,7 @@ public class ReconnectTest {
                 } catch (InterruptedException e) {
                   throw new RuntimeException(e);
                 }
+                log.info("Processing " + msg);
                 return msg.toUpperCase();
               })
           .writerSendingMessage(
@@ -167,21 +167,72 @@ public class ReconnectTest {
     }
   }
 
-  @BeforeEach
-  void startEngine() {
-    engine.start();
-  }
-
   @AfterEach
-  void stopEngine() throws IOException {
+  void stopEngine() throws IOException, InterruptedException {
     engine.stop();
     rabbitUtil.purgeQueues();
+    proxy.delete();
+  }
+
+  @DisplayName("during startup, retry registration of consumers")
+  @Test
+  void recoverFromDisruptionDuringStartup() throws IOException, InterruptedException {
+    TestMessage input = new TestMessage("hello world");
+    log.info("Sending message");
+    rabbitUtil.send(input);
+    Thread toxicThread =
+        new Thread(
+            () -> {
+              try {
+                log.info("Disrupting RabbitMQ connection");
+                proxy.toxics().timeout("timeout", ToxicDirection.DOWNSTREAM, 1000);
+                Thread.sleep(15000);
+                log.info("Re-establishing RabbitMQ connection");
+                proxy.toxics().get("timeout").remove();
+              } catch (InterruptedException | IOException e) {
+                throw new RuntimeException(e);
+              }
+            });
+    Thread engineThread =
+        new Thread(
+            () -> {
+              try {
+                Thread.sleep(200);
+                log.info("Starting Flusswerk engine");
+                engine.start();
+              } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+              }
+            });
+
+    engineThread.start();
+    toxicThread.start();
+    toxicThread.join();
+    engineThread.join();
+
+    Thread.sleep(15000);
+    log.info("Collection should be recovered now, get processed message");
+    Channel channel = rabbitConnection.getChannel();
+    ReconnectTest.CollectMessages collectMessages =
+        new CollectMessages(channel, flusswerkObjectMapper);
+    channel.basicConsume("output", false, collectMessages);
+
+    Thread.sleep(2000);
+    channel.basicCancel(collectMessages.getConsumerTag());
+
+    assertThat(collectMessages.getMessages())
+        .map(TestMessage.class::cast)
+        .map(TestMessage::getId)
+        .contains("HELLO WORLD");
+    assertThat(channel.consumerCount("input.first") + channel.consumerCount("input.second"))
+        .isEqualTo(4L);
   }
 
   @DisplayName("processing should continue with the last message that wasn't acknowledged")
   @Test
   public void recoveryAfterDisruptionDuringProcessing() throws Exception {
     TestMessage input = new TestMessage("hello world");
+    engine.start();
 
     log.info("Sending message");
     rabbitUtil.send(input);

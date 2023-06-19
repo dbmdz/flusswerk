@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.dbmdz.flusswerk.framework.TestMessage;
+import com.github.dbmdz.flusswerk.framework.engine.FlusswerkConsumer;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.model.Envelope;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
@@ -50,6 +51,29 @@ class RabbitClientTest {
     message.getEnvelope().setDeliveryTag(123123123);
     rabbitClient.ack(message.getEnvelope());
     verify(channel).basicAck(eq(message.getEnvelope().getDeliveryTag()), eq(false));
+  }
+
+  @Test
+  void nack() throws IOException {
+    RabbitClient rabbitClient = new RabbitClient(connection);
+    rabbitClient.nack(123123123, false, false);
+    verify(channel).basicNack(123123123, false, false);
+  }
+
+  @Test
+  void cancel() throws IOException {
+    RabbitClient rabbitClient = new RabbitClient(connection);
+    rabbitClient.cancel("my-consumer-tag");
+    verify(channel).basicCancel("my-consumer-tag");
+  }
+
+  @Test
+  void consume() throws IOException {
+    RabbitClient rabbitClient = new RabbitClient(connection);
+    FlusswerkConsumer consumer = mock(FlusswerkConsumer.class);
+    when(consumer.getInputQueue()).thenReturn("input");
+    rabbitClient.consume(consumer, true);
+    verify(channel).basicConsume("input", true, consumer);
   }
 
   @Test

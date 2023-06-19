@@ -1,8 +1,7 @@
 package com.github.dbmdz.flusswerk.framework.engine;
 
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
-import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
-import com.rabbitmq.client.Channel;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitClient;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Run flows {@link Flow} for every message from the {@link MessageBroker} - usually several in
+ * Run flows {@link Flow} for every message from the {@link RabbitClient} - usually several in
  * parallel.
  */
 public class Engine {
@@ -25,26 +24,27 @@ public class Engine {
   private final ExecutorService executorService;
   private final List<Worker> workers;
   private final List<FlusswerkConsumer> consumers;
-  private final Channel channel;
+  private final RabbitClient rabbitClient;
   private final Semaphore startOnlyOnce;
 
   /**
    * Creates a new Engine bridging RabbitMQ consumers and Flusswerk workers.
    *
-   * @param channel the RabbitMQ channel new messages are read from
+   * @param rabbitClient the RabbitMQ client that registers consumers to a given channel
    * @param flusswerkConsumers the consumers that read those messages from RabbitMQ
    * @param workers the workers that do the processing
    */
-  public Engine(Channel channel, List<FlusswerkConsumer> flusswerkConsumers, List<Worker> workers) {
-    this(channel, flusswerkConsumers, workers, Executors.newFixedThreadPool(workers.size()));
+  public Engine(
+      RabbitClient rabbitClient, List<FlusswerkConsumer> flusswerkConsumers, List<Worker> workers) {
+    this(rabbitClient, flusswerkConsumers, workers, Executors.newFixedThreadPool(workers.size()));
   }
 
   public Engine(
-      Channel channel,
+      RabbitClient rabbitClient,
       List<FlusswerkConsumer> flusswerkConsumers,
       List<Worker> workers,
       ExecutorService executorService) {
-    this.channel = channel;
+    this.rabbitClient = rabbitClient;
     this.executorService = executorService;
     this.workers = workers;
     this.consumers = flusswerkConsumers;
@@ -69,11 +69,7 @@ public class Engine {
 
     LOGGER.debug("Starting consumers");
     for (FlusswerkConsumer consumer : consumers) {
-      try {
-        channel.basicConsume(consumer.getInputQueue(), false, consumer);
-      } catch (IOException e) {
-        LOGGER.error("Could not start RabbitMQ consumer.", e);
-      }
+      rabbitClient.consume(consumer, false);
     }
   }
 
@@ -86,7 +82,7 @@ public class Engine {
     consumers.forEach(
         consumer -> {
           try {
-            channel.basicCancel(consumer.getConsumerTag());
+            rabbitClient.cancel(consumer.getConsumerTag());
           } catch (IOException e) {
             LOGGER.error("Could not cancel consumer", e);
           }
@@ -101,7 +97,7 @@ public class Engine {
     for (var task : remainingTasks) {
       long deliveryTag = task.getMessage().getEnvelope().getDeliveryTag();
       try {
-        channel.basicNack(deliveryTag, false, true);
+        rabbitClient.nack(deliveryTag, false, true);
       } catch (IOException e) {
         LOGGER.error("Could not NACK message with delivery tag {}", deliveryTag, e);
       }

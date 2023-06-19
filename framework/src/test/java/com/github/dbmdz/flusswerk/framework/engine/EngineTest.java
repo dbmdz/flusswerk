@@ -5,7 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.rabbitmq.client.Channel;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitClient;
 import java.io.IOException;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,18 +15,18 @@ import org.junit.jupiter.api.Test;
 @DisplayName("The Engine")
 class EngineTest {
 
-  private Channel channel;
+  private RabbitClient rabbitClient;
   private List<FlusswerkConsumer> consumers;
   private List<Worker> workers;
   private Engine engine;
 
   @BeforeEach
   void setUp() {
-    channel = mock(Channel.class);
+    rabbitClient = mock(RabbitClient.class);
     consumers = List.of(mockConsumer("consumer1", "queue1"), mockConsumer("consumer2", "queue2"));
 
     workers = List.of(mock(Worker.class), mock(Worker.class));
-    engine = new Engine(channel, consumers, workers, new TestingExecutorService());
+    engine = new Engine(rabbitClient, consumers, workers, new TestingExecutorService());
   }
 
   private FlusswerkConsumer mockConsumer(String consumerTag, String queue) {
@@ -49,7 +49,7 @@ class EngineTest {
   public void engineShouldConnectAllConsumers() throws IOException {
     engine.start();
     for (FlusswerkConsumer consumer : consumers) {
-      verify(channel).basicConsume(eq(consumer.getInputQueue()), eq(false), eq(consumer));
+      verify(rabbitClient).consume(eq(consumer), eq(false));
     }
     engine.stop();
   }
@@ -69,7 +69,7 @@ class EngineTest {
     engine.stop();
     for (FlusswerkConsumer consumer : consumers) {
       String consumerTag = consumer.getConsumerTag();
-      verify(channel).basicCancel(eq(consumerTag));
+      verify(rabbitClient).cancel(eq(consumerTag));
     }
   }
 }
