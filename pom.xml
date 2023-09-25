@@ -76,7 +76,7 @@
     <version.junit>5.7.0</version.junit>
     <version.mockito>4.10.0</version.mockito>
     <!-- Plugin versions -->
-    <version.fmt-maven-plugin>2.20</version.fmt-maven-plugin>
+    <version.fmt-maven-plugin>2.21.1</version.fmt-maven-plugin>
     <version.githook-maven-plugin>1.0.5</version.githook-maven-plugin>
     <version.maven-gpg-plugin>3.1.0</version.maven-gpg-plugin>
     <version.maven-jacoco-plugin>0.8.9</version.maven-jacoco-plugin>
