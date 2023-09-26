@@ -34,7 +34,6 @@ public class DefaultProcessReport implements ProcessReport {
             name,
             e.getMessage(),
             keyValue("amqp_message", message.toString()),
-            keyValue("exception", e.toString()),
             e);
   }
 
@@ -46,7 +45,6 @@ public class DefaultProcessReport implements ProcessReport {
             name,
             e.getMessage(),
             keyValue("amqp_message", message.toString()),
-            keyValue("exception", e.toString()),
             e);
   }
 
