@@ -4,16 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [6.0.0]
 
 ### Fixed
 
-- The Counter `flusswerk_messages_seconds` now records the processing time in seconds
+- The Counter `flusswerk_messages_seconds` now records the processing time in seconds ([#444](https://github.com/dbmdz/flusswerk/pull/444))
+- Flusswerk default metrics names now follow best practices ([#420](https://github.com/dbmdz/flusswerk/pull/420))
 
 ### Changed
 
+- The DefaultProcessReport now supports common defaults and sensible structured fields so that most applications don't need to implement their own ProcessReport anymore ([DefaultProcessReport](https://github.com/dbmdz/flusswerk/blob/main/framework/src/main/java/com/github/dbmdz/flusswerk/framework/reporting/DefaultProcessReport.java))
 - Migrated to SpringBoot 3 / JDK17
-- `flowInfo.duration()` returns a `Duration` object instead of `long`
+- `flowInfo.duration()` returns a `Duration` object instead of `long` ([#444](https://github.com/dbmdz/flusswerk/pull/444))
+- Support for partial retries: When a workload is split in smaller chunks, then part of these can be successful and part can be retried (e.g. when sending all images of a book individually to cloud services). See [RetryProcessingException.send()](https://github.com/dbmdz/flusswerk/blob/main/framework/src/main/java/com/github/dbmdz/flusswerk/framework/exceptions/RetryProcessingException.java#L61-L69) for details. 
+- Flusswerk can now deserialize messages without `@JsonName` annotations.
 
 ## [5.1.1] - 2022-11-14
 ### Fixed
