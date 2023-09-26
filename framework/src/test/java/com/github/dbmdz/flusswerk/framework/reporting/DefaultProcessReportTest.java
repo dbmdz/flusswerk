@@ -1,6 +1,7 @@
 package com.github.dbmdz.flusswerk.framework.reporting;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -29,7 +30,7 @@ class DefaultProcessReportTest {
     listAppender.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
     listAppender.start();
     logger.addAppender(listAppender);
-    defaultProcessReport = new DefaultProcessReport("testapp");
+    defaultProcessReport = new DefaultProcessReport("testapp", mock(Tracing.class));
   }
 
   @DisplayName("should report success")

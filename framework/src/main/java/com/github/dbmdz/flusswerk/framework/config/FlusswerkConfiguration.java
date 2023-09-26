@@ -129,7 +129,7 @@ public class FlusswerkConfiguration {
                                 metrics,
                                 messageBroker,
                                 processReport.orElseGet(
-                                    () -> new DefaultProcessReport(appProperties.name())),
+                                    () -> new DefaultProcessReport(appProperties.name(), tracing)),
                                 taskQueue,
                                 tracing))
                     .collect(
