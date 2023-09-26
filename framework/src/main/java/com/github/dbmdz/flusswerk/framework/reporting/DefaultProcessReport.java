@@ -14,14 +14,16 @@ public class DefaultProcessReport implements ProcessReport {
   private static final Logger LOGGER = LoggerFactory.getLogger(DefaultProcessReport.class);
 
   private final String name;
+  private final Tracing tracing;
 
-  public DefaultProcessReport(String name) {
+  public DefaultProcessReport(String name, Tracing tracing) {
     this.name = requireNonNull(name);
+    this.tracing = requireNonNull(tracing);
   }
 
   @Override
   public void reportSuccess(Message message) {
-    LOGGER.info("{} successful", name);
+    LOGGER.info("{} successful", name, keyValue("tracing", tracing.tracingPath()));
   }
 
   @Override
@@ -64,7 +66,7 @@ public class DefaultProcessReport implements ProcessReport {
             name,
             e.getMessage(),
             keyValue("amqp_message", message.toString()),
-            keyValue("exception", e.toString()));
+            e);
   }
 
   @Override
@@ -79,7 +81,7 @@ public class DefaultProcessReport implements ProcessReport {
             messagesSent,
             e.getMessage(),
             keyValue("amqp_message", message.toString()),
-            keyValue("exception", e.toString()));
+            e);
   }
 
   @Override
