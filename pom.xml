@@ -79,7 +79,7 @@
     <version.fmt-maven-plugin>2.21.1</version.fmt-maven-plugin>
     <version.githook-maven-plugin>1.0.5</version.githook-maven-plugin>
     <version.maven-gpg-plugin>3.1.0</version.maven-gpg-plugin>
-    <version.maven-jacoco-plugin>0.8.9</version.maven-jacoco-plugin>
+    <version.maven-jacoco-plugin>0.8.11</version.maven-jacoco-plugin>
     <version.nexus-staging-maven-plugin>1.6.13</version.nexus-staging-maven-plugin>
     <version.wagon-maven-plugin>2.0.2</version.wagon-maven-plugin>
     <version.huxhorn-sulky-ulid>8.3.0</version.huxhorn-sulky-ulid>
