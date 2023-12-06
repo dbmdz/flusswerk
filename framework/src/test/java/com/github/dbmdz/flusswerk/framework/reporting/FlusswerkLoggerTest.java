@@ -34,7 +34,7 @@ class FlusswerkLoggerTest {
   @Test
   void error() {
     flusswerkLogger.error("format string", "a");
-    verify(logger).error(anyString(), (Object[]) any());
+    verify(logger).error(anyString(), any(Object[].class));
   }
 
   @DisplayName("should move Throwable to the end")
@@ -50,28 +50,28 @@ class FlusswerkLoggerTest {
   @Test
   void warn() {
     flusswerkLogger.warn("format string", "a");
-    verify(logger).warn(anyString(), (Object[]) any());
+    verify(logger).warn(anyString(), any(Object[].class));
   }
 
   @DisplayName("should use info logging")
   @Test
   void info() {
     flusswerkLogger.info("format string", "a");
-    verify(logger).info(anyString(), (Object[]) any());
+    verify(logger).info(anyString(), any(Object[].class));
   }
 
   @DisplayName("should use debug logging")
   @Test
   void debug() {
     flusswerkLogger.debug("format string", "a");
-    verify(logger).debug(anyString(), (Object[]) any());
+    verify(logger).debug(anyString(), any(Object[].class));
   }
 
   @DisplayName("should use trace logging")
   @Test
   void trace() {
     flusswerkLogger.trace("format string", "a");
-    verify(logger).trace(anyString(), (Object[]) any());
+    verify(logger).trace(anyString(), any(Object[].class));
   }
 
   @DisplayName("should add tracing information")
