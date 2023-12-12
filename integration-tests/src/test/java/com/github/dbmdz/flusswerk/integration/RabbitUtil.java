@@ -40,7 +40,7 @@ public class RabbitUtil {
   }
 
   private Message checkedReceive(String queueName, boolean autoAck)
-      throws InvalidMessageException, IOException, InterruptedException {
+      throws InvalidMessageException, InterruptedException {
     var queue = rabbitMQ.queue(queueName);
     Thread.sleep(10); // wait for message to arrive
     Optional<Message> received = queue.receive(autoAck);
@@ -65,7 +65,7 @@ public class RabbitUtil {
   public Message receive(boolean autoAck) {
     try {
       return checkedReceive(output(), autoAck);
-    } catch (InterruptedException | InvalidMessageException | IOException e) {
+    } catch (InterruptedException | InvalidMessageException e) {
       throw new RuntimeException(e);
     }
   }
@@ -78,7 +78,7 @@ public class RabbitUtil {
     String failedQueue = routing.getFailurePolicy(firstInput()).getFailedRoutingKey();
     try {
       return checkedReceive(failedQueue, autoAck);
-    } catch (InterruptedException | InvalidMessageException | IOException e) {
+    } catch (InterruptedException | InvalidMessageException e) {
       throw new RuntimeException(e);
     }
   }
@@ -87,7 +87,7 @@ public class RabbitUtil {
     return routing.getFailurePolicy(firstInput());
   }
 
-  public void purgeQueues() throws IOException {
+  public void purgeQueues() {
     for (Queue queue : allQueues()) {
       var deletedMessages = queue.purge();
       if (deletedMessages != 0) {

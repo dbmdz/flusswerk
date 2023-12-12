@@ -51,7 +51,7 @@ class TracingTest {
 
     assertThat(tracing.tracingPath()).hasSize(expected.size() + 1);
 
-    if (input != null && input.size() > 0) {
+    if (input != null && !input.isEmpty()) {
       assertThat(tracing.tracingPath()).startsWith(expected.toArray(new String[] {}));
     }
 

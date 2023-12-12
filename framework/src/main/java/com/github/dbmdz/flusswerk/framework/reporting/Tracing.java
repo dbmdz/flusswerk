@@ -90,6 +90,6 @@ public class Tracing {
    * @param messages The messages to set the tracing path for.
    */
   public void ensureFor(Collection<? extends Message> messages) {
-    messages.stream().forEach(this::ensureFor);
+    messages.forEach(this::ensureFor);
   }
 }

@@ -3,13 +3,10 @@ package com.github.dbmdz.flusswerk.framework.rabbitmq;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
-import com.rabbitmq.client.Channel;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -27,7 +24,7 @@ class RabbitMQTest {
   private static final Map<String, String> outgoing =
       Map.of("first.rout", "first.outgoing", "second.route", "second.outgoing");
 
-  private Channel channel;
+  private RabbitClient rabbitClient;
   private RabbitMQ rabbitMQ;
   private Tracing tracing;
 
@@ -47,9 +44,7 @@ class RabbitMQTest {
   @BeforeEach
   void setUp() {
     var routing = RoutingProperties.minimal(incoming, outgoing);
-    var rabbitClient = mock(RabbitClient.class);
-    channel = mock(Channel.class);
-    when(rabbitClient.getChannel()).thenReturn(channel);
+    rabbitClient = mock(RabbitClient.class);
     tracing = new Tracing();
     rabbitMQ = new RabbitMQ(routing, rabbitClient, mock(MessageBroker.class), tracing);
   }
@@ -94,10 +89,10 @@ class RabbitMQTest {
 
   @DisplayName("should ack messages")
   @Test
-  void ack() throws IOException {
+  void ack() {
     Message message = new Message();
     message.getEnvelope().setDeliveryTag(123L);
     rabbitMQ.ack(message);
-    verify(channel).basicAck(123L, false);
+    verify(rabbitClient).ack(message.getEnvelope());
   }
 }

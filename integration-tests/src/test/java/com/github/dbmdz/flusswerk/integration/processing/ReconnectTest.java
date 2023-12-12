@@ -28,6 +28,7 @@ import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -168,7 +169,7 @@ public class ReconnectTest {
   }
 
   @AfterEach
-  void stopEngine() throws IOException, InterruptedException {
+  void stopEngine() throws IOException {
     engine.stop();
     rabbitUtil.purgeQueues();
     proxy.delete();
@@ -252,6 +253,38 @@ public class ReconnectTest {
     channel.basicConsume("output", false, collectMessages);
 
     // Give the second message some time to be processed
+    Thread.sleep(2000);
+
+    channel.basicCancel(collectMessages.getConsumerTag());
+
+    assertThat(collectMessages.getMessages())
+        .map(TestMessage.class::cast)
+        .map(TestMessage::getId)
+        .contains("HELLO WORLD", "AND NOW AGAIN");
+  }
+
+  @DisplayName("processing should recover from channel-level exception")
+  @Test
+  public void recoverFromChannelException()
+      throws IOException, InterruptedException, TimeoutException {
+    log.info("Sending message");
+    rabbitUtil.send(new TestMessage("hello world"));
+    Thread.sleep(500);
+    engine.start();
+    log.info("Closing RabbitMQ channel");
+    Channel channel = rabbitConnection.getChannel();
+    channel.close();
+
+    // allow time for message processing and channel recovery
+    Thread.sleep(2000);
+
+    rabbitUtil.send(new TestMessage("and now again"));
+
+    log.info("Collect outgoing messages");
+    channel = rabbitConnection.getChannel();
+    assertThat(channel.isOpen()).isEqualTo(true);
+    CollectMessages collectMessages = new CollectMessages(channel, flusswerkObjectMapper);
+    channel.basicConsume("output", false, collectMessages);
     Thread.sleep(2000);
 
     channel.basicCancel(collectMessages.getConsumerTag());

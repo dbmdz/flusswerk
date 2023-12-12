@@ -101,7 +101,7 @@ class MessageBrokerTest {
 
   @Test
   @DisplayName("Receive should pull from the specified queue")
-  void receiveShouldPullTheSpecifiedQueue() throws IOException, InvalidMessageException {
+  void receiveShouldPullTheSpecifiedQueue() throws InvalidMessageException {
     String queue = "a.very.special.queue";
     messageBroker.receive(queue);
     verify(rabbitClient).receive(queue, false);
@@ -109,7 +109,7 @@ class MessageBrokerTest {
 
   @Test
   @DisplayName("Default receive should pull from the input queue")
-  void defaultReceiveShouldPullTheInputQueue() throws IOException, InvalidMessageException {
+  void defaultReceiveShouldPullTheInputQueue() throws InvalidMessageException {
     messageBroker.receive();
     verify(rabbitClient).receive(routing.getIncoming().get(0), false);
   }
@@ -133,7 +133,7 @@ class MessageBrokerTest {
 
   @Test
   @DisplayName("invalidMessage should be ACKed and shifted into failed queue")
-  void handleInvalidMessage() throws IOException, InvalidMessageException {
+  void handleInvalidMessage() throws InvalidMessageException {
     String invalidMessageBody = "invalid";
 
     Envelope envelope = new Envelope();

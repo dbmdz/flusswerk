@@ -1,6 +1,5 @@
 package com.github.dbmdz.flusswerk.framework.flow;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.github.dbmdz.flusswerk.framework.TestMessage;

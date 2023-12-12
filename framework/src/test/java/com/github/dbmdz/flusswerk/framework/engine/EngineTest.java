@@ -46,7 +46,7 @@ class EngineTest {
 
   @DisplayName("should connect all consumers")
   @Test
-  public void engineShouldConnectAllConsumers() throws IOException {
+  public void engineShouldConnectAllConsumers() {
     engine.start();
     for (FlusswerkConsumer consumer : consumers) {
       verify(rabbitClient).consume(eq(consumer), eq(false));

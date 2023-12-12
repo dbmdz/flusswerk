@@ -13,8 +13,8 @@ import com.github.dbmdz.flusswerk.framework.TestMessage;
 import com.github.dbmdz.flusswerk.framework.jackson.FlusswerkObjectMapper;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.model.Message;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitClient;
 import com.rabbitmq.client.AMQP.BasicProperties;
-import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Envelope;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -40,13 +40,13 @@ class FlusswerkConsumerTest {
   @BeforeEach
   void setUp() {
     availableWorkers = mock(Semaphore.class);
-    Channel channel = mock(Channel.class);
+    RabbitClient rabbitClient = mock(RabbitClient.class);
     taskQueue = new PriorityBlockingQueue<>();
     IncomingMessageType incomingMessageType = new IncomingMessageType(TestMessage.class);
     flusswerkObjectMapper = new FlusswerkObjectMapper(incomingMessageType);
     consumer =
         new FlusswerkConsumer(
-            availableWorkers, channel, flusswerkObjectMapper, "input.queue", 42, taskQueue);
+            availableWorkers, rabbitClient, flusswerkObjectMapper, "input.queue", 42, taskQueue);
     basicProperties = mock(BasicProperties.class);
     envelope = mock(Envelope.class);
   }
@@ -118,17 +118,17 @@ class FlusswerkConsumerTest {
 
   @DisplayName("should use fallback if deserialization fails")
   @Test
-  void shouldUseFallbackIfDeserializationFails() throws IOException {
+  void shouldUseFallbackIfDeserializationFails() {
     Logger logger = (Logger) LoggerFactory.getLogger(FlusswerkConsumer.class);
     ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
     listAppender.start();
     logger.addAppender(listAppender);
 
-    Channel channel = mock(Channel.class);
+    RabbitClient rabbitClient = mock(RabbitClient.class);
     FlusswerkObjectMapper mapper = FlusswerkObjectMapper.forIncoming(UndeserializableMessage.class);
 
     consumer =
-        new FlusswerkConsumer(availableWorkers, channel, mapper, "input.queue", 42, taskQueue);
+        new FlusswerkConsumer(availableWorkers, rabbitClient, mapper, "input.queue", 42, taskQueue);
 
     byte[] json = "{\"tracing\": [\"a\"]}".getBytes(StandardCharsets.UTF_8);
     consumer.handleDelivery("consumerTag", envelope, basicProperties, json);
@@ -142,16 +142,16 @@ class FlusswerkConsumerTest {
 
   @DisplayName("should log error if deserialization and fallback fails")
   @Test
-  void shouldLogErrorIfDeserializationAndFallbackFails() throws IOException {
+  void shouldLogErrorIfDeserializationAndFallbackFails() {
     Logger logger = (Logger) LoggerFactory.getLogger(FlusswerkConsumer.class);
     ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
     listAppender.start();
     logger.addAppender(listAppender);
 
-    Channel channel = mock(Channel.class);
+    RabbitClient rabbitClient = mock(RabbitClient.class);
     FlusswerkObjectMapper mapper = FlusswerkObjectMapper.forIncoming(UndeserializableMessage.class);
     consumer =
-        new FlusswerkConsumer(availableWorkers, channel, mapper, "input.queue", 42, taskQueue);
+        new FlusswerkConsumer(availableWorkers, rabbitClient, mapper, "input.queue", 42, taskQueue);
 
     byte[] brokenJson = "{\"tracing\": [\"a".getBytes(StandardCharsets.UTF_8);
     consumer.handleDelivery("consumerTag", envelope, basicProperties, brokenJson);

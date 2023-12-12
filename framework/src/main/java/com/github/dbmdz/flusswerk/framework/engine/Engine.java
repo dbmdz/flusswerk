@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * Run flows {@link Flow} for every message from the {@link RabbitClient} - usually several in
  * parallel.
  */
-public class Engine {
+public class Engine implements ChannelListener {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Engine.class);
 
@@ -71,6 +71,9 @@ public class Engine {
     for (FlusswerkConsumer consumer : consumers) {
       rabbitClient.consume(consumer, false);
     }
+
+    // keep track of channel resets
+    this.rabbitClient.addChannelListener(this);
   }
 
   /**
@@ -113,6 +116,14 @@ public class Engine {
       }
     } catch (InterruptedException e) {
       LOGGER.error("Timeout awaiting worker shutdown after 5 minutes", e);
+    }
+  }
+
+  @Override
+  public void handleReset() {
+    LOGGER.debug("Register consumers again after channel reset");
+    for (FlusswerkConsumer consumer : consumers) {
+      rabbitClient.consume(consumer, false);
     }
   }
 }

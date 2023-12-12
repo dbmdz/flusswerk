@@ -1,7 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.monitoring;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -10,7 +9,6 @@ import com.github.dbmdz.flusswerk.framework.flow.FlowInfo;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.search.RequiredSearch;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Duration;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +32,6 @@ class FlusswerkMetricsTest {
   private Gauge activeWorkers;
   private Gauge idleWorkers;
 
-  private RequiredSearch flusswerkMessages;
   private MeterRegistry meterRegistry;
 
   @BeforeEach
@@ -44,7 +41,6 @@ class FlusswerkMetricsTest {
     flusswerkMetrics = new FlusswerkMetrics(processingProperties, meterRegistry);
     activeWorkers = meterRegistry.get("flusswerk.workers").tag("state", "active").gauge();
     idleWorkers = meterRegistry.get("flusswerk.workers").tag("state", "idle").gauge();
-    flusswerkMessages = meterRegistry.get("flusswerk.messages");
   }
 
   @DisplayName("should increment active workers")
