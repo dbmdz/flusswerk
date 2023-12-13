@@ -150,7 +150,7 @@ public class RabbitClient {
             recoverChannel();
           } else {
             log.warn(
-                "Failed to acknowledge message to RabbitMQ: '{}', waiting for channel to become available again",
+                "Failed to acknowledge message from RabbitMQ: '{}', waiting for channel to become available again",
                 e.getMessage());
             channelAvailable = false;
           }
@@ -167,13 +167,13 @@ public class RabbitClient {
     }
   }
 
-  public void reject(Envelope envelope) {
+  public void reject(Envelope envelope, boolean requeue) {
     // The channel might not be available or become unavailable due to a connection error. In this
     // case, we wait until the connection becomes available again.
     while (true) {
       if (channelAvailable) {
         try {
-          channel.basicReject(envelope.getDeliveryTag(), SINGLE_MESSAGE);
+          channel.basicReject(envelope.getDeliveryTag(), requeue);
           break;
         } catch (IOException | AlreadyClosedException e) {
           // Channel-level exceptions are not recoverable

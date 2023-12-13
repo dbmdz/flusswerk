@@ -94,7 +94,7 @@ public class FlusswerkConsumer implements Consumer {
       // If waiting for the semaphore is interrupted (e.g. because of shutdown), the current message
       // should not be processed at all.
       LOGGER.warn("FlusswerkConsumer interrupted while waiting for free worker", e);
-      rabbitClient.reject(envelope);
+      rabbitClient.reject(envelope, true);
       return;
     }
 
