@@ -118,7 +118,7 @@ public class RabbitClient {
   }
 
   public Message receive(String queueName, boolean autoAck) throws InvalidMessageException {
-    GetResponse response = (GetResponse) execute(commands.basicGet(queueName, autoAck));
+    GetResponse response = execute(commands.basicGet(queueName, autoAck));
     if (response == null) {
       return null;
     }
@@ -170,7 +170,7 @@ public class RabbitClient {
   }
 
   public Long getMessageCount(String queue) {
-    return (Long) execute(commands.messageCount(queue));
+    return execute(commands.messageCount(queue));
   }
 
   public boolean isChannelAvailable() {
@@ -185,7 +185,7 @@ public class RabbitClient {
     return (AMQP.Queue.PurgeOk) execute(commands.queuePurge(name));
   }
 
-  private Object execute(ChannelCommand channelCommand) {
+  private <T> T execute(ChannelCommand<T> channelCommand) {
     // The channel might not be available or become unavailable due to a connection error. In this
     // case, we wait until the connection becomes available again.
     while (true) {
