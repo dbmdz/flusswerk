@@ -1,6 +1,7 @@
 package com.github.dbmdz.flusswerk.framework.engine;
 
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.ChannelListener;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitClient;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -96,7 +97,7 @@ public class Engine implements ChannelListener {
     List<Task> remainingTasks = new ArrayList<>();
     taskQueue.drainTo(remainingTasks);
 
-    // NACK and requeue all messages that have not be processed yet
+    // NACK and requeue all messages that have not been processed yet
     for (var task : remainingTasks) {
       long deliveryTag = task.getMessage().getEnvelope().getDeliveryTag();
       try {

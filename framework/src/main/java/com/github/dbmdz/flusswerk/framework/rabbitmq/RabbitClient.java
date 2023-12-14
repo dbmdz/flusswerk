@@ -1,7 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.rabbitmq;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.github.dbmdz.flusswerk.framework.engine.ChannelListener;
 import com.github.dbmdz.flusswerk.framework.engine.FlusswerkConsumer;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.jackson.FlusswerkObjectMapper;
@@ -23,19 +22,19 @@ public class RabbitClient {
 
   private static final boolean DURABLE = true;
 
-  private static final boolean NO_AUTO_DELETE = false;
+  private static final boolean AUTO_DELETE = false;
 
-  private static final boolean NOT_EXCLUSIVE = false;
+  private static final boolean EXCLUSIVE = false;
 
   private static final Integer PERSISTENT = 2;
 
-  private static final boolean SINGLE_MESSAGE = false;
+  private static final boolean MULTIPLE_MESSAGES = false;
 
   private static final Logger log = LoggerFactory.getLogger(RabbitClient.class);
 
   private final RabbitConnection connection;
   private final Channel channel;
-
+  private final ChannelCommands commands;
   private final Lock channelLock = new ReentrantLock();
   private final Condition channelAvailableAgain = channelLock.newCondition();
   private final FlusswerkObjectMapper objectMapper;
@@ -75,6 +74,7 @@ public class RabbitClient {
     } else {
       throw new RuntimeException("Flusswerk needs a recoverable connection to RabbitMQ");
     }
+    commands = new ChannelCommands(channel);
     objectMapper = flusswerkObjectMapper;
   }
 
@@ -94,34 +94,7 @@ public class RabbitClient {
             .deliveryMode(PERSISTENT)
             .build();
 
-    // The channel might not be available or become unavailable due to a connection error. In this
-    // case, we wait until the connection becomes available again.
-    while (true) {
-      if (channelAvailable) {
-        try {
-          channel.basicPublish(exchange, routingKey, properties, data);
-          break;
-        } catch (IOException | AlreadyClosedException e) {
-          // Channel-level exceptions are not recoverable
-          if (e instanceof AlreadyClosedException && !((AlreadyClosedException) e).isHardError()) {
-            recoverChannel();
-          } else {
-            log.warn(
-                "Failed to publish message to RabbitMQ: '{}', waiting for channel to become available again",
-                e.getMessage());
-            channelAvailable = false;
-          }
-        }
-      }
-      // We loop here because the signal might be triggered due to what the JVM documentation calls
-      // a 'spurious wakeup', i.e. the signal is triggered even though no connection recovery has
-      // yet happened.
-      while (!channelAvailable) {
-        channelLock.lock();
-        channelAvailableAgain.awaitUninterruptibly();
-        channelLock.unlock();
-      }
-    }
+    execute(commands.basicPublish(exchange, routingKey, properties, data));
   }
 
   Message deserialize(String body) throws JsonProcessingException {
@@ -137,102 +110,18 @@ public class RabbitClient {
   }
 
   public void ack(long deliveryTag) {
-    // The channel might not be available or become unavailable due to a connection error. In this
-    // case, we wait until the connection becomes available again.
-    while (true) {
-      if (channelAvailable) {
-        try {
-          channel.basicAck(deliveryTag, SINGLE_MESSAGE);
-          break;
-        } catch (IOException | AlreadyClosedException e) {
-          // Channel-level exceptions are not recoverable
-          if (e instanceof AlreadyClosedException && !((AlreadyClosedException) e).isHardError()) {
-            recoverChannel();
-          } else {
-            log.warn(
-                "Failed to acknowledge message from RabbitMQ: '{}', waiting for channel to become available again",
-                e.getMessage());
-            channelAvailable = false;
-          }
-        }
-      }
-      // We loop here because the signal might be triggered due to what the JVM documentation calls
-      // a 'spurious wakeup', i.e. the signal is triggered even though no connection recovery has
-      // yet happened.
-      while (!channelAvailable) {
-        channelLock.lock();
-        channelAvailableAgain.awaitUninterruptibly();
-        channelLock.unlock();
-      }
-    }
+    execute(commands.basicAck(deliveryTag, MULTIPLE_MESSAGES));
   }
 
   public void reject(Envelope envelope, boolean requeue) {
-    // The channel might not be available or become unavailable due to a connection error. In this
-    // case, we wait until the connection becomes available again.
-    while (true) {
-      if (channelAvailable) {
-        try {
-          channel.basicReject(envelope.getDeliveryTag(), requeue);
-          break;
-        } catch (IOException | AlreadyClosedException e) {
-          // Channel-level exceptions are not recoverable
-          if (e instanceof AlreadyClosedException && !((AlreadyClosedException) e).isHardError()) {
-            recoverChannel();
-          } else {
-            log.warn(
-                "Failed to reject message from RabbitMQ: '{}', waiting for channel to become available again",
-                e.getMessage());
-            channelAvailable = false;
-          }
-        }
-      }
-      // We loop here because the signal might be triggered due to what the JVM documentation calls
-      // a 'spurious wakeup', i.e. the signal is triggered even though no connection recovery has
-      // yet happened.
-      while (!channelAvailable) {
-        channelLock.lock();
-        channelAvailableAgain.awaitUninterruptibly();
-        channelLock.unlock();
-      }
-    }
+    execute(commands.basicReject(envelope.getDeliveryTag(), requeue));
   }
 
   public Message receive(String queueName, boolean autoAck) throws InvalidMessageException {
-    GetResponse response;
-    // The channel might not be available or become unavailable due to a connection error. In this
-    // case, we wait until the connection becomes available again.
-    while (true) {
-      if (channelAvailable) {
-        try {
-          response = channel.basicGet(queueName, autoAck);
-          break;
-        } catch (IOException | AlreadyClosedException e) {
-          // Channel-level exceptions are not recoverable
-          if (e instanceof AlreadyClosedException && !((AlreadyClosedException) e).isHardError()) {
-            recoverChannel();
-          } else {
-            log.warn(
-                "Failed to get message from RabbitMQ: '{}', waiting for channel to become available again",
-                e.getMessage());
-            channelAvailable = false;
-          }
-        }
-      }
-      // We loop here because the signal might be triggered due to what the JVM documentation calls
-      // a 'spurious wakeup', i.e. the signal is triggered even though no connection recovery has
-      // yet happened.
-      while (!channelAvailable) {
-        channelLock.lock();
-        channelAvailableAgain.awaitUninterruptibly();
-        channelLock.unlock();
-      }
-    }
-
+    GetResponse response = (GetResponse) execute(commands.basicGet(queueName, autoAck));
     if (response == null) {
       return null;
     }
-
     String body = new String(response.getBody(), StandardCharsets.UTF_8);
     try {
       Message message = deserialize(body);
@@ -251,92 +140,37 @@ public class RabbitClient {
   }
 
   public void consume(FlusswerkConsumer consumer, boolean autoAck) {
-    // The channel might not be available or become unavailable due to a connection error. In this
-    // case, we wait until the connection becomes available again.
-    while (true) {
-      if (channelAvailable) {
-        try {
-          channel.basicConsume(consumer.getInputQueue(), autoAck, consumer);
-          break;
-        } catch (IOException | AlreadyClosedException e) {
-          // Channel-level exceptions are not recoverable
-          if (e instanceof AlreadyClosedException && !((AlreadyClosedException) e).isHardError()) {
-            recoverChannel();
-          } else {
-            log.warn(
-                "Failed to start RabbitMQ consumer: '{}', waiting for channel to become available again",
-                e.getMessage());
-            channelAvailable = false;
-          }
-        }
-      }
-      // We loop here because the signal might be triggered due to what the JVM documentation calls
-      // a 'spurious wakeup', i.e. the signal is triggered even though no connection recovery has
-      // yet happened.
-      while (!channelAvailable) {
-        channelLock.lock();
-        channelAvailableAgain.awaitUninterruptibly();
-        channelLock.unlock();
-      }
-    }
+    execute(commands.basicConsume(consumer.getInputQueue(), autoAck, consumer));
   }
 
   public void nack(long deliveryTag, boolean multiple, boolean requeue) throws IOException {
-    // The channel might not be available or become unavailable due to a connection error. In this
-    // case, we wait until the connection becomes available again.
-    while (true) {
-      if (channelAvailable) {
-        try {
-          channel.basicNack(deliveryTag, multiple, requeue);
-          break;
-        } catch (IOException | AlreadyClosedException e) {
-          // Channel-level exceptions are not recoverable
-          if (e instanceof AlreadyClosedException && !((AlreadyClosedException) e).isHardError()) {
-            recoverChannel();
-          } else {
-            log.warn(
-                "Failed to start RabbitMQ consumer: '{}', waiting for channel to become available again",
-                e.getMessage());
-            channelAvailable = false;
-          }
-        }
-      }
-      // We loop here because the signal might be triggered due to what the JVM documentation calls
-      // a 'spurious wakeup', i.e. the signal is triggered even though no connection recovery has
-      // yet happened.
-      while (!channelAvailable) {
-        channelLock.lock();
-        channelAvailableAgain.awaitUninterruptibly();
-        channelLock.unlock();
-      }
-    }
+    channel.basicNack(deliveryTag, multiple, requeue);
   }
 
   public void cancel(String consumerTag) throws IOException {
     channel.basicCancel(consumerTag);
   }
 
-  public void provideExchange(String exchange) throws IOException {
-    channel.exchangeDeclare(exchange, BuiltinExchangeType.TOPIC, DURABLE);
+  public void provideExchange(String exchange) {
+    execute(commands.exchangeDeclare(exchange, BuiltinExchangeType.TOPIC, DURABLE));
   }
 
   public void declareQueue(
-      String name, String exchange, String routingKey, Map<String, Object> args)
-      throws IOException {
+      String name, String exchange, String routingKey, Map<String, Object> args) {
     createQueue(name, args);
     bindQueue(name, exchange, routingKey);
   }
 
-  public void createQueue(String name, Map<String, Object> args) throws IOException {
-    channel.queueDeclare(name, DURABLE, NOT_EXCLUSIVE, NO_AUTO_DELETE, args);
+  public void createQueue(String name, Map<String, Object> args) {
+    execute(commands.queueDeclare(name, DURABLE, EXCLUSIVE, AUTO_DELETE, args));
   }
 
-  public void bindQueue(String name, String exchange, String routingKey) throws IOException {
-    channel.queueBind(name, exchange, routingKey);
+  public void bindQueue(String name, String exchange, String routingKey) {
+    execute(commands.queueBind(name, exchange, routingKey));
   }
 
-  public Long getMessageCount(String queue) throws IOException {
-    return channel.messageCount(queue);
+  public Long getMessageCount(String queue) {
+    return (Long) execute(commands.messageCount(queue));
   }
 
   public boolean isChannelAvailable() {
@@ -348,18 +182,22 @@ public class RabbitClient {
   }
 
   public AMQP.Queue.PurgeOk queuePurge(String name) {
+    return (AMQP.Queue.PurgeOk) execute(commands.queuePurge(name));
+  }
+
+  private Object execute(ChannelCommand channelCommand) {
     // The channel might not be available or become unavailable due to a connection error. In this
     // case, we wait until the connection becomes available again.
     while (true) {
       if (channelAvailable) {
         try {
-          return channel.queuePurge(name);
+          return channelCommand.execute();
         } catch (IOException | AlreadyClosedException e) {
           if (e instanceof AlreadyClosedException && !((AlreadyClosedException) e).isHardError()) {
             recoverChannel();
           } else {
             log.warn(
-                "Failed to purge queue from RabbitMQ: '{}', waiting for channel to become available again",
+                "Failed to communicate with RabbitMQ: '{}', waiting for channel to become available again",
                 e.getMessage());
             channelAvailable = false;
           }

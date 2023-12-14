@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.model.Message;
-import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -38,7 +37,7 @@ public class Queue {
   /**
    * @return the number of messages in this queue.
    */
-  public long messageCount() throws IOException {
+  public long messageCount() {
     return rabbitClient.getMessageCount(this.name);
   }
 
