@@ -45,7 +45,7 @@ public class FlusswerkConfiguration {
   public Flow flow(Optional<FlowSpec> flowSpec) {
     // No FlowSpec → no Flow. We will have to handle this case when creating the
     // Engine bean as the sole consumer of the Flow bean.
-    return flowSpec.map(spec -> new Flow(spec)).orElse(null);
+    return flowSpec.map(Flow::new).orElse(null);
   }
 
   @Bean
@@ -147,7 +147,7 @@ public class FlusswerkConfiguration {
   public List<FlusswerkConsumer> flusswerkConsumers(
       FlusswerkObjectMapper flusswerkObjectMapper,
       ProcessingProperties processingProperties,
-      RabbitConnection rabbitConnection,
+      RabbitClient rabbitClient,
       RoutingProperties routingProperties,
       PriorityBlockingQueue<Task> taskQueue) {
     int maxPriority = routingProperties.getIncoming().size();
@@ -161,7 +161,7 @@ public class FlusswerkConfiguration {
         flusswerkConsumers.add(
             new FlusswerkConsumer(
                 availableWorkers,
-                rabbitConnection.getChannel(),
+                rabbitClient,
                 flusswerkObjectMapper,
                 queueName,
                 priority,

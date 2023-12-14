@@ -2,7 +2,6 @@ package com.github.dbmdz.flusswerk.framework.engine;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import com.github.dbmdz.flusswerk.framework.TestMessage;

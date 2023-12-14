@@ -20,18 +20,19 @@ public class RabbitUtilAssert extends AbstractAssert<RabbitUtilAssert, RabbitUti
     actual
         .allQueues()
         .forEach(
-            queue ->
+            queue -> {
+              try {
                 Assertions.assertThat(getMessageCount(queue))
                     .as("Queue " + queue.getName() + " is not empty")
-                    .isZero());
+                    .isZero();
+              } catch (IOException e) {
+                throw new RuntimeException(e);
+              }
+            });
     return this;
   }
 
-  private static long getMessageCount(Queue queue) {
-    try {
-      return queue.messageCount();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+  private static long getMessageCount(Queue queue) throws IOException {
+    return queue.messageCount();
   }
 }

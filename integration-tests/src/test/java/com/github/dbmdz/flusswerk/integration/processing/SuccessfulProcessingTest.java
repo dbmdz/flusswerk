@@ -52,7 +52,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 public class SuccessfulProcessingTest {
   @Container
-  static RabbitMQContainer rabbitMQContainer =
+  static final RabbitMQContainer rabbitMQContainer =
       new RabbitMQContainer("rabbitmq:3-management-alpine");
 
   private final Engine engine;
@@ -99,7 +99,7 @@ public class SuccessfulProcessingTest {
   }
 
   @AfterEach
-  void stopEngine() throws IOException {
+  void stopEngine() {
     engine.stop();
     rabbitUtil.purgeQueues();
   }

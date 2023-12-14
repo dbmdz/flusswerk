@@ -127,9 +127,8 @@ public class MessageBroker {
    * MessageBroker#ack(Message)}.
    *
    * @return the received message.
-   * @throws IOException if communication with RabbitMQ failed.
    */
-  public Message receive() throws IOException {
+  public Message receive() {
     Message message = null;
     for (String inputQueue : routingConfig.getIncoming()) {
       try {

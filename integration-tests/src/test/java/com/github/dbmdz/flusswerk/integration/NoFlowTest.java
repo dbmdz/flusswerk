@@ -45,7 +45,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 public class NoFlowTest {
   @Container
-  static RabbitMQContainer rabbitMQContainer =
+  static final RabbitMQContainer rabbitMQContainer =
       new RabbitMQContainer("rabbitmq:3-management-alpine");
 
   @TestConfiguration
@@ -82,7 +82,7 @@ public class NoFlowTest {
   }
 
   @AfterEach
-  void stopEngine() throws IOException {
+  void stopEngine() {
     rabbitUtil.purgeQueues();
   }
 

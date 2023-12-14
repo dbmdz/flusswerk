@@ -3,10 +3,12 @@ package com.github.dbmdz.flusswerk.framework.rabbitmq;
 import com.github.dbmdz.flusswerk.framework.config.properties.RabbitMQProperties;
 import com.rabbitmq.client.Address;
 import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.impl.recovery.*;
+import com.rabbitmq.utility.Utility;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
@@ -20,7 +22,9 @@ public class RabbitConnection {
 
   private final ConnectionFactory factory;
 
-  private Channel channel;
+  private AutorecoveringConnection connection;
+
+  private AutorecoveringChannel channel;
   private final String appName;
 
   private final RabbitMQProperties rabbitMQ;
@@ -59,8 +63,8 @@ public class RabbitConnection {
     while (connectionIsFailing) {
       try {
         LOGGER.debug("Waiting for connection to {} ...", addresses);
-        Connection connection = factory.newConnection(addresses, appName);
-        channel = connection.createChannel();
+        connection = (AutorecoveringConnection) factory.newConnection(addresses, appName);
+        channel = (AutorecoveringChannel) connection.createChannel();
         channel.basicRecover(true);
         channel.basicQos(1);
         connectionIsFailing = false;
@@ -77,6 +81,28 @@ public class RabbitConnection {
         } catch (InterruptedException e1) {
           throw new IOException("Could not connect to RabbitMQ at " + addresses, e);
         }
+      }
+    }
+  }
+
+  public void recoverChannel() throws IOException {
+    channel.automaticallyRecover(connection, connection.getDelegate());
+    // recover topology
+    for (final RecordedExchange exchange :
+        Utility.copy(connection.getRecordedExchanges()).values()) {
+      if (exchange.getChannel() == channel) {
+        connection.recoverExchange(exchange, true);
+      }
+    }
+    for (final Map.Entry<String, RecordedQueue> entry :
+        Utility.copy(connection.getRecordedQueues()).entrySet()) {
+      if (entry.getValue().getChannel() == channel) {
+        connection.recoverQueue(entry.getKey(), entry.getValue(), true);
+      }
+    }
+    for (final RecordedBinding b : Utility.copy(connection.getRecordedBindings())) {
+      if (b.getChannel() == channel) {
+        connection.recoverBinding(b, true);
       }
     }
   }

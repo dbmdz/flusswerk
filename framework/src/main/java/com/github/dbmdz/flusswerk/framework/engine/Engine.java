@@ -1,6 +1,7 @@
 package com.github.dbmdz.flusswerk.framework.engine;
 
 import com.github.dbmdz.flusswerk.framework.flow.Flow;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.ChannelListener;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitClient;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ import org.slf4j.LoggerFactory;
  * Run flows {@link Flow} for every message from the {@link RabbitClient} - usually several in
  * parallel.
  */
-public class Engine {
+public class Engine implements ChannelListener {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Engine.class);
 
@@ -71,6 +72,9 @@ public class Engine {
     for (FlusswerkConsumer consumer : consumers) {
       rabbitClient.consume(consumer, false);
     }
+
+    // keep track of channel resets
+    this.rabbitClient.addChannelListener(this);
   }
 
   /**
@@ -93,7 +97,7 @@ public class Engine {
     List<Task> remainingTasks = new ArrayList<>();
     taskQueue.drainTo(remainingTasks);
 
-    // NACK and requeue all messages that have not be processed yet
+    // NACK and requeue all messages that have not been processed yet
     for (var task : remainingTasks) {
       long deliveryTag = task.getMessage().getEnvelope().getDeliveryTag();
       try {
@@ -113,6 +117,14 @@ public class Engine {
       }
     } catch (InterruptedException e) {
       LOGGER.error("Timeout awaiting worker shutdown after 5 minutes", e);
+    }
+  }
+
+  @Override
+  public void handleReset() {
+    LOGGER.debug("Register consumers again after channel reset");
+    for (FlusswerkConsumer consumer : consumers) {
+      rabbitClient.consume(consumer, false);
     }
   }
 }

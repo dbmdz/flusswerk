@@ -5,11 +5,9 @@ import static net.logstash.logback.argument.StructuredArguments.kv;
 import com.github.dbmdz.flusswerk.framework.jackson.FlusswerkObjectMapper;
 import com.github.dbmdz.flusswerk.framework.model.IncomingMessageType;
 import com.github.dbmdz.flusswerk.framework.model.Message;
+import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitClient;
+import com.rabbitmq.client.*;
 import com.rabbitmq.client.AMQP.BasicProperties;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.Envelope;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -21,14 +19,15 @@ import org.slf4j.LoggerFactory;
  * Receive AMQP message from a RabbitMQ queue, deserialize the Flusswerk {@link Message} and put
  * that into the internal task queue.
  */
-public class FlusswerkConsumer extends DefaultConsumer {
+public class FlusswerkConsumer implements Consumer {
 
   public static final FlusswerkObjectMapper FALLBACK_MAPPER =
       new FlusswerkObjectMapper(new IncomingMessageType());
   private static final Logger LOGGER = LoggerFactory.getLogger(FlusswerkConsumer.class);
+  private volatile String _consumerTag;
 
   private final Semaphore availableWorkers;
-  private final Channel channel;
+  private final RabbitClient rabbitClient;
   private final FlusswerkObjectMapper flusswerkObjectMapper;
   private final PriorityBlockingQueue<Task> taskQueue;
   private final int priority;
@@ -37,20 +36,19 @@ public class FlusswerkConsumer extends DefaultConsumer {
   /**
    * Constructs a new instance and records its association to the passed-in channel.
    *
-   * @param channel the channel to which this consumer is attached
+   * @param rabbitClient the client which handles communication with RabbitMQ
    * @param flusswerkObjectMapper the object mapper to deserialize messages
    * @param inputQueue the rabbitMQ queue this consumer is bound to
    */
   public FlusswerkConsumer(
       Semaphore availableWorkers,
-      Channel channel,
+      RabbitClient rabbitClient,
       FlusswerkObjectMapper flusswerkObjectMapper,
       String inputQueue,
       int priority,
       PriorityBlockingQueue<Task> taskQueue) {
-    super(channel);
     this.availableWorkers = availableWorkers;
-    this.channel = channel;
+    this.rabbitClient = rabbitClient;
     this.flusswerkObjectMapper = flusswerkObjectMapper;
     this.inputQueue = inputQueue;
     this.priority = priority;
@@ -58,9 +56,37 @@ public class FlusswerkConsumer extends DefaultConsumer {
   }
 
   @Override
+  public void handleConsumeOk(String consumerTag) {
+    this._consumerTag = consumerTag;
+  }
+
+  @Override
+  public void handleCancelOk(String consumerTag) {
+    // nothing to do
+  }
+
+  @Override
+  public void handleCancel(String consumerTag) {
+    // nothing to do
+  }
+
+  @Override
+  public void handleShutdownSignal(String consumerTag, ShutdownSignalException sig) {
+    // nothing to do
+  }
+
+  @Override
+  public void handleRecoverOk(String consumerTag) {
+    // nothing to do
+  }
+
+  public String getConsumerTag() {
+    return this._consumerTag;
+  }
+
+  @Override
   public void handleDelivery(
-      String consumerTag, Envelope envelope, BasicProperties properties, byte[] body)
-      throws IOException {
+      String consumerTag, Envelope envelope, BasicProperties properties, byte[] body) {
 
     try {
       availableWorkers.acquire();
@@ -68,7 +94,7 @@ public class FlusswerkConsumer extends DefaultConsumer {
       // If waiting for the semaphore is interrupted (e.g. because of shutdown), the current message
       // should not be processed at all.
       LOGGER.warn("FlusswerkConsumer interrupted while waiting for free worker", e);
-      channel.basicReject(envelope.getDeliveryTag(), true);
+      rabbitClient.reject(envelope, true);
       return;
     }
 
@@ -90,7 +116,7 @@ public class FlusswerkConsumer extends DefaultConsumer {
       if (tracing != null) {
         LOGGER.error("Could not deserialize message", kv("tracing", tracing), e);
       }
-      channel.basicAck(envelope.getDeliveryTag(), false);
+      rabbitClient.ack(envelope.getDeliveryTag());
       availableWorkers.release();
     }
   }

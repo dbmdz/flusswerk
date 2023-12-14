@@ -3,8 +3,6 @@ package com.github.dbmdz.flusswerk.framework.rabbitmq;
 import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
-import com.rabbitmq.client.Channel;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,8 +12,6 @@ public class RabbitMQ {
   private final Map<String, Queue> queues;
   private final Map<String, Topic> routes;
   private final Map<String, Topic> topics;
-
-  private final Channel channel;
   private final RabbitClient rabbitClient;
   private final MessageBroker messageBroker;
   private final Tracing tracing;
@@ -35,7 +31,6 @@ public class RabbitMQ {
     this.queues = new HashMap<>();
     this.routes = new HashMap<>();
     this.topics = new HashMap<>();
-    this.channel = rabbitClient.getChannel();
     this.rabbitClient = rabbitClient;
     this.messageBroker = messageBroker;
 
@@ -95,14 +90,12 @@ public class RabbitMQ {
   }
 
   /**
-   * Acknowledges a message with RabbitMQ. This needs the message to have an Envelope with an valid
+   * Acknowledges a message with RabbitMQ. This needs the message to have an Envelope with a valid
    * delivery tag (usually because it came from RabbitMQ in the first place).
    *
    * @param message The message to acknowledge.
-   * @throws IOException If communication with RabbitMQ fails.
    */
-  public void ack(Message message) throws IOException {
-    var deliveryTag = message.getEnvelope().getDeliveryTag();
-    channel.basicAck(deliveryTag, false);
+  public void ack(Message message) {
+    rabbitClient.ack(message.getEnvelope());
   }
 }

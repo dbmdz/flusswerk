@@ -57,7 +57,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 public class RetryTest {
 
   @Container
-  static RabbitMQContainer rabbitMQContainer =
+  static final RabbitMQContainer rabbitMQContainer =
       new RabbitMQContainer("rabbitmq:3-management-alpine");
 
   private final Engine engine;
@@ -113,7 +113,7 @@ public class RetryTest {
   }
 
   @AfterEach
-  void stopEngine() throws IOException {
+  void stopEngine() {
     engine.stop();
     rabbitUtil.purgeQueues();
   }
