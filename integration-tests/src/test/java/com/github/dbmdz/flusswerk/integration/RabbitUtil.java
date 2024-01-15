@@ -32,7 +32,7 @@ public class RabbitUtil {
   }
 
   public String output() {
-    return routing.getOutgoing().get("default");
+    return routing.getOutgoing().get("default").get(0);
   }
 
   public void send(Message message) throws IOException {
@@ -98,7 +98,8 @@ public class RabbitUtil {
 
   public List<Queue> allQueues() {
     Stream<String> queueNames = routing.getIncoming().stream();
-    queueNames = Stream.concat(queueNames, routing.getOutgoing().values().stream());
+    queueNames =
+        Stream.concat(queueNames, routing.getOutgoing().values().stream().flatMap(List::stream));
     queueNames =
         Stream.concat(
             queueNames,

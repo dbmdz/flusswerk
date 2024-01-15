@@ -7,6 +7,7 @@ import com.github.dbmdz.flusswerk.framework.model.Message;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,11 +45,13 @@ public class MessageBroker {
    */
   @Deprecated
   void send(Message message) throws IOException {
-    var topic = routingConfig.getOutgoing().get("default");
-    if (topic == null) {
+    List<String> topics = routingConfig.getOutgoing().get("default");
+    if (topics == null || topics.isEmpty()) {
       throw new RuntimeException("Cannot send message, no default queue specified");
     }
-    send(topic, message);
+    for (String topic : topics) {
+      send(topic, message);
+    }
   }
 
   /**
@@ -60,11 +63,13 @@ public class MessageBroker {
    */
   @Deprecated
   public void send(Collection<? extends Message> messages) throws IOException {
-    var topic = routingConfig.getOutgoing().get("default");
-    if (topic == null) {
-      throw new RuntimeException("Cannot send messages, no default queue specified");
+    List<String> topics = routingConfig.getOutgoing().get("default");
+    if (topics == null || topics.isEmpty()) {
+      throw new RuntimeException("Cannot send message, no default queue specified");
     }
-    send(topic, messages);
+    for (String topic : topics) {
+      send(topic, messages);
+    }
   }
 
   /**
@@ -188,7 +193,8 @@ public class MessageBroker {
   }
 
   private void provideOutputQueues() throws IOException {
-    for (String topic : routingConfig.getOutgoing().values()) {
+    for (String topic :
+        routingConfig.getOutgoing().values().stream().flatMap(List::stream).toList()) {
       rabbitClient.declareQueue(
           topic,
           routingConfig.getExchange(topic),

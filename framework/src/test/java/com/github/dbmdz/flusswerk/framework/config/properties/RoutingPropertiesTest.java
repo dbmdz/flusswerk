@@ -64,7 +64,7 @@ class RoutingPropertiesTest {
   void shouldProvideValidMinimalConfig() {
     var routingConfig =
         RoutingProperties.minimal(
-            List.of("some.input.queue"), Map.of("default", "some.output.queue"));
+            List.of("some.input.queue"), Map.of("default", List.of("some.output.queue")));
     assertThat(routingConfig.getExchange("some.input.queue")).isEqualTo(DEFAULT_EXCHANGE);
     assertThat(routingConfig.getDeadLetterExchange("some.input.queue"))
         .isEqualTo(RoutingProperties.defaultDeadLetterExchange(DEFAULT_EXCHANGE));

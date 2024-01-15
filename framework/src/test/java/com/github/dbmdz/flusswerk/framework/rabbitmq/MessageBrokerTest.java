@@ -40,7 +40,8 @@ class MessageBrokerTest {
     failurePolicy = new FailurePolicy("some.input.queue");
     routing =
         RoutingProperties.minimal(
-            List.of("some.input.queue"), Map.of("default", "some.output.queue"));
+            List.of("some.input.queue"),
+            Map.of("default", List.of("some.output.queue", "another.output.queue")));
 
     rabbitClient = mock(RabbitClient.class);
     messageBroker = new MessageBroker(routing, rabbitClient);
@@ -87,7 +88,7 @@ class MessageBrokerTest {
   @DisplayName("Should send a message to the output queue")
   void sendShouldRouteMessageToOutputQueue() throws IOException {
     messageBroker.send(new Message());
-    verify(rabbitClient).send(any(), eq(routing.getOutgoing().get("default")), any());
+    verify(rabbitClient).send(any(), eq(routing.getOutgoing().get("default").get(0)), any());
   }
 
   @Test

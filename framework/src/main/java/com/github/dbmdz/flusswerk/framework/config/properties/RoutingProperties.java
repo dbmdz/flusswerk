@@ -28,7 +28,7 @@ public class RoutingProperties {
   private final List<String> incoming;
   private final Map<String, String> exchanges;
   private final Map<String, String> deadLetterExchanges;
-  private final Map<String, String> outgoing;
+  private final Map<String, List<String>> outgoing;
   private final Map<String, FailurePolicy> failurePolicies;
 
   /**
@@ -39,7 +39,7 @@ public class RoutingProperties {
   public RoutingProperties(
       @NotBlank String exchange,
       List<String> incoming,
-      Map<String, String> outgoing,
+      Map<String, List<String>> outgoing,
       Map<String, String> exchanges,
       Map<String, String> deadLetterExchanges,
       Map<String, FailurePolicyProperties> failurePolicies) {
@@ -76,7 +76,8 @@ public class RoutingProperties {
    * @param outgoing The routes for outgoing messages.
    * @return routing properties that rely on defaults wherever possible
    */
-  public static RoutingProperties minimal(List<String> incoming, Map<String, String> outgoing) {
+  public static RoutingProperties minimal(
+      List<String> incoming, Map<String, List<String>> outgoing) {
     return new RoutingProperties(null, incoming, outgoing, null, null, null);
   }
 
@@ -85,7 +86,7 @@ public class RoutingProperties {
       String defaultDlx,
       Map<String, String> specificExchanges,
       Map<String, String> specificDeadLetterExchanges) {
-    Stream.concat(this.incoming.stream(), this.outgoing.values().stream())
+    Stream.concat(this.incoming.stream(), this.outgoing.values().stream().flatMap(List::stream))
         .forEach(
             queue -> {
               String exchange = specificExchanges.getOrDefault(queue, defaultExchange);
@@ -142,9 +143,9 @@ public class RoutingProperties {
   }
 
   /**
-   * @return The topic to send to per default (optional).
+   * @return The queues to send to (optional).
    */
-  public Map<String, String> getOutgoing() {
+  public Map<String, List<String>> getOutgoing() {
     return outgoing;
   }
 

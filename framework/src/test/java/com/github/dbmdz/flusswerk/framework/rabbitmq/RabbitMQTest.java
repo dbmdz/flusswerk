@@ -21,8 +21,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 class RabbitMQTest {
 
   private static final List<String> incoming = List.of("first.incoming", "first.incoming");
-  private static final Map<String, String> outgoing =
-      Map.of("first.rout", "first.outgoing", "second.route", "second.outgoing");
+  private static final Map<String, List<String>> outgoing =
+      Map.of(
+          "first.route",
+          List.of("first.outgoing"),
+          "second.route",
+          List.of("second.outgoing", "another.outgoing"));
 
   private RabbitClient rabbitClient;
   private RabbitMQ rabbitMQ;
@@ -34,7 +38,7 @@ class RabbitMQTest {
   }
 
   private static Stream<String> topics() {
-    return Stream.concat(incoming.stream(), outgoing.values().stream());
+    return Stream.concat(incoming.stream(), outgoing.values().stream().flatMap(List::stream));
   }
 
   private static Stream<String> queues() {
@@ -52,8 +56,13 @@ class RabbitMQTest {
   @DisplayName("should provide matching topics for routes")
   @ParameterizedTest
   @MethodSource("routesAndTopics")
-  void shouldProvideMatchingTopicsForRoutes(String route, String topic) {
-    var expected = new Topic(topic, mock(MessageBroker.class), tracing);
+  void shouldProvideMatchingTopicsForRoutes(String route, List<String> topics) {
+    var expected =
+        new Route(
+            route,
+            topics.stream()
+                .map(topic -> new Topic(topic, mock(MessageBroker.class), tracing))
+                .toList());
     assertThat(rabbitMQ.route(route)).isEqualTo(expected);
   }
 
