@@ -143,10 +143,17 @@ public class RoutingProperties {
   }
 
   /**
-   * @return The queues to send to (optional).
+   * @return The queues to send to, organized by route (optional).
    */
   public Map<String, List<String>> getOutgoing() {
     return outgoing;
+  }
+
+  /**
+   * @return A list of all the queues to send to.
+   */
+  public List<String> allOutgoing() {
+    return outgoing.values().stream().flatMap(List::stream).toList();
   }
 
   public FailurePolicy getFailurePolicy(String queue) {

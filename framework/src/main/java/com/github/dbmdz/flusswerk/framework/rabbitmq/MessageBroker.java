@@ -193,8 +193,7 @@ public class MessageBroker {
   }
 
   private void provideOutputQueues() throws IOException {
-    for (String topic :
-        routingConfig.getOutgoing().values().stream().flatMap(List::stream).toList()) {
+    for (String topic : routingConfig.allOutgoing()) {
       rabbitClient.declareQueue(
           topic,
           routingConfig.getExchange(topic),

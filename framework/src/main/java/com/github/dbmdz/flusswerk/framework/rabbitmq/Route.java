@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Objects;
 
 /** Flusswerk-specific abstraction, collection of topics/queues. No equivalent in RabbitMQ. */
-public class Route {
-  private String name;
-  private List<Topic> topics;
+public class Route implements Sender {
+  private final String name;
+  private final List<Topic> topics;
 
   public Route(String name) {
     this.name = name;
@@ -27,14 +27,13 @@ public class Route {
   }
 
   /**
-   * Sends a message to the topics on this route. The message will have a tracing id either based on
-   * the incoming message or newly generated for applications that do not work on incoming messages.
-   * In that case, every time you call this method it creates a new tracing path.
+   * Sends a message to the topics on this route.
    *
    * @param message The message to send.
    * @throws IOException If communication with RabbitMQ fails or if the message cannot be serialized
    *     to JSON.
    */
+  @Override
   public void send(Message message) throws IOException {
     for (Topic topic : topics) {
       topic.send(message);
@@ -48,6 +47,7 @@ public class Route {
    * @throws IOException If communication with RabbitMQ fails or if the message cannot be serialized
    *     to JSON.
    */
+  @Override
   public void send(Collection<Message> messages) throws IOException {
     for (Topic topic : topics) {
       topic.send(messages);
@@ -61,6 +61,7 @@ public class Route {
    * @throws IOException If communication with RabbitMQ fails or if the message cannot be serialized
    *     to JSON.
    */
+  @Override
   public void send(Message... messages) throws IOException {
     send(List.of(messages));
   }
@@ -72,6 +73,7 @@ public class Route {
    *
    * @param message The message serialized to bytes
    */
+  @Override
   public void sendRaw(byte[] message) {
     for (Topic topic : topics) {
       topic.sendRaw(message);

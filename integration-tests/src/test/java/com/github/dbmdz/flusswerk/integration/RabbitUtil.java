@@ -98,8 +98,7 @@ public class RabbitUtil {
 
   public List<Queue> allQueues() {
     Stream<String> queueNames = routing.getIncoming().stream();
-    queueNames =
-        Stream.concat(queueNames, routing.getOutgoing().values().stream().flatMap(List::stream));
+    queueNames = Stream.concat(queueNames, routing.allOutgoing().stream());
     queueNames =
         Stream.concat(
             queueNames,

@@ -13,7 +13,7 @@ import java.util.Objects;
  * Represents a AMQP/RabbitMQ topic to send messages to. In many setups this is equal to the
  * respective queue name.
  */
-public class Topic {
+public class Topic implements Sender {
 
   private final String name;
   private final MessageBroker messageBroker;
@@ -34,6 +34,7 @@ public class Topic {
    * @throws IOException If communication with RabbitMQ fails or if the message cannot be serialized
    *     to JSON.
    */
+  @Override
   public void send(Message message) throws IOException {
     // Only set a tracing path if there is none yet
     if (message.getTracing() == null || message.getTracing().isEmpty()) {
@@ -49,6 +50,7 @@ public class Topic {
    * @throws IOException If communication with RabbitMQ fails or if the message cannot be serialized
    *     to JSON.
    */
+  @Override
   public void send(Collection<Message> messages) throws IOException {
     // Get a new tracing path in case one is needed
     final List<String> tracingPath = getTracingPath();
@@ -65,6 +67,7 @@ public class Topic {
    * @throws IOException If communication with RabbitMQ fails or if the message cannot be serialized
    *     to JSON.
    */
+  @Override
   public void send(Message... messages) throws IOException {
     send(List.of(messages));
   }
@@ -76,6 +79,7 @@ public class Topic {
    *
    * @param message The message serialized to bytes
    */
+  @Override
   public void sendRaw(byte[] message) {
     messageBroker.sendRaw(name, message);
   }
