@@ -4,7 +4,6 @@ import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.model.Envelope;
 import com.github.dbmdz.flusswerk.framework.model.Message;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +26,7 @@ public class MessageBroker {
 
   private final RabbitClient rabbitClient;
 
-  public MessageBroker(RoutingProperties routing, RabbitClient rabbitClient) throws IOException {
+  public MessageBroker(RoutingProperties routing, RabbitClient rabbitClient) {
     this.routingConfig = routing;
     this.rabbitClient = rabbitClient;
 
@@ -40,11 +39,10 @@ public class MessageBroker {
    * Sends a message to the default output queue as JSON document.
    *
    * @param message the message to send.
-   * @throws IOException if sending the message fails.
    * @deprecated Use {@link Topic#send(Message)} instead
    */
   @Deprecated
-  void send(Message message) throws IOException {
+  void send(Message message) {
     List<String> topics = routingConfig.getOutgoing().get("default");
     if (topics == null || topics.isEmpty()) {
       throw new RuntimeException("Cannot send message, no default queue specified");
@@ -58,11 +56,10 @@ public class MessageBroker {
    * Sends messages to the default output queue as JSON document.
    *
    * @param messages the message to send.
-   * @throws IOException if sending the message fails.
    * @deprecated Use {@link Topic#send(Message)} instead
    */
   @Deprecated
-  public void send(Collection<? extends Message> messages) throws IOException {
+  public void send(Collection<? extends Message> messages) {
     List<String> topics = routingConfig.getOutgoing().get("default");
     if (topics == null || topics.isEmpty()) {
       throw new RuntimeException("Cannot send message, no default queue specified");
@@ -78,9 +75,8 @@ public class MessageBroker {
    * @param routingKey the routing key for the queue to send the message to (usually the queue
    *     name).
    * @param message the message to send.
-   * @throws IOException if sending the message fails.
    */
-  void send(String routingKey, Message message) throws IOException {
+  void send(String routingKey, Message message) {
     rabbitClient.send(routingConfig.getExchange(routingKey), routingKey, message);
   }
 
@@ -95,9 +91,8 @@ public class MessageBroker {
    * @param routingKey the routing key for the queue to send the message to (usually the queue
    *     name).
    * @param messages the messages to send.
-   * @throws IOException if sending a message fails.
    */
-  void send(String routingKey, Collection<? extends Message> messages) throws IOException {
+  void send(String routingKey, Collection<? extends Message> messages) {
     for (Message message : messages) {
       send(routingKey, message);
     }
@@ -164,7 +159,7 @@ public class MessageBroker {
     }
   }
 
-  private void provideInputQueues() throws IOException {
+  private void provideInputQueues() {
     for (String inputQueue : routingConfig.getIncoming()) {
       FailurePolicy failurePolicy = routingConfig.getFailurePolicy(inputQueue);
       final String exchange = routingConfig.getExchange(inputQueue);
@@ -192,7 +187,7 @@ public class MessageBroker {
     }
   }
 
-  private void provideOutputQueues() throws IOException {
+  private void provideOutputQueues() {
     for (String topic : routingConfig.allOutgoing()) {
       rabbitClient.declareQueue(
           topic,
@@ -217,9 +212,8 @@ public class MessageBroker {
    *
    * @param message the message to reject
    * @return true if retry, false if failed
-   * @throws IOException if communication with RabbitMQ failed
    */
-  public boolean reject(Message message) throws IOException {
+  public boolean reject(Message message) {
     final Envelope envelope = message.getEnvelope();
     final long maxRetries = routingConfig.getFailurePolicy(message).getRetries();
     if (envelope.getRetries() < maxRetries) {
@@ -232,7 +226,7 @@ public class MessageBroker {
     }
   }
 
-  void fail(Message message, boolean ackMessage) throws IOException {
+  void fail(Message message, boolean ackMessage) {
     if (ackMessage) {
       ack(message);
     }
@@ -244,11 +238,11 @@ public class MessageBroker {
     }
   }
 
-  public void fail(Message message) throws IOException {
+  public void fail(Message message) {
     fail(message, true);
   }
 
-  public void retry(Message message) throws IOException {
+  public void retry(Message message) {
     LOGGER.debug("Send message to retry queue: " + message);
     FailurePolicy failurePolicy = routingConfig.getFailurePolicy(message);
     String retryRoutingKey = failurePolicy.getRetryRoutingKey();
@@ -259,7 +253,7 @@ public class MessageBroker {
     }
   }
 
-  private void provideExchanges() throws IOException {
+  private void provideExchanges() {
     for (String exchange : routingConfig.getExchanges()) {
       rabbitClient.provideExchange(exchange);
     }
@@ -272,11 +266,10 @@ public class MessageBroker {
    * Returns the number of messages in known queues
    *
    * @return a map of queue names and the number of messages in these queues
-   * @throws IOException if communication with RabbitMQ fails
    * @deprecated Use {@link Queue#messageCount()} instead.
    */
   @Deprecated
-  Map<String, Long> getMessageCounts() throws IOException {
+  Map<String, Long> getMessageCounts() {
     Map<String, Long> result = new HashMap<>();
     for (String queue : routingConfig.getIncoming()) {
       result.put(queue, rabbitClient.getMessageCount(queue));
@@ -284,7 +277,7 @@ public class MessageBroker {
     return result;
   }
 
-  Map<String, Long> getFailedMessageCounts() throws IOException {
+  Map<String, Long> getFailedMessageCounts() {
     Map<String, Long> result = new HashMap<>();
     for (String inputQueue : routingConfig.getIncoming()) {
       FailurePolicy failurePolicy = routingConfig.getFailurePolicy(inputQueue);
@@ -296,7 +289,7 @@ public class MessageBroker {
     return result;
   }
 
-  public Map<String, Long> getRetryMessageCounts() throws IOException {
+  public Map<String, Long> getRetryMessageCounts() {
     Map<String, Long> result = new HashMap<>();
     for (String inputQueue : routingConfig.getIncoming()) {
       FailurePolicy failurePolicy = routingConfig.getFailurePolicy(inputQueue);

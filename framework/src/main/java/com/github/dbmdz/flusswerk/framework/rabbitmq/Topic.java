@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -31,11 +30,9 @@ public class Topic implements Sender {
    * case, every time you call this method it creates a new tracing path.
    *
    * @param message The message to send.
-   * @throws IOException If communication with RabbitMQ fails or if the message cannot be serialized
-   *     to JSON.
    */
   @Override
-  public void send(Message message) throws IOException {
+  public void send(Message message) {
     // Only set a tracing path if there is none yet
     if (message.getTracing() == null || message.getTracing().isEmpty()) {
       message.setTracing(getTracingPath());
@@ -47,11 +44,9 @@ public class Topic implements Sender {
    * Sends multiple messages to this topic.
    *
    * @param messages The messages to send.
-   * @throws IOException If communication with RabbitMQ fails or if the message cannot be serialized
-   *     to JSON.
    */
   @Override
-  public void send(Collection<Message> messages) throws IOException {
+  public void send(Collection<Message> messages) {
     // Get a new tracing path in case one is needed
     final List<String> tracingPath = getTracingPath();
     messages.stream()
@@ -64,11 +59,9 @@ public class Topic implements Sender {
    * Convenience implementation, mostly for tests.
    *
    * @param messages The messages to send.
-   * @throws IOException If communication with RabbitMQ fails or if the message cannot be serialized
-   *     to JSON.
    */
   @Override
-  public void send(Message... messages) throws IOException {
+  public void send(Message... messages) {
     send(List.of(messages));
   }
 

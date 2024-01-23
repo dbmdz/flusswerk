@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import com.github.dbmdz.flusswerk.framework.TestMessage;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
-import java.io.IOException;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,7 +30,7 @@ class TopicTest {
 
   @DisplayName("should send a single message")
   @Test
-  void shouldSendOneMessage() throws IOException {
+  void shouldSendOneMessage() {
     var message = new TestMessage("123");
     topic.send(message);
     verify(messageBroker).send(any(), eq(message));
@@ -39,7 +38,7 @@ class TopicTest {
 
   @DisplayName("should send all messages")
   @Test
-  void shouldSendManyMessages() throws IOException {
+  void shouldSendManyMessages() {
     List<Message> messages = List.of(new TestMessage("1"), new TestMessage("2"));
     topic.send(messages);
     verify(messageBroker).send(any(), eq(messages));

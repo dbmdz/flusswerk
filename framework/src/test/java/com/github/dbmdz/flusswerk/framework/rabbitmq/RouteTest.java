@@ -7,7 +7,6 @@ import static org.mockito.Mockito.verify;
 
 import com.github.dbmdz.flusswerk.framework.TestMessage;
 import com.github.dbmdz.flusswerk.framework.model.Message;
-import java.io.IOException;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,7 +25,7 @@ class RouteTest {
 
   @DisplayName("should send a single message")
   @Test
-  void shouldSendOneMessage() throws IOException {
+  void shouldSendOneMessage() {
     var message = new TestMessage("123");
     route.send(message);
     for (Topic topic : topics) {
@@ -36,7 +35,7 @@ class RouteTest {
 
   @DisplayName("should send all messages")
   @Test
-  void shouldSendManyMessages() throws IOException {
+  void shouldSendManyMessages() {
     List<Message> messages = List.of(new TestMessage("1"), new TestMessage("2"));
     route.send(messages);
     for (Topic topic : topics) {

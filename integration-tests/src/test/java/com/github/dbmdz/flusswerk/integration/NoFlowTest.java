@@ -88,7 +88,7 @@ public class NoFlowTest {
 
   @DisplayName("then it still should send a message to a route")
   @Test
-  public void shouldSendMessageToRoute() throws IOException {
+  public void shouldSendMessageToRoute() {
     Message message = new TestMessage("123");
     rabbitMQ.topic(rabbitUtil.output()).send(message);
     Message received = rabbitUtil.receive();

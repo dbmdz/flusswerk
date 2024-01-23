@@ -82,7 +82,7 @@ public class RabbitClient {
     this(new FlusswerkObjectMapper(incomingMessageType), connection);
   }
 
-  void send(String exchange, String routingKey, Message message) throws IOException {
+  void send(String exchange, String routingKey, Message message) {
     byte[] data = serialize(message);
     sendRaw(exchange, routingKey, data);
   }
@@ -101,8 +101,12 @@ public class RabbitClient {
     return objectMapper.deserialize(body);
   }
 
-  byte[] serialize(Message message) throws IOException {
-    return objectMapper.writeValueAsBytes(message);
+  byte[] serialize(Message message) {
+    try {
+      return objectMapper.writeValueAsBytes(message);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Cannot serialize message", e);
+    }
   }
 
   public void ack(com.github.dbmdz.flusswerk.framework.model.Envelope envelope) {
@@ -182,7 +186,7 @@ public class RabbitClient {
   }
 
   public AMQP.Queue.PurgeOk queuePurge(String name) {
-    return (AMQP.Queue.PurgeOk) execute(commands.queuePurge(name));
+    return execute(commands.queuePurge(name));
   }
 
   private <T> T execute(ChannelCommand<T> channelCommand) {

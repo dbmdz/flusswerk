@@ -14,7 +14,6 @@ import com.github.dbmdz.flusswerk.framework.monitoring.FlusswerkMetrics;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -74,7 +73,7 @@ class WorkerTest {
 
   @DisplayName("should fail message on StopProcessingException")
   @Test
-  void shouldFailMessageOnStopProcessingException() throws IOException {
+  void shouldFailMessageOnStopProcessingException() {
     when(flow.process(message)).thenThrow(new StopProcessingException("Intentional Exception"));
     worker.process(message);
     verify(messageBroker).fail(message);
@@ -83,7 +82,7 @@ class WorkerTest {
   @DisplayName("should retry message on RetryProcessingException")
   @ParameterizedTest
   @MethodSource("retryableExceptions")
-  void shouldRetryMessageOnRetryProcessingException(RuntimeException exception) throws IOException {
+  void shouldRetryMessageOnRetryProcessingException(RuntimeException exception) {
     when(flow.process(message)).thenThrow(exception);
     worker.process(message);
     verify(messageBroker).reject(message);
@@ -116,7 +115,7 @@ class WorkerTest {
 
   @DisplayName("should log retry on exception")
   @Test
-  void shouldLogRetry() throws IOException {
+  void shouldLogRetry() {
     Exception exception = new RetryProcessingException("intentional");
     when(flow.process(message)).thenThrow(exception);
     when(messageBroker.reject(message)).thenReturn(true); // retry
@@ -136,7 +135,7 @@ class WorkerTest {
 
   @DisplayName("should send messages")
   @Test
-  void shouldSendMessages() throws IOException {
+  void shouldSendMessages() {
     when(flow.process(message)).thenReturn(List.of(message));
     worker.process(message);
     verify(messageBroker).send(List.of(message));
@@ -144,9 +143,9 @@ class WorkerTest {
 
   @DisplayName("should fail processing when sending messages fails")
   @Test
-  void shouldFailProcessingWhenSendingMessagesFails() throws IOException {
+  void shouldFailProcessingWhenSendingMessagesFails() {
     when(flow.process(message)).thenReturn(List.of(message));
-    doThrow(IOException.class).when(messageBroker).send(any());
+    doThrow(RuntimeException.class).when(messageBroker).send(any());
     worker.process(message);
     verify(processReport).reportFail(any(), any());
   }
@@ -174,7 +173,7 @@ class WorkerTest {
 
   @DisplayName("should add tracing information to messages after skipping")
   @Test
-  void shouldAddTracingAfterSkipping() throws IOException {
+  void shouldAddTracingAfterSkipping() {
     List<String> tracingPath = List.of("abcde", "1234567");
     Message incomingMessage = new Message();
     incomingMessage.setTracing(tracingPath);
@@ -210,7 +209,7 @@ class WorkerTest {
 
   @DisplayName("should perform complex retry sending messages")
   @Test
-  void shouldPerformComplexRetrySendingMessages() throws IOException {
+  void shouldPerformComplexRetrySendingMessages() {
     Message incomingMessage = new TestMessage("incoming");
     Message outgoingMessage = new TestMessage("outgoing");
     when(flow.process(incomingMessage))
@@ -221,7 +220,7 @@ class WorkerTest {
 
   @DisplayName("should perform complex retry with new messages")
   @Test
-  void shouldPerformComplexRetryWithNewMessages() throws IOException {
+  void shouldPerformComplexRetryWithNewMessages() {
     Message incomingMessage = new TestMessage("incoming");
     List<Message> messagesToRetry = List.of(new TestMessage("retry1"), new TestMessage("retry2"));
     when(flow.process(incomingMessage))

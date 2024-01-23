@@ -1,7 +1,6 @@
 package com.github.dbmdz.flusswerk.framework.rabbitmq;
 
 import com.github.dbmdz.flusswerk.framework.model.Message;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -30,11 +29,9 @@ public class Route implements Sender {
    * Sends a message to the topics on this route.
    *
    * @param message The message to send.
-   * @throws IOException If communication with RabbitMQ fails or if the message cannot be serialized
-   *     to JSON.
    */
   @Override
-  public void send(Message message) throws IOException {
+  public void send(Message message) {
     for (Topic topic : topics) {
       topic.send(message);
     }
@@ -44,11 +41,9 @@ public class Route implements Sender {
    * Sends multiple messages to the topics on this route.
    *
    * @param messages The messages to send.
-   * @throws IOException If communication with RabbitMQ fails or if the message cannot be serialized
-   *     to JSON.
    */
   @Override
-  public void send(Collection<Message> messages) throws IOException {
+  public void send(Collection<Message> messages) {
     for (Topic topic : topics) {
       topic.send(messages);
     }
@@ -58,11 +53,9 @@ public class Route implements Sender {
    * Convenience implementation, mostly for tests.
    *
    * @param messages The messages to send.
-   * @throws IOException If communication with RabbitMQ fails or if the message cannot be serialized
-   *     to JSON.
    */
   @Override
-  public void send(Message... messages) throws IOException {
+  public void send(Message... messages) {
     send(List.of(messages));
   }
 

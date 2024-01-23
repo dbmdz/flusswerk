@@ -13,7 +13,6 @@ import com.github.dbmdz.flusswerk.framework.config.properties.RoutingProperties;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.model.Envelope;
 import com.github.dbmdz.flusswerk.framework.model.Message;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +35,7 @@ class MessageBrokerTest {
   private FailurePolicy failurePolicy;
 
   @BeforeEach
-  void setUp() throws IOException {
+  void setUp() {
     failurePolicy = new FailurePolicy("some.input.queue");
     routing =
         RoutingProperties.minimal(
@@ -51,7 +50,7 @@ class MessageBrokerTest {
 
   @Test
   @DisplayName("Send should use the specified routing key")
-  void sendShouldUseSpecifiedRoutingKey() throws IOException {
+  void sendShouldUseSpecifiedRoutingKey() {
     messageBroker.send("there", message);
     verify(rabbitClient).send(anyString(), eq("there"), eq(message));
   }
@@ -65,7 +64,7 @@ class MessageBrokerTest {
 
   @Test
   @DisplayName("Reject should count rejections")
-  void rejectShouldCountRejections() throws IOException {
+  void rejectShouldCountRejections() {
     int numberOfRejections = 3;
     for (int i = 0; i < numberOfRejections; i++) {
       messageBroker.reject(message);
@@ -75,7 +74,7 @@ class MessageBrokerTest {
 
   @Test
   @DisplayName("Should route a message to the failed queue if it has been rejected to often")
-  void rejectShouldRouteToFailedQueueIfMessageIsRejectedTooOften() throws IOException {
+  void rejectShouldRouteToFailedQueueIfMessageIsRejectedTooOften() {
     int numberOfRejections = failurePolicy.getRetries() + 1;
     for (int i = 0; i < numberOfRejections; i++) {
       messageBroker.reject(message);
@@ -86,14 +85,14 @@ class MessageBrokerTest {
 
   @Test
   @DisplayName("Should send a message to the output queue")
-  void sendShouldRouteMessageToOutputQueue() throws IOException {
+  void sendShouldRouteMessageToOutputQueue() {
     messageBroker.send(new Message());
     verify(rabbitClient).send(any(), eq(routing.getOutgoing().get("default").get(0)), any());
   }
 
   @Test
   @DisplayName("Should send multiple messages to the specified queue")
-  void sendMultipleMessagesShouldRouteMessagesToSpecifiedQueue() throws IOException {
+  void sendMultipleMessagesShouldRouteMessagesToSpecifiedQueue() {
     String queue = "specified.queue";
     List<Message> messages = Arrays.asList(new Message(), new Message(), new Message());
     messageBroker.send(queue, messages);
@@ -117,7 +116,7 @@ class MessageBrokerTest {
 
   @Test
   @DisplayName("getMessageCount should return all message counts")
-  void getMessageCountsShouldGetAllMessageCounts() throws IOException {
+  void getMessageCountsShouldGetAllMessageCounts() {
     RoutingProperties routing = RoutingProperties.minimal(List.of("input1", "input2"), null);
 
     Map<String, Long> expected = new HashMap<>();

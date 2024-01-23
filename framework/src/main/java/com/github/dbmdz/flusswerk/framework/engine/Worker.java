@@ -10,7 +10,6 @@ import com.github.dbmdz.flusswerk.framework.monitoring.FlusswerkMetrics;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.MessageBroker;
 import com.github.dbmdz.flusswerk.framework.reporting.ProcessReport;
 import com.github.dbmdz.flusswerk.framework.reporting.Tracing;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -125,49 +124,34 @@ public class Worker implements Runnable {
   }
 
   private void retryOrFail(Message receivedMessage, RuntimeException e) {
-    try {
-      messageBroker.ack(receivedMessage);
-      boolean isRejected = messageBroker.reject(receivedMessage);
-      if (isRejected) {
-        processReport.reportRetry(receivedMessage, e);
-      } else {
-        processReport.reportFailAfterMaxRetries(receivedMessage, e);
-      }
-    } catch (IOException fatalException) {
-      var body = receivedMessage.getEnvelope().getBody();
-      LOGGER.error("Could not reject message" + body, fatalException);
+    messageBroker.ack(receivedMessage);
+    boolean isRejected = messageBroker.reject(receivedMessage);
+    if (isRejected) {
+      processReport.reportRetry(receivedMessage, e);
+    } else {
+      processReport.reportFailAfterMaxRetries(receivedMessage, e);
     }
   }
 
   private void complexRetry(Message receivedMessage, RetryProcessingException e) {
-    try {
-      messageBroker.ack(receivedMessage);
-      for (Message retryMessage : e.getMessagesToRetry()) {
-        Envelope envelope = retryMessage.getEnvelope();
-        envelope.setRetries(receivedMessage.getEnvelope().getRetries());
-        envelope.setSource(receivedMessage.getEnvelope().getSource());
-        tracing.ensureFor(retryMessage);
-        messageBroker.reject(retryMessage);
-      }
-      // Send the messages that should be sent anyway
-      tracing.ensureFor(e.getMessagesToSend());
-      messageBroker.send(e.getMessagesToSend());
-
-      processReport.reportRetry(receivedMessage, e);
-    } catch (IOException fatalException) {
-      var body = receivedMessage.getEnvelope().getBody();
-      LOGGER.error("Complex retry failed" + body, fatalException);
+    messageBroker.ack(receivedMessage);
+    for (Message retryMessage : e.getMessagesToRetry()) {
+      Envelope envelope = retryMessage.getEnvelope();
+      envelope.setRetries(receivedMessage.getEnvelope().getRetries());
+      envelope.setSource(receivedMessage.getEnvelope().getSource());
+      tracing.ensureFor(retryMessage);
+      messageBroker.reject(retryMessage);
     }
+    // Send the messages that should be sent anyway
+    tracing.ensureFor(e.getMessagesToSend());
+    messageBroker.send(e.getMessagesToSend());
+
+    processReport.reportRetry(receivedMessage, e);
   }
 
   private void fail(Message message, StopProcessingException e) {
-    try {
-      processReport.reportFail(message, e);
-      messageBroker.fail(message);
-    } catch (IOException fatalException) {
-      var body = message.getEnvelope().getBody();
-      LOGGER.error("Could not fail message" + body, fatalException);
-    }
+    processReport.reportFail(message, e);
+    messageBroker.fail(message);
   }
 
   /**
