@@ -99,8 +99,8 @@ public class FlusswerkConfiguration {
   }
 
   @Bean
-  public MessageBroker messageBroker(RoutingProperties routingProperties, RabbitClient rabbitClient)
-      throws IOException {
+  public MessageBroker messageBroker(
+      RoutingProperties routingProperties, RabbitClient rabbitClient) {
     return new MessageBroker(routingProperties, rabbitClient);
   }
 

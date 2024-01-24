@@ -42,7 +42,8 @@ public class FlusswerkPropertiesTest {
     assertThat(routing)
         .hasFieldOrPropertyWithValue("defaultExchange", "my.exchange")
         .hasFieldOrPropertyWithValue("incoming", List.of("first", "second"))
-        .hasFieldOrPropertyWithValue("outgoing", Map.of("default", "default.queue.to.write.to"));
+        .hasFieldOrPropertyWithValue(
+            "outgoing", Map.of("default", List.of("default.queue.to.write.to")));
 
     assertThat(routing.getExchange("second")).isEqualTo("other.exchange");
 

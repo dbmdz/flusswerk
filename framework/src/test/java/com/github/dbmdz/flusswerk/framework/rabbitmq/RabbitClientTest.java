@@ -132,8 +132,7 @@ class RabbitClientTest {
     return messageToReceive;
   }
 
-  private GetResponse createResponse(long deliveryTag, Message message, RabbitClient rabbitClient)
-      throws IOException {
+  private GetResponse createResponse(long deliveryTag, Message message, RabbitClient rabbitClient) {
     com.rabbitmq.client.Envelope envelope =
         new com.rabbitmq.client.Envelope(deliveryTag, true, "workflow", "some.input.queue");
     BasicProperties basicProperties = new BasicProperties.Builder().build();

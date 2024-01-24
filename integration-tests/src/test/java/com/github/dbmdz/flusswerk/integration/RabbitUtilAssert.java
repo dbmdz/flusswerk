@@ -1,7 +1,6 @@
 package com.github.dbmdz.flusswerk.integration;
 
 import com.github.dbmdz.flusswerk.framework.rabbitmq.Queue;
-import java.io.IOException;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;
 
@@ -21,18 +20,14 @@ public class RabbitUtilAssert extends AbstractAssert<RabbitUtilAssert, RabbitUti
         .allQueues()
         .forEach(
             queue -> {
-              try {
-                Assertions.assertThat(getMessageCount(queue))
-                    .as("Queue " + queue.getName() + " is not empty")
-                    .isZero();
-              } catch (IOException e) {
-                throw new RuntimeException(e);
-              }
+              Assertions.assertThat(getMessageCount(queue))
+                  .as("Queue " + queue.getName() + " is not empty")
+                  .isZero();
             });
     return this;
   }
 
-  private static long getMessageCount(Queue queue) throws IOException {
+  private static long getMessageCount(Queue queue) {
     return queue.messageCount();
   }
 }

@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 import com.github.dbmdz.flusswerk.framework.exceptions.InvalidMessageException;
 import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.rabbitmq.client.AMQP.Queue.PurgeOk;
-import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,7 +33,7 @@ class QueueTest {
   }
 
   @Test
-  void messageCount() throws IOException {
+  void messageCount() {
     var expected = 123123L;
     when(rabbitClient.getMessageCount(queue.getName())).thenReturn(expected);
 

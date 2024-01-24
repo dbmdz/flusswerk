@@ -6,7 +6,6 @@ import com.github.dbmdz.flusswerk.framework.model.Message;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.FailurePolicy;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.Queue;
 import com.github.dbmdz.flusswerk.framework.rabbitmq.RabbitMQ;
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,10 +31,10 @@ public class RabbitUtil {
   }
 
   public String output() {
-    return routing.getOutgoing().get("default");
+    return routing.getOutgoing().get("default").get(0);
   }
 
-  public void send(Message message) throws IOException {
+  public void send(Message message) {
     rabbitMQ.topic(firstInput()).send(message);
   }
 
@@ -98,7 +97,7 @@ public class RabbitUtil {
 
   public List<Queue> allQueues() {
     Stream<String> queueNames = routing.getIncoming().stream();
-    queueNames = Stream.concat(queueNames, routing.getOutgoing().values().stream());
+    queueNames = Stream.concat(queueNames, routing.allOutgoing().stream());
     queueNames =
         Stream.concat(
             queueNames,

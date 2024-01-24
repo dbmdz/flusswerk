@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Automatically recover from channel-level exceptions. This involves a breaking change in the constructor of `FlusswerkConsumer`, which now requires a `RabbitClient` instead of a `Channel`.
 
+### Changed
+- Outgoing routes may now include a list of topics instead of a single topic. A `Route` can be used to send a message to several topics at once.
+
 ## [6.0.1] - 2023-12-06
 
 ### Fixed

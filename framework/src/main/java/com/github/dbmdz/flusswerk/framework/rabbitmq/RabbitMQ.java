@@ -10,7 +10,7 @@ import java.util.Map;
 public class RabbitMQ {
 
   private final Map<String, Queue> queues;
-  private final Map<String, Topic> routes;
+  private final Map<String, Route> routes;
   private final Map<String, Topic> topics;
   private final RabbitClient rabbitClient;
   private final MessageBroker messageBroker;
@@ -47,11 +47,16 @@ public class RabbitMQ {
     routingProperties
         .getOutgoing()
         .forEach(
-            (route, topicName) -> {
-              addQueue(topicName);
-              var topic = new Topic(topicName, messageBroker, tracing);
-              topics.put(topicName, topic);
-              routes.put(route, topic);
+            (routeName, topicNames) -> {
+              Route route = new Route(routeName);
+              topicNames.forEach(
+                  name -> {
+                    addQueue(name);
+                    var topic = new Topic(name, messageBroker, tracing);
+                    topics.put(name, topic);
+                    route.addTopic(topic);
+                  });
+              routes.put(routeName, route);
             });
   }
 
@@ -60,12 +65,12 @@ public class RabbitMQ {
   }
 
   /**
-   * A topic to send messages to.
+   * A route (collection of topics) to send messages to.
    *
    * @param name a route as configured in application.yml
-   * @return the corresponding topic
+   * @return the corresponding route
    */
-  public Topic route(String name) {
+  public Route route(String name) {
     return routes.get(name);
   }
 
