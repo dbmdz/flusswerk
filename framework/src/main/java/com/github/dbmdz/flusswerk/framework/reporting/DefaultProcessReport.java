@@ -5,46 +5,55 @@ import static net.logstash.logback.argument.StructuredArguments.keyValue;
 
 import com.github.dbmdz.flusswerk.framework.exceptions.RetryProcessingException;
 import com.github.dbmdz.flusswerk.framework.exceptions.StopProcessingException;
+import com.github.dbmdz.flusswerk.framework.model.Envelope;
 import com.github.dbmdz.flusswerk.framework.model.Message;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DefaultProcessReport implements ProcessReport {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(DefaultProcessReport.class);
-
+  private final FlusswerkLogger logger;
   private final String name;
-  private final Tracing tracing;
 
   public DefaultProcessReport(String name, Tracing tracing) {
     this.name = requireNonNull(name);
-    this.tracing = requireNonNull(tracing);
+    FlusswerkLoggerFactory loggerFactory = new FlusswerkLoggerFactory(requireNonNull(tracing));
+    this.logger = loggerFactory.getFlusswerkLogger(DefaultProcessReport.class);
+  }
+
+  public DefaultProcessReport(String name, FlusswerkLogger logger) {
+    this.name = requireNonNull(name);
+    this.logger = requireNonNull(logger);
   }
 
   @Override
   public void reportSuccess(Message message) {
-    LOGGER.info("{} successful", name, keyValue("tracing", tracing.tracingPath()));
+    getLogger().info("{} successful", name);
   }
 
   @Override
   public void reportFail(Message message, StopProcessingException e) {
+    Envelope envelope = message.getEnvelope();
     getLogger()
         .error(
             "{} failed terminally: {}",
             name,
             e.getMessage(),
-            keyValue("amqp_message", message.toString()),
+            keyValue("will_retry", false),
+            keyValue("incoming_queue", envelope.getSource()),
+            keyValue("retries", envelope.getRetries()),
             e);
   }
 
   @Override
   public void reportFailAfterMaxRetries(Message message, Exception e) {
+    Envelope envelope = message.getEnvelope();
     getLogger()
         .error(
             "{} failed after maximum number of retries: {}",
             name,
             e.getMessage(),
-            keyValue("amqp_message", message.toString()),
+            keyValue("will_retry", false),
+            keyValue("incoming_queue", envelope.getSource()),
+            keyValue("retries", envelope.getRetries()),
             e);
   }
 
@@ -58,12 +67,15 @@ public class DefaultProcessReport implements ProcessReport {
 
   @Override
   public void reportRetry(Message message, RuntimeException e) {
+    Envelope envelope = message.getEnvelope();
     getLogger()
         .warn(
             "{} rejected for retry: {}",
             name,
             e.getMessage(),
-            keyValue("amqp_message", message.toString()),
+            keyValue("will_retry", true),
+            keyValue("incoming_queue", envelope.getSource()),
+            keyValue("retries", envelope.getRetries()),
             e);
   }
 
@@ -71,6 +83,7 @@ public class DefaultProcessReport implements ProcessReport {
   public void reportComplexRetry(Message message, RetryProcessingException e) {
     int newMessagesToRetry = e.getMessagesToRetry().size();
     int messagesSent = e.getMessagesToSend().size();
+    Envelope envelope = message.getEnvelope();
     getLogger()
         .warn(
             "{} rejected for retry with ({} new, {} sent) and : {}",
@@ -78,16 +91,18 @@ public class DefaultProcessReport implements ProcessReport {
             newMessagesToRetry,
             messagesSent,
             e.getMessage(),
-            keyValue("amqp_message", message.toString()),
+            keyValue("will_retry", true),
+            keyValue("incoming_queue", envelope.getSource()),
+            keyValue("retries", envelope.getRetries()),
             e);
   }
 
   @Override
   public void reportSkip(Message message, Exception skip) {
-    LOGGER.info("Skipped: {}", skip.getMessage());
+    getLogger().info("Skipped: {}", skip.getMessage());
   }
 
-  protected Logger getLogger() {
-    return LOGGER;
+  protected FlusswerkLogger getLogger() {
+    return logger;
   }
 }

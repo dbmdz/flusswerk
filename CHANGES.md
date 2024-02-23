@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Outgoing routes may now include a list of topics instead of a single topic. A `Route` can be used to send a message to several topics at once.
+- The `DefaultFlusswerkReport` logs tracing information.
+
+### Removed
+- `FlusswerkProcessReport`, `StructuredProcessReport` and `SilentProcessReport` have been removed. Users who would like to customize their process report can subclass [DefaultProcessReport](framework/src/main/java/com/github/dbmdz/flusswerk/framework/reporting/DefaultProcessReport.java)
+or implement the [ProcessReport](framework/src/main/java/com/github/dbmdz/flusswerk/framework/reporting/ProcessReport.java) interface.
 
 ## [6.0.1] - 2023-12-06
 
