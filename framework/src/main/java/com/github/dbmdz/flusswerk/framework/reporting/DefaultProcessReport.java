@@ -105,4 +105,8 @@ public class DefaultProcessReport implements ProcessReport {
   protected FlusswerkLogger getLogger() {
     return logger;
   }
+
+  protected String getName() {
+    return name;
+  }
 }
