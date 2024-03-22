@@ -68,7 +68,7 @@ public class FlusswerkLogger {
   Object[] addTracing(Object[] arguments) {
     Object[] extended = new Object[arguments.length + 1];
     System.arraycopy(arguments, 0, extended, 0, arguments.length);
-    if (arguments[arguments.length - 1] instanceof Throwable) {
+    if (arguments.length > 0 && arguments[arguments.length - 1] instanceof Throwable) {
       extended[extended.length - 1] = arguments[arguments.length - 1];
       extended[extended.length - 2] = keyValue("tracing", tracing.tracingPath());
     } else {
