@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * Flusswerk Logger can handle function calls with the format String as sole argument.
 
+### Changed
+* Reporting of partial retries can now be customized by overriding `ProcessReport.reportComplexRetry(Message message, RetryProcessingException e)` and `ProcessReport.reportComplexFailedAfterMaxRetries(Message message, RetryProcessingException e)`.
+
 ## [7.0.0] - 2024-03-15
 
 ### Fixed

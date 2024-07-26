@@ -135,18 +135,23 @@ public class Worker implements Runnable {
 
   private void complexRetry(Message receivedMessage, RetryProcessingException e) {
     messageBroker.ack(receivedMessage);
+    boolean isRejected = false;
     for (Message retryMessage : e.getMessagesToRetry()) {
       Envelope envelope = retryMessage.getEnvelope();
       envelope.setRetries(receivedMessage.getEnvelope().getRetries());
       envelope.setSource(receivedMessage.getEnvelope().getSource());
       tracing.ensureFor(retryMessage);
-      messageBroker.reject(retryMessage);
+      isRejected = messageBroker.reject(retryMessage);
     }
     // Send the messages that should be sent anyway
     tracing.ensureFor(e.getMessagesToSend());
     messageBroker.send(e.getMessagesToSend());
 
-    processReport.reportRetry(receivedMessage, e);
+    if (isRejected) {
+      processReport.reportComplexRetry(receivedMessage, e);
+    } else {
+      processReport.reportComplexFailedAfterMaxRetries(receivedMessage, e);
+    }
   }
 
   private void fail(Message message, StopProcessingException e) {
