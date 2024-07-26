@@ -60,6 +60,17 @@ public interface ProcessReport {
     reportReject(message, e);
   }
 
+  /**
+   * Report that a message has failed after the maximum number of retries and potentially also has
+   * messages sent anyway.
+   *
+   * @param message The message which finally failed after the maximum number of retries
+   * @param e The exception why the message failed
+   */
+  default void reportComplexFailedAfterMaxRetries(Message message, RetryProcessingException e) {
+    reportReject(message, e);
+  }
+
   default void reportSkip(Message message, Exception skip) {
     reportSuccess(message);
   }

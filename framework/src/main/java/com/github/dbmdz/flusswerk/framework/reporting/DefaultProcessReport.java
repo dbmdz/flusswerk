@@ -98,6 +98,22 @@ public class DefaultProcessReport implements ProcessReport {
   }
 
   @Override
+  public void reportComplexFailedAfterMaxRetries(Message message, RetryProcessingException e) {
+    int messagesSent = e.getMessagesToSend().size();
+    Envelope envelope = message.getEnvelope();
+    getLogger()
+        .warn(
+            "{} failed after maximum number of retries with ({} sent) and : {}",
+            name,
+            messagesSent,
+            e.getMessage(),
+            keyValue("will_retry", false),
+            keyValue("incoming_queue", envelope.getSource()),
+            keyValue("retries", envelope.getRetries()),
+            e);
+  }
+
+  @Override
   public void reportSkip(Message message, Exception skip) {
     getLogger().info("Skipped: {}", skip.getMessage());
   }

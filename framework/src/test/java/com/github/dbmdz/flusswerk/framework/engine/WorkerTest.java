@@ -223,12 +223,15 @@ class WorkerTest {
   void shouldPerformComplexRetryWithNewMessages() {
     Message incomingMessage = new TestMessage("incoming");
     List<Message> messagesToRetry = List.of(new TestMessage("retry1"), new TestMessage("retry2"));
-    when(flow.process(incomingMessage))
-        .thenThrow(new RetryProcessingException("Retry processing").retry(messagesToRetry));
+    RetryProcessingException retryException =
+        new RetryProcessingException("Retry processing").retry(messagesToRetry);
+    when(flow.process(incomingMessage)).thenThrow(retryException);
+    when(messageBroker.reject(any())).thenReturn(true);
     worker.process(incomingMessage);
     verify(messageBroker).ack(incomingMessage);
     for (Message message : messagesToRetry) {
       verify(messageBroker).reject(message);
     }
+    verify(processReport).reportComplexRetry(incomingMessage, retryException);
   }
 }
