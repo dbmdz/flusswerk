@@ -14,7 +14,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.1.6</version>
+    <version>3.5.5</version>
   </parent>
 
   <description>
@@ -76,7 +76,7 @@
       <dependency>
         <groupId>com.rabbitmq</groupId>
         <artifactId>amqp-client</artifactId>
-        <version>5.21.0</version>
+        <version>5.26.0</version>
       </dependency>
       <dependency>
         <groupId>com.github.dbmdz.flusswerk</groupId>
@@ -86,18 +86,18 @@
       <dependency>
         <groupId>net.logstash.logback</groupId>
         <artifactId>logstash-logback-encoder</artifactId>
-        <version>7.4</version>
+        <version>8.1</version>
       </dependency>
       <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-core</artifactId>
-        <version>5.13.0</version>
+        <version>5.19.0</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter</artifactId>
-        <version>5.11.0</version>
+        <version>5.13.4</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -113,7 +113,7 @@
       <plugin>
         <groupId>com.spotify.fmt</groupId>
         <artifactId>fmt-maven-plugin</artifactId>
-        <version>2.24</version>
+        <version>2.27</version>
         <executions>
           <execution>
             <goals>
@@ -150,7 +150,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.10.0</version>
+        <version>3.11.3</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -168,7 +168,7 @@
         <plugin>
           <groupId>com.spotify.fmt</groupId>
           <artifactId>fmt-maven-plugin</artifactId>
-          <version>2.24</version>
+          <version>2.27</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
@@ -178,7 +178,7 @@
         <plugin>
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
-          <version>0.8.12</version>
+          <version>0.8.13</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
@@ -271,7 +271,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>3.2.5</version>
+            <version>3.2.8</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
