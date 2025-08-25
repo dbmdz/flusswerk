@@ -254,12 +254,60 @@
 
   <profiles>
     <profile>
+      <id>custom-nexus</id>
+      <distributionManagement>
+        <!-- credentials for server in settings.xml -->
+        <repository>
+          <id>maven-releases</id>
+          <name>Maven Releases</name>
+          <url>${env.NEXUS_RELEASE_REPOSITORY_URL}</url>
+        </repository>
+        <snapshotRepository>
+          <id>maven-snapshots</id>
+          <name>Maven Snapshots</name>
+          <url>${env.NEXUS_SNAPSHOT_REPOSITORY_URL}</url>
+        </snapshotRepository>
+      </distributionManagement>
+      <repositories>
+        <repository>
+          <id>maven-releases</id>
+          <name>Maven Releases</name>
+          <url>${env.NEXUS_RELEASE_REPOSITORY_URL}</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>maven-snapshots</id>
+          <name>Maven Snapshots</name>
+          <url>${env.NEXUS_SNAPSHOT_REPOSITORY_URL}</url>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+           <enabled>true</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+    </profile>
+
+    <profile>
       <id>maven-central</id>
       <build>
         <plugins>
           <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <groupId>org.sonatype.central</groupId>
+            <artifactId>central-publishing-maven-plugin</artifactId>
+            <version>0.8.0</version>
+            <extensions>true</extensions>
+            <configuration>
+              <publishingServerId>central</publishingServerId>
+              <autoPublish>true</autoPublish>
+              <deploymentName>${project.groupId}:${project.artifactId}:${project.version}</deploymentName>
+            </configuration>
           </plugin>
         </plugins>
       </build>
