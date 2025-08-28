@@ -69,6 +69,7 @@
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <skip.deploy>false</skip.deploy>
   </properties>
 
   <dependencyManagement>
@@ -110,7 +111,7 @@
         <artifactId>maven-deploy-plugin</artifactId>
         <version>3.1.2</version>
         <configuration>
-          <skip>true</skip>
+          <skip>${skip.deploy}</skip>
         </configuration>
       </plugin>
       <plugin>
