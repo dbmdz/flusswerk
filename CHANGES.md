@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+
+- *Breaking* Changed groupId and artifactId
+
 ## [7.0.1] - 2024-07-30
 
 ### Fixed
