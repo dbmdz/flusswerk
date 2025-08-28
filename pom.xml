@@ -4,12 +4,12 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.github.dbmdz.flusswerk</groupId>
-  <artifactId>flusswerk</artifactId>
-  <version>7.0.2-SNAPSHOT</version>
+  <groupId>dev.mdz</groupId>
+  <artifactId>flusswerk-parent</artifactId>
+  <version>8.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Flusswerk</name>
+  <name>Flusswerk (Parent)</name>
 
   <parent>
     <groupId>org.springframework.boot</groupId>
@@ -79,11 +79,6 @@
         <version>5.26.0</version>
       </dependency>
       <dependency>
-        <groupId>com.github.dbmdz.flusswerk</groupId>
-        <artifactId>framework</artifactId>
-        <version>7.0.2-SNAPSHOT</version>
-      </dependency>
-      <dependency>
         <groupId>net.logstash.logback</groupId>
         <artifactId>logstash-logback-encoder</artifactId>
         <version>8.1</version>
@@ -110,6 +105,14 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>3.1.2</version>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>com.spotify.fmt</groupId>
         <artifactId>fmt-maven-plugin</artifactId>
@@ -253,47 +256,6 @@
   </repositories>
 
   <profiles>
-    <profile>
-      <id>custom-nexus</id>
-      <distributionManagement>
-        <!-- credentials for server in settings.xml -->
-        <repository>
-          <id>maven-releases</id>
-          <name>Maven Releases</name>
-          <url>${env.NEXUS_RELEASE_REPOSITORY_URL}</url>
-        </repository>
-        <snapshotRepository>
-          <id>maven-snapshots</id>
-          <name>Maven Snapshots</name>
-          <url>${env.NEXUS_SNAPSHOT_REPOSITORY_URL}</url>
-        </snapshotRepository>
-      </distributionManagement>
-      <repositories>
-        <repository>
-          <id>maven-releases</id>
-          <name>Maven Releases</name>
-          <url>${env.NEXUS_RELEASE_REPOSITORY_URL}</url>
-          <releases>
-            <enabled>true</enabled>
-          </releases>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
-        </repository>
-        <repository>
-          <id>maven-snapshots</id>
-          <name>Maven Snapshots</name>
-          <url>${env.NEXUS_SNAPSHOT_REPOSITORY_URL}</url>
-          <releases>
-            <enabled>false</enabled>
-          </releases>
-          <snapshots>
-           <enabled>true</enabled>
-          </snapshots>
-        </repository>
-      </repositories>
-    </profile>
-
     <profile>
       <id>maven-central</id>
       <build>

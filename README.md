@@ -13,9 +13,9 @@ Java application).
 
 ```xml
 <dependency>
-  <groupId>com.github.dbmdz.flusswerk</groupId>
-  <artifactId>framework</artifactId>
-  <version>5.0.0</version>
+  <groupId>dev.mdz</groupId>
+  <artifactId>flusswerk</artifactId>
+  <version>8.0.0</version>
 </dependency>
 ```
 
@@ -23,7 +23,7 @@ Java application).
 
 ```groovy
 dependencies {
-    compile group: 'com.github.dbmdz.flusswerk', name: 'flusswerk', version: '5.0.0'
+    compile group: 'dev.mdz', name: 'flusswerk', version: '8.0.0'
 }
 ``` 
  
