@@ -13,7 +13,6 @@
 
   <properties>
     <skip.integration.tests>true</skip.integration.tests>
-    <skip.deploy>true</skip.deploy>
   </properties>
 
   <dependencies>
