@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [8.0.0](https://github.com/dbmdz/flusswerk/releases/tag/8.0.0) - 2025-09-18
+
 ### Changed
 
 - *Breaking* Changed groupId and artifactId
