@@ -112,13 +112,13 @@ public class RabbitConnection implements SmartLifecycle {
   }
 
   public void close() {
-    if (channel == null || !channel.isOpen()) {
+    if (connection == null || !connection.isOpen()) {
       return;
     }
     try {
-      channel.close(AMQP.CONNECTION_FORCED, "Application shutdown");
-    } catch (TimeoutException | IOException exception) {
-      LOGGER.error("Could not close RabbitMQ channel", exception);
+      connection.close(AMQP.CONNECTION_FORCED, "Application shutdown");
+    } catch (IOException exception) {
+      LOGGER.error("Could not close RabbitMQ connection", exception);
     }
   }
 
@@ -140,10 +140,12 @@ public class RabbitConnection implements SmartLifecycle {
   @Override
   public void start() {
     // nothing to do, connection is established in constructor for fail-fast behavior
+    LOGGER.info("Starting RabbitMQ connection");
   }
 
   @Override
   public void stop() {
+    LOGGER.info("Closing RabbitMQ connection");
     close();
   }
 }
