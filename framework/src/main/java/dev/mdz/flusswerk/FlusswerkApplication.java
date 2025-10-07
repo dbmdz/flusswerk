@@ -1,7 +1,6 @@
 package dev.mdz.flusswerk;
 
 import dev.mdz.flusswerk.engine.Engine;
-import jakarta.annotation.PreDestroy;
 import java.util.Optional;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -13,23 +12,18 @@ public class FlusswerkApplication implements CommandLineRunner {
 
   protected final Engine engine; // can be null if Flusswerk is only used to send messages
 
+  public FlusswerkApplication() {
+    this.engine = null; // for backwards compatibility, will be removed
+  }
+
+  @Deprecated
   public FlusswerkApplication(Optional<Engine> engine) {
+    // for backwards compatibility, will be removed
     this.engine = engine.orElse(null);
   }
 
   @Override
   public void run(String... args) {
-    if (engine == null) {
-      return;
-    }
-    engine.start();
-  }
-
-  @PreDestroy
-  public void shutdown() {
-    if (engine == null) {
-      return;
-    }
-    engine.stop();
+    // nothing to do
   }
 }

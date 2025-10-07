@@ -1,5 +1,6 @@
 package dev.mdz.flusswerk.rabbitmq;
 
+import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Address;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
@@ -104,6 +105,17 @@ public class RabbitConnection {
       if (b.getChannel() == channel) {
         connection.recoverBinding(b, true);
       }
+    }
+  }
+
+  public void close() {
+    if (channel == null || !channel.isOpen()) {
+      return;
+    }
+    try {
+      channel.close(AMQP.CONNECTION_FORCED, "Application shutdown");
+    } catch (TimeoutException | IOException exception) {
+      LOGGER.error("Could not close RabbitMQ channel", exception);
     }
   }
 }
