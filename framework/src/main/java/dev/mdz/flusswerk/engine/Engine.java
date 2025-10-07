@@ -1,5 +1,6 @@
 package dev.mdz.flusswerk.engine;
 
+import dev.mdz.flusswerk.LifecyclePhases;
 import dev.mdz.flusswerk.flow.Flow;
 import dev.mdz.flusswerk.rabbitmq.ChannelListener;
 import dev.mdz.flusswerk.rabbitmq.RabbitClient;
@@ -13,12 +14,13 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.SmartLifecycle;
 
 /**
  * Run flows {@link Flow} for every message from the {@link RabbitClient} - usually several in
  * parallel.
  */
-public class Engine implements ChannelListener {
+public class Engine implements ChannelListener, SmartLifecycle {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Engine.class);
 
@@ -52,10 +54,26 @@ public class Engine implements ChannelListener {
     this.startOnlyOnce = new Semaphore(1);
   }
 
+  @Override
+  public int getPhase() {
+    return LifecyclePhases.PROCESSING;
+  }
+
+  @Override
+  public boolean isAutoStartup() {
+    return true;
+  }
+
+  @Override
+  public boolean isRunning() {
+    return startOnlyOnce.availablePermits() == 0;
+  }
+
   /**
    * Starts processing messages until {@link Engine#stop()} is called. If there are no messages in
    * the input queue, the engine waits for new messages to arrive.
    */
+  @Override
   public void start() {
     if (!startOnlyOnce.tryAcquire()) {
       LOGGER.error("Engine had already been started once. Starting again is not possible.");
@@ -81,6 +99,7 @@ public class Engine implements ChannelListener {
    * Stops processing new messages or waiting for new messages to arrive. This usually means that
    * the application will shut down when the last worker finished.
    */
+  @Override
   public void stop() {
     // Stop receiving new messages
     consumers.forEach(
