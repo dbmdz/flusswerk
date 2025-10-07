@@ -6,6 +6,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.impl.recovery.*;
 import com.rabbitmq.utility.Utility;
+import dev.mdz.flusswerk.LifecyclePhases;
 import dev.mdz.flusswerk.config.properties.RabbitMQProperties;
 import java.io.IOException;
 import java.util.List;
@@ -15,8 +16,9 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.SmartLifecycle;
 
-public class RabbitConnection {
+public class RabbitConnection implements SmartLifecycle {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RabbitConnection.class);
   private static final int RETRY_INTERVAL = 5;
@@ -43,7 +45,8 @@ public class RabbitConnection {
     factory.setPassword(rabbitMQ.password());
     rabbitMQ.getVirtualHost().ifPresent(factory::setVirtualHost);
     factory.setConnectionRecoveryTriggeringCondition(sse -> !sse.isInitiatedByApplication());
-    waitForConnection();
+    waitForConnection(); // not in start() because this should fail fast if no connection is
+    // possible
   }
 
   /**
@@ -117,5 +120,30 @@ public class RabbitConnection {
     } catch (TimeoutException | IOException exception) {
       LOGGER.error("Could not close RabbitMQ channel", exception);
     }
+  }
+
+  @Override
+  public int getPhase() {
+    return LifecyclePhases.CONNECTIONS; // should be started before any consumers
+  }
+
+  @Override
+  public boolean isAutoStartup() {
+    return true; // use lifecycle management
+  }
+
+  @Override
+  public boolean isRunning() {
+    return connection != null && connection.isOpen();
+  }
+
+  @Override
+  public void start() {
+    // nothing to do, connection is established in constructor for fail-fast behavior
+  }
+
+  @Override
+  public void stop() {
+    close();
   }
 }

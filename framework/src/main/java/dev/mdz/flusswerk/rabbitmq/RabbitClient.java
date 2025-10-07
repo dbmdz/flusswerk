@@ -50,6 +50,8 @@ public class RabbitClient {
     channel = connection.getChannel();
     // We need a recoverable connection since we don't want to handle connection and channel
     // recovery ourselves.
+    // This is done in constructor instead of lifecycle events to fail fast and not leave a half
+    // configured application running.
     if (channel instanceof RecoverableChannel rc) {
       rc.addRecoveryListener(
           new RecoveryListener() {
