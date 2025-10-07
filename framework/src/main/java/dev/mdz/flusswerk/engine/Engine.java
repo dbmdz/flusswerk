@@ -75,6 +75,7 @@ public class Engine implements ChannelListener, SmartLifecycle {
    */
   @Override
   public void start() {
+    LOGGER.info("Starting RabbitMQ consumers");
     if (!startOnlyOnce.tryAcquire()) {
       LOGGER.error("Engine had already been started once. Starting again is not possible.");
       return;
@@ -101,6 +102,7 @@ public class Engine implements ChannelListener, SmartLifecycle {
    */
   @Override
   public void stop() {
+    LOGGER.info("Stopping RabbitMQ consumers");
     // Stop receiving new messages
     consumers.forEach(
         consumer -> {
