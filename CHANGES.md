@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [8.0.1](https://github.com/dbmdz/flusswerk/releases/tag/8.0.0) - 2025-10-08
+
+### Fixed
+
+- Gracefully close RabbitMQ connection when application is shutdown
+
 ## [8.0.0](https://github.com/dbmdz/flusswerk/releases/tag/8.0.0) - 2025-09-18
 
 ### Changed
@@ -15,10 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [7.0.1] - 2024-07-30
 
 ### Fixed
-* Flusswerk Logger can handle function calls with the format String as sole argument.
+- Flusswerk Logger can handle function calls with the format String as sole argument.
 
 ### Changed
-* Reporting of partial retries can now be customized by overriding `ProcessReport.reportComplexRetry(Message message, RetryProcessingException e)` and `ProcessReport.reportComplexFailedAfterMaxRetries(Message message, RetryProcessingException e)`.
+- Reporting of partial retries can now be customized by overriding `ProcessReport.reportComplexRetry(Message message, RetryProcessingException e)` and `ProcessReport.reportComplexFailedAfterMaxRetries(Message message, RetryProcessingException e)`.
 
 ## [7.0.0] - 2024-03-15
 
