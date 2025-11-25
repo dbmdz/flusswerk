@@ -15,7 +15,7 @@ Java application).
 <dependency>
   <groupId>dev.mdz</groupId>
   <artifactId>flusswerk</artifactId>
-  <version>8.0.0</version>
+  <version>9.0.0</version>
 </dependency>
 ```
 
@@ -23,7 +23,7 @@ Java application).
 
 ```groovy
 dependencies {
-    compile group: 'dev.mdz', name: 'flusswerk', version: '8.0.0'
+    compile group: 'dev.mdz', name: 'flusswerk', version: '9.0.0'
 }
 ``` 
  
