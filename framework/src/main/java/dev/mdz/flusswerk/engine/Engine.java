@@ -109,7 +109,7 @@ public class Engine implements ChannelListener, SmartLifecycle {
           try {
             rabbitClient.cancel(consumer.getConsumerTag());
           } catch (IOException e) {
-            LOGGER.error("Could not cancel consumer", e);
+            LOGGER.error("Could not cancel consumer with tag=" + consumer.getConsumerTag(), e);
           }
         });
 

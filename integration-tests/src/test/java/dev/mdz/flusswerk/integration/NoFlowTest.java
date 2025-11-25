@@ -13,18 +13,18 @@ import dev.mdz.flusswerk.rabbitmq.RabbitConnection;
 import dev.mdz.flusswerk.rabbitmq.RabbitMQ;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.metrics.CompositeMeterRegistryAutoConfiguration;
-import org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.RabbitMQContainer;
@@ -39,13 +39,26 @@ import org.testcontainers.junit.jupiter.Testcontainers;
       FlusswerkConfiguration.class,
       NoFlowTest.NoFlowTestConfiguration.class
     })
-@Import({MetricsAutoConfiguration.class, CompositeMeterRegistryAutoConfiguration.class})
+@Import(IntegrationTestConfiguration.class)
 @DisplayName("When Flusswerk is created without a Flow")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Testcontainers
 public class NoFlowTest {
   @Container
   static final RabbitMQContainer rabbitMQContainer =
-      new RabbitMQContainer("rabbitmq:3-management-alpine");
+      new RabbitMQContainer("rabbitmq:4-management-alpine");
+
+  private final Engine engine;
+  private final RabbitMQ rabbitMQ;
+  private final RabbitUtil rabbitUtil;
+
+  @Autowired
+  public NoFlowTest(
+      Optional<Engine> engine, RoutingProperties routingProperties, RabbitMQ rabbitMQ) {
+    this.engine = engine.orElse(null);
+    this.rabbitMQ = rabbitMQ;
+    this.rabbitUtil = new RabbitUtil(rabbitMQ, routingProperties);
+  }
 
   @TestConfiguration
   static class NoFlowTestConfiguration {
@@ -67,17 +80,6 @@ public class NoFlowTest {
     public IncomingMessageType incomingMessageType() {
       return new IncomingMessageType(TestMessage.class);
     }
-  }
-
-  private final Engine engine;
-  private final RabbitMQ rabbitMQ;
-  private final RabbitUtil rabbitUtil;
-
-  @Autowired
-  public NoFlowTest(Engine engine, RoutingProperties routingProperties, RabbitMQ rabbitMQ) {
-    this.engine = engine;
-    this.rabbitMQ = rabbitMQ;
-    this.rabbitUtil = new RabbitUtil(rabbitMQ, routingProperties);
   }
 
   @AfterEach
