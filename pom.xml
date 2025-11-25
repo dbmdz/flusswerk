@@ -6,7 +6,7 @@
 
   <groupId>dev.mdz</groupId>
   <artifactId>flusswerk-parent</artifactId>
-  <version>8.0.2-SNAPSHOT</version>
+  <version>9.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Flusswerk (Parent)</name>
@@ -14,7 +14,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.6</version>
+    <version>4.0.0</version>
   </parent>
 
   <description>
@@ -76,7 +76,7 @@
       <dependency>
         <groupId>com.rabbitmq</groupId>
         <artifactId>amqp-client</artifactId>
-        <version>5.26.0</version>
+        <version>5.27.1</version>
       </dependency>
       <dependency>
         <groupId>net.logstash.logback</groupId>
@@ -92,7 +92,7 @@
       <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter</artifactId>
-        <version>6.0.0</version>
+        <version>6.0.1</version>
         <scope>test</scope>
       </dependency>
       <dependency>
