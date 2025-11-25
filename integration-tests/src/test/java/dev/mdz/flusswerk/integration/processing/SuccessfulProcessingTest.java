@@ -9,6 +9,7 @@ import dev.mdz.flusswerk.config.properties.RoutingProperties;
 import dev.mdz.flusswerk.engine.Engine;
 import dev.mdz.flusswerk.flow.FlowSpec;
 import dev.mdz.flusswerk.flow.builder.FlowBuilder;
+import dev.mdz.flusswerk.integration.IntegrationTestConfiguration;
 import dev.mdz.flusswerk.integration.RabbitUtil;
 import dev.mdz.flusswerk.integration.TestMessage;
 import dev.mdz.flusswerk.model.IncomingMessageType;
@@ -22,8 +23,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.metrics.CompositeMeterRegistryAutoConfiguration;
-import org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -45,14 +44,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
       FlusswerkConfiguration.class,
       SuccessfulProcessingTest.FlowConfiguration.class
     })
-@Import({MetricsAutoConfiguration.class, CompositeMeterRegistryAutoConfiguration.class})
+@Import(IntegrationTestConfiguration.class)
 @DisplayName("When Flusswerk successfully processes a message")
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @Testcontainers
 public class SuccessfulProcessingTest {
   @Container
   static final RabbitMQContainer rabbitMQContainer =
-      new RabbitMQContainer("rabbitmq:3-management-alpine");
+      new RabbitMQContainer("rabbitmq:4-management-alpine");
 
   private final Engine engine;
 
@@ -94,7 +93,9 @@ public class SuccessfulProcessingTest {
 
   @BeforeEach
   void startEngine() {
-    engine.start();
+    if (!engine.isRunning()) {
+      engine.start();
+    }
   }
 
   @AfterEach

@@ -13,6 +13,7 @@ import dev.mdz.flusswerk.config.properties.RoutingProperties;
 import dev.mdz.flusswerk.engine.Engine;
 import dev.mdz.flusswerk.flow.FlowSpec;
 import dev.mdz.flusswerk.flow.builder.FlowBuilder;
+import dev.mdz.flusswerk.integration.IntegrationTestConfiguration;
 import dev.mdz.flusswerk.integration.RabbitUtil;
 import dev.mdz.flusswerk.integration.TestMessage;
 import dev.mdz.flusswerk.jackson.FlusswerkObjectMapper;
@@ -29,7 +30,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,8 +37,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.metrics.CompositeMeterRegistryAutoConfiguration;
-import org.springframework.boot.actuate.autoconfigure.metrics.MetricsAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -62,23 +60,23 @@ import org.testcontainers.junit.jupiter.Testcontainers;
       FlusswerkConfiguration.class,
       ReconnectTest.FlowConfiguration.class
     })
-@Import({MetricsAutoConfiguration.class, CompositeMeterRegistryAutoConfiguration.class})
+@Import(IntegrationTestConfiguration.class)
 @DisplayName("When the RabbitMQ connection is lost")
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @Testcontainers
 public class ReconnectTest {
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  @Rule static final Network network = Network.newNetwork();
+  public static final Network network = Network.newNetwork();
 
   @Container
   static final RabbitMQContainer rabbitMQContainer =
-      new RabbitMQContainer("rabbitmq:3-management-alpine")
+      new RabbitMQContainer("rabbitmq:4-management-alpine")
           .withNetwork(network)
           .withExposedPorts(5672)
           .withNetworkAliases("rabbitmq");
 
-  @Rule
+  @Container
   static final ToxiproxyContainer toxiProxy =
       new ToxiproxyContainer("ghcr.io/shopify/toxiproxy:2.5.0")
           .withExposedPorts(5672, 8474)
@@ -233,7 +231,9 @@ public class ReconnectTest {
   @Test
   public void recoveryAfterDisruptionDuringProcessing() throws Exception {
     TestMessage input = new TestMessage("hello world");
-    engine.start();
+    if (!engine.isRunning()) {
+      engine.start();
+    }
 
     log.info("Sending message");
     rabbitUtil.send(input);
@@ -270,7 +270,9 @@ public class ReconnectTest {
     log.info("Sending message");
     rabbitUtil.send(new TestMessage("hello world"));
     Thread.sleep(500);
-    engine.start();
+    if (!engine.isRunning()) {
+      engine.start();
+    }
     log.info("Closing RabbitMQ channel");
     Channel channel = rabbitConnection.getChannel();
     channel.close();
