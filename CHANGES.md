@@ -6,12 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [9.0.0](https://github.com/dbmdz/flusswerk/releases/tag/9.0.0) - 2025-12-01
+
 ### Changed
 
 - *Breaking* Migration to Spring Boot 4
 - Updated testcontainer dependencies to RabbitMQ 4
 
-## [8.0.1](https://github.com/dbmdz/flusswerk/releases/tag/8.0.0) - 2025-10-08
+## [8.0.1](https://github.com/dbmdz/flusswerk/releases/tag/8.0.1) - 2025-10-08
 
 ### Fixed
 
