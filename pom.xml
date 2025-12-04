@@ -46,8 +46,8 @@
     </developer>
   </developers>
   <ciManagement>
-    <url>https://travis-ci.org/dbmdz/flusswerk</url>
-    <system>Travis CI</system>
+    <system>GitHub Actions</system>
+    <url>https://github.com/dbmdz/flusswerk/actions</url>
   </ciManagement>
   <issueManagement>
     <url>https://github.com/dbmdz/flusswerk/issues</url>
