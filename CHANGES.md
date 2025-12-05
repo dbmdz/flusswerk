@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [9.0.1](https://github.com/dbmdz/flusswerk/releases/tag/9.0.1) - 2025-12-05
+
+### Added
+
+- Added version of framework to the parent POM
+
 ## [9.0.0](https://github.com/dbmdz/flusswerk/releases/tag/9.0.0) - 2025-12-01
 
 ### Changed
