@@ -6,7 +6,7 @@
 
   <groupId>dev.mdz</groupId>
   <artifactId>flusswerk-parent</artifactId>
-  <version>9.0.1</version>
+  <version>9.0.2-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Flusswerk (Parent)</name>
@@ -81,7 +81,7 @@
       <dependency>
         <groupId>dev.mdz</groupId>
         <artifactId>flusswerk</artifactId>
-        <version>9.0.1</version>
+        <version>9.0.2-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>net.logstash.logback</groupId>
