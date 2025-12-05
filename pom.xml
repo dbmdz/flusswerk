@@ -81,7 +81,7 @@
       <dependency>
         <groupId>dev.mdz</groupId>
         <artifactId>flusswerk</artifactId>
-        <version>${project.version}</version>
+        <version>9.0.1-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>net.logstash.logback</groupId>
