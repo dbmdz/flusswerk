@@ -53,6 +53,11 @@ jobs:
         run: sudo apt update && sudo apt install libxml2-utils
       - name: Extract project version
         run: echo "PROJECT_VERSION=$(xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]/text()' pom.xml)" >> $GITHUB_ENV
+      # FIXME: see https://github.com/mavenplugins/central-publishing-maven-plugin/issues/78
+      - name: Set up Maven 3.9.16
+        uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: 3.9.16
       # Publish snapshot
       - name: Set up JDK 17 for publishing a snapshot
         if: github.event_name == 'push' && endswith(env.PROJECT_VERSION, 'SNAPSHOT')
