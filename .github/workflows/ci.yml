@@ -20,7 +20,7 @@ jobs:
         with:
           check-latest: true
           distribution: temurin
-          java-version: 17
+          java-version: 25
       - name: Set up cache
         uses: actions/cache@v6
         env:
@@ -57,7 +57,7 @@ jobs:
       - name: Set up Maven 3.9.16
         uses: stCarolas/setup-maven@v5
         with:
-          maven-version: 3.9.16
+          maven-version: 3.10.0
       # Publish snapshot
       - name: Set up JDK 17 for publishing a snapshot
         if: github.event_name == 'push' && endswith(env.PROJECT_VERSION, 'SNAPSHOT')
@@ -65,7 +65,7 @@ jobs:
         with:
           check-latest: true
           distribution: temurin
-          java-version: 17
+          java-version: 25
           server-id: central
           server-password: MAVEN_PASSWORD
           server-username: MAVEN_USERNAME
@@ -84,7 +84,7 @@ jobs:
           distribution: temurin
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
-          java-version: 17
+          java-version: 25
           server-id: central
           server-password: MAVEN_PASSWORD
           server-username: MAVEN_USERNAME
